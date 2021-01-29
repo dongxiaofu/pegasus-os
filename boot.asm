@@ -85,11 +85,13 @@ DISP_STR:
 	mov  ah, 00h
 	mov  dl, 0
 	int 13h
+	mov ax,	FirstSectorOfRootDirectory
 	call ReadSector
 
 	mov ah,	0Ah
 	; mov al,	[es:bx+510]
-	mov al,	[es:bx+4]
+	;mov al,	[es:bx]
+	mov al,	[es:bx + 32]
 	;mov al, 'F'
 	mov [gs:(80 * 13 + 35) * 2],	ax
 	jmp $
@@ -99,15 +101,55 @@ BootMessage:	db	"Hello,World OS!"
 ; 长度，需要使用 equ 
 BootMessageLength	equ	$ - BootMessage
 
+FirstSectorOfRootDirectory	equ	19
+SectorNumberOfTrack	equ	18
+
 ; 读取扇区
 ReadSector:
+	;push bx
+	xchg	bx, bx
+	;push cx
+	; mov bx, SectorNumberOfTrack
+	mov bl, SectorNumberOfTrack
+	div bl	; 商在al中，余数在ah中
+	mov ch, al
+	shr ch, 1	; ch 是柱面号
+	mov dh, al
+	and dh, 1	; dh 是磁头号
+	mov dl, 0	; 驱动器号，0表示A盘
+	mov cl, ah
+	add cl, 1	; cl 是起始扇区号
+	mov ah, 02h	; 读软盘
+	;pop cx
+	mov bx, BaseOfLoader	; 让es:bx指向BaseOfLoader
+	xchg	bx, bx
+	int 13h
+	;pop cx
+	; pop bx
+	ret	
+
+;
+;        mov ch, 0
+;        mov cl, 1
+;        mov dh, 0
+;        mov dl, 0
+;        mov al, 1                       ; 要读的扇区数量
+;        mov ah, 02h                     ; 读软盘
+;        mov bx, BaseOfLoader            ; 让es:bx指向BaseOfLoader
+;        int 13h                         ; int 13h 中断
+;        ret
+
+
+; 读取扇区
+ReadSector2:
 	mov ch, 0
-	mov cl, 1
-	mov dh, 0
+	mov cl, 2
+	mov dh, 1
 	mov dl, 0
 	mov al, 1			; 要读的扇区数量
 	mov ah,	02h			; 读软盘
 	mov bx,	BaseOfLoader		; 让es:bx指向BaseOfLoader
+	xchg	bx, bx
 	int 13h				; int 13h 中断
 	ret
 
