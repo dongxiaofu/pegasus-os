@@ -86,6 +86,7 @@ DISP_STR:
 	mov  dl, 0
 	int 13h
 	mov ax,	FirstSectorOfRootDirectory
+	mov cl, 1
 	call ReadSector
 
 	mov ah,	0Ah
@@ -149,6 +150,11 @@ FILE_FOUND:
 	mov si, di
 	lodsw	
 	xchg bx, bx
+	
+	
+	xchg bx, bx	
+	call GetFATEntry
+	xchg bx, bx
 	jmp OVER
 	
 FILE_NOT_FOUND:
@@ -167,32 +173,96 @@ BootMessageLength	equ	$ - BootMessage
 
 FirstSectorOfRootDirectory	equ	19
 SectorNumberOfTrack	equ	18
+SectorNumberOfFAT1	equ	1
 
 LoaderBinFileName:	db	"LOADER  BIN"
 LoaderBinFileNameLength	equ	$ - LoaderBinFileName	; 中间两个空格
 
+FATEntryIsInt	equ 0		; FAT项的字节偏移量是不是整数个字节：0，不是；1，是。
+BytesOfSector	equ	512	; 每个扇区包含的字节数量
+; 根据FAT项的编号获取这个FAT项的值
+GetFATEntry:
+	; 用FAT项的编号计算出这个FAT项的字节偏移量 start
+	; mov cx, 3
+	; mul cx
+	; mov cx, 2
+	;div cx		; 商在al中，余数在ah中	; 
+	MOV ah, 00h
+	mov dl, 0
+	int 13h
+	
+	mov dx, 0
+	mov bx, 3
+	mul bx
+	mov bx, 2
+	div bx
+	xchg bx, bx
+	; 用FAT项的编号计算出这个FAT项的字节偏移量 end
+	mov [FATEntryIsInt], dx
+	; 用字节偏移量计算出扇区偏移量 start
+	mov dx, 0
+	; and ax, 0000000011111111b  ; 不知道这句的意图是啥，忘记得太快了！
+	; mov dword ax, al ; 错误用法
+	; mov cx, [BytesOfSector]
+	mov cx, 512
+	div cx
+	push dx
+	add ax, SectorNumberOfFAT1	; ax 是在FAT1区域的偏移。要把它转化为在软盘中的扇区号，需加上FAT1对软盘的偏移量。
+	; mov ah, 00h
+
+	; mov dl, 0
+	; int 13h
+	; 用字节偏移量计算出扇区偏移量 end
+	; mov dword ax, al
+	; add ax,1
+	mov cl, 2 
+	mov bx, 0
+	; 用扇区偏移量计算出在某柱面某磁道的扇区偏移量，可以直接调用ReadSector
+	call ReadSector
+	;mov ax, [es:bx]
+	pop dx
+	add bx, dx
+	xchg bx, bx
+	mov ax, [es:bx]
+	; 根据FAT项偏移量是否占用整数个字节来计算FAT项的值
+	cmp byte [FATEntryIsInt], 0
+	jz FATEntry_Is_Int
+	shr ax, 4	
+FATEntry_Is_Int:
+	and ax, 0x0FFF
+	ret
+
 ; 读取扇区
 ReadSector:
 	;push bx
-	xchg	bx, bx
+	push bp
+	mov bp, sp
+	sub esp, 2
+	mov byte [bp-2], cl
+	; push al	; error: invalid combination of opcode and operands
 	;push cx
 	; mov bx, SectorNumberOfTrack
-	mov bl, SectorNumberOfTrack
+	; ax 存储在软盘中的扇区号
+	mov bl, SectorNumberOfTrack	; 一个磁道包含的扇区数
 	div bl	; 商在al中，余数在ah中
 	mov ch, al
 	shr ch, 1	; ch 是柱面号
 	mov dh, al
 	and dh, 1	; dh 是磁头号
 	mov dl, 0	; 驱动器号，0表示A盘
+	inc ah
 	mov cl, ah
-	add cl, 1	; cl 是起始扇区号
+	;add cl, 1	; cl 是起始扇区号
+	; pop al		; al 是要读的扇区数量
+	mov al, [bp-2]
+	add esp, 2
 	mov ah, 02h	; 读软盘
 	;pop cx
 	mov bx, BaseOfLoader	; 让es:bx指向BaseOfLoader
-	xchg	bx, bx
 	int 13h
 	;pop cx
 	; pop bx
+	pop bp
 	ret	
 
 ;

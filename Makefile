@@ -5,6 +5,8 @@ everything:boot.bin loader.bin
 	sudo mount -o loop a.img /mnt/floppy/
 	sudo cp loader.bin	/mnt/floppy/ -v
 	sudo umount /mnt/floppy
+clean:
+	rm -rvf *.bin
 
 boot.bin:boot.asm
 	nasm $< -o $@ 
