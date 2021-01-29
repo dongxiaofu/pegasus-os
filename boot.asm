@@ -98,7 +98,6 @@ DISP_STR:
 	mov di, BaseOfLoader
 	; mov si, LoaderBinFileName
 SEARCH_FILE_IN_ROOT_DIRECTORY:
-	xchg bx, bx
 	cmp cx, 0
 	jz FILE_NOT_FOUND
 	push cx
@@ -115,7 +114,6 @@ COMPARE_FILENAME:
 	;cmp [es:si], [ds:di]
 	;cmp [si], [di]
 	lodsb
-	xchg bx, bx
 	mov ah, [es:di]
 	cmp al, byte [es:di]
 	jnz FILENAME_DIFFIERENT
@@ -140,12 +138,17 @@ FILENAME_DIFFIERENT:
 	jz FILE_NOT_FOUND
 	and di, 0xFFE0	; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置
 	add di, 32	; 增加一个根目录项的大小
-	xchg bx, bx
 	jmp SEARCH_FILE_IN_ROOT_DIRECTORY
 FILE_FOUND:
 	mov al, 'S'
 	mov ah, 0Ah
 	mov [gs:(80 * 23 + 35) *2], ax
+	; 获取文件的第一个簇的簇号
+	and di, 0xFFE0  ; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置; 获取文件的第一个簇的簇号
+	add di, 0x1A
+	mov si, di
+	lodsw	
+	xchg bx, bx
 	jmp OVER
 	
 FILE_NOT_FOUND:
@@ -165,7 +168,7 @@ BootMessageLength	equ	$ - BootMessage
 FirstSectorOfRootDirectory	equ	19
 SectorNumberOfTrack	equ	18
 
-LoaderBinFileName:	db	"LOADER  BIN4"
+LoaderBinFileName:	db	"LOADER  BIN"
 LoaderBinFileNameLength	equ	$ - LoaderBinFileName	; 中间两个空格
 
 ; 读取扇区
