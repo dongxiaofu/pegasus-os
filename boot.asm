@@ -94,6 +94,67 @@ DISP_STR:
 	mov al,	[es:bx + 32]
 	;mov al, 'F'
 	mov [gs:(80 * 13 + 35) * 2],	ax
+	mov cx, 3
+	mov di, BaseOfLoader
+	; mov si, LoaderBinFileName
+SEARCH_FILE_IN_ROOT_DIRECTORY:
+	xchg bx, bx
+	cmp cx, 0
+	jz FILE_NOT_FOUND
+	push cx
+	;mov ax, cs
+	;mov es, ax
+	;mov ds, ax	
+	; mov si, bx
+	; mov di, BaseOfLoader
+	mov si, LoaderBinFileName
+	;mov cx,	[LoaderBinFileNameLength]
+	mov cx, LoaderBinFileNameLength
+	mov dx, 0
+COMPARE_FILENAME:
+	;cmp [es:si], [ds:di]
+	;cmp [si], [di]
+	lodsb
+	xchg bx, bx
+	mov ah, [es:di]
+	cmp al, byte [es:di]
+	jnz FILENAME_DIFFIERENT
+	dec cx
+	; inc si
+	inc di
+	inc dx
+	;cmp dx, [LoaderBinFileNameLength]
+	;cmp dx, 11
+	cmp dx, LoaderBinFileNameLength
+	jz FILE_FOUND
+	jmp COMPARE_FILENAME		
+FILENAME_DIFFIERENT:
+	mov al, 'D'
+        mov ah, 0Ah
+        mov [gs:(80 * 23 + 40) *2], ax
+
+
+	pop cx		; 在循环中，cx会自动减少吗？
+	cmp cx, 0
+	dec cx
+	jz FILE_NOT_FOUND
+	and di, 0xFFE0	; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置
+	add di, 32	; 增加一个根目录项的大小
+	xchg bx, bx
+	jmp SEARCH_FILE_IN_ROOT_DIRECTORY
+FILE_FOUND:
+	mov al, 'S'
+	mov ah, 0Ah
+	mov [gs:(80 * 23 + 35) *2], ax
+	jmp OVER
+	
+FILE_NOT_FOUND:
+        mov al, 'N'
+        mov ah, 0Ah
+        mov [gs:(80 * 23 + 36) *2], ax
+
+OVER:
+
 	jmp $
 
 BootMessage:	db	"Hello,World OS!"
@@ -103,6 +164,9 @@ BootMessageLength	equ	$ - BootMessage
 
 FirstSectorOfRootDirectory	equ	19
 SectorNumberOfTrack	equ	18
+
+LoaderBinFileName:	db	"LOADER  BIN4"
+LoaderBinFileNameLength	equ	$ - LoaderBinFileName	; 中间两个空格
 
 ; 读取扇区
 ReadSector:
