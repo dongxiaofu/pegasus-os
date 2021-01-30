@@ -173,12 +173,44 @@ FILE_FOUND:
 	add di, 0x1A
 	mov si, di
 	lodsw	
+	
+	
 	xchg bx, bx
-	
-	
-	xchg bx, bx	
 	call GetFATEntry
 	xchg bx, bx
+	mov bx, 0
+	; 获取到文件的第一个簇号后，开始读取文件
+READ_FILE:
+	
+	; 簇号就是FAT项的编号，把FAT项的编号换算成字节数
+	push bx
+	mov dx, 0
+	mov bx, 3
+	mul bx
+	mov bx, 2
+	div bx			; 商在ax中，余数在dx中
+	mov [FATEntryIsInt], dx
+	
+	; 用字节数计算出FAT项在软盘中的扇区号
+	mov dx, 0
+	mov bx, 512
+	div bx			; 商在ax中，余数在dx中。商是扇区偏移量，余数是在扇区内的字节偏移量
+	
+	; 读取一个扇区的数据 start
+	add ax, SectorNumberOfFAT1
+	mov cl, 1
+	pop bx	
+	call ReadSector
+        add bx, 512
+	; 读取一个扇区的数据 end
+
+	
+
+	
+		
+
+	jmp READ_FILE
+
 	jmp OVER
 	
 FILE_NOT_FOUND:
@@ -199,7 +231,7 @@ FirstSectorOfRootDirectory	equ	19
 SectorNumberOfTrack	equ	18
 SectorNumberOfFAT1	equ	1
 
-LoaderBinFileName:	db	"LOADER--++  BIN"
+LoaderBinFileName:	db	"LOADER  BIN"
 LoaderBinFileNameLength	equ	$ - LoaderBinFileName	; 中间两个空格
 
 FATEntryIsInt	equ 0		; FAT项的字节偏移量是不是整数个字节：0，不是；1，是。
@@ -220,7 +252,6 @@ GetFATEntry:
 	mul bx
 	mov bx, 2
 	div bx
-	xchg bx, bx
 	; 用FAT项的编号计算出这个FAT项的字节偏移量 end
 	mov [FATEntryIsInt], dx
 	; 用字节偏移量计算出扇区偏移量 start
@@ -246,7 +277,6 @@ GetFATEntry:
 	;mov ax, [es:bx]
 	pop dx
 	add bx, dx
-	xchg bx, bx
 	mov ax, [es:bx]
 	; 根据FAT项偏移量是否占用整数个字节来计算FAT项的值
 	cmp byte [FATEntryIsInt], 0
