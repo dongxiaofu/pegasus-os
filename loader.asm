@@ -17,6 +17,3 @@ org	0100h
         mov ah, 0Ch
         mov al, 'M'
         mov [gs:(80 * 16 + 20)*2], ax
-
-; times	db	600	0	
-times	1024	db	0
