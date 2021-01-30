@@ -34,19 +34,19 @@ LABEL_START:
 
 
 	
-	
-DISP_STR:
-	;mov al,	[es:si]
-	;mov al, 'M'
-	; 获取si指向的内存中的数据
-	mov al, [si]
-	; 下一个字节的内存找那个存储的数据
-	inc si
-	mov ah, 0Ah
-	mov [gs:di], ax
-	add di, 2
-	
-	loop DISP_STR
+;这段代码能清屏	
+;DISP_STR;:
+	;;mov al,	[es:si]
+	;;mov al, 'M'
+	;; 获取si指向的内存中的数据
+	;mov al, [si]
+	;; 下一个字节的内存找那个存储的数据
+	;inc si
+	;mov ah, 0Ah
+	;mov [gs:di], ax
+	;add di, 2
+	;
+	;loop DISP_STR
 
 
 	; 写显存打印字符串 end	
@@ -173,8 +173,9 @@ READ_FILE:
 	; 读取一个扇区的数据 end
 	
 	pop ax
+	xchg bx, bx
 	call GetFATEntry
-	
+	xchg bx, bx	
 	
 		
 
