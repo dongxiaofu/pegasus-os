@@ -28,28 +28,7 @@ org 0x7c00
 LABEL_START:
 	mov ax,	0B800h
 	mov gs,	ax
-	mov al,	'G'
-	mov ah,	0Ch
-	mov [gs:((80 * 10 + 40) * 2)],	ax
-
-
 	
-;这段代码能清屏	
-;DISP_STR;:
-	;;mov al,	[es:si]
-	;;mov al, 'M'
-	;; 获取si指向的内存中的数据
-	;mov al, [si]
-	;; 下一个字节的内存找那个存储的数据
-	;inc si
-	;mov ah, 0Ah
-	;mov [gs:di], ax
-	;add di, 2
-	;
-	;loop DISP_STR
-
-
-	; 写显存打印字符串 end	
 	mov  ah, 00h
 	mov  dl, 0
 	int 13h
@@ -57,12 +36,6 @@ LABEL_START:
 	mov cl, 1
 	call ReadSector
 
-	mov ah,	0Ah
-	; mov al,	[es:bx+510]
-	;mov al,	[es:bx]
-	mov al,	[es:bx + 32]
-	;mov al, 'F'
-	mov [gs:(80 * 13 + 35) * 2],	ax
 	mov cx, 3
 	mov di, BaseOfLoader
 	; mov si, LoaderBinFileName
@@ -81,41 +54,17 @@ SEARCH_FILE_IN_ROOT_DIRECTORY:
 	mov dx, 0
 	mov bx, (80 * 18 + 40) * 2
 	;mov ex, (80 * 25 + 40) * 2
-	push bp
-	mov bp, sp
-	sub dword esp, 2
-	mov dword [bp - 2], (80 * 19 + 40) * 2
 COMPARE_FILENAME:
 	;cmp [es:si], [ds:di]
 	;cmp [si], [di]
 	lodsb
-	mov ah, [es:di]
 	cmp al, byte [es:di]
 	jnz FILENAME_DIFFIERENT
 	dec cx
-	; inc si
-	; inc di
-	; inc dx
-	
-	push bx
-	mov ah, 0Bh
-	mov [gs:bx], ax
-	add bx, 2
-	
-	mov al, [es:di]
-	mov ah, 0Ah
-	push bx
-	mov bx, [bp-2]
-	mov [gs:bx], ax
-	add bx, 2
-	mov [bp-2], bx
-	pop bx	
 
 	inc di
 	inc dx
 
-	;cmp dx, [LoaderBinFileNameLength]
-	;cmp dx, 11
 	cmp dx, LoaderBinFileNameLength
 	jz FILE_FOUND
 	jmp COMPARE_FILENAME		
@@ -141,40 +90,46 @@ FILE_FOUND:
 	add di, 0x1A
 	mov si, di
 	lodsw	
+	push ax
 	
-	
-	xchg bx, bx
 	; call GetFATEntry
-	xchg bx, bx
 	mov bx, 0
 	; 获取到文件的第一个簇号后，开始读取文件
 READ_FILE:
-	push ax
-	; 簇号就是FAT项的编号，把FAT项的编号换算成字节数
 	push bx
-	mov dx, 0
-	mov bx, 3
-	mul bx
-	mov bx, 2
-	div bx			; 商在ax中，余数在dx中
-	mov [FATEntryIsInt], dx
+	; push ax
+	; 簇号就是FAT项的编号，把FAT项的编号换算成字节数
+	;;push bx
+	;mov dx, 0
+	;mov bx, 3
+	;mul bx
+	;mov bx, 2
+	;div bx			; 商在ax中，余数在dx中
+	;mov [FATEntryIsInt], dx
+	;
+	;; 用字节数计算出FAT项在软盘中的扇区号
+	;mov dx, 0
+	;mov bx, 512
+	;div bx			; 商在ax中，余数在dx中。商是扇区偏移量，余数是在扇区内的字节偏移量
 	
-	; 用字节数计算出FAT项在软盘中的扇区号
-	mov dx, 0
-	mov bx, 512
-	div bx			; 商在ax中，余数在dx中。商是扇区偏移量，余数是在扇区内的字节偏移量
-	
+	; 簇号就是FAT项的编号，同时也是文件块在数据区的扇区号。
+	; 用簇号计算出目标扇区在软盘中的的扇区号。
+	;add ax, 19
+	;add ax, 14
+	;sub ax, 2
+		
 	; 读取一个扇区的数据 start
-	add ax, SectorNumberOfFAT1
+	; add ax, SectorNumberOfFAT1
 	mov cl, 1
 	pop bx	
-	call ReadSector
+	;call ReadSector
         add bx, 512
 	; 读取一个扇区的数据 end
 	
 	pop ax
 	xchg bx, bx
 	call GetFATEntry
+	push ax
 	xchg bx, bx	
 	
 		
@@ -213,10 +168,12 @@ GetFATEntry:
 	; mul cx
 	; mov cx, 2
 	;div cx		; 商在al中，余数在ah中	; 
+	push ax
 	MOV ah, 00h
 	mov dl, 0
 	int 13h
-	
+
+	pop ax	
 	mov dx, 0
 	mov bx, 3
 	mul bx
@@ -242,11 +199,10 @@ GetFATEntry:
 	; add ax,1
 	mov cl, 2 
 	mov bx, 0
-	push es
 	push ax
 	mov ax, BaseOfLoader
-	sub ax, 0100h
-	mov es, ax
+	sub ax, 01000h
+	mov bx, ax
 	pop ax
 	; 用扇区偏移量计算出在某柱面某磁道的扇区偏移量，可以直接调用ReadSector
 	call ReadSector
@@ -254,7 +210,7 @@ GetFATEntry:
 	pop dx
 	add bx, dx
 	mov ax, [es:bx]
-	pop es
+	xchg bx, bx
 	; 根据FAT项偏移量是否占用整数个字节来计算FAT项的值
 	cmp byte [FATEntryIsInt], 0
 	jz FATEntry_Is_Int
@@ -266,6 +222,7 @@ FATEntry_Is_Int:
 ; 读取扇区
 ReadSector:
 	;push bx
+	push ax
 	push bp
 	mov bp, sp
 	sub esp, 2
@@ -294,6 +251,7 @@ ReadSector:
 	;pop cx
 	; pop bx
 	pop bp
+	pop ax
 	ret	
 
 
@@ -318,7 +276,6 @@ ReadSector2:
 	mov al, 1			; 要读的扇区数量
 	mov ah,	02h			; 读软盘
 	mov bx,	BaseOfLoader		; 让es:bx指向BaseOfLoader
-	xchg	bx, bx
 	int 13h				; int 13h 中断
 	ret
 
