@@ -32,39 +32,7 @@ LABEL_START:
 	mov ah,	0Ch
 	mov [gs:((80 * 10 + 40) * 2)],	ax
 
-	; 打印字符串
-	mov ax, cs
-	mov es, ax	; 非必须
-	mov ds, ax	; 非必须
-	mov ax, BootMessage
-	; 变量不能直接赋值给bp，原因未知。下面的cx也是如此。
-	;mov bp,	BootMessage
-	mov bp, ax
-	;mov cx,	BootMessageLength
-	;mov cx, 16
-	mov ax, BootMessageLength
-	mov cx, ax
-	mov ah,	13h
-	mov al, 01h
-	; mov ax,	1301h	; al 是0、1或2时，字符串显示不正常，花花绿绿，看不清楚
-	mov bx, 000ch
-	mov dl,	10
-	mov dh, 15
-	int 10h
 
-	; 写显存打印字符串 start	
-	mov di,	(80 * 5 + 20) * 2
-	mov ax, BootMessageLength
-	mov cx, ax
-	
-	; 关键语句，让 si 指向 BootMessage
-	mov si, BootMessage
-	;mov es, ax
-	;lea si, BootMessage
-	; mov si, ax	
-	;mov si, BootMessage
-	;mov es, si
-	;mov si,	0
 	
 	
 DISP_STR:
@@ -273,12 +241,19 @@ GetFATEntry:
 	; add ax,1
 	mov cl, 2 
 	mov bx, 0
+	push es
+	push ax
+	mov ax, BaseOfLoader
+	sub ax, 0100h
+	mov es, ax
+	pop ax
 	; 用扇区偏移量计算出在某柱面某磁道的扇区偏移量，可以直接调用ReadSector
 	call ReadSector
 	;mov ax, [es:bx]
 	pop dx
 	add bx, dx
 	mov ax, [es:bx]
+	pop es
 	; 根据FAT项偏移量是否占用整数个字节来计算FAT项的值
 	cmp byte [FATEntryIsInt], 0
 	jz FATEntry_Is_Int
