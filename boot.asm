@@ -176,12 +176,12 @@ FILE_FOUND:
 	
 	
 	xchg bx, bx
-	call GetFATEntry
+	; call GetFATEntry
 	xchg bx, bx
 	mov bx, 0
 	; 获取到文件的第一个簇号后，开始读取文件
 READ_FILE:
-	
+	push ax
 	; 簇号就是FAT项的编号，把FAT项的编号换算成字节数
 	push bx
 	mov dx, 0
@@ -203,9 +203,10 @@ READ_FILE:
 	call ReadSector
         add bx, 512
 	; 读取一个扇区的数据 end
-
 	
-
+	pop ax
+	call GetFATEntry
+	
 	
 		
 
