@@ -111,6 +111,12 @@ SEARCH_FILE_IN_ROOT_DIRECTORY:
 	;mov cx,	[LoaderBinFileNameLength]
 	mov cx, LoaderBinFileNameLength
 	mov dx, 0
+	mov bx, (80 * 18 + 40) * 2
+	;mov ex, (80 * 25 + 40) * 2
+	push bp
+	mov bp, sp
+	sub dword esp, 2
+	mov dword [bp - 2], (80 * 19 + 40) * 2
 COMPARE_FILENAME:
 	;cmp [es:si], [ds:di]
 	;cmp [si], [di]
@@ -120,8 +126,26 @@ COMPARE_FILENAME:
 	jnz FILENAME_DIFFIERENT
 	dec cx
 	; inc si
+	; inc di
+	; inc dx
+	
+	push bx
+	mov ah, 0Bh
+	mov [gs:bx], ax
+	add bx, 2
+	
+	mov al, [es:di]
+	mov ah, 0Ah
+	push bx
+	mov bx, [bp-2]
+	mov [gs:bx], ax
+	add bx, 2
+	mov [bp-2], bx
+	pop bx	
+
 	inc di
 	inc dx
+
 	;cmp dx, [LoaderBinFileNameLength]
 	;cmp dx, 11
 	cmp dx, LoaderBinFileNameLength
@@ -175,7 +199,7 @@ FirstSectorOfRootDirectory	equ	19
 SectorNumberOfTrack	equ	18
 SectorNumberOfFAT1	equ	1
 
-LoaderBinFileName:	db	"LOADER  BIN"
+LoaderBinFileName:	db	"LOADER--++  BIN"
 LoaderBinFileNameLength	equ	$ - LoaderBinFileName	; 中间两个空格
 
 FATEntryIsInt	equ 0		; FAT项的字节偏移量是不是整数个字节：0，不是；1，是。
