@@ -32,26 +32,6 @@ LABEL_START:
 	mov ah,	0Ch
 	mov [gs:((80 * 10 + 40) * 2)],	ax
 
-	; 打印字符串
-	mov ax, cs
-	mov es, ax	; 非必须
-	mov ds, ax	; 非必须
-	mov ax, BootMessage
-	; 变量不能直接赋值给bp，原因未知。下面的cx也是如此。
-	;mov bp,	BootMessage
-	mov bp, ax
-	;mov cx,	BootMessageLength
-	;mov cx, 16
-	mov ax, BootMessageLength
-	mov cx, ax
-	mov ah,	13h
-	mov al, 01h
-	; mov ax,	1301h	; al 是0、1或2时，字符串显示不正常，花花绿绿，看不清楚
-	mov bx, 000Bh
-	mov dl,	10
-	mov dh, 15
-	int 10h
-
 	mov  ah, 00h
 	mov  dl, 0
 	int 13h
@@ -59,31 +39,14 @@ LABEL_START:
 	mov cl, 1
 	call ReadSector
 
-	;mov ah,	0Ah
-	; mov al,	[es:bx+510]
-	;mov al,	[es:bx]
-	;mov al,	[es:bx + 32]
-	;mov al, 'F'
-	;mov [gs:(80 * 13 + 35) * 2],	ax
 	mov cx, 3
 	mov di, BaseOfLoader
 	push di
 
-BootMessage2:    db      "Hello,World"
-BMLen   equ     $ - BootMessage2
-;xchg bx, bx
-mov si, BootMessage2	
-
 SEARCH_FILE_IN_ROOT_DIRECTORY:
 	cmp cx, 0
 	jz FILE_NOT_FOUND
-	push cx
-	mov ax, cs
-	mov es, ax
-	mov ds, ax	
-	; mov si, bx
-	; mov di, BaseOfLoader
-	;mov si, LoaderBinFileName
+	mov si, LoaderBinFileName
 	cld
 	;mov cx,	[LoaderBinFileNameLength]
 	mov cx, LoaderBinFileNameLength
