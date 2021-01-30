@@ -122,7 +122,7 @@ READ_FILE:
 	; add ax, SectorNumberOfFAT1
 	mov cl, 1
 	pop bx	
-	;call ReadSector
+	call ReadSector
         add bx, 512
 	; 读取一个扇区的数据 end
 	
@@ -131,17 +131,24 @@ READ_FILE:
 	call GetFATEntry
 	push ax
 	xchg bx, bx	
-	
+	cmp ax, 0xFF8
+	; 注意了，ax >= 0xFF8 时跳转，使用jc 而不是jz。昨天，一定是在这里弄错了，导致浪费几个小时调试。
+	;jz READ_FILE_OVER	
+	jc READ_FILE_OVER	
 		
-
 	jmp READ_FILE
-
-	jmp OVER
 	
 FILE_NOT_FOUND:
         mov al, 'N'
         mov ah, 0Ah
         mov [gs:(80 * 23 + 36) *2], ax
+	jmp OVER
+
+READ_FILE_OVER:
+	mov al, 'O'
+	mov ah, 0Ah
+	mov [gs:(80 * 23 + 33) * 2], ax
+	jmp OVER
 
 OVER:
 
