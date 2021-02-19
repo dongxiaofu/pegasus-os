@@ -27,18 +27,18 @@ org	0100h
 
 
 
-	xchg bx, bx
+	;xchg bx, bx
 	
 
 LABEL_START:
 	mov ax, 0B800h
 	mov gs, ax
 	mov ah, 0Ch
-	mov al, 'M'
+	mov al, 'X'
 	mov [gs:(80 * 16 + 20)*2], ax
 
 	
-	mov ax, BaseOfLoader
+	mov ax, BaseOfKernel
 	mov es, ax
 	;mov ds, ax		; lodsb、lodsw，把[ds:si]中的数据加载到ax中
 
@@ -50,7 +50,8 @@ LABEL_START:
 	
 	mov bx, OffSetOfLoader
 	call ReadSector
-	mov cx, 3
+	; mov cx, 3
+	mov cx, 5
 	
 	mov di, OffSetOfLoader
 	; mov si, LoaderBinFileName
@@ -62,7 +63,7 @@ SEARCH_FILE_IN_ROOT_DIRECTORY:
 	;mov es, ax
 	;mov ds, ax	
 	; mov si, bx
-	; mov di, BaseOfLoader
+	; mov di, BaseOfKernel
 	mov si, LoaderBinFileName
 	;mov cx,	[LoaderBinFileNameLength]
 	mov cx, LoaderBinFileNameLength
@@ -93,6 +94,7 @@ FILENAME_DIFFIERENT:
 	cmp cx, 0
 	dec cx
 	jz FILE_NOT_FOUND
+	xchg bx, bx
 	and di, 0xFFE0	; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置
 	add di, 32	; 增加一个根目录项的大小
 	jmp SEARCH_FILE_IN_ROOT_DIRECTORY
@@ -100,22 +102,24 @@ FILE_FOUND:
 	mov al, 'S'
 	mov ah, 0Ah
 	mov [gs:(80 * 23 + 35) *2], ax
+	xchg bx, bx
 	; 修改段地址和偏移量后，获取的第一个簇号错了 
 	; 获取文件的第一个簇的簇号
 	and di, 0xFFE0  ; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置; 获取文件的第一个簇的簇号
 	add di, 0x1A
 	mov si, di
-	mov ax, BaseOfLoader
-	push ds
-	mov ds, ax
+	mov ax, BaseOfKernel
+	push es
+	mov es, ax
 	lodsw
-	pop ds	
+	pop es	
 	push ax
-	
+	xchg bx, bx	
 	; call GetFATEntry
 	mov bx, OffSetOfLoader
 	; 获取到文件的第一个簇号后，开始读取文件
 READ_FILE:
+	xchg bx, bx
 	push bx
 	; push ax
 	; 簇号就是FAT项的编号，把FAT项的编号换算成字节数
@@ -143,14 +147,14 @@ READ_FILE:
 	mov cl, 1
 	pop bx	
 	call ReadSector
-	xchg bx, bx
+	;xchg bx, bx
         add bx, 512
 	; 读取一个扇区的数据 end
 	
 	;jmp READ_FILE_OVER
 		
 	pop ax
-	xchg bx, bx
+	;xchg bx, bx
 	call GetFATEntry
 	xchg bx, bx
 	push ax
@@ -160,6 +164,11 @@ READ_FILE:
 	;jc READ_FILE_OVER	
 	jnb READ_FILE_OVER	
 	
+	;mov al, 'A'
+	;inc al
+	;mov ah, 0Ah
+	;mov [gs:(80 * 23 + 36) *2], ax	
+	xchg bx, bx	
 	jmp READ_FILE
 	
 FILE_NOT_FOUND:
@@ -174,7 +183,7 @@ READ_FILE_OVER:
 	mov [gs:(80 * 23 + 33) * 2], ax
 	
 	xchg bx, bx
-	jmp BaseOfLoader:OffSetOfLoader	
+	jmp BaseOfKernel:OffSetOfLoader	
 	jmp OVER
 
 OVER:
@@ -190,7 +199,8 @@ FirstSectorOfRootDirectory	equ	19
 SectorNumberOfTrack	equ	18
 SectorNumberOfFAT1	equ	1
 
-LoaderBinFileName:	db	"KERNEL  BIN"
+;LoaderBinFileName:	db	"KERNEL  BIN"
+LoaderBinFileName:	db	"MKERNEL  BIN"
 LoaderBinFileNameLength	equ	$ - LoaderBinFileName	; 中间两个空格
 
 FATEntryIsInt	equ 0		; FAT项的字节偏移量是不是整数个字节：0，不是；1，是。
@@ -242,7 +252,7 @@ GetFATEntry:
 	; 用扇区偏移量计算出在某柱面某磁道的扇区偏移量，可以直接调用ReadSector
 	call ReadSector
 	;pop es
-	xchg bx, bx
+	;xchg bx, bx
 	;pop ax
 	;mov ax, [es:bx]
 	pop dx
@@ -286,13 +296,13 @@ ReadSector:
 	mov ah, 02h	; 读软盘
 	pop bx
 	
-	;mov bx, BaseOfLoader	; 让es:bx指向BaseOfLoader
+	;mov bx, BaseOfKernel	; 让es:bx指向BaseOfKernel
 	;mov ax, cs
 	;mov es, ax
-	xchg bx, bx
+	;xchg bx, bx
 	int 13h
 	;pop cx
-	xchg bx, bx
+	;xchg bx, bx
 	; pop bx
 	pop bp
 	pop ax
@@ -306,7 +316,7 @@ ReadSector:
 ;        mov dl, 0
 ;        mov al, 1                       ; 要读的扇区数量
 ;        mov ah, 02h                     ; 读软盘
-;        mov bx, BaseOfLoader            ; 让es:bx指向BaseOfLoader
+;        mov bx, BaseOfKernel            ; 让es:bx指向BaseOfKernel
 ;        int 13h                         ; int 13h 中断
 ;        ret
 
@@ -319,10 +329,10 @@ ReadSector2:
 	mov dl, 0
 	mov al, 1			; 要读的扇区数量
 	mov ah,	02h			; 读软盘
-	mov bx,	BaseOfLoader		; 让es:bx指向BaseOfLoader
+	mov bx,	BaseOfKernel		; 让es:bx指向BaseOfKernel
 	int 13h				; int 13h 中断
 	ret
 
-BaseOfLoader	equ	0x7000
+BaseOfKernel	equ	0x0800
 OffSetOfLoader	equ	0x100
 BaseOfFATEntry	equ	0x1000
