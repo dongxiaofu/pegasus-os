@@ -27,7 +27,7 @@ org	0100h
 
 
 
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	
 
 LABEL_START:
@@ -52,9 +52,9 @@ LABEL_START:
 	
 	mov bx, OffSetOfLoader
 	call ReadSector
-	xchg bx, bx
+	;xchg bx, bx
 	mov cx, 4
-	
+	mov bx, (80 * 18 + 40) * 2
 	mov di, OffSetOfLoader
 	; mov si, LoaderBinFileName
 SEARCH_FILE_IN_ROOT_DIRECTORY:
@@ -70,7 +70,7 @@ SEARCH_FILE_IN_ROOT_DIRECTORY:
 	;mov cx,	[LoaderBinFileNameLength]
 	mov cx, LoaderBinFileNameLength
 	mov dx, 0
-	mov bx, (80 * 18 + 40) * 2
+	;mov bx, (80 * 18 + 40) * 2
 	;mov ex, (80 * 25 + 40) * 2
 COMPARE_FILENAME:
 	;cmp [es:si], [ds:di]
@@ -82,21 +82,21 @@ COMPARE_FILENAME:
 
 	inc di
 	inc dx
-
+	
 	cmp dx, LoaderBinFileNameLength
 	jz FILE_FOUND
 	jmp COMPARE_FILENAME		
 FILENAME_DIFFIERENT:
-	mov al, 'D'
-        mov ah, 0Ah
-        mov [gs:(80 * 23 + 40) *2], ax
-
+	mov al, 'E'
+        mov ah, 0Ch
+        mov [gs:bx], ax
+	add bx, 160
 
 	pop cx		; 在循环中，cx会自动减少吗？
 	cmp cx, 0
 	dec cx
 	jz FILE_NOT_FOUND
-	;xchg bx, bx
+	;;xchg bx, bx
 	and di, 0xFFE0	; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置
 	add di, 32	; 增加一个根目录项的大小
 	jmp SEARCH_FILE_IN_ROOT_DIRECTORY
@@ -111,10 +111,11 @@ FILE_FOUND:
 	add di, 0x1A
 	mov si, di
 	mov ax, BaseOfKernel
-	push es
-	mov es, ax
+	push ds
+	mov ds, ax
+	;xchg bx, bx
 	lodsw
-	pop es	
+	pop ds	
 	push ax
 	;xchg bx, bx	
 	; call GetFATEntry
@@ -149,14 +150,14 @@ READ_FILE:
 	mov cl, 1
 	pop bx	
 	call ReadSector
-	;;xchg bx, bx
+	;xchg bx, bx
         add bx, 512
 	; 读取一个扇区的数据 end
 	
 	;jmp READ_FILE_OVER
 		
 	pop ax
-	;;xchg bx, bx
+	;xchg bx, bx
 	call GetFATEntry
 	;xchg bx, bx
 	push ax
@@ -170,7 +171,7 @@ READ_FILE:
 	;inc al
 	;mov ah, 0Ah
 	;mov [gs:(80 * 23 + 36) *2], ax	
-	;xchg bx, bx	
+	;;xchg bx, bx	
 	jmp READ_FILE
 	
 FILE_NOT_FOUND:
@@ -181,10 +182,20 @@ FILE_NOT_FOUND:
 
 READ_FILE_OVER:
 	mov al, 'O'
-	mov ah, 0Ah
+	mov ah, 0Dh
 	mov [gs:(80 * 23 + 33) * 2], ax
+
+	mov ax, 0B800h
+	mov gs, ax
+	mov ah, 0Dh
+	mov al, 'Y'
+	; 一行最多能显示多少列？27超出了最大列限制，所以不显示。
+	; 费了很多时间才测试正确。
+	;mov [gs:(80 * 27 + 21)*2], ax
+	mov [gs:(80 * 22 + 22)*2], ax
+
 	
-	;xchg bx, bx
+	xchg bx, bx
 	jmp BaseOfKernel:OffSetOfLoader	
 	jmp OVER
 
@@ -254,7 +265,7 @@ GetFATEntry:
 	; 用扇区偏移量计算出在某柱面某磁道的扇区偏移量，可以直接调用ReadSector
 	call ReadSector
 	;pop es
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	;pop ax
 	;mov ax, [es:bx]
 	pop dx
@@ -275,7 +286,7 @@ ReadSector:
 	push bp
 	push bx
 	mov bp, sp
-	sub esp, 2
+	sub sp, 2
 	mov byte [bp-2], cl
 	; push al	; error: invalid combination of opcode and operands
 	;push cx
@@ -294,17 +305,17 @@ ReadSector:
 	;add cl, 1	; cl 是起始扇区号
 	; pop al		; al 是要读的扇区数量
 	mov al, [bp-2]
-	add esp, 2
+	add sp, 2
 	mov ah, 02h	; 读软盘
 	pop bx
 	
 	;mov bx, BaseOfKernel	; 让es:bx指向BaseOfKernel
 	;mov ax, cs
 	;mov es, ax
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	int 13h
 	;pop cx
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	; pop bx
 	pop bp
 	pop ax
@@ -336,5 +347,5 @@ ReadSector2:
 	ret
 
 BaseOfKernel	equ	0x8000
-OffSetOfLoader	equ	0x00
+OffSetOfLoader	equ	0x100
 BaseOfFATEntry	equ	0x1000
