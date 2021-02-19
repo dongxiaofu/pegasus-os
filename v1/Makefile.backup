@@ -1,6 +1,7 @@
 .PYTHON:everything
 
 everything:boot.bin loader.bin kernel.bin
+	ld -s kernel.o -o kernel.bin -m elf_i386 
 	dd if=boot.bin of=a.img count=1 conv=notrunc
 	sudo mount -o loop a.img /mnt/floppy/
 	sudo cp loader.bin	/mnt/floppy/ -v
@@ -15,7 +16,7 @@ boot.bin:boot.asm
 loader.bin:loader.asm
 	nasm -o loader.bin loader.asm
 
-kernel.bin:kernel2.asm
+kernel.bin:kernel.asm
 	# nasm -o kernel.o -f elf kernel.asm
 	# ld -s kernel.o -o kernel.bin -m elf_i386 
-	nasm  kernel2.asm -o kernel.bin
+	nasm -f elf kernel.asm -o kernel.o
