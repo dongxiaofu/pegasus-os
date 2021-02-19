@@ -334,6 +334,41 @@ ReadSector:
 ;        ret
 
 
+; Memcpy(p_vaddr, p_off, p_size)
+Memcpy:
+	push bp
+	push ax
+	push cx
+	push si
+	push di
+
+	mov di, [bp + 4]	; p_vaddr，即 dst
+	mov si, [bp + 8]	; p_off，即 src
+
+.1:
+	mov byte al, [ds:si]
+	mov [es:di], al
+
+	inc si
+	inc di
+	dec cx
+	
+	cmp cx, 0
+	jmp .2
+	jmp .1
+
+.2:
+	mov ax, [bp + 4]
+	
+	pop di
+	pop si
+	pop cx	
+	pop ax
+	pop bp
+	
+	ret
+
+
 ; 读取扇区
 ReadSector2:
 	mov ch, 0
