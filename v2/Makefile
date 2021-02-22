@@ -17,5 +17,8 @@ loader.bin:loader.asm
 
 kernel.bin:kernel.asm
 	nasm -o kernel.o -f elf kernel.asm
-	ld -s kernel.o -o kernel.bin -m elf_i386 
+	# ld -s -Ttext 0x30400  -o kernel.bin  kernel.o -m elf_i386 
+	# ld -s -Ttext 0x60400  -o kernel.bin  kernel.o -m elf_i386 
+	ld -s -Ttext 0x6400  -o kernel.bin  kernel.o -m elf_i386 
+	# ld -s  -o kernel.bin  kernel.o -m elf_i386 
 	# nasm  kernel.asm -o kernel.bin
