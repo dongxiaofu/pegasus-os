@@ -1,4 +1,5 @@
-org 0x7c00
+org	0100h
+
 
 	jmp	LABEL_START
 	nop
@@ -25,13 +26,23 @@ org 0x7c00
 	BS_FileSysType	DB 'FAT12   '	; 文件系统类型, 必须 8个字节
 
 
+
+	;;;xchg bx, bx
+	
+
 LABEL_START:
-	mov ax,	0B800h
-	mov gs,	ax
-	;xchg bx, bx	
-	mov ax, BaseOfLoader
+	mov ax, 0B800h
+	mov gs, ax
+	mov ah, 0Ch
+	mov al, 'X'
+	mov [gs:(80 * 16 + 20)*2], ax
+
+	
+	mov ax, BaseOfKernel
 	mov es, ax
 	;mov ds, ax		; lodsb、lodsw，把[ds:si]中的数据加载到ax中
+	mov ax, 0x9000
+	mov ds, ax
 
 	mov  ah, 00h
 	mov  dl, 0
@@ -41,9 +52,9 @@ LABEL_START:
 	
 	mov bx, OffSetOfLoader
 	call ReadSector
-	;;xchg bx, bx
-	mov cx, 3
-	
+	;xchg bx, bx
+	mov cx, 4
+	mov bx, (80 * 18 + 40) * 2
 	mov di, OffSetOfLoader
 	; mov si, LoaderBinFileName
 SEARCH_FILE_IN_ROOT_DIRECTORY:
@@ -54,18 +65,16 @@ SEARCH_FILE_IN_ROOT_DIRECTORY:
 	;mov es, ax
 	;mov ds, ax	
 	; mov si, bx
-	; mov di, BaseOfLoader
+	; mov di, BaseOfKernel
 	mov si, LoaderBinFileName
-	;xchg bx, bx
 	;mov cx,	[LoaderBinFileNameLength]
 	mov cx, LoaderBinFileNameLength
 	mov dx, 0
-	mov bx, (80 * 18 + 40) * 2
+	;mov bx, (80 * 18 + 40) * 2
 	;mov ex, (80 * 25 + 40) * 2
 COMPARE_FILENAME:
 	;cmp [es:si], [ds:di]
 	;cmp [si], [di]
-	;xchg bx, bx
 	lodsb
 	cmp al, byte [es:di]
 	jnz FILENAME_DIFFIERENT
@@ -73,35 +82,38 @@ COMPARE_FILENAME:
 
 	inc di
 	inc dx
-
+	
 	cmp dx, LoaderBinFileNameLength
 	jz FILE_FOUND
 	jmp COMPARE_FILENAME		
 FILENAME_DIFFIERENT:
-	mov al, 'D'
-        mov ah, 0Ah
-        mov [gs:(80 * 24 + 40) *2], ax
-
+	mov al, 'E'
+        mov ah, 0Ch
+        mov [gs:bx], ax
+	add bx, 160
 
 	pop cx		; 在循环中，cx会自动减少吗？
 	cmp cx, 0
 	dec cx
 	jz FILE_NOT_FOUND
+	;;xchg bx, bx
 	and di, 0xFFE0	; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置
 	add di, 32	; 增加一个根目录项的大小
 	jmp SEARCH_FILE_IN_ROOT_DIRECTORY
 FILE_FOUND:
 	mov al, 'S'
 	mov ah, 0Ah
-	mov [gs:(80 * 24 + 35) *2], ax
+	mov [gs:(80 * 23 + 35) *2], ax
+	;xchg bx, bx
 	; 修改段地址和偏移量后，获取的第一个簇号错了 
 	; 获取文件的第一个簇的簇号
 	and di, 0xFFE0  ; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置; 获取文件的第一个簇的簇号
 	add di, 0x1A
 	mov si, di
-	mov ax, BaseOfLoader
+	mov ax, BaseOfKernel
 	push ds
 	mov ds, ax
+	;xchg bx, bx
 	lodsw
 	pop ds	
 	push ax
@@ -110,6 +122,7 @@ FILE_FOUND:
 	mov bx, OffSetOfLoader
 	; 获取到文件的第一个簇号后，开始读取文件
 READ_FILE:
+	;xchg bx, bx
 	push bx
 	; push ax
 	; 簇号就是FAT项的编号，把FAT项的编号换算成字节数
@@ -137,16 +150,16 @@ READ_FILE:
 	mov cl, 1
 	pop bx	
 	call ReadSector
-	;;xchg bx, bx
+	;xchg bx, bx
         add bx, 512
 	; 读取一个扇区的数据 end
 	
 	;jmp READ_FILE_OVER
 		
 	pop ax
-	push bx
+	;xchg bx, bx
 	call GetFATEntry
-	pop bx
+	;xchg bx, bx
 	push ax
 	cmp ax, 0xFF8
 	; 注意了，ax >= 0xFF8 时跳转，使用jc 而不是jz。昨天，一定是在这里弄错了，导致浪费几个小时调试。
@@ -154,37 +167,36 @@ READ_FILE:
 	;jc READ_FILE_OVER	
 	jnb READ_FILE_OVER	
 	
+	;mov al, 'A'
+	;inc al
+	;mov ah, 0Ah
+	;mov [gs:(80 * 23 + 36) *2], ax	
+	;;xchg bx, bx	
 	jmp READ_FILE
 	
 FILE_NOT_FOUND:
         mov al, 'N'
         mov ah, 0Ah
-        mov [gs:(80 * 24 + 36) *2], ax
+        mov [gs:(80 * 23 + 36) *2], ax
 	jmp OVER
 
 READ_FILE_OVER:
-	
-	; 簇号就是FAT项的编号，同时也是文件块在数据区的扇区号。
-	; 用簇号计算出目标扇区在软盘中的的扇区号。
-	add ax, 19
-	add ax, 14
-	sub ax, 2
-
-	; 读取一个扇区的数据 start
-	; add ax, SectorNumberOfFAT1
-	mov cl, 1
-	;pop bx	
-	;call ReadSector
-	;xchg bx, bx
-    	;add bx, 512
-	; 读取一个扇区的数据 end
-
 	mov al, 'O'
-	mov ah, 0Ah
-	mov [gs:(80 * 24 + 33) * 2], ax
+	mov ah, 0Dh
+	mov [gs:(80 * 23 + 33) * 2], ax
+
+	mov ax, 0B800h
+	mov gs, ax
+	mov ah, 0Dh
+	mov al, 'Y'
+	; 一行最多能显示多少列？27超出了最大列限制，所以不显示。
+	; 费了很多时间才测试正确。
+	;mov [gs:(80 * 27 + 21)*2], ax
+	mov [gs:(80 * 22 + 22)*2], ax
+
 	
 	xchg bx, bx
-	jmp BaseOfLoader:OffSetOfLoader	
+	;jmp BaseOfKernel:OffSetOfLoader	
 	jmp OVER
 
 OVER:
@@ -200,7 +212,8 @@ FirstSectorOfRootDirectory	equ	19
 SectorNumberOfTrack	equ	18
 SectorNumberOfFAT1	equ	1
 
-LoaderBinFileName:	db	"LOADER  BIN"
+;LoaderBinFileName:	db	"KERNEL  BIN"
+LoaderBinFileName:	db	"KERNEL  BIN"
 LoaderBinFileNameLength	equ	$ - LoaderBinFileName	; 中间两个空格
 
 FATEntryIsInt	equ 0		; FAT项的字节偏移量是不是整数个字节：0，不是；1，是。
@@ -252,7 +265,7 @@ GetFATEntry:
 	; 用扇区偏移量计算出在某柱面某磁道的扇区偏移量，可以直接调用ReadSector
 	call ReadSector
 	;pop es
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	;pop ax
 	;mov ax, [es:bx]
 	pop dx
@@ -273,7 +286,7 @@ ReadSector:
 	push bp
 	push bx
 	mov bp, sp
-	sub esp, 2
+	sub sp, 2
 	mov byte [bp-2], cl
 	; push al	; error: invalid combination of opcode and operands
 	;push cx
@@ -292,17 +305,17 @@ ReadSector:
 	;add cl, 1	; cl 是起始扇区号
 	; pop al		; al 是要读的扇区数量
 	mov al, [bp-2]
-	add esp, 2
+	add sp, 2
 	mov ah, 02h	; 读软盘
 	pop bx
 	
-	;mov bx, BaseOfLoader	; 让es:bx指向BaseOfLoader
+	;mov bx, BaseOfKernel	; 让es:bx指向BaseOfKernel
 	;mov ax, cs
 	;mov es, ax
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	int 13h
 	;pop cx
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	; pop bx
 	pop bp
 	pop ax
@@ -316,11 +329,83 @@ ReadSector:
 ;        mov dl, 0
 ;        mov al, 1                       ; 要读的扇区数量
 ;        mov ah, 02h                     ; 读软盘
-;        mov bx, BaseOfLoader            ; 让es:bx指向BaseOfLoader
+;        mov bx, BaseOfKernel            ; 让es:bx指向BaseOfKernel
 ;        int 13h                         ; int 13h 中断
 ;        ret
 
 
+; Memcpy(p_vaddr, p_off, p_size)
+Memcpy:
+	push bp
+	push ax
+	push cx
+	push si
+	push di
+
+	mov di, [bp + 4]	; p_vaddr，即 dst
+	mov si, [bp + 8]	; p_off，即 src
+
+.1:
+	mov byte al, [ds:si]
+	mov [es:di], al
+
+	inc si
+	inc di
+	dec cx
+	
+	cmp cx, 0
+	jmp .2
+	jmp .1
+
+.2:
+	mov ax, [bp + 4]
+	
+	pop di
+	pop si
+	pop cx	
+	pop ax
+	pop bp
+	
+	ret
+
+; 重新放置内核
+InitKernel:
+	push ax
+	push cx
+	push si
+	;程序段的个数
+	mov cx, [BaseOfKernel + 2CH]
+	;程序头表的内存地址
+	xor si, si
+	mov si,	[BaseOfKernel + 1CH]
+	add si, BaseOfKernel
+
+Begin:
+	push word [si + 16H]
+
+	mov ax, BaseOfKernel
+	add ax, [si + 4H]
+	push ax
+
+	push word [si + 8H]
+	
+	add si, BaseOfKernel	
+	call Memcpy
+	; 三个参数，占用3个字,6个字节
+	add sp, 6
+	dec cx
+	cmp cx, 0
+	jmp NoAction
+	add si, 20H
+	jmp Begin
+
+NoAction:
+	pop si
+	pop cx
+	pop ax
+	
+
+	ret
 ; 读取扇区
 ReadSector2:
 	mov ch, 0
@@ -329,14 +414,10 @@ ReadSector2:
 	mov dl, 0
 	mov al, 1			; 要读的扇区数量
 	mov ah,	02h			; 读软盘
-	mov bx,	BaseOfLoader		; 让es:bx指向BaseOfLoader
+	mov bx,	BaseOfKernel		; 让es:bx指向BaseOfKernel
 	int 13h				; int 13h 中断
 	ret
 
-BaseOfLoader	equ	0x9000
-OffSetOfLoader	equ	0x100
+BaseOfKernel	equ	0x800
+OffSetOfLoader	equ	0x0
 BaseOfFATEntry	equ	0x1000
-
-
-times	510 - ($ - $$)	db	0
-dw	0xAA55

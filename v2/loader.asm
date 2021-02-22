@@ -27,7 +27,7 @@ org	0100h
 
 
 
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	
 
 LABEL_START:
@@ -52,7 +52,7 @@ LABEL_START:
 	
 	mov bx, OffSetOfLoader
 	call ReadSector
-	;xchg bx, bx
+	;;xchg bx, bx
 	mov cx, 4
 	mov bx, (80 * 18 + 40) * 2
 	mov di, OffSetOfLoader
@@ -96,7 +96,7 @@ FILENAME_DIFFIERENT:
 	cmp cx, 0
 	dec cx
 	jz FILE_NOT_FOUND
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	and di, 0xFFE0	; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置
 	add di, 32	; 增加一个根目录项的大小
 	jmp SEARCH_FILE_IN_ROOT_DIRECTORY
@@ -104,7 +104,7 @@ FILE_FOUND:
 	mov al, 'S'
 	mov ah, 0Ah
 	mov [gs:(80 * 23 + 35) *2], ax
-	;xchg bx, bx
+	;;xchg bx, bx
 	; 修改段地址和偏移量后，获取的第一个簇号错了 
 	; 获取文件的第一个簇的簇号
 	and di, 0xFFE0  ; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置; 获取文件的第一个簇的簇号
@@ -113,16 +113,16 @@ FILE_FOUND:
 	mov ax, BaseOfKernel
 	push ds
 	mov ds, ax
-	;xchg bx, bx
+	;;xchg bx, bx
 	lodsw
 	pop ds	
 	push ax
-	;xchg bx, bx	
+	;;xchg bx, bx	
 	; call GetFATEntry
 	mov bx, OffSetOfLoader
 	; 获取到文件的第一个簇号后，开始读取文件
 READ_FILE:
-	;xchg bx, bx
+	;;xchg bx, bx
 	push bx
 	; push ax
 	; 簇号就是FAT项的编号，把FAT项的编号换算成字节数
@@ -150,16 +150,16 @@ READ_FILE:
 	mov cl, 1
 	pop bx	
 	call ReadSector
-	;xchg bx, bx
+	;;xchg bx, bx
         add bx, 512
 	; 读取一个扇区的数据 end
 	
 	;jmp READ_FILE_OVER
 		
 	pop ax
-	;xchg bx, bx
+	push bx
 	call GetFATEntry
-	;xchg bx, bx
+	pop bx
 	push ax
 	cmp ax, 0xFF8
 	; 注意了，ax >= 0xFF8 时跳转，使用jc 而不是jz。昨天，一定是在这里弄错了，导致浪费几个小时调试。
@@ -171,7 +171,7 @@ READ_FILE:
 	;inc al
 	;mov ah, 0Ah
 	;mov [gs:(80 * 23 + 36) *2], ax	
-	;;xchg bx, bx	
+	;;;xchg bx, bx	
 	jmp READ_FILE
 	
 FILE_NOT_FOUND:
@@ -181,23 +181,24 @@ FILE_NOT_FOUND:
 	jmp OVER
 
 READ_FILE_OVER:
+	xchg bx, bx
 	mov al, 'O'
 	mov ah, 0Dh
 	mov [gs:(80 * 23 + 33) * 2], ax
-
-	mov ax, 0B800h
-	mov gs, ax
-	mov ah, 0Dh
-	mov al, 'Y'
-	; 一行最多能显示多少列？27超出了最大列限制，所以不显示。
-	; 费了很多时间才测试正确。
-	;mov [gs:(80 * 27 + 21)*2], ax
-	mov [gs:(80 * 22 + 22)*2], ax
-
+	; 在内存中重新放置内核
+	call InitKernel
 	
 	xchg bx, bx
-	jmp BaseOfKernel:OffSetOfLoader	
-	jmp OVER
+	;jmp BaseOfKernel:73h
+	;jmp BaseOfKernel:61h
+	jmp BaseOfKernel2:400h
+	;jmp BaseOfKernel:60h
+	;jmp BaseOfKernel:0
+	;jmp BaseOfKernel:OffSetOfLoader	
+	;jmp BaseOfKernel2:0x30400
+	;jmp BaseOfKernel:OffSetOfLoader
+	;jmp BaseOfKernel:40h
+	;jmp OVER
 
 OVER:
 
@@ -265,7 +266,7 @@ GetFATEntry:
 	; 用扇区偏移量计算出在某柱面某磁道的扇区偏移量，可以直接调用ReadSector
 	call ReadSector
 	;pop es
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	;pop ax
 	;mov ax, [es:bx]
 	pop dx
@@ -312,10 +313,10 @@ ReadSector:
 	;mov bx, BaseOfKernel	; 让es:bx指向BaseOfKernel
 	;mov ax, cs
 	;mov es, ax
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	int 13h
 	;pop cx
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	; pop bx
 	pop bp
 	pop ax
@@ -333,40 +334,104 @@ ReadSector:
 ;        int 13h                         ; int 13h 中断
 ;        ret
 
-
 ; Memcpy(p_vaddr, p_off, p_size)
 Memcpy:
-	push bp
-	push ax
-	push cx
-	push si
-	push di
+        push bp
+	mov bp, sp
+        push ax
+        push cx
+        push si
+        push di
+	;mov bp, sp
+        ;mov di, [bp + 4]        ; p_vaddr，即 dst
+        ;mov si, [bp + 8]        ; p_off，即 src
+	;mov cx, [bp + 12]	; 程序头的个数，即p_size
 
-	mov di, [bp + 4]	; p_vaddr，即 dst
-	mov si, [bp + 8]	; p_off，即 src
+	;mov di, [bp + 8]        ; p_vaddr，即 dst
+        ;mov si, [bp + 12]        ; p_off，即 src
+        ;mov cx, [bp + 16]       ; 程序头的个数，即p_size
+	
+	mov di, [bp + 4]        ; p_vaddr，即 dst
+        mov si, [bp + 6]        ; p_off，即 src
+        mov cx, [bp + 8]       ; 程序头的个数，即p_size
+	push es
+	mov es, di
+	mov di, 0
 
 .1:
 	mov byte al, [ds:si]
-	mov [es:di], al
+        mov [es:di], al
 
-	inc si
-	inc di
-	dec cx
-	
-	cmp cx, 0
-	jmp .2
-	jmp .1
+        inc si
+        inc di
+        dec cx
+
+        cmp cx, 0
+        jz .2
+        jmp .1
 
 .2:
+        pop es
 	mov ax, [bp + 4]
-	
-	pop di
-	pop si
-	pop cx	
-	pop ax
-	pop bp
-	
+
+        pop di
+        pop si
+        pop cx
+        pop ax
+        pop bp
+
 	ret
+
+
+; 重新放置内核
+InitKernel:
+       push ax
+       push cx
+       push si
+       mov ax, 0x8000
+       push ds
+       mov ds, ax
+	xchg bx, bx
+       ;程序段的个数
+	;mov cx, word ptr ds:0x802c
+       mov cx, [BaseOfKernel3 + 2CH]
+       ; mov ax, [BaseOfKernel + 2CH]
+       ;程序头表的内存地址
+       xor si, si
+       mov si, [BaseOfKernel3 + 1CH]
+       add si, BaseOfKernel3
+	xchg bx, bx
+
+.Begin2:
+      mov ax, [si + 10H]
+      ;push word [si + 10H]
+      push word ax
+
+       mov ax, BaseOfKernel3
+       add ax, [si + 4H]
+       push word ax
+	mov ax, [si + 8H]
+	push ax
+        ;push word [si + 8H]
+	xchg bx, bx
+        call Memcpy
+	xchg bx, bx
+        ; 三个参数，占用3个字,6个字节
+        add sp, 6
+        dec cx
+        cmp cx, 0
+        jz .NoAction
+        add si, 20H
+        jmp .Begin2
+;
+.NoAction:
+	pop ds
+        pop si
+        pop cx
+        pop ax
+
+	ret
+
 
 
 ; 读取扇区
@@ -382,5 +447,9 @@ ReadSector2:
 	ret
 
 BaseOfKernel	equ	0x8000
-OffSetOfLoader	equ	0x100
+BaseOfKernel2	equ	0x6000
+BaseOfKernel3	equ	0x0
+OffSetOfLoader	equ	0x0
 BaseOfFATEntry	equ	0x1000
+
+;times 7800 db 0
