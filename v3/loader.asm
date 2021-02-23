@@ -25,10 +25,41 @@ org	0100h
 	BS_VolLab	DB 'OrangeS0.02'; 卷标, 必须 11 个字节
 	BS_FileSysType	DB 'FAT12   '	; 文件系统类型, 必须 8个字节
 
+	; 三个参数分别是段基址、段界限、段属性
+	; 分别用 %1、%2、%3表示上面的三个参数
+	;%macro	Descriptor 3
+	;	dw	%2 & 0ffffh
+	;	dw	%1 & 0ffffh
+	;	db	(%1 >> 16) & 0ffh
+	;	db	%3 & 0ffh
+	;	db	((%2 >> 16) & 0fh) | (((%3 >> 8) & 0fh) << 4)
+	;	db	(%1 >> 24) & 0ffh
+	;%endmacro
 
+	%macro	Descriptor 3
+	dw	0h;%2 & ffffh dw	%1 & ffffh
+	dw	0h;%2 & ffffh dw	%1 & ffffh
+	db	0h;(%1 >> 16) & ffh
+	db	0h;%3 & ffh
+	db	0h;((%2 >> 16) & fh) | (((%3 >> 8) & fh) << 4)
+	db	0h;(%1 >> 24) & ffh
+	%endmacro
 
-	;;;;xchg bx, bx
-	
+	LABEL_GDT:	Descriptor  0,	0,	0
+	LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 893h
+	xchg bx, bx
+	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 398h
+	xchg bx, bx
+	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
+	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 2f0h
+
+	GdtLen	equ		$ - LABEL_GDT
+	GdtPtr	dw	GdtLen - 1
+		dd	BaseOfLoader * 10h + LABEL_GDT
+	SelectFlatX	equ	LABLE_GDT_FLAT_X - LABEL_GDT
+	SelectFlatWR	equ	LABLE_GDT_FLAT_WR - LABEL_GDT
+	SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 3
+
 
 LABEL_START:
 	mov ax, 0B800h
@@ -185,13 +216,34 @@ READ_FILE_OVER:
 	mov al, 'O'
 	mov ah, 0Dh
 	mov [gs:(80 * 23 + 33) * 2], ax
-	; 在内存中重新放置内核
-	call InitKernel
-	
+	; 开启保护模式 start
+	;cli
+	xchg bx, bx	
+	lgdt [GdtPtr]	
+
+	cli
+
+	in al, 92h
+	or al, 10b
+	out 92h, al
+
+	mov eax, cr0
+	or eax, 1
+	mov cr0, eax
 	xchg bx, bx
+	; 真正进入保护模式。这句把cs设置为SelectFlatX	
+	jmp dword SelectFlatX:(BaseOfLoader * 10h + LABEL_PM_START)
+	; 开启保护模式 end
+
+
+
+	; 在内存中重新放置内核
+	;call InitKernel
+	
+	;xchg bx, bx
 	;jmp BaseOfKernel:73h
 	;jmp BaseOfKernel:61h
-	jmp BaseOfKernel2:400h
+	;jmp BaseOfKernel2:400h
 	;jmp BaseOfKernel:60h
 	;jmp BaseOfKernel:0
 	;jmp BaseOfKernel:OffSetOfLoader	
@@ -202,6 +254,25 @@ READ_FILE_OVER:
 
 OVER:
 
+	jmp $
+
+
+[section .32]
+
+LABEL_PM_START:
+	mov ax, SelectFlatWR
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov ss, ax
+
+	mov ax, SelectVideo
+	mov gs, ax
+
+	mov al, 'K'
+	mov ah, 0Ah
+	mov [gs:(80 * 19 + 25) * 2], ax
+	
 	jmp $
 
 BootMessage:	db	"Hello,World OS!"
@@ -451,5 +522,5 @@ BaseOfKernel2	equ	0x6000
 BaseOfKernel3	equ	0x0
 OffSetOfLoader	equ	0x0
 BaseOfFATEntry	equ	0x1000
-
+BaseOfLoader    equ     0x9000
 ;times 7800 db 0
