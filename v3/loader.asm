@@ -25,31 +25,29 @@ org	0100h
 	BS_VolLab	DB 'OrangeS0.02'; 卷标, 必须 11 个字节
 	BS_FileSysType	DB 'FAT12   '	; 文件系统类型, 必须 8个字节
 
-	; 三个参数分别是段基址、段界限、段属性
-	; 分别用 %1、%2、%3表示上面的三个参数
-	;%macro	Descriptor 3
-	;	dw	%2 & 0ffffh
-	;	dw	%1 & 0ffffh
-	;	db	(%1 >> 16) & 0ffh
-	;	db	%3 & 0ffh
-	;	db	((%2 >> 16) & 0fh) | (((%3 >> 8) & 0fh) << 4)
-	;	db	(%1 >> 24) & 0ffh
-	;%endmacro
+; 三个参数分别是段基址、段界限、段属性
+; 分别用 %1、%2、%3表示上面的三个参数
+%macro	Descriptor 3
+	dw	%2 & 0ffffh
+	dw	%1 & 0ffffh
+	db	(%1 >> 16) & 0ffh
+	db	%3 & 0ffh
+	db	((%2 >> 16) & 0fh) | (((%3 >> 8) & 0fh) << 4)
+	db	(%1 >> 24) & 0ffh
+%endmacro
 
-	%macro	Descriptor 3
-	dw	0h;%2 & ffffh dw	%1 & ffffh
-	dw	0h;%2 & ffffh dw	%1 & ffffh
-	db	0h;(%1 >> 16) & ffh
-	db	0h;%3 & ffh
-	db	0h;((%2 >> 16) & fh) | (((%3 >> 8) & fh) << 4)
-	db	0h;(%1 >> 24) & ffh
-	%endmacro
-
+;	%macro	Descriptor 3
+;	dw	0h;%2 & ffffh dw	%1 & ffffh
+;	dw	0h;%2 & ffffh dw	%1 & ffffh
+;	db	0h;(%1 >> 16) & ffh
+;	db	0h;%3 & ffh
+;	db	0h;((%2 >> 16) & fh) | (((%3 >> 8) & fh) << 4)
+;	db	0h;(%1 >> 24) & ffh
+;	%endmacro
+;
 	LABEL_GDT:	Descriptor  0,	0,	0
-	LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 893h
-	xchg bx, bx
-	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 398h
-	xchg bx, bx
+	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 893h
+	LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
 	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
 	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 2f0h
 
