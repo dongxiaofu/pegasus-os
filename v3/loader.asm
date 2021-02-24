@@ -46,15 +46,15 @@ org	0100h
 ;	%endmacro
 ;
 	LABEL_GDT:	Descriptor  0,	0,	0
-	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 893h
-	LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
+	LABLE_GDT_FLAT_X: Descriptor	0,		0ffffffh,		 0c9ah
+	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
 	;LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
 	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         0c92h
 	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 2f0h
 
 	GdtLen	equ		$ - LABEL_GDT
 	GdtPtr	dw	GdtLen - 1
-		dd	BaseOfLoader * 10h + LABEL_GDT
+		dd	BaseOfLoaderPhyAddr + LABEL_GDT
 	SelectFlatX	equ	LABLE_GDT_FLAT_X - LABEL_GDT
 	SelectFlatWR	equ	LABLE_GDT_FLAT_WR - LABEL_GDT
 	SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 3
@@ -212,17 +212,17 @@ FILE_NOT_FOUND:
 
 READ_FILE_OVER:
 	xchg bx, bx
-	mov al, 'O'
-	mov ah, 0Dh
-	mov [gs:(80 * 23 + 33) * 2], ax
+	;mov al, 'O'
+	;mov ah, 0Dh
+	;mov [gs:(80 * 23 + 33) * 2], ax
 	; 开启保护模式 start
 	;cli
-	xchg bx, bx	
+	;mov dx, BaseOfLoaderPhyAddr + LABEL_PM_START xchg bx, bx	
 	lgdt [GdtPtr]	
-
+	
 	cli
-
-	in al, 92h
+	
+	 in al, 92h
 	or al, 10b
 	out 92h, al
 
@@ -231,9 +231,10 @@ READ_FILE_OVER:
 	mov cr0, eax
 	xchg bx, bx
 	; 真正进入保护模式。这句把cs设置为SelectFlatX	
-	jmp dword SelectFlatX:(BaseOfLoader * 10h + LABEL_PM_START)
+	;jmp dword SelectFlatX:(BaseOfLoaderPhyAddr + 100h + LABEL_PM_START)
+	;jmp dword SelectFlatX:dx
+	jmp dword SelectFlatX:(BaseOfLoaderPhyAddr + LABEL_PM_START)
 	; 开启保护模式 end
-
 
 
 	; 在内存中重新放置内核
@@ -255,23 +256,29 @@ OVER:
 
 	jmp $
 
+[SECTION .s32]
 
-[section .32]
+ALIGN	32
+
+[BITS	32]
 
 LABEL_PM_START:
-	mov ax, SelectFlatWR
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov ss, ax
-
+	;mov ax, SelectFlatWR
+	;mov ds, ax
+	;mov es, ax
+	;mov fs, ax
+	;mov ss, ax
 	mov ax, SelectVideo
 	mov gs, ax
-
+	
+	mov ax, 0x001b
+	mov gs, ax
 	mov al, 'K'
 	mov ah, 0Ah
 	mov [gs:(80 * 19 + 25) * 2], ax
-	
+	jmp $
+	mov ecx, 1	
+
 	jmp $
 
 BootMessage:	db	"Hello,World OS!"
@@ -522,4 +529,8 @@ BaseOfKernel3	equ	0x0
 OffSetOfLoader	equ	0x0
 BaseOfFATEntry	equ	0x1000
 BaseOfLoader    equ     0x9000
+
+
+BaseOfLoaderPhyAddr	equ	BaseOfLoader * 10h	; LOADER.BIN 被加载到的位置 ---- 物理地址 (= BaseOfLoader * 10h)
+
 ;times 7800 db 0
