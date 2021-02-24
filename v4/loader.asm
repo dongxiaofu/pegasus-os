@@ -388,104 +388,6 @@ ReadSector:
 ;        int 13h                         ; int 13h 中断
 ;        ret
 
-; Memcpy(p_vaddr, p_off, p_size)
-Memcpy:
-        push bp
-	mov bp, sp
-        push ax
-        push cx
-        push si
-        push di
-	;mov bp, sp
-        ;mov di, [bp + 4]        ; p_vaddr，即 dst
-        ;mov si, [bp + 8]        ; p_off，即 src
-	;mov cx, [bp + 12]	; 程序头的个数，即p_size
-
-	;mov di, [bp + 8]        ; p_vaddr，即 dst
-        ;mov si, [bp + 12]        ; p_off，即 src
-        ;mov cx, [bp + 16]       ; 程序头的个数，即p_size
-	
-	mov di, [bp + 4]        ; p_vaddr，即 dst
-        mov si, [bp + 6]        ; p_off，即 src
-        mov cx, [bp + 8]       ; 程序头的个数，即p_size
-	push es
-	mov es, di
-	mov di, 0
-
-.1:
-	mov byte al, [ds:si]
-        mov [es:di], al
-
-        inc si
-        inc di
-        dec cx
-
-        cmp cx, 0
-        jz .2
-        jmp .1
-
-.2:
-        pop es
-	mov ax, [bp + 4]
-
-        pop di
-        pop si
-        pop cx
-        pop ax
-        pop bp
-
-	ret
-
-
-; 重新放置内核
-InitKernel:
-       push ax
-       push cx
-       push si
-       mov ax, 0x8000
-       push ds
-       mov ds, ax
-	xchg bx, bx
-       ;程序段的个数
-	;mov cx, word ptr ds:0x802c
-       mov cx, [BaseOfKernel3 + 2CH]
-       ; mov ax, [BaseOfKernel + 2CH]
-       ;程序头表的内存地址
-       xor si, si
-       mov si, [BaseOfKernel3 + 1CH]
-       add si, BaseOfKernel3
-	xchg bx, bx
-
-.Begin2:
-      mov ax, [si + 10H]
-      ;push word [si + 10H]
-      push word ax
-
-       mov ax, BaseOfKernel3
-       add ax, [si + 4H]
-       push word ax
-	mov ax, [si + 8H]
-	push ax
-        ;push word [si + 8H]
-	xchg bx, bx
-        call Memcpy
-	xchg bx, bx
-        ; 三个参数，占用3个字,6个字节
-        add sp, 6
-        dec cx
-        cmp cx, 0
-        jz .NoAction
-        add si, 20H
-        jmp .Begin2
-;
-.NoAction:
-	pop ds
-        pop si
-        pop cx
-        pop ax
-
-	ret
-
 
 
 ; 读取扇区
@@ -534,3 +436,101 @@ LABEL_PM_START:
 	jmp $
 	jmp $
 	jmp $
+
+
+
+; 重新放置内核
+InitKernel:
+	push eax
+	push ecx
+	push esi
+	;程序段的个数
+	;mov cx, word ptr ds:0x802c
+	mov ecx, [BaseOfKernel3 + 2CH]
+	; mov ax, [BaseOfKernel + 2CH]
+	;程序头表的内存地址
+	xor esi, esi
+	mov esi, [BaseOfKernel3 + 1CH]
+	add esi, BaseOfKernel3
+
+
+.Begin:
+	mov eax, [esi + 10H]
+	push eax
+
+	mov eax, BaseOfKernel3
+	add eax, [si + 4H]
+	push eax
+	mov eax, [si + 8H]
+	push eax
+	call Memcpy
+	; 三个参数（每个占用32位，4个字节，2个字），占用6个字,12个字节
+	add esp, 12
+	dec ecx
+	cmp ecx, 0
+	jz .NoAction
+	add esi, 20H
+	jmp .Begin
+
+.NoAction:
+	pop ds
+	pop esi
+	pop ecx
+	pop eax
+
+	ret
+
+
+; Memcpy(p_vaddr, p_off, p_size)
+Memcpy:
+	push ebp
+	mov ebp, esp
+	push eax
+	push ecx
+	push esi
+	push edi
+	;mov bp, sp
+	;mov di, [bp + 4]        ; p_vaddr，即 dst
+	;mov si, [bp + 8]        ; p_off，即 src
+	;mov cx, [bp + 12]	; 程序头的个数，即p_size
+
+	;mov di, [bp + 8]        ; p_vaddr，即 dst
+	;mov si, [bp + 12]        ; p_off，即 src
+	;mov cx, [bp + 16]       ; 程序头的个数，即p_size
+
+	mov edi, [ebp + 8]        ; p_vaddr，即 dst
+	mov esi, [ebp + 12]        ; p_off，即 src
+	mov ecx, [ebp + 16]       ; 程序头的个数，即p_size
+	push es
+
+	; 在32位模式下，这两步操作不需要。而且，我没有找到把大操作数赋值给小存储单元的指令。
+	; mov es, edi
+	; mov edi, 0
+
+.1:
+	mov byte al, [ds:esi]
+	mov [es:edi], al
+
+	inc esi
+	inc edi
+	dec ecx
+
+	cmp ecx, 0
+	jz .2
+	jmp .1
+
+.2:
+	pop es
+	mov eax, [ebp + 8]
+
+	pop edi
+	pop esi
+	pop ecx
+	pop eax
+	pop ebp
+
+	ret
+
+
+
+BaseOfKernelPhyAddr	equ	0x80000h	; Kernel.BIN 被加载到的位置 ---- 物理地址 中的段基址部分
