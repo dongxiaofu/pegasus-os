@@ -48,7 +48,8 @@ org	0100h
 	LABEL_GDT:	Descriptor  0,	0,	0
 	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 893h
 	LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
-	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
+	;LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
+	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         0c92h
 	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 2f0h
 
 	GdtLen	equ		$ - LABEL_GDT
