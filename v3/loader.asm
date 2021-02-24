@@ -256,30 +256,7 @@ OVER:
 
 	jmp $
 
-[SECTION .s32]
 
-ALIGN	32
-
-[BITS	32]
-
-LABEL_PM_START:
-	;mov ax, SelectFlatWR
-	;mov ds, ax
-	;mov es, ax
-	;mov fs, ax
-	;mov ss, ax
-	mov ax, SelectVideo
-	mov gs, ax
-	
-	mov ax, 0x001b
-	mov gs, ax
-	mov al, 'K'
-	mov ah, 0Ah
-	mov [gs:(80 * 19 + 25) * 2], ax
-	jmp $
-	mov ecx, 1	
-
-	jmp $
 
 BootMessage:	db	"Hello,World OS!"
 ;BootMessageLength:	db	$ - BootMessage
@@ -533,4 +510,27 @@ BaseOfLoader    equ     0x9000
 
 BaseOfLoaderPhyAddr	equ	BaseOfLoader * 10h	; LOADER.BIN 被加载到的位置 ---- 物理地址 (= BaseOfLoader * 10h)
 
-;times 7800 db 0
+[SECTION .s32]
+
+ALIGN	32
+
+[BITS	32]
+
+LABEL_PM_START:
+	;mov ax, SelectFlatWR
+	;mov ds, ax
+	;mov es, ax
+	;mov fs, ax
+	;mov ss, ax
+	mov ax, SelectVideo
+	mov gs, ax
+	
+	mov ax, 0x001b
+	mov gs, ax
+	mov al, 'K'
+	mov ah, 0Ah
+	mov [gs:(80 * 19 + 25) * 2], ax
+	jmp $
+	mov ecx, 1	
+
+	jmp $
