@@ -517,11 +517,11 @@ ALIGN	32
 [BITS	32]
 
 LABEL_PM_START:
-	;mov ax, SelectFlatWR
-	;mov ds, ax
-	;mov es, ax
-	;mov fs, ax
-	;mov ss, ax
+	mov ax, SelectFlatWR
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov ss, ax
 	mov ax, SelectVideo
 	mov gs, ax
 	
@@ -529,6 +529,8 @@ LABEL_PM_START:
 	mov al, 'K'
 	mov ah, 0Ah
 	mov [gs:(80 * 19 + 25) * 2], ax
-	jmp $
 
+	jmp $
+	jmp $
+	jmp $
 	jmp $
