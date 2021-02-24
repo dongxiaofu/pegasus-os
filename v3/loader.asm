@@ -50,7 +50,7 @@ org	0100h
 	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
 	;LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
 	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         0c92h
-	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 2f0h
+	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 0f2h
 
 	GdtLen	equ		$ - LABEL_GDT
 	GdtPtr	dw	GdtLen - 1
@@ -525,12 +525,10 @@ LABEL_PM_START:
 	mov ax, SelectVideo
 	mov gs, ax
 	
-	mov ax, 0x001b
 	mov gs, ax
 	mov al, 'K'
 	mov ah, 0Ah
 	mov [gs:(80 * 19 + 25) * 2], ax
 	jmp $
-	mov ecx, 1	
 
 	jmp $
