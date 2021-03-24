@@ -2,12 +2,14 @@
 ; pmtest2.asm
 ; 编译方法：nasm pmtest2.asm -o pmtest2.com
 ; ==========================================
+org	0100h
+
+	jmp	LABEL_BEGIN
+	nop
 
 %include	"pm.inc"	; 常量, 宏, 以及一些说明
 
-org	0100h
-	jmp	LABEL_BEGIN
-	nop
+
 
 	; 下面是 FAT12 磁盘的头
 	BS_OEMName	DB 'ForrestY'	; OEM String, 必须 8 个字节
