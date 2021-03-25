@@ -65,7 +65,7 @@ SEARCH_FILE_IN_ROOT_DIRECTORY:
 COMPARE_FILENAME:
 	;cmp [es:si], [ds:di]
 	;cmp [si], [di]
-	;;xchg bx, bx
+	;xchg bx, bx
 	lodsb
 	cmp al, byte [es:di]
 	jnz FILENAME_DIFFIERENT
@@ -78,7 +78,7 @@ COMPARE_FILENAME:
 	jz FILE_FOUND
 	jmp COMPARE_FILENAME		
 FILENAME_DIFFIERENT:
-	mov al, 'D'
+	mov al, 'M'
         mov ah, 0Ah
         mov [gs:(80 * 24 + 40) *2], ax
 
@@ -333,7 +333,8 @@ ReadSector2:
 	int 13h				; int 13h 中断
 	ret
 
-BaseOfLoader	equ	0x9000
+;BaseOfLoader	equ	0x9000
+BaseOfLoader	equ	0x7000
 OffSetOfLoader	equ	0x100
 BaseOfFATEntry	equ	0x1000
 

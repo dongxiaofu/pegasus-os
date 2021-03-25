@@ -15,7 +15,8 @@ boot.bin:boot.asm
 
 #loader.bin:loader.asm
 loader.bin:pmtest2.asm
-	nasm -o loader.bin pmtest2.asm
+	# nasm -o loader.bin pmtest2.asm
+	nasm -o loader.bin loader.asm
 
 kernel.bin:kernel.asm
 	nasm -o kernel.o -f elf kernel.asm

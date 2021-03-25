@@ -65,7 +65,7 @@ ALIGN	32
 LABEL_DATA:
 SPValueInRealMode	dw	0
 ; 字符串
-PMMessage:		db	"In Protect Mode now. ^-^", 0	; 在保护模式中显示
+PMMessage:		db	"3333In Protect Mode now. ^-^", 0	; 在保护模式中显示
 OffsetPMMessage		equ	PMMessage - $$
 StrTest:		db	"ABCDEFGHIJKLMNOPQRSTUVWXYZ", 0
 OffsetStrTest		equ	StrTest - $$
@@ -88,6 +88,9 @@ TopOfStack	equ	$ - LABEL_STACK - 1
 [SECTION .s16]
 [BITS	16]
 LABEL_BEGIN:
+	mov	al, 'R'
+	;mov	ah, 0Ah
+	mov	[gs:(80*24 + 34)*2], ax
 	xchg	bx, bx
 	mov	ax, cs
 	mov	ds, ax
