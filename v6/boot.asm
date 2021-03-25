@@ -334,7 +334,7 @@ ReadSector2:
 	ret
 
 ;BaseOfLoader	equ	0x9000
-BaseOfLoader	equ	0x7000
+BaseOfLoader	equ	0x2000
 OffSetOfLoader	equ	0x100
 BaseOfFATEntry	equ	0x1000
 
