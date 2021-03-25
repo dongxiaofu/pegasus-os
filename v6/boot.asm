@@ -55,6 +55,7 @@ SEARCH_FILE_IN_ROOT_DIRECTORY:
 	;mov ds, ax	
 	; mov si, bx
 	; mov di, BaseOfLoader
+	; ds是多少？
 	mov si, LoaderBinFileName
 	;;xchg bx, bx
 	;mov cx,	[LoaderBinFileNameLength]
