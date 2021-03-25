@@ -74,6 +74,7 @@ LABEL_START:
 	mov ax, BaseOfLoader
 	mov ds, ax
 
+	; 读取根目录扇区
 	mov  ah, 00h
 	mov  dl, 0
 	int 13h
@@ -105,6 +106,13 @@ SEARCH_FILE_IN_ROOT_DIRECTORY:
 COMPARE_FILENAME:
 	;cmp [es:si], [ds:di]
 	;cmp [si], [di]
+	; 把[ds:si]指向的数据装载到ax/eax/rax中。
+	; 在本程序中，es段的数据来源于前面读取的【根目录扇区】。
+	; 在本程序中，ds段的数据来源于第74、75行，把ds设置为BaseOfLoader。
+	; 所有疑团全部解开，mov si, LoaderBinFileName，[ds:si]指向 "KERNEL  BIN"。
+	; cmp al, byte [es:di] 逐字节比较"KERNEL  BIN"和根目录扇区中读取到的文件名。
+	; 太惨重的教训！花了两天，才衔接上十多天前写的汇编代码。
+	; 一定要写更详细的注释；尽量一气呵成完成汇编代码写的功能。
 	lodsb
 	cmp al, byte [es:di]
 	jnz FILENAME_DIFFIERENT
@@ -275,6 +283,10 @@ BootMessage:	db	"Hello,World OS!"
 ; 长度，需要使用 equ 
 BootMessageLength	equ	$ - BootMessage
 
+; 根目录区的第一个扇区。引导扇区占用一个扇区，每个FAT区占用9个扇区，2个FAT项占用18个扇区。
+; 因此，根目录区的第一个扇区是第19个扇区。
+; 根目录区所占用的扇区长度不固定，我们的FAT文件系统人为设置它占用的扇区是1个。
+; 根目录区占用的扇区的数量由FAT系统中包含的文件数量决定。
 FirstSectorOfRootDirectory	equ	19
 SectorNumberOfTrack	equ	18
 SectorNumberOfFAT1	equ	1
@@ -416,6 +428,13 @@ ReadSector2:
 	int 13h				; int 13h 中断
 	ret
 
+; 这些值的设置非常重要。
+; 第一，BaseOfLoader 要与boot.asm中的同名标号，值相同。
+; 第二，BaseOfKernel 和 BaseOfLoader 的值不能随意设置，有讲究。
+; 1>BaseOfKernel 要比 BaseOfLoader 大。否则，内核过大，会覆盖loader.bin。
+; 2>BaseOfLoader 和 0x30000 之间要留足空间。否则，loader.bin 会覆盖重新放置后的内核。
+; 3>BaseOfKernel 和 0x30000 之间呢？
+; 3>0x30000 这个数值，是 Makefile 中编译时设置的：ld -s -Ttext 0x30400  -o kernel.bin  kernel.o -m elf_i386 
 ;BaseOfKernel	equ	0x8000
 BaseOfKernel	equ	0x9000
 BaseOfKernel2	equ	0x6000
