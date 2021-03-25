@@ -71,7 +71,7 @@ LABEL_START:
 	mov ax, BaseOfKernel
 	mov es, ax
 	;mov ds, ax		; lodsb、lodsw，把[ds:si]中的数据加载到ax中
-	mov ax, 0x7000
+	mov ax, BaseOfLoader
 	mov ds, ax
 
 	mov  ah, 00h
@@ -423,7 +423,7 @@ BaseOfKernel3	equ	0x0
 OffSetOfLoader	equ	0x0
 BaseOfFATEntry	equ	0x1000
 ;BaseOfLoader    equ     0x9000
-BaseOfLoader    equ     0x7000
+BaseOfLoader    equ     0x2000
 
 
 BaseOfLoaderPhyAddr	equ	BaseOfLoader * 10h	; LOADER.BIN 被加载到的位置 ---- 物理地址 (= BaseOfLoader * 10h)
@@ -567,4 +567,4 @@ Memcpy:
 
 
 
-BaseOfKernelPhyAddr	equ	90000h	; Kernel.BIN 被加载到的位置 ---- 物理地址 中的段基址部分
+BaseOfKernelPhyAddr	equ	BaseOfKernel * 10h  ; Kernel.BIN 被加载到的位置 ---- 物理地址 中的段基址部分

@@ -14,8 +14,8 @@ _start:
 	jmp $
 
 	times	131072	db	0
-	;times	131072	db	0
-	;times	131072	db	0
+	times	131072	db	0
+	times	131072	db	0
 	;times	131072	db	0
 	;times	131072	db	0
 	;times	131072	db	0
