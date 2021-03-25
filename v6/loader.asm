@@ -49,6 +49,7 @@ org	0100h
 	LABLE_GDT_FLAT_X: Descriptor	0,		0ffffffh,		 0c9ah
 	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
 	;LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
+	LABLE_GDT_FLAT_WR_TEST:Descriptor 5242880,	        0fffffh,	         0c92h
 	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         0c92h
 	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 0f2h
 
@@ -57,6 +58,7 @@ org	0100h
 		dd	BaseOfLoaderPhyAddr + LABEL_GDT
 	SelectFlatX	equ	LABLE_GDT_FLAT_X - LABEL_GDT
 	SelectFlatWR	equ	LABLE_GDT_FLAT_WR - LABEL_GDT
+	SelectFlatWR_TEST	equ	LABLE_GDT_FLAT_WR_TEST - LABEL_GDT
 	SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 3
 
 
@@ -475,11 +477,29 @@ LABEL_PM_START:
 	mov ah, 0Ah
 	mov [gs:(80 * 19 + 20) * 2], ax
 	
-	;xchg bx, bx
+	
+	; 测试读写5M之上的内存读写 start
+	push es
+	mov ax, SelectFlatWR_TEST
+	mov es, ax
+	mov esi, 0
+	mov edi, 0
+	xchg bx, bx
+	mov byte [es:edi], 'W'
+	mov byte al, [es:edi]
+	mov ah, 0Ah
+	mov [gs:(80*20 + 20) * 2], ax
+	
+	mov byte [es:edi], 'Q'
+	mov byte al, [es:edi]
+	mov [gs:(80*20 + 21) * 2], ax
+	
+	pop es
+	; 测试读写5M之上的内存读写 end
 
 
-	;jmp 0x30400
-	jmp SelectFlatX:0x30400
+
+	;jmp SelectFlatX:0x30400
 	jmp $
 	jmp $
 	jmp $
