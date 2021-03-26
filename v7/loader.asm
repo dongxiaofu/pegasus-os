@@ -67,32 +67,6 @@ org	0100h
 
 
 LABEL_START:
-	xchg bx, bx	
-	xor		eax,	eax
-	mov		ax,		cs
-	movzx	eax, ax
-	shl		eax,		4
-	add		eax,		LABEL_SEG_16
-
-	mov		word [LABLE_GDT_FLAT_X_16+2],	ax
-	shr		eax,		16
-	mov		byte [LABLE_GDT_FLAT_X_16+4],  al
-	mov		byte [LABLE_GDT_FLAT_X_16+7],	ah
-	mov	eax,	[LABLE_GDT_FLAT_X_16]
-
-
-	xor		eax,	eax
-	mov		ax,		cs
-	movzx	eax, ax
-	shl		eax,		4
-	add		eax,		LABEL_PM_START
-
-	mov		word [LABLE_GDT_FLAT_X+2],	ax
-	shr		eax,		16
-	mov		byte [LABLE_GDT_FLAT_X+4],  al
-	mov		byte [LABLE_GDT_FLAT_X+7],	ah
-
-
 	mov ax, 0B800h
 	mov gs, ax
 	mov ah, 0Ch
@@ -283,7 +257,7 @@ READ_FILE_OVER:
 	;jmp dword SelectFlatX:(BaseOfLoaderPhyAddr + 100h + LABEL_PM_START)
 	;jmp dword SelectFlatX:dx
 	xchg bx, bx
-	jmp dword SelectFlatX:0
+	jmp dword SelectFlatX: BaseOfLoaderPhyAddr + LABEL_PM_START
 	; 开启保护模式 end
 
 
@@ -516,7 +490,7 @@ LABEL_PM_START:
 	mov [gs:(80 * 19 + 25) * 2], ax
 	xchg bx, bx	
 	; 跳入16位模式（保护模式)
-	jmp word SelectFlatX_16:0
+	jmp word SelectFlatX_16:BaseOfLoaderPhyAddr + LABEL_SEG_16
 	
 
 
