@@ -47,9 +47,11 @@ org	0100h
 ;
 	LABEL_GDT:	Descriptor  0,	0,	0
 	LABLE_GDT_FLAT_X: Descriptor	0,		0ffffffh,		 0c9ah
+	LABLE_GDT_FLAT_X_16: Descriptor	0,		0ffffffh,		 98h
 	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
 	;LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
 	LABLE_GDT_FLAT_WR_TEST:Descriptor 5242880,	        0fffffh,	         0c92h
+	LABLE_GDT_FLAT_WR_16:Descriptor 0,	        0fffffh,	         0892h
 	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         0c92h
 	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 0f2h
 
@@ -57,12 +59,28 @@ org	0100h
 	GdtPtr	dw	GdtLen - 1
 		dd	BaseOfLoaderPhyAddr + LABEL_GDT
 	SelectFlatX	equ	LABLE_GDT_FLAT_X - LABEL_GDT
+	SelectFlatX_16	equ	LABLE_GDT_FLAT_X_16 - LABEL_GDT
 	SelectFlatWR	equ	LABLE_GDT_FLAT_WR - LABEL_GDT
 	SelectFlatWR_TEST	equ	LABLE_GDT_FLAT_WR_TEST - LABEL_GDT
+	SelectFlatWR_16	equ	LABLE_GDT_FLAT_WR_16 - LABEL_GDT
 	SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 3
 
 
 LABEL_START:
+	xchg bx, bx	
+	xor		eax,	eax
+	mov		ax,		cs
+	movzx	eax, ax
+	shl		eax,		4
+	add		eax,		LABEL_SEG_16
+
+	mov		word [LABLE_GDT_FLAT_X_16+2],	ax
+	shr		eax,		16
+	mov		byte [LABLE_GDT_FLAT_X_16+4],  al
+	mov		byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+7],	ah
+	mov	eax,	[BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16]
+
+
 	mov ax, 0B800h
 	mov gs, ax
 	mov ah, 0Ch
@@ -231,7 +249,6 @@ FILE_NOT_FOUND:
 	jmp OVER
 
 READ_FILE_OVER:
-	xchg bx, bx
 	;mov al, 'O'
 	;mov ah, 0Dh
 	;mov [gs:(80 * 23 + 33) * 2], ax
@@ -275,6 +292,23 @@ READ_FILE_OVER:
 	;jmp OVER
 
 OVER:
+
+	jmp $
+
+; 从保护模式切换到实模式后，回到这里
+IN_REAL_MODEL:
+	mov ax, cs
+	mov ds, ax
+	mov es, ax
+	mov ss, ax
+	mov fs, ax
+
+	mov ax, 0xb800
+	mov gs, ax
+
+	mov al, 'H'
+	mov ah, 0Ah
+	mov [gs:(80*23+20)*2], ax
 
 	jmp $
 
@@ -468,8 +502,14 @@ LABEL_PM_START:
 	mov al, 'K'
 	mov ah, 0Ah
 	mov [gs:(80 * 19 + 25) * 2], ax
+	xchg bx, bx	
+	; 跳入16位模式（保护模式)
+	jmp word SelectFlatX_16:0
+	
+
+
 	xchg bx, bx
-	call InitKernel
+	;call InitKernel
 	xchg bx, bx	
 
 	;mov gs, ax
@@ -607,3 +647,25 @@ Memcpy:
 
 
 BaseOfKernelPhyAddr	equ	BaseOfKernel * 10h  ; Kernel.BIN 被加载到的位置 ---- 物理地址 中的段基址部分
+
+[SECTION .s16]
+[BITS 16]
+LABEL_SEG_16:
+	jmp $
+	jmp $
+	jmp $
+	jmp $
+	xchg bx, bx
+	mov ax, 	SelectFlatWR_16
+	mov es,	ax
+	mov ss, ax
+	mov fs, ax
+	mov ds, ax
+	
+	mov al, 'T'
+	mov ah, 0Ah
+	mov [gs:(80*22+21)*2], ax
+
+
+GO_BACK_REAL_MODEL:
+	jmp 0:IN_REAL_MODEL
