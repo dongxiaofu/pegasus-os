@@ -1,2 +1,2 @@
-jmp $
-jmp $
+mov     ax,     cs
+mov	ds,	ax

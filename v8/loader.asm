@@ -48,6 +48,7 @@ org	0100h
 	LABEL_GDT:	Descriptor  0,	0,	0
 	LABLE_GDT_FLAT_X: Descriptor	0,		0ffffffh,		 0c9ah
 	LABLE_GDT_FLAT_X_16: Descriptor	0,		0ffffffh,		 98h
+	LABLE_GDT_FLAT_X_162: Descriptor	0,		0ffffffh,		 98h
 	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
 	;LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
 	LABLE_GDT_FLAT_WR_TEST:Descriptor 5242880,	        0fffffh,	         0c92h
@@ -61,6 +62,7 @@ org	0100h
 		;dd	BaseOfLoaderPhyAddr + LABEL_GDT
 	SelectFlatX	equ	LABLE_GDT_FLAT_X - LABEL_GDT
 	SelectFlatX_16	equ	LABLE_GDT_FLAT_X_16 - LABEL_GDT
+	SelectFlatX_162	equ	LABLE_GDT_FLAT_X_162 - LABEL_GDT
 	SelectFlatWR	equ	LABLE_GDT_FLAT_WR - LABEL_GDT
 	SelectFlatWR_TEST	equ	LABLE_GDT_FLAT_WR_TEST - LABEL_GDT
 	SelectFlatWR_16	equ	LABLE_GDT_FLAT_WR_16 - LABEL_GDT
@@ -83,8 +85,22 @@ LABEL_START:
 	mov		byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+7],	ah
 	mov		ax,	GdtPtr
 
+
+	mov     ax,     cs
+        xchg bx, bx
+        xor             eax,    eax
+        mov             ax,             cs
+        movzx   eax, ax
+        shl             eax,            4
+        add             eax,            IN_REAL_MODEL
+
+        mov             word [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_162+2],     ax
+        shr             eax,            16
+        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_162+4],  al
+        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_162+7],     ah
+
 	mov		ax,	cs
-	mov		[BaseOfLoaderPhyAddr + GO_BACK_REAL_MODEL + 3],	ax
+	;mov		[BaseOfLoaderPhyAddr + GO_BACK_REAL_MODEL + 3],	ax
 	
 	mov ax, 0B800h
 	mov gs, ax
@@ -304,6 +320,9 @@ OVER:
 
 ; 从保护模式切换到实模式后，回到这里
 IN_REAL_MODEL:
+	jmp $
+	jmp $
+	jmp $
 	mov ax, cs
 	mov ds, ax
 	mov es, ax
@@ -666,12 +685,13 @@ LABEL_SEG_16:
 	mov ds, ax
 	
 	; 必须先切换到实模式，跳转才生效
-	in al, 92h
-	and al,	11111101b
-	out 92h, al
+	;in al, 92h
+	;and al,	11111101b
+	;out 92h, al
 
-	mov eax, cr0
-	and eax,0xfffffffe
-	mov cr0, eax		
+	;mov eax, cr0
+	;and eax,0xfffffffe
+	;mov cr0, eax		
 GO_BACK_REAL_MODEL:
-	jmp 0:IN_REAL_MODEL
+	;jmp SelectFlatX_162:IN_REAL_MODEL
+	jmp SelectFlatX_162:0
