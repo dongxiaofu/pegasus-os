@@ -57,7 +57,8 @@ org	0100h
 
 	GdtLen	equ		$ - LABEL_GDT
 	GdtPtr	dw	GdtLen - 1
-		dd	BaseOfLoaderPhyAddr + LABEL_GDT
+		dd	0
+		;dd	BaseOfLoaderPhyAddr + LABEL_GDT
 	SelectFlatX	equ	LABLE_GDT_FLAT_X - LABEL_GDT
 	SelectFlatX_16	equ	LABLE_GDT_FLAT_X_16 - LABEL_GDT
 	SelectFlatWR	equ	LABLE_GDT_FLAT_WR - LABEL_GDT
@@ -67,6 +68,21 @@ org	0100h
 
 
 LABEL_START:
+	mov	ax,	cs
+	mov	ds,	ax
+	xchg bx, bx	
+	xor		eax,	eax
+	mov		ax,		cs
+	movzx	eax, ax
+	shl		eax,		4
+	add		eax,		LABEL_SEG_16
+
+	mov		word [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+2],	ax
+	shr		eax,		16
+	mov		byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+4],  al
+	mov		byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+7],	ah
+	mov		ax,	GdtPtr
+
 	mov ax, 0B800h
 	mov gs, ax
 	mov ah, 0Ch
@@ -240,7 +256,9 @@ READ_FILE_OVER:
 	;mov [gs:(80 * 23 + 33) * 2], ax
 	; 开启保护模式 start
 	;cli
-	;mov dx, BaseOfLoaderPhyAddr + LABEL_PM_START ;;xchg bx, bx	
+	;mov dx, BaseOfLoaderPhyAddr + 0	
+	xchg	bx, bx
+	mov 	dword [GdtPtr + 2], BaseOfLoaderPhyAddr + LABEL_GDT
 	lgdt [GdtPtr]	
 	
 	cli
@@ -257,7 +275,7 @@ READ_FILE_OVER:
 	;jmp dword SelectFlatX:(BaseOfLoaderPhyAddr + 100h + LABEL_PM_START)
 	;jmp dword SelectFlatX:dx
 	xchg bx, bx
-	jmp dword SelectFlatX: BaseOfLoaderPhyAddr + LABEL_PM_START
+	jmp dword SelectFlatX:(BaseOfLoaderPhyAddr + LABEL_PM_START)
 	; 开启保护模式 end
 
 
@@ -490,7 +508,7 @@ LABEL_PM_START:
 	mov [gs:(80 * 19 + 25) * 2], ax
 	xchg bx, bx	
 	; 跳入16位模式（保护模式)
-	jmp word SelectFlatX_16:BaseOfLoaderPhyAddr + LABEL_SEG_16
+	jmp word SelectFlatX_16:0
 	
 
 
