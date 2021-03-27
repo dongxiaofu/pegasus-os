@@ -47,6 +47,9 @@ org	0100h
 ;
 	LABEL_GDT:	Descriptor  0,	0,	0
 	LABLE_GDT_FLAT_X: Descriptor	0,		0ffffffh,		 0c9ah
+	; 3特权等级
+	LABLE_GDT_FLAT_X_3: Descriptor	0,		0ffffffh,		 0cd8h;0cf8h
+	LABLE_GDT_STACK_3:Descriptor 0,	        	TOP_OF_STACK3,           0cd2h;0cf2h
 	LABLE_GDT_FLAT_X_16: Descriptor	0,		0ffffffh,		 98h
 	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
 	;LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
@@ -60,6 +63,10 @@ org	0100h
 		dd	0
 		;dd	BaseOfLoaderPhyAddr + LABEL_GDT
 	SelectFlatX	equ	LABLE_GDT_FLAT_X - LABEL_GDT
+	;SelectFlatX_3	equ	LABLE_GDT_FLAT_X_3 - LABEL_GDT
+	SelectFlatX_3	equ	LABLE_GDT_FLAT_X_3 - LABEL_GDT + 2
+	SelectStack_3	equ	LABLE_GDT_STACK_3 - LABEL_GDT + 2
+	;SelectStack_3	equ	LABLE_GDT_STACK_3 - LABEL_GDT
 	SelectFlatX_16	equ	LABLE_GDT_FLAT_X_16 - LABEL_GDT
 	SelectFlatWR	equ	LABLE_GDT_FLAT_WR - LABEL_GDT
 	SelectFlatWR_TEST	equ	LABLE_GDT_FLAT_WR_TEST - LABEL_GDT
@@ -81,7 +88,37 @@ LABEL_START:
 	shr		eax,		16
 	mov		byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+4],  al
 	mov		byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+7],	ah
-	mov		ax,	GdtPtr
+
+	; 3特权级
+	mov     ax,     cs
+        mov     ds,     ax
+        xchg bx, bx
+        xor             eax,    eax
+        mov             ax,             cs
+        movzx   eax, ax
+        shl             eax,            4
+        add             eax,            LABEL_SEG_PRI3
+
+        mov             word [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_3+2],     ax
+        shr             eax,            16
+        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_3+4],  al
+        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_3+7],     ah
+
+
+	mov     ax,     cs
+        mov     ds,     ax
+        xchg bx, bx
+        xor             eax,    eax
+        mov             ax,             cs
+        movzx   eax, ax
+        shl             eax,            4
+        add             eax,            LABEL_STACK3
+
+        mov             word [BaseOfLoaderPhyAddr + LABLE_GDT_STACK_3+2],     ax
+        shr             eax,            16
+        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_STACK_3+4],  al
+        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_STACK_3+7],     ah
+
 
 	mov		ax,	cs
 	mov		[BaseOfLoaderPhyAddr + GO_BACK_REAL_MODEL + 3],	ax
@@ -511,9 +548,13 @@ LABEL_PM_START:
 	mov [gs:(80 * 19 + 25) * 2], ax
 	xchg bx, bx	
 	; 跳入16位模式（保护模式)
-	jmp word SelectFlatX_16:0
-	
-
+	;jmp word SelectFlatX_16:0
+	;jmp SelectFlatX_3:0
+	push SelectStack_3 
+	push TOP_OF_STACK3
+	push SelectFlatX_3
+	push 0
+	retf
 
 	xchg bx, bx
 	;call InitKernel
@@ -675,3 +716,33 @@ LABEL_SEG_16:
 	mov cr0, eax		
 GO_BACK_REAL_MODEL:
 	jmp 0:IN_REAL_MODEL
+
+
+
+[SECTION .s32]
+[BITS 32]
+
+LABEL_SEG_PRI3:
+	xchg bx, bx
+	mov ax, cs
+	;mov ds, ax
+	;mov es, ax
+	;mov ss, ax
+	;mov fs, ax
+
+	mov al, '3'
+	mov ah, 0Ah
+	mov [gs:(80*24+25)*2], ax
+	jmp $
+
+
+
+;堆栈
+[SECTION .s3]
+ALIGN 32
+[BITS 32]
+
+LABEL_STACK3:
+	times	512	db	0
+
+TOP_OF_STACK3	equ	$ - LABEL_STACK3 - 1
