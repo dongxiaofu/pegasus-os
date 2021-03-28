@@ -555,6 +555,10 @@ LABEL_PM_START:
 	push SelectFlatX_3
 	push 0
 	retf
+	
+	; check_cs(0x0012): non-conforming code seg descriptor dpl != cpl, dpl=2, cpl=0
+	; 检查特权级时，jmp并没有把cpl更新为目标选择子的rpl；使用retf时，更新后再检查。	
+	jmp SelectFlatX_3:0;
 
 	xchg bx, bx
 	;call InitKernel
