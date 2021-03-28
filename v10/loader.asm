@@ -36,6 +36,25 @@ org	0100h
 	db	(%1 >> 24) & 0ffh
 %endmacro
 
+
+; 门描述符，四个参数，分别是：目标代码段的偏移量、目标代码段选择子、门描述符的属性、ParamCount
+%macro	GateDes	4
+	dw	%1 & 0ffffh
+	dw	%2 & 0ffffh
+	dw	(%4 & 01fh) | ((%3 << 8) & 0ff00h)
+	dw	(%1 >> 16) & 0ffffh
+%endmacro
+
+; 门
+; 门描述符，四个参数，分别是：目标代码段的偏移量、目标代码段选择子、门描述符的属性、ParamCount
+%macro Gate 4
+	dw	(%1 & 0FFFFh)				; 偏移1
+	dw	%2					; 选择子
+	dw	(%4 & 1Fh) | ((%3 << 8) & 0FF00h)	; 属性
+	dw	((%1 >> 16) & 0FFFFh)			; 偏移2
+%endmacro ; 共 8 字节
+
+
 ;	%macro	Descriptor 3
 ;	dw	0h;%2 & ffffh dw	%1 & ffffh
 ;	dw	0h;%2 & ffffh dw	%1 & ffffh
@@ -58,6 +77,13 @@ org	0100h
 	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         0c92h
 	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 0f2h
 
+	; 门
+	LABLE_GDT_GATE: Descriptor	0,		0ffffffh,		 0c9ah
+	;LABLE_GATE: GateDes	0,SELECTOR_GDT_GATE,	0c9ah,	0
+	;bx_dbg_read_pmode_descriptor: selector 0x0050 points to a system descriptor and is not supported!
+	;LABLE_GATE: Gate	0,SELECTOR_GDT_GATE,	0c8ah,	0
+	LABLE_GATE: Gate	0,SELECTOR_GDT_GATE,	008ch,	0
+
 	GdtLen	equ		$ - LABEL_GDT
 	GdtPtr	dw	GdtLen - 1
 		dd	0
@@ -72,7 +98,10 @@ org	0100h
 	SelectFlatWR_TEST	equ	LABLE_GDT_FLAT_WR_TEST - LABEL_GDT
 	SelectFlatWR_16	equ	LABLE_GDT_FLAT_WR_16 - LABEL_GDT
 	SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 3
-
+	
+	; 门
+	SELECTOR_GDT_GATE	equ	LABLE_GDT_GATE - LABEL_GDT
+	SelectGate	equ	LABLE_GATE - LABEL_GDT
 
 LABEL_START:
 	mov	ax,	cs
@@ -88,6 +117,23 @@ LABEL_START:
 	shr		eax,		16
 	mov		byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+4],  al
 	mov		byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+7],	ah
+
+
+	; 门指向的段描述符
+	mov     ax,     cs
+        mov     ds,     ax
+        xchg bx, bx
+        xor             eax,    eax
+        mov             ax,             cs
+        movzx   eax, ax
+        shl             eax,            4
+        add             eax,           	LABLE_SEG_GDT_GATE
+
+
+        mov             word [BaseOfLoaderPhyAddr + LABLE_GDT_GATE+2],     ax
+        shr             eax,            16
+        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_GATE+4],  al
+        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_GATE+7],     ah
 
 	; 3特权级
 	mov     ax,     cs
@@ -542,7 +588,11 @@ LABEL_PM_START:
 	mov ss, ax
 	mov ax, SelectVideo
 	mov gs, ax
-	
+	xchg bx, bx
+	; 使用门
+	call SelectGate:0 
+	;call SELECTOR_GDT_GATE:0
+
 	mov al, 'K'
 	mov ah, 0Ah
 	mov [gs:(80 * 19 + 25) * 2], ax
@@ -750,3 +800,36 @@ LABEL_STACK3:
 	times	512	db	0
 
 TOP_OF_STACK3	equ	$ - LABEL_STACK3 - 1
+
+;门
+;[SECTION .gate]
+;ALIGN 32
+;[BITS 32]
+;
+;LABLE_SEG_GDT_GATE:
+;	jmp $
+;	jmp $
+;	mov al, 'T'
+;	mov ah, 0Ah
+;	mov [gs:(80*24 + 25)*2], ax
+;
+;	ret
+
+
+[SECTION .sdest]; 调用门目标段
+[BITS	32]
+
+LABLE_SEG_GDT_GATE:
+	;jmp	$
+	mov	ax, SelectVideo
+	mov	gs, ax			; 视频段选择子(目的)
+
+	mov	edi, (80 * 12 + 0) * 2	; 屏幕第 12 行, 第 0 列。
+	mov	ah, 0Ch			; 0000: 黑底    1100: 红字
+	mov	al, 'C'
+	mov	[gs:edi], ax
+
+	retf
+
+SegCodeDestLen	equ	$ - LABLE_SEG_GDT_GATE
+; END of [SECTION .sdest]
