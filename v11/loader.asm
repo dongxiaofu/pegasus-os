@@ -113,10 +113,10 @@ LABEL_START:
 	shl		eax,		4
 	add		eax,		LABEL_SEG_16
 
-	mov		word [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+2],	ax
+	mov		word [LABLE_GDT_FLAT_X_16+2],	ax
 	shr		eax,		16
-	mov		byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+4],  al
-	mov		byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_16+7],	ah
+	mov		byte [LABLE_GDT_FLAT_X_16+4],  al
+	mov		byte [LABLE_GDT_FLAT_X_16+7],	ah
 
 
 	; 门指向的段描述符
@@ -130,10 +130,10 @@ LABEL_START:
         add             eax,           	LABLE_SEG_GDT_GATE
 
 
-        mov             word [BaseOfLoaderPhyAddr + LABLE_GDT_GATE+2],     ax
+        mov             word [LABLE_GDT_GATE+2],     ax
         shr             eax,            16
-        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_GATE+4],  al
-        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_GATE+7],     ah
+        mov             byte [LABLE_GDT_GATE+4],  al
+        mov             byte [LABLE_GDT_GATE+7],     ah
 
 	; 3特权级
 	mov     ax,     cs
@@ -145,10 +145,10 @@ LABEL_START:
         shl             eax,            4
         add             eax,            LABEL_SEG_PRI3
 
-        mov             word [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_3+2],     ax
+        mov             word [LABLE_GDT_FLAT_X_3+2],     ax
         shr             eax,            16
-        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_3+4],  al
-        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_FLAT_X_3+7],     ah
+        mov             byte [LABLE_GDT_FLAT_X_3+4],  al
+        mov             byte [LABLE_GDT_FLAT_X_3+7],     ah
 
 
 	mov     ax,     cs
@@ -160,10 +160,10 @@ LABEL_START:
         shl             eax,            4
         add             eax,            LABEL_STACK3
 
-        mov             word [BaseOfLoaderPhyAddr + LABLE_GDT_STACK_3+2],     ax
+        mov             word [LABLE_GDT_STACK_3+2],     ax
         shr             eax,            16
-        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_STACK_3+4],  al
-        mov             byte [BaseOfLoaderPhyAddr + LABLE_GDT_STACK_3+7],     ah
+        mov             byte [LABLE_GDT_STACK_3+4],  al
+        mov             byte [LABLE_GDT_STACK_3+7],     ah
 
 
 	mov		ax,	cs
