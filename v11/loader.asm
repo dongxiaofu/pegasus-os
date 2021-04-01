@@ -66,9 +66,11 @@ org	0100h
 ;
 	LABEL_GDT:	Descriptor  0,	0,	0
 	LABLE_GDT_FLAT_X: Descriptor	0,		0ffffffh,		 0c9ah
+	LABEL_GDT_TSS	: Descriptor	0,	        LABEL_TSS_LEN - 1,	 0889h	
+	LABLE_GDT_STACK_0:Descriptor 0,	        	TopOfStack,              0c92h
 	; 3特权等级
-	LABLE_GDT_FLAT_X_3: Descriptor	0,		0ffffffh,		 0cd8h;0cf8h
-	LABLE_GDT_STACK_3:Descriptor 0,	        	TOP_OF_STACK3,           0cd2h;0cf2h
+	LABLE_GDT_FLAT_X_3: Descriptor	0,		0ffffffh,		 0cf8h
+	LABLE_GDT_STACK_3:Descriptor 0,	        	TOP_OF_STACK3,           0cf2h
 	LABLE_GDT_FLAT_X_16: Descriptor	0,		0ffffffh,		 98h
 	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
 	;LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
@@ -82,16 +84,18 @@ org	0100h
 	;LABLE_GATE: GateDes	0,SELECTOR_GDT_GATE,	0c9ah,	0
 	;bx_dbg_read_pmode_descriptor: selector 0x0050 points to a system descriptor and is not supported!
 	;LABLE_GATE: Gate	0,SELECTOR_GDT_GATE,	0c8ah,	0
-	LABLE_GATE: Gate	0,SELECTOR_GDT_GATE,	008ch,	0
+	LABLE_GATE: Gate	0,SELECTOR_GDT_GATE,	008ch + 60h,	0
 
 	GdtLen	equ		$ - LABEL_GDT
 	GdtPtr	dw	GdtLen - 1
 		dd	0
 		;dd	BaseOfLoaderPhyAddr + LABEL_GDT
 	SelectFlatX	equ	LABLE_GDT_FLAT_X - LABEL_GDT
+	SelectStack	equ	LABLE_GDT_STACK_0 - LABEL_GDT
+	SelectTss	equ	LABEL_GDT_TSS - LABEL_GDT
 	;SelectFlatX_3	equ	LABLE_GDT_FLAT_X_3 - LABEL_GDT
-	SelectFlatX_3	equ	LABLE_GDT_FLAT_X_3 - LABEL_GDT + 2
-	SelectStack_3	equ	LABLE_GDT_STACK_3 - LABEL_GDT + 2
+	SelectFlatX_3	equ	LABLE_GDT_FLAT_X_3 - LABEL_GDT + 3
+	SelectStack_3	equ	LABLE_GDT_STACK_3 - LABEL_GDT + 3
 	;SelectStack_3	equ	LABLE_GDT_STACK_3 - LABEL_GDT
 	SelectFlatX_16	equ	LABLE_GDT_FLAT_X_16 - LABEL_GDT
 	SelectFlatWR	equ	LABLE_GDT_FLAT_WR - LABEL_GDT
@@ -101,7 +105,7 @@ org	0100h
 	
 	; 门
 	SELECTOR_GDT_GATE	equ	LABLE_GDT_GATE - LABEL_GDT
-	SelectGate	equ	LABLE_GATE - LABEL_GDT
+	SelectGate	equ	LABLE_GATE - LABEL_GDT + 3
 
 LABEL_START:
 	mov	ax,	cs
@@ -165,6 +169,37 @@ LABEL_START:
         mov             byte [LABLE_GDT_STACK_3+4],  al
         mov             byte [LABLE_GDT_STACK_3+7],     ah
 
+
+	; 0特权级的堆栈
+	mov     ax,     cs
+        mov     ds,     ax
+        xchg bx, bx
+        xor             eax,    eax
+        mov             ax,             cs
+        movzx   eax, ax
+        shl             eax,            4
+        add             eax,            LABLE_STACK
+
+        mov             word [LABLE_GDT_STACK_3+2],     ax
+        shr             eax,            16
+        mov             byte [LABLE_GDT_STACK_3+4],  al
+        mov             byte [LABLE_GDT_STACK_3+7],     ah
+
+
+	; TSS
+	mov     ax,     cs
+        mov     ds,     ax
+        xchg bx, bx
+        xor             eax,    eax
+        mov             ax,             cs
+        movzx   eax, ax
+        shl             eax,            4
+        add             eax,            LABEL_TSS
+
+        mov             word [LABEL_GDT_TSS+2],     ax
+        shr             eax,            16
+        mov             byte [LABEL_GDT_TSS+4],  al
+        mov             byte [LABEL_GDT_TSS+7],     ah
 
 	mov		ax,	cs
 	mov		[BaseOfLoaderPhyAddr + GO_BACK_REAL_MODEL + 3],	ax
@@ -346,6 +381,10 @@ READ_FILE_OVER:
 	xchg	bx, bx
 	mov 	dword [GdtPtr + 2], BaseOfLoaderPhyAddr + LABEL_GDT
 	lgdt [GdtPtr]	
+
+	; 加载TSS
+	;mov ax, SelectTss
+	;ltr ax
 	
 	cli
 	
@@ -590,8 +629,11 @@ LABEL_PM_START:
 	mov gs, ax
 	xchg bx, bx
 	; 使用门
-	call SelectGate:0 
+	;call SelectGate:0 
 	;call SELECTOR_GDT_GATE:0
+	
+	mov ax, SelectTss
+	ltr ax
 
 	mov al, 'K'
 	mov ah, 0Ah
@@ -787,6 +829,10 @@ LABEL_SEG_PRI3:
 	mov al, '3'
 	mov ah, 0Ah
 	mov [gs:(80*24+25)*2], ax
+
+	; 使用调用门，从低特权级向高特权级转移	
+	call SelectGate:0;
+
 	jmp $
 
 
@@ -829,7 +875,57 @@ LABLE_SEG_GDT_GATE:
 	mov	al, 'C'
 	mov	[gs:edi], ax
 
+	mov	edi, (80 * 12 + 1) * 2
+	mov	ah, 0Bh
+	mov 	al, 'D'
+	mov	[gs:edi], ax
+
 	retf
 
 SegCodeDestLen	equ	$ - LABLE_SEG_GDT_GATE
 ; END of [SECTION .sdest]
+
+[SECTION .stack0]
+[BITS 32]
+
+LABLE_STACK:
+	times	512	db	0
+LABLE_LEN	equ	$ - LABLE_STACK
+TopOfStack	equ	LABLE_LEN - 1
+; END of [SECTION .stack0]
+
+
+[SECTION .tss]
+[BITS 32]
+
+LABEL_TSS:
+	DD	0
+	DD	TopOfStack
+	DD	SelectStack
+	DD	0
+	DD	0
+	DD	0
+	DD	0
+	DD	0
+	DD	0
+	DD	0	; cr3
+	DD	0	; EIP
+	DD	0	; eflags
+	DD	0	; eax
+	DD	0	; ecx
+	DD	0	; edx
+	DD	0	; ebx
+	DD	0	; esp
+	DD	0	; ebp
+	DD	0	; esi
+	DD	0	; edi
+	DD	0	; es
+	DD	0	; cs
+	DD	0	; ss
+	DD	0	; ds
+	DD	0	; fs
+	DD	0	; gs
+	DD	0	; ldt
+	DD	$ - LABEL_TSS + 2
+LABEL_TSS_LEN	equ	$ - LABEL_TSS
+; END OF [SECTION .tss]
