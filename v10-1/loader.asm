@@ -65,30 +65,33 @@ org	0100h
 ;	%endmacro
 ;
 	LABEL_GDT:	Descriptor  0,	0,	0
-	LABLE_GDT_FLAT_X: Descriptor	0,		0ffffffh,		 0c9ah
+	LABLE_GDT_FLAT_X: Descriptor	0,		0fffffh,		 0c9ah
+	LABEL_DESC_STACK:      Descriptor 0,       TopOfStack, 93h+4000h;Stack, 32 位
 	; 3特权等级
-	LABLE_GDT_FLAT_X_3: Descriptor	0,		0ffffffh,		 0cd8h;0cf8h
+	LABLE_GDT_FLAT_X_3: Descriptor	0,		0fffffh,		 0cd8h;0cf8h
 	LABLE_GDT_STACK_3:Descriptor 0,	        	TOP_OF_STACK3,           0cd2h;0cf2h
-	LABLE_GDT_FLAT_X_16: Descriptor	0,		0ffffffh,		 98h
+	LABLE_GDT_FLAT_X_16: Descriptor	0,		0fffffh,		 98h
 	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
 	;LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
 	LABLE_GDT_FLAT_WR_TEST:Descriptor 5242880,	        0fffffh,	         0c92h
 	LABLE_GDT_FLAT_WR_16:Descriptor 0,	        0fffffh,	         0892h
 	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         0c92h
+	LABEL_DESC_TSS:        Descriptor 0,          TSSLen-1, 	89h
 	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 0f2h
 
 	; 门
-	LABLE_GDT_GATE: Descriptor	0,		0ffffffh,		 0c9ah
+	LABLE_GDT_GATE: Descriptor	0,		0fffffh,		 0c9ah
 	;LABLE_GATE: GateDes	0,SELECTOR_GDT_GATE,	0c9ah,	0
 	;bx_dbg_read_pmode_descriptor: selector 0x0050 points to a system descriptor and is not supported!
 	;LABLE_GATE: Gate	0,SELECTOR_GDT_GATE,	0c8ah,	0
-	LABLE_GATE: Gate	0,SELECTOR_GDT_GATE,	008ch,	0
+	LABLE_GATE: Gate	0,SELECTOR_GDT_GATE,	008ch + 40h,	0
 
 	GdtLen	equ		$ - LABEL_GDT
 	GdtPtr	dw	GdtLen - 1
 		dd	0
 		;dd	BaseOfLoaderPhyAddr + LABEL_GDT
 	SelectFlatX	equ	LABLE_GDT_FLAT_X - LABEL_GDT
+	SelectorStack		equ	LABEL_DESC_STACK	- LABEL_GDT
 	;SelectFlatX_3	equ	LABLE_GDT_FLAT_X_3 - LABEL_GDT
 	SelectFlatX_3	equ	LABLE_GDT_FLAT_X_3 - LABEL_GDT + 2
 	SelectStack_3	equ	LABLE_GDT_STACK_3 - LABEL_GDT + 2
@@ -100,8 +103,10 @@ org	0100h
 	SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 3
 	
 	; 门
-	SELECTOR_GDT_GATE	equ	LABLE_GDT_GATE - LABEL_GDT
-	SelectGate	equ	LABLE_GATE - LABEL_GDT
+	SELECTOR_GDT_GATE	equ	LABLE_GDT_GATE - LABEL_GDT + 2
+	SelectGate	equ	LABLE_GATE - LABEL_GDT + 2
+
+	SelectorTSS		equ	LABEL_DESC_TSS		- LABEL_GDT
 
 LABEL_START:
 	mov	ax,	cs
@@ -164,6 +169,27 @@ LABEL_START:
         shr             eax,            16
         mov             byte [LABLE_GDT_STACK_3+4],  al
         mov             byte [LABLE_GDT_STACK_3+7],     ah
+
+	; 初始化 TSS 描述符
+	xor	eax, eax
+	mov	ax, ds
+	shl	eax, 4
+	add	eax, LABEL_TSS
+	mov	word [LABEL_DESC_TSS + 2], ax
+	shr	eax, 16
+	mov	byte [LABEL_DESC_TSS + 4], al
+	mov	byte [LABEL_DESC_TSS + 7], ah
+
+
+	; 初始化堆栈段描述符
+	xor	eax, eax
+	mov	ax, ds
+	shl	eax, 4
+	add	eax, LABEL_STACK
+	mov	word [LABEL_DESC_STACK + 2], ax
+	shr	eax, 16
+	mov	byte [LABEL_DESC_STACK + 4], al
+	mov	byte [LABEL_DESC_STACK + 7], ah
 
 
 	mov		ax,	cs
@@ -590,8 +616,12 @@ LABEL_PM_START:
 	mov gs, ax
 	xchg bx, bx
 	; 使用门
-	call SelectGate:0 
+	;call SelectGate:0 
 	;call SELECTOR_GDT_GATE:0
+	
+	mov	ax, SelectorTSS
+	ltr	ax
+
 
 	mov al, 'K'
 	mov ah, 0Ah
@@ -787,6 +817,9 @@ LABEL_SEG_PRI3:
 	mov al, '3'
 	mov ah, 0Ah
 	mov [gs:(80*24+25)*2], ax
+
+	call SelectGate:0
+
 	jmp $
 
 
@@ -833,3 +866,51 @@ LABLE_SEG_GDT_GATE:
 
 SegCodeDestLen	equ	$ - LABLE_SEG_GDT_GATE
 ; END of [SECTION .sdest]
+
+
+; 全局堆栈段
+[SECTION .gs]
+ALIGN	32
+[BITS	32]
+LABEL_STACK:
+	times 512 db 0
+
+TopOfStack	equ	$ - LABEL_STACK - 1
+
+; END of [SECTION .gs]
+
+
+; TSS
+[SECTION .tss]
+ALIGN	32
+[BITS	32]
+LABEL_TSS:
+		DD	0			; Back
+		DD	TopOfStack		; 0 级堆栈
+		DD	SelectorStack		; 
+		DD	0			; 1 级堆栈
+		DD	0			; 
+		DD	0			; 2 级堆栈
+		DD	0			; 
+		DD	0			; CR3
+		DD	0			; EIP
+		DD	0			; EFLAGS
+		DD	0			; EAX
+		DD	0			; ECX
+		DD	0			; EDX
+		DD	0			; EBX
+		DD	0			; ESP
+		DD	0			; EBP
+		DD	0			; ESI
+		DD	0			; EDI
+		DD	0			; ES
+		DD	0			; CS
+		DD	0			; SS
+		DD	0			; DS
+		DD	0			; FS
+		DD	0			; GS
+		DD	0			; LDT
+		DW	0			; 调试陷阱标志
+		DW	$ - LABEL_TSS + 2	; I/O位图基址
+		DB	0ffh			; I/O位图结束标志
+TSSLen		equ	$ - LABEL_TSS
