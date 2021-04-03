@@ -675,6 +675,7 @@ LABEL_PM_START:
 
 	; 中断
 	call Init_8259A
+	call Init8253
 	;xchg bx, bx
 	;sti
 	int 80h
@@ -837,6 +838,21 @@ Init_8259A:
 ;	out 0xA1, al		
 ;	call io_delay
 	ret
+
+Init8253:
+	mov ax, 0x34
+	out 0x43, al
+
+	;mov ax, 11931
+	;mov ax, (1193182 / 10000000000000)
+	mov ax, (1193182 / 100)
+	out 0x40, al
+	shr ax, 8
+	out 0x40, al
+	;error: invalid combination of opcode and operands
+	;out 0x40, ah
+	ret
+
 
 io_delay:
 	nop
