@@ -1,2 +1,1 @@
-jmp $
-jmp $
+mov     ah, 0Ch
