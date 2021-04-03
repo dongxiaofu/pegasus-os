@@ -36,25 +36,6 @@ org	0100h
 	db	(%1 >> 24) & 0ffh
 %endmacro
 
-
-; 门描述符，四个参数，分别是：目标代码段的偏移量、目标代码段选择子、门描述符的属性、ParamCount
-%macro	GateDes	4
-	dw	%1 & 0ffffh
-	dw	%2 & 0ffffh
-	dw	(%4 & 01fh) | ((%3 << 8) & 0ff00h)
-	dw	(%1 >> 16) & 0ffffh
-%endmacro
-
-; 门
-; 门描述符，四个参数，分别是：目标代码段的偏移量、目标代码段选择子、门描述符的属性、ParamCount
-%macro Gate 4
-	dw	(%1 & 0FFFFh)				; 偏移1
-	dw	%2					; 选择子
-	dw	(%4 & 1Fh) | ((%3 << 8) & 0FF00h)	; 属性
-	dw	((%1 >> 16) & 0FFFFh)			; 偏移2
-%endmacro ; 共 8 字节
-
-
 ;	%macro	Descriptor 3
 ;	dw	0h;%2 & ffffh dw	%1 & ffffh
 ;	dw	0h;%2 & ffffh dw	%1 & ffffh
@@ -65,15 +46,9 @@ org	0100h
 ;	%endmacro
 ;
 	LABEL_GDT:	Descriptor  0,	0,	0
-	;LABLE_GDT_FLAT_X: Descriptor	0,		0ffffffh,		 0c9ah
-	LABLE_GDT_FLAT_X: Descriptor	0,		Seg32Len - 1,		 0c9ah
-	;LABLE_GDT_FLAT_X: Descriptor	0,		0ffffffh,		 0c9ah
-	LABEL_GDT_TSS	: Descriptor	0,	        LABEL_TSS_LEN - 1,	 0889h	
-	LABLE_GDT_STACK_0:Descriptor 0,	        	TopOfStack,              0c92h
-	; 3特权等级
-	LABLE_GDT_FLAT_X_3: Descriptor	0,		0ffffffh,		 0cf8h
-	LABLE_GDT_STACK_3:Descriptor 0,	        	TOP_OF_STACK3,           0cf2h
+	LABLE_GDT_FLAT_X: Descriptor	0,		0ffffffh,		 0c9ah
 	LABLE_GDT_FLAT_X_16: Descriptor	0,		0ffffffh,		 98h
+	LABLE_GDT_FLAT_X_162: Descriptor	0,		0ffffffh,		 98h
 	;LABLE_GDT_FLAT_X: Descriptor	0,		0FFFFFh,		 0c9ah
 	;LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         293h
 	LABLE_GDT_FLAT_WR_TEST:Descriptor 5242880,	        0fffffh,	         0c92h
@@ -81,38 +56,23 @@ org	0100h
 	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         0c92h
 	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 0f2h
 
-	; 门
-	LABLE_GDT_GATE: Descriptor	0,		0ffffffh,		 0c9ah
-	;LABLE_GATE: GateDes	0,SELECTOR_GDT_GATE,	0c9ah,	0
-	;bx_dbg_read_pmode_descriptor: selector 0x0050 points to a system descriptor and is not supported!
-	;LABLE_GATE: Gate	0,SELECTOR_GDT_GATE,	0c8ah,	0
-	LABLE_GATE: Gate	0,SELECTOR_GDT_GATE,	008ch + 60h,	0
-
 	GdtLen	equ		$ - LABEL_GDT
 	GdtPtr	dw	GdtLen - 1
 		dd	0
 		;dd	BaseOfLoaderPhyAddr + LABEL_GDT
 	SelectFlatX	equ	LABLE_GDT_FLAT_X - LABEL_GDT
-	SelectStack	equ	LABLE_GDT_STACK_0 - LABEL_GDT
-	SelectTss	equ	LABEL_GDT_TSS - LABEL_GDT
-	;SelectFlatX_3	equ	LABLE_GDT_FLAT_X_3 - LABEL_GDT
-	SelectFlatX_3	equ	LABLE_GDT_FLAT_X_3 - LABEL_GDT + 3
-	SelectStack_3	equ	LABLE_GDT_STACK_3 - LABEL_GDT + 3
-	;SelectStack_3	equ	LABLE_GDT_STACK_3 - LABEL_GDT
 	SelectFlatX_16	equ	LABLE_GDT_FLAT_X_16 - LABEL_GDT
+	SelectFlatX_162	equ	LABLE_GDT_FLAT_X_162 - LABEL_GDT
 	SelectFlatWR	equ	LABLE_GDT_FLAT_WR - LABEL_GDT
 	SelectFlatWR_TEST	equ	LABLE_GDT_FLAT_WR_TEST - LABEL_GDT
 	SelectFlatWR_16	equ	LABLE_GDT_FLAT_WR_16 - LABEL_GDT
 	SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 3
-	
-	; 门
-	SELECTOR_GDT_GATE	equ	LABLE_GDT_GATE - LABEL_GDT
-	SelectGate	equ	LABLE_GATE - LABEL_GDT + 3
+
 
 LABEL_START:
 	mov	ax,	cs
 	mov	ds,	ax
-	;;xchg bx, bx	
+	xchg bx, bx	
 	xor		eax,	eax
 	mov		ax,		cs
 	movzx	eax, ax
@@ -123,123 +83,30 @@ LABEL_START:
 	shr		eax,		16
 	mov		byte [LABLE_GDT_FLAT_X_16+4],  al
 	mov		byte [LABLE_GDT_FLAT_X_16+7],	ah
+	mov		ax,	GdtPtr
 
 
-	; 门指向的段描述符
 	mov     ax,     cs
-        mov     ds,     ax
-        ;;xchg bx, bx
+        xchg bx, bx
         xor             eax,    eax
         mov             ax,             cs
         movzx   eax, ax
         shl             eax,            4
-        add             eax,           	LABLE_SEG_GDT_GATE
+        add             eax,            IN_REAL_MODEL
 
-
-        mov             word [LABLE_GDT_GATE+2],     ax
+        mov             word [LABLE_GDT_FLAT_X_162+2],     ax
         shr             eax,            16
-        mov             byte [LABLE_GDT_GATE+4],  al
-        mov             byte [LABLE_GDT_GATE+7],     ah
-
-	; 3特权级
-	mov     ax,     cs
-        mov     ds,     ax
-        ;;xchg bx, bx
-        xor             eax,    eax
-        mov             ax,             cs
-        movzx   eax, ax
-        shl             eax,            4
-        add             eax,            LABEL_SEG_PRI3
-
-        mov             word [LABLE_GDT_FLAT_X_3+2],     ax
-        shr             eax,            16
-        mov             byte [LABLE_GDT_FLAT_X_3+4],  al
-        mov             byte [LABLE_GDT_FLAT_X_3+7],     ah
-
-
-	mov     ax,     cs
-        mov     ds,     ax
-        ;;xchg bx, bx
-        xor             eax,    eax
-        mov             ax,             cs
-        movzx   eax, ax
-        shl             eax,            4
-        add             eax,            LABEL_STACK3
-
-        mov             word [LABLE_GDT_STACK_3+2],     ax
-        shr             eax,            16
-        mov             byte [LABLE_GDT_STACK_3+4],  al
-        mov             byte [LABLE_GDT_STACK_3+7],     ah
-
-
-	; 0特权级的堆栈
-	mov     ax,     cs
-        mov     ds,     ax
-        ;;xchg bx, bx
-        xor             eax,    eax
-        mov             ax,             cs
-        movzx   eax, ax
-        shl             eax,            4
-        add             eax,            LABLE_STACK
-
-        mov             word [LABLE_GDT_STACK_3+2],     ax
-        shr             eax,            16
-        mov             byte [LABLE_GDT_STACK_3+4],  al
-        mov             byte [LABLE_GDT_STACK_3+7],     ah
-
-
-	; TSS
-	mov     ax,     cs
-        mov     ds,     ax
-        ;xchg bx, bx
-        xor             eax,    eax
-        mov             ax,             cs
-        movzx   eax, ax
-        shl             eax,            4
-        add             eax,            LABEL_TSS
-
-        mov             word [LABEL_GDT_TSS+2],     ax
-        shr             eax,            16
-        mov             byte [LABEL_GDT_TSS+4],  al
-        mov             byte [LABEL_GDT_TSS+7],     ah
-
-
-	; 32位
-	mov     ax,     cs
-        mov     ds,     ax
-        ;xchg bx, bx
-        xor             eax,    eax
-        mov             ax,             cs
-        movzx   eax, ax
-        shl             eax,            4
-        add             eax,           LABEL_PM_START 
-
-        mov             word [LABLE_GDT_FLAT_X+2],     ax
-        shr             eax,            16
-        mov             byte [LABLE_GDT_FLAT_X+4],  al
-        mov             byte [LABLE_GDT_FLAT_X+7],     ah
-
+        mov             byte [LABLE_GDT_FLAT_X_162+4],  al
+        mov             byte [LABLE_GDT_FLAT_X_162+7],     ah
 
 	mov		ax,	cs
-	mov		[BaseOfLoaderPhyAddr + GO_BACK_REAL_MODEL + 3],	ax
+	;mov		[BaseOfLoaderPhyAddr + GO_BACK_REAL_MODEL + 3],	ax
 	
 	mov ax, 0B800h
 	mov gs, ax
 	mov ah, 0Ch
 	mov al, 'X'
 	mov [gs:(80 * 16 + 20)*2], ax
-
-
-	; 修改IdtPtr的基地址
-	xchg bx, bx
-	;mov ax, cs
-	xor eax, eax
-	mov ax, cs
-	movzx eax, ax
-	shl eax, 4
-	add eax, LABEL_IDT
-
-	mov dword [IdtPtr + 2], eax 	
 
 	
 	mov ax, BaseOfKernel
@@ -257,7 +124,7 @@ LABEL_START:
 	
 	mov bx, OffSetOfLoader
 	call ReadSector
-	;;;;;;xchg bx, bx
+	;;;;xchg bx, bx
 	mov cx, 4
 	mov bx, (80 * 18 + 40) * 2
 	mov di, OffSetOfLoader
@@ -308,7 +175,7 @@ FILENAME_DIFFIERENT:
 	cmp cx, 0
 	dec cx
 	jz FILE_NOT_FOUND
-	;;;;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	and di, 0xFFE0	; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置
 	add di, 32	; 增加一个根目录项的大小
 	jmp SEARCH_FILE_IN_ROOT_DIRECTORY
@@ -316,7 +183,7 @@ FILE_FOUND:
 	mov al, 'S'
 	mov ah, 0Ah
 	mov [gs:(80 * 23 + 35) *2], ax
-	;;;;;;xchg bx, bx
+	;;;;xchg bx, bx
 	; 修改段地址和偏移量后，获取的第一个簇号错了 
 	; 获取文件的第一个簇的簇号
 	and di, 0xFFE0  ; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置; 获取文件的第一个簇的簇号
@@ -325,16 +192,16 @@ FILE_FOUND:
 	mov ax, BaseOfKernel
 	push ds
 	mov ds, ax
-	;;;;;;xchg bx, bx
+	;;;;xchg bx, bx
 	lodsw
 	pop ds	
 	push ax
-	;;;;;;xchg bx, bx	
+	;;;;xchg bx, bx	
 	; call GetFATEntry
 	mov bx, OffSetOfLoader
 	; 获取到文件的第一个簇号后，开始读取文件
 READ_FILE:
-	;;;;;;xchg bx, bx
+	;;;;xchg bx, bx
 	push bx
 	; push ax
 	; 簇号就是FAT项的编号，把FAT项的编号换算成字节数
@@ -362,13 +229,13 @@ READ_FILE:
 	mov cl, 1
 	pop bx	
 	call ReadSector
-	;;;;xchg bx, bx
+	;;xchg bx, bx
         add bx, 512
 	jc	.1
 	jmp	.2
 	; 读取一个扇区的数据 end
 .1:
-	;;;xchg bx, bx
+	;xchg bx, bx
 	push ax
 	mov ax, es
 	add ax, 0100h
@@ -377,9 +244,9 @@ READ_FILE:
 .2:
 	pop ax
 	push bx
-	;;;xchg bx, bx
+	;xchg bx, bx
 	call GetFATEntry
-	;;;xchg bx, bx
+	;xchg bx, bx
 	pop bx
 	push ax
 	cmp ax, 0xFF8
@@ -393,7 +260,7 @@ READ_FILE:
 	;inc al
 	;mov ah, 0Ah
 	;mov [gs:(80 * 23 + 36) *2], ax	
-	;;;;;;;xchg bx, bx	
+	;;;;;xchg bx, bx	
 	jmp READ_FILE
 	
 FILE_NOT_FOUND:
@@ -409,21 +276,12 @@ READ_FILE_OVER:
 	; 开启保护模式 start
 	;cli
 	;mov dx, BaseOfLoaderPhyAddr + 0	
-	;;xchg	bx, bx
+	xchg	bx, bx
 	mov 	dword [GdtPtr + 2], BaseOfLoaderPhyAddr + LABEL_GDT
 	lgdt [GdtPtr]	
-
-	; 加载TSS
-	;mov ax, SelectTss
-	;ltr ax
 	
 	cli
 	
-
-	; 加载 Idt
-	xchg bx, bx
-	lidt [IdtPtr]
-
 	 in al, 92h
 	or al, 10b
 	out 92h, al
@@ -431,13 +289,12 @@ READ_FILE_OVER:
 	mov eax, cr0
 	or eax, 1
 	mov cr0, eax
-	;;;xchg bx, bx
+	;xchg bx, bx
 	; 真正进入保护模式。这句把cs设置为SelectFlatX	
 	;jmp dword SelectFlatX:(BaseOfLoaderPhyAddr + 100h + LABEL_PM_START)
 	;jmp dword SelectFlatX:dx
-	;;xchg bx, bx
-	;jmp dword SelectFlatX:(BaseOfLoaderPhyAddr + LABEL_PM_START)
-	jmp dword SelectFlatX:0;
+	xchg bx, bx
+	jmp dword SelectFlatX:(BaseOfLoaderPhyAddr + LABEL_PM_START)
 	; 开启保护模式 end
 
 
@@ -445,7 +302,7 @@ READ_FILE_OVER:
 	;call InitKernel
 
 	
-	;;;;;xchg bx, bx
+	;;;xchg bx, bx
 	;jmp BaseOfKernel:73h
 	;jmp BaseOfKernel:61h
 	;jmp BaseOfKernel2:400h
@@ -463,6 +320,9 @@ OVER:
 
 ; 从保护模式切换到实模式后，回到这里
 IN_REAL_MODEL:
+	jmp $
+	jmp $
+	jmp $
 	mov ax, cs
 	mov ds, ax
 	mov es, ax
@@ -547,7 +407,7 @@ GetFATEntry:
 	; 用扇区偏移量计算出在某柱面某磁道的扇区偏移量，可以直接调用ReadSector
 	call ReadSector
 	;pop es
-	;;;;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	;pop ax
 	;mov ax, [es:bx]
 	pop dx
@@ -595,10 +455,10 @@ ReadSector:
 	;mov bx, BaseOfKernel	; 让es:bx指向BaseOfKernel
 	;mov ax, cs
 	;mov es, ax
-	;;;;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	int 13h
 	;pop cx
-	;;;;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	; pop bx
 	pop bp
 	pop ax
@@ -656,7 +516,7 @@ ALIGN	32
 [BITS	32]
 
 LABEL_PM_START:
-	;;xchg bx, bx
+	xchg bx, bx
 	mov ax, SelectFlatWR
 	mov ds, ax
 	mov es, ax
@@ -664,55 +524,19 @@ LABEL_PM_START:
 	mov ss, ax
 	mov ax, SelectVideo
 	mov gs, ax
-	;;xchg bx, bx
-	; 使用门
-	;call SelectGate:0 
-	;call SELECTOR_GDT_GATE:0
-
-	mov al, 'T'
-        mov ah, 0Ah
-        ;mov [gs:(80 * 19 + 25) * 2], ax
-
-	; 中断
-	call Init_8259A
-	call Init8253
-	;xchg bx, bx
-	;sti
-	int 80h
-	;int 20h
-	sti
-	jmp $
-
-	mov al, 'K'
-        mov ah, 0Ah
-        ;mov [gs:(80 * 19 + 25) * 2], ax
-
-	;jmp $
-
 	
-	mov ax, SelectTss
-	ltr ax
-
 	mov al, 'K'
 	mov ah, 0Ah
 	mov [gs:(80 * 19 + 25) * 2], ax
-	;;xchg bx, bx	
+	xchg bx, bx	
 	; 跳入16位模式（保护模式)
 	;jmp word SelectFlatX_16:0
-	;jmp SelectFlatX_3:0
-	push SelectStack_3 
-	push TOP_OF_STACK3
-	push SelectFlatX_3
-	push 0
-	retf
 	
-	; check_cs(0x0012): non-conforming code seg descriptor dpl != cpl, dpl=2, cpl=0
-	; 检查特权级时，jmp并没有把cpl更新为目标选择子的rpl；使用retf时，更新后再检查。	
-	jmp SelectFlatX_3:0;
 
-	;;xchg bx, bx
-	;call InitKernel
-	;;xchg bx, bx	
+
+	xchg bx, bx
+	call InitKernel
+	xchg bx, bx	
 
 	;mov gs, ax
 	mov al, 'G'
@@ -726,7 +550,7 @@ LABEL_PM_START:
 	mov es, ax
 	mov esi, 0
 	mov edi, 0
-	;;xchg bx, bx
+	xchg bx, bx
 	mov byte [es:edi], 'W'
 	mov byte al, [es:edi]
 	mov ah, 0Ah
@@ -740,129 +564,12 @@ LABEL_PM_START:
 	; 测试读写5M之上的内存读写 end
 
 
-; 中断例程
-_Superious_handle:
-;Superious_handle  equ	$ - _Superious_handle
-Superious_handle  equ	_Superious_handle - $$
-;Superious_handle  equ	_Superious_handle - $$ + BaseOfLoaderPhyAddr 
-	xchg bx, bx
-	mov al, 'A'
-	mov ah, 0Ah
-	mov [gs:(80*20 + 21)*2], ax
-	;;ret
-	iretd
 
-	;jmp $
-	;jmp $
-	;jmp $
-	;mov	ah, 0Ch				; 0000: 黑底    1100: 红字
-	;mov	al, '!'
-	;mov	al, 'V'
-	;mov	[gs:((80 * 0 + 75) * 2)], ax	; 屏幕第 0 行, 第 75 列。
-	;jmp	$
-	iretd
-
-_ClockHandler:
-ClockHandler	equ	_ClockHandler - $$
-	; error: operation size not specified
-	;inc [gs:(80*20 + 21)*2]
-	xchg bx, bx
-	inc byte [gs:(80*20 + 21)*2]
-	; 发送EOF
-	mov al, 20h
-	out 20h, al
-	; 不明白iretd和ret的区别
-	iretd
-
-
-; END OF 中断例程
-
-
-
-	;jmp SelectFlatX:0x30400
+	jmp SelectFlatX:0x30400
 	jmp $
 	jmp $
 	jmp $
 	jmp $
-
-
-Init_8259A:
-	; ICW1
-	mov al, 011h
-	out 0x20, al
-	call io_delay
-	
-	out 0xA0, al	
-	call io_delay
-	
-	; ICW2
-	mov al, 020h
-	out 0x21, al
-	call io_delay
-	
-	mov al, 028h
-	out 0xA1, al
-	call io_delay
-
-	; ICW3
-	mov al, 004h
-	out 0x21, al
-	call io_delay
-	
-	mov al, 002h
-	out 0xA1, al
-	call io_delay
-	
-	; ICW4
-	mov al, 001h
-	out 0x21, al
-	call io_delay
-
-	out 0xA1, al
-	call io_delay
-	 
-	; OCW1
-	mov al, 11111110b
-	out 0x21, al
-	call io_delay
-
-	mov al, 11111111b
-	out 0xA1, al
-	call io_delay
-	;OCW2
-;	mov al, 11111110b
-;	out 0x21, al
-;	call io_delay
-;
-;	mov al, 11111111b
-;	out 0xA1, al		
-;	call io_delay
-	ret
-
-Init8253:
-	mov ax, 0x34
-	out 0x43, al
-
-	;mov ax, 11931
-	;mov ax, (1193182 / 10000000000000)
-	;mov ax, (1193182 / 10 * 5)
-	mov ax, 65535
-	out 0x40, al
-	shr ax, 8
-	out 0x40, al
-	;error: invalid combination of opcode and operands
-	;out 0x40, ah
-	ret
-
-
-io_delay:
-	nop
-	nop
-	nop
-	nop
-	ret
-
-Seg32Len equ $ - LABEL_PM_START
 
 
 
@@ -871,7 +578,7 @@ InitKernel:
 	push eax
 	push ecx
 	push esi
-	;;;xchg bx, bx
+	;xchg bx, bx
 	;程序段的个数
 	;mov cx, word ptr ds:0x802c
 	mov cx, [BaseOfKernelPhyAddr + 2CH]
@@ -880,7 +587,7 @@ InitKernel:
 	xor esi, esi
 	mov esi, [BaseOfKernelPhyAddr + 1CH]
 	add esi, BaseOfKernelPhyAddr
-	;;xchg bx, bx
+	xchg bx, bx
 
 .Begin:
 	mov eax, [esi + 10H]
@@ -892,7 +599,7 @@ InitKernel:
 	mov eax, [esi + 8H]
 	push eax
 	call Memcpy
-	;;xchg bx, bx
+	xchg bx, bx
 	; 三个参数（每个占用32位，4个字节，2个字），占用6个字,12个字节
 	add esp, 12
 	dec ecx
@@ -902,7 +609,7 @@ InitKernel:
 	jmp .Begin
 
 .NoAction:
-	;;;xchg bx, bx
+	;xchg bx, bx
 	pop esi
 	pop ecx
 	pop eax
@@ -912,7 +619,7 @@ InitKernel:
 
 ; Memcpy(p_vaddr, p_off, p_size)
 Memcpy:
-	;;xchg bx, bx
+	xchg bx, bx
 	push ebp
 	mov ebp, esp
 	push eax
@@ -928,7 +635,7 @@ Memcpy:
 	;mov si, [bp + 12]        ; p_off，即 src
 	;mov cx, [bp + 16]       ; 程序头的个数，即p_size
 
-	;;xchg bx, bx
+	xchg bx, bx
 	mov edi, [ebp + 8]        ; p_vaddr，即 dst
 	mov esi, [ebp + 12]        ; p_off，即 src
 	mov ecx, [ebp + 16]       ; 程序头的个数，即p_size
@@ -951,7 +658,7 @@ Memcpy:
 	jmp .1
 
 .2:
-	;;xchg bx, bx
+	xchg bx, bx
 	;pop es
 	mov eax, [ebp + 8]
 
@@ -970,7 +677,7 @@ BaseOfKernelPhyAddr	equ	BaseOfKernel * 10h  ; Kernel.BIN 被加载到的位置 -
 [SECTION .s16]
 [BITS 16]
 LABEL_SEG_16:
-	;;xchg bx, bx
+	xchg bx, bx
 	mov ax, 	SelectFlatWR_16
 	mov es,	ax
 	mov ss, ax
@@ -978,151 +685,13 @@ LABEL_SEG_16:
 	mov ds, ax
 	
 	; 必须先切换到实模式，跳转才生效
-	in al, 92h
-	and al,	11111101b
-	out 92h, al
+	;in al, 92h
+	;and al,	11111101b
+	;out 92h, al
 
-	mov eax, cr0
-	and eax,0xfffffffe
-	mov cr0, eax		
+	;mov eax, cr0
+	;and eax,0xfffffffe
+	;mov cr0, eax		
 GO_BACK_REAL_MODEL:
-	jmp 0:IN_REAL_MODEL
-
-
-
-[SECTION .s32]
-[BITS 32]
-
-LABEL_SEG_PRI3:
-	;;xchg bx, bx
-	mov ax, cs
-	;mov ds, ax
-	;mov es, ax
-	;mov ss, ax
-	;mov fs, ax
-
-	mov al, '3'
-	mov ah, 0Ah
-	mov [gs:(80*24+25)*2], ax
-
-	; 使用调用门，从低特权级向高特权级转移	
-	call SelectGate:0;
-
-	jmp $
-
-
-
-;堆栈
-[SECTION .s3]
-ALIGN 32
-[BITS 32]
-
-LABEL_STACK3:
-	times	512	db	0
-
-TOP_OF_STACK3	equ	$ - LABEL_STACK3 - 1
-
-;门
-;[SECTION .gate]
-;ALIGN 32
-;[BITS 32]
-;
-;LABLE_SEG_GDT_GATE:
-;	jmp $
-;	jmp $
-;	mov al, 'T'
-;	mov ah, 0Ah
-;	mov [gs:(80*24 + 25)*2], ax
-;
-;	ret
-
-
-[SECTION .sdest]; 调用门目标段
-[BITS	32]
-
-LABLE_SEG_GDT_GATE:
-	;jmp	$
-	mov	ax, SelectVideo
-	mov	gs, ax			; 视频段选择子(目的)
-
-	mov	edi, (80 * 12 + 0) * 2	; 屏幕第 12 行, 第 0 列。
-	mov	ah, 0Ch			; 0000: 黑底    1100: 红字
-	mov	al, 'C'
-	mov	[gs:edi], ax
-
-	mov	edi, (80 * 12 + 1) * 2
-	mov	ah, 0Bh
-	mov 	al, 'D'
-	mov	[gs:edi], ax
-
-	retf
-
-SegCodeDestLen	equ	$ - LABLE_SEG_GDT_GATE
-; END of [SECTION .sdest]
-
-[SECTION .stack0]
-[BITS 32]
-
-LABLE_STACK:
-	times	512	db	0
-LABLE_LEN	equ	$ - LABLE_STACK
-TopOfStack	equ	LABLE_LEN - 1
-; END of [SECTION .stack0]
-
-
-[SECTION .tss]
-[BITS 32]
-
-LABEL_TSS:
-	DD	0
-	DD	TopOfStack
-	DD	SelectStack
-	DD	0
-	DD	0
-	DD	0
-	DD	0
-	DD	0
-	DD	0
-	DD	0	; cr3
-	DD	0	; EIP
-	DD	0	; eflags
-	DD	0	; eax
-	DD	0	; ecx
-	DD	0	; edx
-	DD	0	; ebx
-	DD	0	; esp
-	DD	0	; ebp
-	DD	0	; esi
-	DD	0	; edi
-	DD	0	; es
-	DD	0	; cs
-	DD	0	; ss
-	DD	0	; ds
-	DD	0	; fs
-	DD	0	; gs
-	DD	0	; ldt
-	DD	$ - LABEL_TSS + 2
-LABEL_TSS_LEN	equ	$ - LABEL_TSS
-; END OF [SECTION .tss]
-
-; 门描述符，四个参数，分别是：目标代码段的偏移量、目标代码段选择子、门描述符的属性、ParamCount
-; 属性是 1110，或者是0111。不确定是小端法或大端法，所以有两种顺序的属性。
-; 属性是 0111 0001。错误.
-; 属性应该是 1000 1110
-[SECTION .idt]
-ALIGN 32
-[BITS 32]
-LABEL_IDT:
-%rep	32
-	Gate	Superious_handle, SelectFlatX, 08Eh, 0 ; 属性是 1110，或者是0111。不确定是小端法或大端法，所以有两种顺序的属性。 
-%endrep
-.20h:	Gate	ClockHandler,	SelectFlatX, 08Eh, 0
-;.80h:	Gate	ClockHandler,	SelectFlatX, 08Eh, 0
-%rep 222
-	Gate    Superious_handle, SelectFlatX, 08Eh, 0
-%endrep
-IDT_LEN	equ	$ - LABEL_IDT
-IdtPtr	dw	IDT_LEN - 1
-	dd	0
-;END OF [SECTION .idt]
-
+	;jmp SelectFlatX_162:IN_REAL_MODEL
+	jmp SelectFlatX_162:0

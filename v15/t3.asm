@@ -1,1 +1,2 @@
-mov     ah, 0Ch
+mov     ax,     cs
+mov	ds,	ax
