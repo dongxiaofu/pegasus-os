@@ -676,10 +676,10 @@ LABEL_PM_START:
 	; 中断
 	call Init_8259A
 	;xchg bx, bx
-	sti
+	;sti
 	int 80h
 	;int 20h
-	;sti
+	sti
 	jmp $
 
 	mov al, 'K'
@@ -767,8 +767,10 @@ ClockHandler	equ	_ClockHandler - $$
 	;inc [gs:(80*20 + 21)*2]
 	xchg bx, bx
 	inc byte [gs:(80*20 + 21)*2]
+	; 发送EOF
 	mov al, 20h
 	out 20h, al
+	; 不明白iretd和ret的区别
 	iretd
 
 
