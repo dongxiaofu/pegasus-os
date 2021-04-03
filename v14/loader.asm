@@ -845,7 +845,8 @@ Init8253:
 
 	;mov ax, 11931
 	;mov ax, (1193182 / 10000000000000)
-	mov ax, (1193182 / 100)
+	;mov ax, (1193182 / 10 * 5)
+	mov ax, 65535
 	out 0x40, al
 	shr ax, 8
 	out 0x40, al
