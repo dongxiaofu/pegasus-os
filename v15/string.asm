@@ -3,7 +3,6 @@
 global Memcpy
 
 Memcpy:
-	xchg bx, bx
 	push ebp
 	mov ebp, esp
 	push eax
@@ -19,7 +18,6 @@ Memcpy:
 	;mov si, [bp + 12]        ; p_off，即 src
 	;mov cx, [bp + 16]       ; 程序头的个数，即p_size
 
-	xchg bx, bx
 	mov edi, [ebp + 8]        ; p_vaddr，即 dst
 	mov esi, [ebp + 12]        ; p_off，即 src
 	mov ecx, [ebp + 16]       ; 程序头的个数，即p_size
@@ -35,6 +33,8 @@ Memcpy:
 
 	inc esi
 	inc edi
+	cmp ecx, 0
+	jz .2
 	dec ecx
 
 	cmp ecx, 0

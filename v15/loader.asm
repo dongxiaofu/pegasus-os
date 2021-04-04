@@ -72,7 +72,7 @@ org	0100h
 LABEL_START:
 	mov	ax,	cs
 	mov	ds,	ax
-	xchg bx, bx	
+	;;xhcg bx, bx	
 	xor		eax,	eax
 	mov		ax,		cs
 	movzx	eax, ax
@@ -87,7 +87,7 @@ LABEL_START:
 
 
 	mov     ax,     cs
-        xchg bx, bx
+        ;;;xhcg bx, bx
         xor             eax,    eax
         mov             ax,             cs
         movzx   eax, ax
@@ -124,7 +124,7 @@ LABEL_START:
 	
 	mov bx, OffSetOfLoader
 	call ReadSector
-	;;;;xchg bx, bx
+	;;;;;;;xhcg bx, bx
 	mov cx, 4
 	mov bx, (80 * 18 + 40) * 2
 	mov di, OffSetOfLoader
@@ -175,7 +175,7 @@ FILENAME_DIFFIERENT:
 	cmp cx, 0
 	dec cx
 	jz FILE_NOT_FOUND
-	;;;;;xchg bx, bx
+	;;;;;;;;xhcg bx, bx
 	and di, 0xFFE0	; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置
 	add di, 32	; 增加一个根目录项的大小
 	jmp SEARCH_FILE_IN_ROOT_DIRECTORY
@@ -183,7 +183,7 @@ FILE_FOUND:
 	mov al, 'S'
 	mov ah, 0Ah
 	mov [gs:(80 * 23 + 35) *2], ax
-	;;;;xchg bx, bx
+	;;;;;;;xhcg bx, bx
 	; 修改段地址和偏移量后，获取的第一个簇号错了 
 	; 获取文件的第一个簇的簇号
 	and di, 0xFFE0  ; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置; 获取文件的第一个簇的簇号
@@ -192,16 +192,16 @@ FILE_FOUND:
 	mov ax, BaseOfKernel
 	push ds
 	mov ds, ax
-	;;;;xchg bx, bx
+	;;;;;;;xhcg bx, bx
 	lodsw
 	pop ds	
 	push ax
-	;;;;xchg bx, bx	
+	;;;;;;;xhcg bx, bx	
 	; call GetFATEntry
 	mov bx, OffSetOfLoader
 	; 获取到文件的第一个簇号后，开始读取文件
 READ_FILE:
-	;;;;xchg bx, bx
+	;;;;;;;xhcg bx, bx
 	push bx
 	; push ax
 	; 簇号就是FAT项的编号，把FAT项的编号换算成字节数
@@ -229,13 +229,13 @@ READ_FILE:
 	mov cl, 1
 	pop bx	
 	call ReadSector
-	;;xchg bx, bx
+	;;;;;xhcg bx, bx
         add bx, 512
 	jc	.1
 	jmp	.2
 	; 读取一个扇区的数据 end
 .1:
-	;xchg bx, bx
+	;;;;xhcg bx, bx
 	push ax
 	mov ax, es
 	add ax, 0100h
@@ -244,9 +244,9 @@ READ_FILE:
 .2:
 	pop ax
 	push bx
-	;xchg bx, bx
+	;;;;xhcg bx, bx
 	call GetFATEntry
-	;xchg bx, bx
+	;;;;xhcg bx, bx
 	pop bx
 	push ax
 	cmp ax, 0xFF8
@@ -260,7 +260,7 @@ READ_FILE:
 	;inc al
 	;mov ah, 0Ah
 	;mov [gs:(80 * 23 + 36) *2], ax	
-	;;;;;xchg bx, bx	
+	;;;;;;;;xhcg bx, bx	
 	jmp READ_FILE
 	
 FILE_NOT_FOUND:
@@ -289,11 +289,11 @@ READ_FILE_OVER:
 	mov eax, cr0
 	or eax, 1
 	mov cr0, eax
-	;xchg bx, bx
+	;;;;xhcg bx, bx
 	; 真正进入保护模式。这句把cs设置为SelectFlatX	
 	;jmp dword SelectFlatX:(BaseOfLoaderPhyAddr + 100h + LABEL_PM_START)
 	;jmp dword SelectFlatX:dx
-	xchg bx, bx
+	;;;xhcg bx, bx
 	jmp dword SelectFlatX:(BaseOfLoaderPhyAddr + LABEL_PM_START)
 	; 开启保护模式 end
 
@@ -302,7 +302,7 @@ READ_FILE_OVER:
 	;call InitKernel
 
 	
-	;;;xchg bx, bx
+	;;;;;;xhcg bx, bx
 	;jmp BaseOfKernel:73h
 	;jmp BaseOfKernel:61h
 	;jmp BaseOfKernel2:400h
@@ -407,7 +407,7 @@ GetFATEntry:
 	; 用扇区偏移量计算出在某柱面某磁道的扇区偏移量，可以直接调用ReadSector
 	call ReadSector
 	;pop es
-	;;;;;;xchg bx, bx
+	;;;;;;;;;xhcg bx, bx
 	;pop ax
 	;mov ax, [es:bx]
 	pop dx
@@ -455,10 +455,10 @@ ReadSector:
 	;mov bx, BaseOfKernel	; 让es:bx指向BaseOfKernel
 	;mov ax, cs
 	;mov es, ax
-	;;;;;;xchg bx, bx
+	;;;;;;;;;xhcg bx, bx
 	int 13h
 	;pop cx
-	;;;;;;xchg bx, bx
+	;;;;;;;;;xhcg bx, bx
 	; pop bx
 	pop bp
 	pop ax
@@ -528,15 +528,15 @@ LABEL_PM_START:
 	mov al, 'K'
 	mov ah, 0Ah
 	mov [gs:(80 * 19 + 25) * 2], ax
-	xchg bx, bx	
+	;;;xhcg bx, bx	
 	; 跳入16位模式（保护模式)
 	;jmp word SelectFlatX_16:0
 	
 
 
-	xchg bx, bx
+	;;xhcg bx, bx
 	call InitKernel
-	xchg bx, bx	
+	;;xhcg bx, bx	
 
 	;mov gs, ax
 	mov al, 'G'
@@ -550,7 +550,7 @@ LABEL_PM_START:
 	mov es, ax
 	mov esi, 0
 	mov edi, 0
-	xchg bx, bx
+	;;;xhcg bx, bx
 	mov byte [es:edi], 'W'
 	mov byte al, [es:edi]
 	mov ah, 0Ah
@@ -564,7 +564,7 @@ LABEL_PM_START:
 	; 测试读写5M之上的内存读写 end
 
 
-
+	;;xhcg bx, bx
 	jmp SelectFlatX:0x30400
 	jmp $
 	jmp $
@@ -578,7 +578,7 @@ InitKernel:
 	push eax
 	push ecx
 	push esi
-	;xchg bx, bx
+	;xhcg bx, bx
 	;程序段的个数
 	;mov cx, word ptr ds:0x802c
 	mov cx, [BaseOfKernelPhyAddr + 2CH]
@@ -587,7 +587,7 @@ InitKernel:
 	xor esi, esi
 	mov esi, [BaseOfKernelPhyAddr + 1CH]
 	add esi, BaseOfKernelPhyAddr
-	xchg bx, bx
+	;xhcg bx, bx
 
 .Begin:
 	mov eax, [esi + 10H]
@@ -598,8 +598,9 @@ InitKernel:
 	push eax
 	mov eax, [esi + 8H]
 	push eax
+	;xhcg bx, bx
 	call Memcpy
-	xchg bx, bx
+	;xhcg bx, bx
 	; 三个参数（每个占用32位，4个字节，2个字），占用6个字,12个字节
 	add esp, 12
 	dec ecx
@@ -609,7 +610,7 @@ InitKernel:
 	jmp .Begin
 
 .NoAction:
-	;xchg bx, bx
+	;xhcg bx, bx
 	pop esi
 	pop ecx
 	pop eax
@@ -619,7 +620,7 @@ InitKernel:
 
 ; Memcpy(p_vaddr, p_off, p_size)
 Memcpy:
-	xchg bx, bx
+	;;;xhcg bx, bx
 	push ebp
 	mov ebp, esp
 	push eax
@@ -635,7 +636,7 @@ Memcpy:
 	;mov si, [bp + 12]        ; p_off，即 src
 	;mov cx, [bp + 16]       ; 程序头的个数，即p_size
 
-	xchg bx, bx
+	;xchg bx, bx
 	mov edi, [ebp + 8]        ; p_vaddr，即 dst
 	mov esi, [ebp + 12]        ; p_off，即 src
 	mov ecx, [ebp + 16]       ; 程序头的个数，即p_size
@@ -651,6 +652,8 @@ Memcpy:
 
 	inc esi
 	inc edi
+	cmp ecx, 0
+	jz .2
 	dec ecx
 
 	cmp ecx, 0
@@ -658,7 +661,7 @@ Memcpy:
 	jmp .1
 
 .2:
-	xchg bx, bx
+	;xchg bx, bx
 	;pop es
 	mov eax, [ebp + 8]
 
@@ -677,7 +680,7 @@ BaseOfKernelPhyAddr	equ	BaseOfKernel * 10h  ; Kernel.BIN 被加载到的位置 -
 [SECTION .s16]
 [BITS 16]
 LABEL_SEG_16:
-	xchg bx, bx
+	;;;xhcg bx, bx
 	mov ax, 	SelectFlatWR_16
 	mov es,	ax
 	mov ss, ax
