@@ -10,6 +10,9 @@ int main(int argc, char **argv)
 	printf("a = %p\n", a);
 	printf("*a = %d\n", *a);
 	printf("b = %d\n", b);
-
+	int *e = &b;
+	printf("e = %d\n", *e);
+	int *f = b;
+	printf("f = %d\n", *f);
 	return 0;
 }
