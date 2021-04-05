@@ -42,7 +42,6 @@ Memcpy:
 	jmp .1
 
 .2:
-	xchg bx, bx
 	;pop es
 	mov eax, [ebp + 8]
 

@@ -1,5 +1,7 @@
 //extern InterruptTest; 
+int dis_pos;
 typedef void (*int_handle) ();
+void disp_str(char *str);
 void InterruptTest();
 unsigned char gdt_ptr[6];
 void Memcpy(void *dst, void *src, int size);
@@ -46,6 +48,15 @@ void ReloadGDT()
 	*pm_idt_limit = 256 * sizeof(Gate) - 1;
 	*pm_idt_base = (int)&idt;
 
+	for(int i = 0; i < 10; i++){
+		for(int j = 0; j < 160; j++){
+			disp_str(" ");
+		}
+
+	}
+
+	disp_str("\n=================\n");
+	disp_str("Hello, World!\n");
 	// 向idt中添加中断门 InterruptTest
 	 // InitInterruptDesc(1, InterruptTest);	
 	 InitInterruptDesc(0x0, InterruptTest);	
