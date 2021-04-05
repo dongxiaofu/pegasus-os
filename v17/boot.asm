@@ -28,7 +28,7 @@ org 0x7c00
 LABEL_START:
 	mov ax,	0B800h
 	mov gs,	ax
-	;;xchg bx, bx	
+	;;xchg; bx, bx	
 	mov ax, BaseOfLoader
 	mov es, ax
 	;mov ds, ax		; lodsb、lodsw，把[ds:si]中的数据加载到ax中
@@ -41,7 +41,7 @@ LABEL_START:
 	
 	mov bx, OffSetOfLoader
 	call ReadSector
-	;;;xchg bx, bx
+	;;;xchg; bx, bx
 	mov cx, 3
 	
 	mov di, OffSetOfLoader
@@ -57,7 +57,7 @@ SEARCH_FILE_IN_ROOT_DIRECTORY:
 	; mov di, BaseOfLoader
 	; ds是多少？
 	mov si, LoaderBinFileName
-	;;xchg bx, bx
+	;;xchg; bx, bx
 	;mov cx,	[LoaderBinFileNameLength]
 	mov cx, LoaderBinFileNameLength
 	mov dx, 0
@@ -66,7 +66,7 @@ SEARCH_FILE_IN_ROOT_DIRECTORY:
 COMPARE_FILENAME:
 	;cmp [es:si], [ds:di]
 	;cmp [si], [di]
-	;xchg bx, bx
+	;xchg; bx, bx
 	lodsb
 	cmp al, byte [es:di]
 	jnz FILENAME_DIFFIERENT
@@ -106,7 +106,7 @@ FILE_FOUND:
 	lodsw
 	pop ds	
 	push ax
-	;;xchg bx, bx	
+	;;xchg; bx, bx	
 	; call GetFATEntry
 	mov bx, OffSetOfLoader
 	; 获取到文件的第一个簇号后，开始读取文件
@@ -138,7 +138,7 @@ READ_FILE:
 	mov cl, 1
 	pop bx	
 	call ReadSector
-	;;;xchg bx, bx
+	;;;xchg; bx, bx
         add bx, 512
 	; 读取一个扇区的数据 end
 	
@@ -176,7 +176,7 @@ READ_FILE_OVER:
 	mov cl, 1
 	;pop bx	
 	;call ReadSector
-	;;xchg bx, bx
+	;;xchg; bx, bx
     	;add bx, 512
 	; 读取一个扇区的数据 end
 
@@ -184,7 +184,7 @@ READ_FILE_OVER:
 	mov ah, 0Ah
 	mov [gs:(80 * 24 + 33) * 2], ax
 	
-	;xchg bx, bx
+	;xchg; bx, bx
 	jmp BaseOfLoader:OffSetOfLoader	
 	jmp OVER
 
@@ -253,7 +253,7 @@ GetFATEntry:
 	; 用扇区偏移量计算出在某柱面某磁道的扇区偏移量，可以直接调用ReadSector
 	call ReadSector
 	;pop es
-	;;;xchg bx, bx
+	;;;xchg; bx, bx
 	;pop ax
 	;mov ax, [es:bx]
 	pop dx
@@ -300,10 +300,10 @@ ReadSector:
 	;mov bx, BaseOfLoader	; 让es:bx指向BaseOfLoader
 	;mov ax, cs
 	;mov es, ax
-	;;;xchg bx, bx
+	;;;xchg; bx, bx
 	int 13h
 	;pop cx
-	;;;xchg bx, bx
+	;;;xchg; bx, bx
 	; pop bx
 	pop bp
 	pop ax

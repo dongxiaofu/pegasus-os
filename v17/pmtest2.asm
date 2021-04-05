@@ -91,7 +91,7 @@ LABEL_BEGIN:
 	mov	al, 'R'
 	;mov	ah, 0Ah
 	mov	[gs:(80*24 + 34)*2], ax
-	xchg	bx, bx
+	xchg;	bx, bx
 	mov	ax, cs
 	mov	ds, ax
 	mov	es, ax
@@ -172,7 +172,7 @@ LABEL_BEGIN:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LABEL_REAL_ENTRY:
-	xchg	bx, bx		; 从保护模式跳回到实模式就到了这里
+	xchg;	bx, bx		; 从保护模式跳回到实模式就到了这里
 	; 跳回实模式:
 	mov	ax, SelectorNormal
 	mov	ds, ax
@@ -184,8 +184,8 @@ LABEL_REAL_ENTRY:
 	mov	eax, cr0
 	and	al, 11111110b
 	mov	cr0, eax
-	xchg	bx, bx
-	;xchg	bx, bx
+	xchg;	bx, bx
+	;xchg;	bx, bx
 	mov	ax, cs
 	mov	ds, ax
 	mov	es, ax
@@ -245,7 +245,7 @@ LABEL_SEG_CODE32:
 
 	; 到此停止
 	;jmp	SelectorCode16:0
-	xchg	bx, bx
+	xchg;	bx, bx
 	;jmp	SelectorCode16:LABEL_REAL_ENTRY
 	jmp	SelectorCode16:0
 
@@ -359,14 +359,14 @@ LABEL_SEG_CODE16:
 	; 跳回实模式:
 ;被注释的这段，没有作用。
 ;SelectorNormal 没有任何作用。
-	xchg	bx, bx
+	xchg;	bx, bx
 	mov	ax, SelectorNormal
 	mov	ds, ax
 	mov	es, ax
 	mov	fs, ax
 	mov	gs, ax
 	mov	ss, ax
-	xchg	bx, bx
+	xchg;	bx, bx
 	mov	eax, cr0
 	and	al, 11111110b
 	mov	cr0, eax
