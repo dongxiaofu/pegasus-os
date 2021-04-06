@@ -2,6 +2,8 @@
 int dis_pos;
 typedef void (*int_handle) ();
 void disp_str(char *str);
+void atoi(char *str, int num);
+void disp_int(int num);
 void InterruptTest();
 unsigned char gdt_ptr[6];
 void Memcpy(void *dst, void *src, int size);
@@ -57,6 +59,9 @@ void ReloadGDT()
 
 	disp_str("\n=================\n");
 	disp_str("Hello, World!\n");
+	//disp_int(23);
+	disp_int(0x020A);
+	disp_str("\n");
 	// 向idt中添加中断门 InterruptTest
 	 // InitInterruptDesc(1, InterruptTest);	
 	 InitInterruptDesc(0x0, InterruptTest);	
@@ -85,4 +90,42 @@ void InitInterruptDesc(int vec_no, int_handle offset)
 	gate->offset_high = base >> 16;
 	// 先这样，以后再拆分成TYPE和特权级
 	gate->type_other_attribute = 0x08E;
+}
+
+
+void atoi(char *str, int num)
+{
+	char *p = str;
+	*p++ = '0';
+	*p++ = 'x';
+	char ch;
+	char flag = 0;	
+
+	if(num == 0){
+		*p++ = '0';
+	}else{
+		for(int i = 28; i >= 0; i-=4){
+			ch = (num >> i) & 0xF;
+			if(flag == 0 && ch == 0) continue;
+			flag = 1;
+			ch = ch + '0';
+			if(ch > '9'){
+				ch += 7;	
+			}	
+			*p++ = ch;
+		}
+	}	
+	
+	*p = 0;
+
+	return;
+}
+
+void disp_int(int num)
+{
+	char *str;
+	atoi(str, num);
+	disp_str(str);
+	return;
+
 }
