@@ -2,9 +2,11 @@
 int dis_pos;
 typedef void (*int_handle) ();
 void disp_str(char *str);
+void disp_str_colour(char *str, int colour);
 void atoi(char *str, int num);
 void disp_int(int num);
 void InterruptTest();
+void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags);
 unsigned char gdt_ptr[6];
 void Memcpy(void *dst, void *src, int size);
 void InitInterruptDesc(int vec_no, int_handle offset); 
@@ -133,4 +135,67 @@ void disp_int(int num)
 	disp_str(str);
 	return;
 
+}
+
+void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags)
+{
+	char *msg[] = {
+		"# Divide by zero:",
+		"# Single step:",
+		"# Non-maskable  (NMI):",
+		"# Breakpoint:",
+		"# Overflow trap:",
+		"# BOUND range exceeded (186,286,386):",
+		"# Invalid opcode (186,286,386):",
+		"# Coprocessor not available (286,386):",
+		"# Double fault exception (286,386):",
+		"# Coprocessor segment overrun (286,386):",
+		"# Invalid task state segment (286,386):",
+		"# Segment not present (286,386):",
+		"# Stack exception (286,386):",
+		"# General protection exception (286,386):",
+		"# Page fault (286,386):",
+		//"# Reserved:",
+		"# Coprocessor error (286,386):",
+
+		"#AC :",
+		"#MC :",
+		"#XF :",
+	};
+
+	// 清屏
+	for(int i = 0; i < 80 * 10 * 2; i++){
+		disp_str(" ");
+	}	
+
+	dis_pos = 0;
+	int colour = 0x74;
+	char *error_msg = msg[vec_no];
+	disp_str_colour(error_msg, colour);
+	disp_str("\n\n");
+	
+	if(error_no != 0xFFFFFFFF){
+		disp_str_colour("error_no:", colour);
+        	disp_int(error_no);
+        	disp_str("\n\n");
+	}
+
+	disp_str_colour("cs:", colour);
+	disp_int(cs);
+	disp_str("\n\n");
+
+	disp_str_colour("eip:", colour);
+        disp_int(eip);
+        disp_str("\n\n");
+
+	disp_str_colour("eflags:", colour);
+        disp_int(eflags);
+        disp_str("\n\n");	
+
+	return;
+}
+
+void disp_str_colour(char *str, int colour)
+{
+	disp_str(str);
 }
