@@ -3,13 +3,42 @@ int dis_pos;
 typedef void (*int_handle) ();
 void disp_str(char *str);
 void disp_str_colour(char *str, int colour);
+
+// 内部中断 start
+void divide_zero_fault();
+void single_step_fault();
+void non_maskable_interrupt();
+void breakpoint_trap();
+void overflow_trap();
+void bound_range_exceeded_fault();
+void invalid_opcode_fault();
+void coprocessor_not_available_fault();
+void double_fault_exception_abort();
+void coprocessor_segment_overrun();
+void invalid_task_state_segment_fault();
+void segment_not_present_fault();
+void stack_exception_fault();
+void general_protection_exception_fault();
+void page_fault();
+void coprocessor_error_fault();
+void align_check_fault();
+void simd_float_exception_fault();
+// 内部中断 end
+
+
 void atoi(char *str, int num);
 void disp_int(int num);
 void InterruptTest();
 void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags);
 unsigned char gdt_ptr[6];
 void Memcpy(void *dst, void *src, int size);
-void InitInterruptDesc(int vec_no, int_handle offset); 
+//void InitInterruptDesc(int vec_no, int_handle offset); 
+void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type);
+// 初始化内部中断
+void init_internal_interrupt();
+
+void test();
+
 typedef struct{
 	unsigned short seg_limit_below;
 	unsigned short seg_base_below;
@@ -35,6 +64,9 @@ Gate idt[256];
 
 void ReloadGDT()
 {
+	//disp_int(0x3);
+	//disp_str_colour("Hello,World\n", 0x0C);
+	//return;
 	Memcpy(&gdt,
 		(void *)(*((int *)(&gdt_ptr[2]))),
 		*((short *)(&gdt_ptr[0]))
@@ -59,24 +91,31 @@ void ReloadGDT()
 
 	//}
 	//for(int i = 0; i < 80 * 2 * 5; i++){
+	//dis_pos = 0;
 	for(int i = 0; i < 80 * 2 * 25; i++){
-		disp_str(" ");
+		//disp_str(" ");
 	}
-	dis_pos = 0;
-
-	disp_str("\n=================\n");
-	disp_str("Hello, World!\n");
+	//dis_pos = 0;
+	// disp_int(0x8);
+	// return;
+	//disp_str_colour("Hello, World!", 0x74);
+	//disp_str_colour("Hello, World!===========I am successful!", 0x0B);
+	//disp_str("\n=================\n");
+	//disp_str("Hello, World!\n");
 	//disp_int(23);
-	disp_int(0x020A);
-	disp_str("\n");
+	//disp_int(0x020A);
+	//disp_str("\n");
+	//return;
 	// 向idt中添加中断门 InterruptTest
 	 // InitInterruptDesc(1, InterruptTest);	
-	 InitInterruptDesc(0x0, InterruptTest);	
-
+	 //InitInterruptDesc(0x0, InterruptTest);	
+	// 内部中断
+	init_internal_interrupt();
+	
 	return;
 }
 
-void InitInterruptDesc(int vec_no, int_handle offset)
+void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type)
 {
 	Gate *gate = &idt[vec_no];
 	//idt[vec_no].paramCount = 0;
@@ -96,7 +135,8 @@ void InitInterruptDesc(int vec_no, int_handle offset)
 	gate->selector = 0x8;
 	gate->offset_high = base >> 16;
 	// 先这样，以后再拆分成TYPE和特权级
-	gate->type_other_attribute = 0x08E;
+	// gate->type_other_attribute = 0x08E;
+	gate->type_other_attribute = (privilege << 4) | type;
 }
 
 
@@ -130,10 +170,13 @@ void atoi(char *str, int num)
 
 void disp_int(int num)
 {
-	char *str;
+	//char *str = "";
+	char str[16];
 	atoi(str, num);
-	disp_str(str);
-	return;
+	//disp_str_colour("ABC", 0x0A);
+	// disp_str(str);
+	disp_str_colour(str, 0x0B);
+	//return;
 
 }
 
@@ -162,16 +205,20 @@ void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags)
 		"#MC :",
 		"#XF :",
 	};
-
+	dis_pos = 0;
 	// 清屏
-	for(int i = 0; i < 80 * 10 * 2; i++){
+	for(int i = 0; i < 80 * 25 * 2; i++){
 		disp_str(" ");
 	}	
 
 	dis_pos = 0;
-	int colour = 0x74;
+	// int colour = 0x74;
+	int colour = 0x0A;
 	char *error_msg = msg[vec_no];
 	disp_str_colour(error_msg, colour);
+	disp_str("\n\n");
+	disp_str_colour("vec_no:", colour);
+	disp_int(vec_no);
 	disp_str("\n\n");
 	
 	if(error_no != 0xFFFFFFFF){
@@ -195,7 +242,52 @@ void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags)
 	return;
 }
 
-void disp_str_colour(char *str, int colour)
+void init_internal_interrupt()
 {
-	disp_str(str);
+	InitInterruptDesc(0,divide_zero_fault,0x08,0x0E);
+	InitInterruptDesc(1,single_step_fault,0x08,0x0E);
+	InitInterruptDesc(2,non_maskable_interrupt,0x08,0x0E);
+	InitInterruptDesc(3,breakpoint_trap,0x08,0x0E);
+	InitInterruptDesc(4,overflow_trap,0x08,0x0E);
+	InitInterruptDesc(5,bound_range_exceeded_fault,0x08,0x0E);
+	InitInterruptDesc(6,invalid_opcode_fault,0x08,0x0E);
+	InitInterruptDesc(7,coprocessor_not_available_fault,0x08,0x0E);
+	InitInterruptDesc(8,double_fault_exception_abort,0x08,0x0E);
+	InitInterruptDesc(9,coprocessor_segment_overrun,0x08,0x0E);
+	InitInterruptDesc(10,invalid_task_state_segment_fault,0x08,0x0E);
+	InitInterruptDesc(11,segment_not_present_fault,0x08,0x0E);
+	InitInterruptDesc(12,stack_exception_fault,0x08,0x0E);
+	InitInterruptDesc(13,general_protection_exception_fault,0x08,0x0E);
+	InitInterruptDesc(14,page_fault,0x08,0x0E);
+	InitInterruptDesc(16,coprocessor_error_fault,0x08,0x0E);
+	InitInterruptDesc(17,align_check_fault,0x08,0x0E);
+	InitInterruptDesc(18,simd_float_exception_fault,0x08,0x0E);	
+}
+
+void test()
+{
+	disp_int(0x6);
+	disp_str("\n");
+	//return;
+	//disp_str_colour("Hello, World!", 0x74);
+	//return;
+	dis_pos = 0;
+	for(int i = 0; i < 80 * 25 * 2; i++){
+                disp_str(" ");
+        }
+        dis_pos = 0;
+	//return;
+        disp_str_colour("Hello, World!", 0x74);
+	disp_str("\n");
+        disp_int(0x89);
+	disp_str("\n");
+        disp_str_colour("Hello, World!", 0x74);
+	disp_str("\n");
+        disp_str_colour("Hello, World!===========I am successful!", 0x0B);
+        disp_str("\n=================\n");
+        disp_str("Hello, World!\n");
+        disp_int(23);
+	disp_str("\n");
+        disp_int(0x020A);
+        disp_str("\n");
 }

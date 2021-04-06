@@ -10,12 +10,35 @@ StackTop:
 extern gdt_ptr
 extern idt_ptr
 extern ReloadGDT
+extern exception_handler
 
 extern dis_pos
+extern test
 
 global disp_str
+global disp_str_colour
 global _start
 global InterruptTest
+
+; 内部中断
+global divide_zero_fault
+global single_step_fault
+global non_maskable_interrupt
+global breakpoint_trap
+global overflow_trap
+global bound_range_exceeded_fault
+global invalid_opcode_fault
+global coprocessor_not_available_fault
+global double_fault_exception_abort
+global coprocessor_segment_overrun
+global invalid_task_state_segment_fault
+global segment_not_present_fault
+global stack_exception_fault
+global general_protection_exception_fault
+global page_fault
+global coprocessor_error_fault
+global align_check_fault
+global simd_float_exception_fault
 
 
 _start:
@@ -28,31 +51,40 @@ _start:
 	;jmp $
 	;jmp $
 	;jmp $
-	;xchg; bx, bx
+	;;xchg; bx, bx
 	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
 	mov ah, 0Bh
 	mov al, 'L'
 	mov [gs:(80 * 20 + 40) * 2], ax
+	
+	mov esp, StackTop
+	mov word [dis_pos], 0
 	sgdt [gdt_ptr]
 	call ReloadGDT
 	lgdt [gdt_ptr]
 	lidt [idt_ptr]
-	;jmp 0x8:csinit
+	jmp 0x8:csinit
+	;jmp $
 csinit:
 	mov ah, 0Bh
 	mov al, 'M'
 	mov [gs:(80 * 20 + 41) * 2], ax
 	;mov word [dis_pos], 0
-	mov esp, StackTop
+	;mov esp, StackTop
 	push 0
 	popfd
+	
+	call test
+	
 	; 测试resb是否把堆栈初始化成了0
 	push 1
 	push 2
 	push 3
-
+	jmp $
+	int 0x0D
+	ud2
 	int 0x0
 
 	hlt
@@ -82,17 +114,66 @@ InterruptTest:
 
 ; 打印字符串
 disp_str:
-	xchg bx, bx
+	;xchg bx, bx
 	push ebp
 	mov ebp, esp
-	push edi
-	push esi
+	;push edi
+	;push esi
 	
-	mov ah, 0Fh
+	mov ah, 0Dh
 
+	;mov esi, [ebp + 4]; ebp + 4，乱码。那么，[ebp + 4]存储的是什么？
 	mov esi, [ebp + 8]
 	mov edi, [dis_pos]
-	xchg bx, bx
+	;xchg bx, bx
+
+.1:
+	lodsb
+	; al为空，即字符串打印完毕
+	test al, al
+	jz .4
+	cmp al, 0X0A
+	jnz .3
+	; 处理换行
+	push eax
+	mov eax, edi
+	mov bl, 160
+	div bl
+	inc eax
+	mov bl, 160
+	mul bl
+	mov edi, eax
+	pop eax
+	jmp .1
+.3:
+	;xchg bx, bx
+	mov [gs:edi], ax
+	add edi, 2
+	jmp .1
+.4:
+	mov [dis_pos], edi
+	;pop esi
+	;pop edi	
+	pop ebp
+	
+	
+	;ret 1	
+	ret
+
+; 打印字符串，设置颜色
+disp_str_colour:
+	push ebp
+	mov ebp, esp
+	;push edi
+	;push esi
+	xchg bx, bx	
+	mov esi, [ebp + 8]
+	; 颜色
+	mov eax, [ebp + 4]
+	;mov eax, [ebp + 4]
+	;mov eax, 0Bh
+	mov edi, [dis_pos]
+	;xchg bx, bx
 
 .1:
 	lodsb
@@ -119,9 +200,81 @@ disp_str:
 	jmp .1
 .4:
 	mov [dis_pos], edi
-	pop esi
-	pop edi	
+	;pop esi
+	;pop edi	
 	pop ebp
 	
-	ret	
+	ret
+	;ret 2
+	
+; 内部中断
+divide_zero_fault:
+	push 0xFFFFFFFF
+	push 0
+	jmp exception
+single_step_fault:
+	push 0xFFFFFFFF
+	push 1
+	jmp exception
+non_maskable_interrupt:
+	push 0xFFFFFFFF
+	push 2
+	jmp exception
+breakpoint_trap:
+	push 0xFFFFFFFF
+	push 3
+	jmp exception
+overflow_trap:
+	push 0xFFFFFFFF
+	push 4
+	jmp exception
+bound_range_exceeded_fault:
+	push 0xFFFFFFFF
+	push 5
+	jmp exception
+invalid_opcode_fault:
+	push 0xFFFFFFFF
+	push 6
+	jmp exception
+coprocessor_not_available_fault:
+	push 0xFFFFFFFF
+	push 7
+	jmp exception
+double_fault_exception_abort:
+	push 8
+	jmp exception
+coprocessor_segment_overrun:
+	push 0xFFFFFFFF
+	push 9
+	jmp exception
+invalid_task_state_segment_fault:
+	push 10
+	jmp exception
+segment_not_present_fault:
+	push 11
+	jmp exception
+stack_exception_fault:
+	push 12
+	jmp exception
+general_protection_exception_fault:
+	push 13
+	jmp exception
+page_fault:
+	push 14
+	jmp exception
+coprocessor_error_fault:
+	push 0xFFFFFFFF
+	push 16
+	jmp exception
+align_check_fault:
+	push 17
+	jmp exception
+simd_float_exception_fault:
+	push 0xFFFFFFFF
+	push 18
+	jmp exception
 
+exception:
+	call exception_handler
+	add esp, 4 * 2
+	hlt
