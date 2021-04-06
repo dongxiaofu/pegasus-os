@@ -50,12 +50,17 @@ void ReloadGDT()
 	*pm_idt_limit = 256 * sizeof(Gate) - 1;
 	*pm_idt_base = (int)&idt;
 
-	for(int i = 0; i < 10; i++){
-		for(int j = 0; j < 160; j++){
-			disp_str(" ");
-		}
+	//for(int i = 0; i < 10; i++){
+	//	for(int j = 0; j < 160; j++){
+	//		disp_str(" ");
+	//	}
 
+	//}
+	//for(int i = 0; i < 80 * 2 * 5; i++){
+	for(int i = 0; i < 80 * 2 * 25; i++){
+		disp_str(" ");
 	}
+	dis_pos = 0;
 
 	disp_str("\n=================\n");
 	disp_str("Hello, World!\n");
