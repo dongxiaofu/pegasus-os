@@ -2,6 +2,8 @@
 int dis_pos;
 typedef void (*int_handle) ();
 void disp_str(char *str);
+// void disp_str_colour(char *str, int colour);
+void disp_str_colour2(int str, int colour);
 void disp_str_colour(char *str, int colour);
 
 // 内部中断 start
@@ -64,6 +66,9 @@ Gate idt[256];
 
 void ReloadGDT()
 {
+	//disp_str_colour("AAAA", 0x0C);
+	//disp_str_colour("AAAA", 0x0A);
+	//disp_str_colour("bbbb", 0x0D);
 	//disp_int(0x3);
 	//disp_str_colour("Hello,World\n", 0x0C);
 	//return;
@@ -266,28 +271,35 @@ void init_internal_interrupt()
 
 void test()
 {
+	disp_str("A");
 	disp_int(0x6);
 	disp_str("\n");
 	//return;
-	//disp_str_colour("Hello, World!", 0x74);
-	//return;
+	//disp_str_colour2(0x9988, 0x74);
 	dis_pos = 0;
 	for(int i = 0; i < 80 * 25 * 2; i++){
                 disp_str(" ");
         }
         dis_pos = 0;
 	//return;
-        disp_str_colour("Hello, World!", 0x74);
+        disp_str_colour("Hello, World!", 0x0F);
 	disp_str("\n");
         disp_int(0x89);
 	disp_str("\n");
+        disp_str_colour("Hello, World!", 0x0F);
         disp_str_colour("Hello, World!", 0x74);
 	disp_str("\n");
-        disp_str_colour("Hello, World!===========I am successful!", 0x0B);
+        disp_str_colour("Hello, World!===========I am successful!", 0x0F);
         disp_str("\n=================\n");
         disp_str("Hello, World!\n");
         disp_int(23);
 	disp_str("\n");
         disp_int(0x020A);
         disp_str("\n");
+}
+
+
+void disp_str_colour3(char *str, int colour)
+{
+
 }
