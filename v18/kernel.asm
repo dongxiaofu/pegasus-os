@@ -14,6 +14,7 @@ extern exception_handler
 
 extern dis_pos
 extern test
+extern spurious_irq
 
 global disp_str
 global disp_str_colour
@@ -39,6 +40,12 @@ global page_fault
 global coprocessor_error_fault
 global align_check_fault
 global simd_float_exception_fault
+
+
+; 内部中断
+global hwint0
+global hwint1
+
 
 
 _start:
@@ -69,6 +76,8 @@ _start:
 	jmp 0x8:csinit
 	;jmp $
 csinit:
+	sti
+	hlt
 	mov ah, 0Bh
 	mov al, 'M'
 	mov [gs:(80 * 20 + 41) * 2], ax
@@ -298,3 +307,39 @@ exception:
 	call exception_handler
 	add esp, 4 * 2
 	hlt
+
+
+
+; 外部中断
+%macro hwint_master 1
+	push %1
+	call spurious_irq
+	add esp, 4
+	hlt	; 奇怪，必须使用hlt结尾，敲击键盘才能触发中断例程
+%endmacro
+
+hwint0:
+	hwint_master 0
+	;ret
+hwint1:
+	hwint_master 1
+	;ret ; 奇怪，这个函数不能用这个结尾。
+
+
+
+%macro hwint_slave 1
+	push %1
+	call spurious_irq
+	add esp, 4
+%endmacro
+
+
+
+
+
+
+
+
+
+
+
