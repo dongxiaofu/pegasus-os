@@ -28,6 +28,11 @@ void simd_float_exception_fault();
 // 内部中断 end
 
 
+// 外部中断 start
+void hwint0();
+void hwint1();
+// 外部中断 end
+
 void atoi(char *str, int num);
 void disp_int(int num);
 void InterruptTest();
@@ -40,6 +45,13 @@ void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type);
 void init_internal_interrupt();
 
 void test();
+
+void spurious_irq(int irq);
+void init_propt();
+
+const int INIT_MASTER_VEC_NO = 0x20;
+const int INIT_SLAVE_VEC_NO = 0x28;
+
 
 typedef struct{
 	unsigned short seg_limit_below;
@@ -116,7 +128,8 @@ void ReloadGDT()
 	 //InitInterruptDesc(0x0, InterruptTest);	
 	// 内部中断
 	init_internal_interrupt();
-	
+	// 外部中断
+	init_propt();	
 	return;
 }
 
@@ -302,4 +315,17 @@ void test()
 void disp_str_colour3(char *str, int colour)
 {
 
+}
+
+void spurious_irq(int irq)
+{
+	disp_str_colour("\n------------irq start---------------\n", 0x0B);
+	disp_int(irq);
+	disp_str_colour("\n------------irq end---------------\n", 0x0C);
+}
+
+void init_propt()
+{
+	InitInterruptDesc(INIT_MASTER_VEC_NO + 0, hwint0 ,0x08,0x0E);	
+	InitInterruptDesc(INIT_MASTER_VEC_NO + 1, hwint1 ,0x08,0x0E);	
 }

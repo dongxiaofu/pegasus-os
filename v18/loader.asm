@@ -532,7 +532,8 @@ LABEL_PM_START:
 	; 跳入16位模式（保护模式)
 	;jmp word SelectFlatX_16:0
 	
-
+	call Init_8259A
+	call Init8253
 
 	;;xhcg bx, bx
 	call InitKernel
@@ -571,6 +572,82 @@ LABEL_PM_START:
 	jmp $
 	jmp $
 
+Init_8259A:
+	; ICW1
+	mov al, 011h
+	out 0x20, al
+	call io_delay
+	
+	out 0xA0, al	
+	call io_delay
+	
+	; ICW2
+	mov al, 020h
+	out 0x21, al
+	call io_delay
+	
+	mov al, 028h
+	out 0xA1, al
+	call io_delay
+
+	; ICW3
+	mov al, 004h
+	out 0x21, al
+	call io_delay
+	
+	mov al, 002h
+	out 0xA1, al
+	call io_delay
+	
+	; ICW4
+	mov al, 001h
+	out 0x21, al
+	call io_delay
+
+	out 0xA1, al
+	call io_delay
+	 
+	; OCW1
+	;mov al, 11111110b
+	mov al, 11111101b
+	out 0x21, al
+	call io_delay
+
+	mov al, 11111111b
+	out 0xA1, al
+	call io_delay
+	;OCW2
+;	mov al, 11111110b
+;	out 0x21, al
+;	call io_delay
+;
+;	mov al, 11111111b
+;	out 0xA1, al		
+;	call io_delay
+	ret
+
+Init8253:
+	mov ax, 0x34
+	out 0x43, al
+
+	;mov ax, 11931
+	;mov ax, (1193182 / 10000000000000)
+	;mov ax, (1193182 / 10 * 5)
+	mov ax, 65535
+	out 0x40, al
+	shr ax, 8
+	out 0x40, al
+	;error: invalid combination of opcode and operands
+	;out 0x40, ah
+	ret
+
+
+io_delay:
+	nop
+	nop
+	nop
+	nop
+	ret
 
 
 ; 重新放置内核
