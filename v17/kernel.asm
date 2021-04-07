@@ -51,7 +51,7 @@ _start:
 	;jmp $
 	;jmp $
 	;jmp $
-	;;xchg; bx, bx
+	;;;xchg; bx, bx
 	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
@@ -62,6 +62,7 @@ _start:
 	mov esp, StackTop
 	mov word [dis_pos], 0
 	sgdt [gdt_ptr]
+	xchg bx, bx
 	call ReloadGDT
 	lgdt [gdt_ptr]
 	lidt [idt_ptr]
@@ -77,15 +78,14 @@ csinit:
 	popfd
 	
 	call test
-	
+	;hlt	
 	; 测试resb是否把堆栈初始化成了0
 	push 1
 	push 2
 	push 3
-	jmp $
-	int 0x0D
-	ud2
-	int 0x0
+	;int 0x0D
+	;ud2
+	;int 0x0
 
 	hlt
 
@@ -114,7 +114,7 @@ InterruptTest:
 
 ; 打印字符串
 disp_str:
-	;xchg bx, bx
+	xchg bx, bx
 	push ebp
 	mov ebp, esp
 	;push edi
@@ -125,7 +125,7 @@ disp_str:
 	;mov esi, [ebp + 4]; ebp + 4，乱码。那么，[ebp + 4]存储的是什么？
 	mov esi, [ebp + 8]
 	mov edi, [dis_pos]
-	;xchg bx, bx
+	;;xchg bx, bx
 
 .1:
 	lodsb
@@ -146,7 +146,7 @@ disp_str:
 	pop eax
 	jmp .1
 .3:
-	;xchg bx, bx
+	;;xchg bx, bx
 	mov [gs:edi], ax
 	add edi, 2
 	jmp .1
@@ -154,6 +154,7 @@ disp_str:
 	mov [dis_pos], edi
 	;pop esi
 	;pop edi	
+	mov esp, ebp
 	pop ebp
 	
 	
@@ -162,18 +163,36 @@ disp_str:
 
 ; 打印字符串，设置颜色
 disp_str_colour:
+	xchg bx, bx
 	push ebp
 	mov ebp, esp
 	;push edi
 	;push esi
-	xchg bx, bx	
+	;xchg bx, bx	
 	mov esi, [ebp + 8]
-	; 颜色
-	mov eax, [ebp + 4]
+	; ebp + 4 就是颜色
 	;mov eax, [ebp + 4]
-	;mov eax, 0Bh
+	;mov eax, [ebp + 12]
+	;mov ax, [ebp + 12]
+	mov ah, [ebp + 12]
+	;mov eax, [ebp + 12]
+	;mov eax, [ebp + 4]
+	;mov ah, 0Fh
 	mov edi, [dis_pos]
-	;xchg bx, bx
+	;mov ah, 0Ah
+	;mov al, [ebp + 8]	
+	;mov [gs:edi], ax
+	;add edi, 2
+	;mov al, [ebp + 4]
+	;mov [gs:edi], ax
+	;add edi, 2
+	;mov al, [ebp + 12]
+	;mov [gs:edi], ax
+
+	;mov esp, ebp
+	;pop ebp
+	;ret
+	;;xchg bx, bx
 
 .1:
 	lodsb
@@ -202,6 +221,7 @@ disp_str_colour:
 	mov [dis_pos], edi
 	;pop esi
 	;pop edi	
+	mov esp, ebp
 	pop ebp
 	
 	ret
