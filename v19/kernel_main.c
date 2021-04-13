@@ -76,6 +76,76 @@ typedef struct{
 
 Gate idt[256];
 
+// tss
+typedef struct{
+	// 上一个任务的TSS指针
+	unsigned int last_tss_ptr;
+	unsigned int esp0;
+	unsigned int ss0;
+	unsigned int esp1;
+	unsigned int ss1;
+	unsigned int esp2;
+	unsigned int ss2;
+	unsigned int cr3;
+	unsigned int eip;
+	unsigned int eflags;
+	unsigned int eax;
+	unsigned int ecx;
+	unsigned int edx;
+	unsigned int ebx;
+	unsigned int esp;
+	unsigned int ebp;
+	unsigned int esi;
+	unsigned int edi;
+	unsigned int es;
+	unsigned int cs;
+	unsigned int ss;
+	unsigned int ds;
+	unsigned int fs;
+	unsigned int gs;
+	unsigned int ldt;
+	unsigned int trace;
+	unsigned int iobase;
+}TSS;
+
+// 进程表 start
+typedef struct{
+	// 中断处理程序压栈，手工压栈
+	unsigned short gs;	
+	unsigned short fs;	
+	unsigned short es;	
+	unsigned short ds;
+	// pushad压栈，顺序固定	
+	unsigned int edi;	
+	unsigned int esi;	
+	unsigned int ebp;	
+	unsigned int esp;	
+	unsigned int ebx;	
+	unsigned int edx;	
+	unsigned int ecx;	
+	unsigned int eax;
+	// 中断发生时压栈
+	unsigned int eip;
+	unsigned short cs;
+	unsigned int eflags;
+	unsigned short ss;
+}Regs;
+
+typedef struct{
+	Regs s_reg;
+	// ldt选择子
+	unsigned short ldt_selector;
+	// ldt
+	Descriptor ldts[2];	
+	unsigned int pid;		
+}Proc;
+
+// 进程表 end
+
+// 变量--进程
+TSS tss;
+Proc proc_table[1];
+
 void ReloadGDT()
 {
 	//disp_str_colour("AAAA", 0x0C);
@@ -328,4 +398,10 @@ void init_propt()
 {
 	InitInterruptDesc(INIT_MASTER_VEC_NO + 0, hwint0 ,0x08,0x0E);	
 	InitInterruptDesc(INIT_MASTER_VEC_NO + 1, hwint1 ,0x08,0x0E);	
+
+	
+	// 初始化tss
+	
+
+
 }
