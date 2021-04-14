@@ -53,4 +53,27 @@ Memcpy:
 
 	ret
 
+; Memset(void *dest, char character, int size)
+Memset:
+	push ebp
+	mov ebp, esp	
+	
+	push ax
+	
+	mov ecx, [ebp + 16]	; size
+	mov esi, [ebp + 8]	; dest
+	mov al,	 [ebp + 12]	; character	
 
+.1:
+	cmp ecx, 0
+	jz 2
+	mov [esi], al
+	inc ecx
+	inc esi		
+.2:
+	
+	pop ax
+	pop ebp	
+	mov esp, ebp
+
+	ret	

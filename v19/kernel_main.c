@@ -39,6 +39,7 @@ void InterruptTest();
 void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags);
 unsigned char gdt_ptr[6];
 void Memcpy(void *dst, void *src, int size);
+void Memset(void *dest, char character, int size);
 //void InitInterruptDesc(int vec_no, int_handle offset); 
 void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type);
 // 初始化内部中断
@@ -49,8 +50,44 @@ void test();
 void spurious_irq(int irq);
 void init_propt();
 
+// 初始化描述符
+// void InitDescriptor(void *desc, unsigned int base, unsigned int limit, unsigned short attribute);
+void InitDescriptor(Descriptor *desc, unsigned int base, unsigned int limit, unsigned short attribute);
+// 根据段名求物理地址
+unsigned int Seg2PhyAddr(unsigned int selector);
+// 根据虚拟地址求物理地址
+// unsigned int VirAddr2PhyAddr(unsigned int base, unsigned int offset);
+unsigned int VirAddr2PhyAddr(unsigned int base, void *offset);
+// 内核的入口函数
+void kernel_main();
+// 进程A的进程体
+void TestA();
+// 启动进程
+void restart();
+// 进程A的堆栈
+int proc_stack[128];
+
+
+
 const int INIT_MASTER_VEC_NO = 0x20;
 const int INIT_SLAVE_VEC_NO = 0x28;
+
+// 描述符在gdt中的索引
+// #define CS_SELECTOR_INDEX 1;
+#define CS_SELECTOR_INDEX 1
+#define DS_SELECTOR_INDEX 6
+#define GS_SELECTOR_INDEX 7
+
+#define TSS_SELECTOR_INDEX 8
+#define LDT_FIRST_SELECTOR_INDEX 9
+
+// 选择子
+//#define CS_SELECTOR 0x1000;
+#define CS_SELECTOR 0x08
+#define DS_SELECTOR 0x30
+#define GS_SELECTOR 0x38
+#define TSS_SELECTOR 0x40	//1000  000 ---> 100 0000
+#define LDT_FIRST_SELECTOR 0x48
 
 
 typedef struct{
@@ -398,10 +435,86 @@ void init_propt()
 {
 	InitInterruptDesc(INIT_MASTER_VEC_NO + 0, hwint0 ,0x08,0x0E);	
 	InitInterruptDesc(INIT_MASTER_VEC_NO + 1, hwint1 ,0x08,0x0E);	
-
 	
 	// 初始化tss
+	int tss_size = sizeof(TSS);
+	Memset(&tss, 0, tss_size);
+	tss.iobase = tss_size;
+	int ds_phy_addr = Seg2PhyAddr(DS_SELECTOR);
+	// int tss_base = VirAddr2PhyAddr(ds_phy_addr, tss);		
+	int tss_base = VirAddr2PhyAddr(ds_phy_addr, &tss);		
+	int tss_attribute = 0x0c92;		// todo tss的属性怎么确定？
+	InitDescriptor(&gdt[TSS_SELECTOR_INDEX], tss_base, tss_size - 1, tss_attribute);				
+			
+	// 初始化LDT
+	int ldt_size = 2 * sizeof(Descriptor);
+	int ldt_attribute = 0x0c92;          // todo ldt的属性怎么确定？	
+	int ldt_base = VirAddr2PhyAddr(ds_phy_addr, &proc_table[0]);
+	InitDescriptor(&gdt[LDT_FIRST_SELECTOR_INDEX], ldt_base, ldt_size - 1, ldt_attribute);
+}
+
+// 初始化描述符。又花了很多时间才写出来。还参照了我之前写的汇编代码。
+// Descriptor
+void InitDescriptor(Descriptor *desc, unsigned int base, unsigned int limit, unsigned short attribute)
+{
+	// desc->seg_limit_below = limit & 0xFFFF;
+	desc->seg_limit_below = (limit & 0xFFFF);
+	desc->seg_base_below = base & 0xFFFF;
+	desc->seg_base_middle = (base >> 16) & 0xF;
+	desc->seg_attr1 = attribute & 0xFF;
+	desc->seg_limit_high_and_attr2 = (((attribute >> 8) & 0xF) << 4) | ((limit >> 16) & 0x0F); 	
+	desc->seg_base_high = (base >> 24) & 0xF;
+}
+
+// 根据段名求物理地址
+unsigned int Seg2PhyAddr(unsigned int selector)
+{
+	Descriptor desc = gdt[selector >> 3];
+	int addr = ((desc & 0xFFFF0000) >> 16) | (((desc >> 32) & 0xFF) << 16) | (((desc >> 56) & 0xFF) << 24);
+	return addr;
+}
+ // 根据虚拟地址求物理地址
+unsigned int VirAddr2PhyAddr(unsigned int base, unsigned int offset)
+{
+	int addr = base + offset;
+	return addr;
+}
+
+
+void kernel_main()
+{
+	Proc *proc = proc_table;
 	
+	proc->ldt_selector = LDT_FIRST_SELECTOR;
+	
+	//proc->ldts[0] = ;
+	Memcpy(&proc->ldts[0], &gdt[CS_SELECTOR_INDEX], sizeof(Descriptor));
+	// 修改ldt描述符的属性。全局cs的属性是 0c9ah。
+	proc->ldts[0].seg_attr1 = 0xcd;
+	Memcpy(&proc->ldts[1], &gdt[DS_SELECTOR_INDEX], sizeof(Descriptor));
+	// 修改ldt描述符的属性
+	proc->ldts[1].seg_attr1 = 0xcd;
 
+	// 初始化进程表的段寄存器
+	proc->s_reg.cs = 0x05;	// 000 0101		
+	proc->s_reg.ds = 0x0D;	// 000 1101		
+	proc->s_reg.fs = 0x0D;	// 000 1101		
+	proc->s_reg.es = 0x0D;	// 000 1101		
+	proc->s_reg.ss = 0x0D;	// 000 1101		
+	proc->s_reg.gs = GS_SELECTOR;	
+	// 初始化进程表的通用寄存器
+	proc->s_reg.eip = TestA;
+	proc->s_reg.esp = proc_stack + 128;
+	
+	// 启动进程，扣动扳机，砰！		
+	restart();
 
+	while(1){}
+}
+
+void TestA()
+{
+	disp_str("A");
+	disp_int(12);
+	disp_str("\n");
 }
