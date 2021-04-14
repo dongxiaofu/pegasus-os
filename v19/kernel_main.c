@@ -79,6 +79,7 @@ typedef struct{
 	unsigned char seg_attr1;
 	unsigned char seg_limit_high_and_attr2;
 	unsigned char seg_base_high;
+	//char seg_base_high;
 }Descriptor;
 
 Descriptor gdt[128];
@@ -462,6 +463,9 @@ void init_propt()
 	int ldt_attribute = 0x82;          // todo ldt的属性怎么确定？	
 	int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[0].ldts);
 	InitDescriptor(&gdt[LDT_FIRST_SELECTOR_INDEX], ldt_base, ldt_size - 1, ldt_attribute);
+
+	// gs
+	InitDescriptor(&gdt[7], 0xb8000, 0x0FFFF, 0x0F2);
 }
 
 // 初始化描述符。又花了很多时间才写出来。还参照了我之前写的汇编代码。
@@ -471,10 +475,13 @@ void InitDescriptor(Descriptor *desc, unsigned int base, unsigned int limit, uns
 	// desc->seg_limit_below = limit & 0xFFFF;
 	desc->seg_limit_below = (limit & 0xFFFF);
 	desc->seg_base_below = base & 0xFFFF;
-	desc->seg_base_middle = (base >> 16) & 0xF;
+	//desc->seg_base_middle = (base >> 16) & 0xF;
+	desc->seg_base_middle = (base >> 16) & 0xFF;
 	desc->seg_attr1 = attribute & 0xFF;
-	desc->seg_limit_high_and_attr2 = (((attribute >> 8) & 0xF) << 4) | ((limit >> 16) & 0x0F); 	
-	desc->seg_base_high = (base >> 24) & 0xF;
+	//desc->seg_limit_high_and_attr2 = (((attribute >> 8) & 0xF) << 4) | ((limit >> 16) & 0x0F); 	
+	desc->seg_limit_high_and_attr2 = ((attribute >> 8) & 0xF0) | ((limit >> 16) & 0x0F); 	
+	//desc->seg_base_high = (base >> 24) & 0xF;
+	desc->seg_base_high = (unsigned char)((base >> 24) & 0xFF);
 }
 
 // 根据段名求物理地址
@@ -482,7 +489,10 @@ unsigned int Seg2PhyAddr(unsigned int selector)
 {
 	Descriptor desc = gdt[selector >> 3];
 	//int addr = ((desc & 0xFFFF0000) >> 16) | (((desc >> 32) & 0xFF) << 16) | (((desc >> 56) & 0xFF) << 24);
-	int addr = desc.seg_base_below | (desc.seg_base_middle << 16) | (desc.seg_base_high << 24);
+	//int addr = desc.seg_base_below | (desc.seg_base_middle << 16) | (desc.seg_base_high << 24);
+	//int addr = (desc.seg_base_below & 0xFFFF) | ((desc.seg_base_middle & 0xFF0000)) | ((desc.seg_base_high & 0xFF000000));
+	int addr=(desc.seg_base_below & 0xFFFF) | ((desc.seg_base_middle << 16) & 0xFF0000) 
+		| (unsigned char)((desc.seg_base_high<<24) & 0xFF000000);
 	return addr;
 }
  // 根据虚拟地址求物理地址
@@ -542,9 +552,6 @@ void kernel_main()
 		disp_str(" ");
 	}	
 
-	dis_pos = 0;
-	disp_int(33);
-
 	restart();
 
 	while(1){}
@@ -554,6 +561,11 @@ void TestA()
 {
 	dis_pos = 0;
 	//while(1){
-		disp_int(3);
+	//	disp_int(3);
 	//}
+	//int gs_base = Seg2PhyAddr(0x0039);
+	int i = 0;
+	while(1){
+		disp_str("A");
+	}
 }
