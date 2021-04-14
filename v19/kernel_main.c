@@ -188,6 +188,7 @@ void kernel_main();
 void TestA();
 // 启动进程
 void restart();
+void delay(int time);
 // 进程A的堆栈
 int proc_stack[128];
 
@@ -566,6 +567,20 @@ void TestA()
 	//int gs_base = Seg2PhyAddr(0x0039);
 	int i = 0;
 	while(1){
-		disp_str("A");
+		disp_str_colour("Hello, World!", 0x0F);
+		disp_str("\n");
+		disp_int(12);
+		disp_str(".");
+		delay(4);
+	}
+}
+
+void delay(int time)
+{
+	for(int i = 0; i < time; i++){
+		for(int j = 0; j < 10; j++){
+			for(int k = 0; k < 1000; k++){
+			}
+		}
 	}
 }
