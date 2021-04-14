@@ -25,6 +25,7 @@ global disp_str
 global disp_str_colour
 global _start
 global InterruptTest
+global restart
 
 ; 内部中断
 global divide_zero_fault
@@ -63,7 +64,7 @@ _start:
 	;jmp $
 	;jmp $
 	;jmp $
-	;;;xchg; bx, bx
+	;;;;;;xchg; bx, bx
 	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
@@ -74,30 +75,33 @@ _start:
 	mov esp, StackTop
 	mov word [dis_pos], 0
 	sgdt [gdt_ptr]
-	xchg bx, bx
 	call ReloadGDT
 	lgdt [gdt_ptr]
 	lidt [idt_ptr]
 	jmp 0x8:csinit
+	;;;xchg bx, bx
 	;jmp $
 csinit:
+	;;;xchg bx, bx
 	; 加载tss
 	; 怎么使用C代码中的常量？
 	; ltr TSS_SELECTOR
-	ltr [TSS_SELECTOR]
+	;ltr [TSS_SELECTOR]
+	xor eax, eax
+	mov ax, TSS_SELECTOR
+	ltr ax
 	jmp kernel_main
-
-	hlt
+	
 	sti
-	hlt
 	mov ah, 0Bh
 	mov al, 'M'
 	mov [gs:(80 * 20 + 41) * 2], ax
+	hlt
 	;mov word [dis_pos], 0
 	;mov esp, StackTop
 	push 0
 	popfd
-	
+	jmp $	
 	call test
 	;hlt	
 	; 测试resb是否把堆栈初始化成了0
@@ -135,7 +139,7 @@ InterruptTest:
 
 ; 打印字符串
 disp_str:
-	xchg bx, bx
+	;xchg bx, bx
 	push ebp
 	mov ebp, esp
 	;push edi
@@ -146,7 +150,7 @@ disp_str:
 	;mov esi, [ebp + 4]; ebp + 4，乱码。那么，[ebp + 4]存储的是什么？
 	mov esi, [ebp + 8]
 	mov edi, [dis_pos]
-	;;xchg bx, bx
+	;;;;;xchg bx, bx
 
 .1:
 	lodsb
@@ -167,7 +171,7 @@ disp_str:
 	pop eax
 	jmp .1
 .3:
-	;;xchg bx, bx
+	;;;;;xchg bx, bx
 	mov [gs:edi], ax
 	add edi, 2
 	jmp .1
@@ -184,12 +188,12 @@ disp_str:
 
 ; 打印字符串，设置颜色
 disp_str_colour:
-	xchg bx, bx
+	;;xchg bx, bx
 	push ebp
 	mov ebp, esp
 	;push edi
 	;push esi
-	;xchg bx, bx	
+	;;;;xchg bx, bx	
 	mov esi, [ebp + 8]
 	; ebp + 4 就是颜色
 	;mov eax, [ebp + 4]
@@ -213,7 +217,7 @@ disp_str_colour:
 	;mov esp, ebp
 	;pop ebp
 	;ret
-	;;xchg bx, bx
+	;;;;;xchg bx, bx
 
 .1:
 	lodsb
@@ -234,7 +238,7 @@ disp_str_colour:
 	pop eax
 	jmp .1
 .3:
-	xchg bx, bx
+	;;;xchg bx, bx
 	mov [gs:edi], ax
 	add edi, 2
 	jmp .1
@@ -348,12 +352,21 @@ hwint1:
 
 ; 启动进程
 restart:
-	mov esp, [proc_table]
+	;;xchg bx, bx
+	;mov esp, [proc_table]
+	mov eax, proc_table
+	mov esp, eax
 	; 加载ldt
-	lldt [proc_table + 52]
+	;lldt [proc_table + 52]
+	;lldt [proc_table + 64]
+	lldt [proc_table + 68]
+	;lldt [proc_table + 56]
 	; 设置tss.esp0
-	lea eax, [proc_table + 52]
+	;lea eax, [proc_table + 52]
+	;lea eax, [proc_table + 56]
+	lea eax, [proc_table + 68]
 	mov [tss + 4], eax 
+	xchg bx, bx
 	; 出栈 	
 	pop gs
 	pop fs
@@ -361,7 +374,7 @@ restart:
 	pop ds
 
 	popad
-	
+	xchg bx, bx	
 	iretd
 
 

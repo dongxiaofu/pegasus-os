@@ -1,7 +1,7 @@
 [SECTION .txt]
 
 global Memcpy
-
+global Memset
 Memcpy:
 	push ebp
 	mov ebp, esp
@@ -55,25 +55,27 @@ Memcpy:
 
 ; Memset(void *dest, char character, int size)
 Memset:
+	;;;xchg bx, bx
 	push ebp
 	mov ebp, esp	
 	
-	push ax
+	push eax
 	
 	mov ecx, [ebp + 16]	; size
 	mov esi, [ebp + 8]	; dest
-	mov al,	 [ebp + 12]	; character	
+	mov byte al, [ebp + 12]	; character	
 
 .1:
 	cmp ecx, 0
-	jz 2
+	jz .2
 	mov [esi], al
-	inc ecx
+	dec ecx
 	inc esi		
+	jmp .1
 .2:
-	
-	pop ax
+	;;;xchg bx, bx
+	pop eax
 	pop ebp	
-	mov esp, ebp
-
+	;mov esp, ebp
+	;;;xchg bx, bx
 	ret	
