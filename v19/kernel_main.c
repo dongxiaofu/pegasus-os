@@ -144,6 +144,8 @@ typedef struct{
 	unsigned int edi;	
 	unsigned int esi;	
 	unsigned int ebp;	
+	// 在这里消耗了很多时间。为啥需要在这里补上一个值？这是因为popad依次出栈的数据中有这么个值，
+	// 如果不补上这一位，出栈时数据不能依次正确更新到寄存器中。
 	unsigned int kernel_esp;	
 	unsigned int ebx;	
 	unsigned int edx;	
@@ -155,7 +157,7 @@ typedef struct{
 	//unsigned short cs;
 	unsigned int eflags;
 	//unsigned short ss;
-	unsigned int esp;	// 漏掉了这个
+	unsigned int esp;	// 漏掉了这个。iretd会出栈更新esp。
 	unsigned int ss;
 }Regs;
 
@@ -544,6 +546,8 @@ void kernel_main()
 	proc->s_reg.esp = (int)(proc_stack + 128);
 	// proc->s_reg.esp = proc_stack + 128;
 	// 抄的于上神的。需要自己弄清楚。我已经理解了。
+	// IOPL = 1, IF = 1
+	// IOPL 控制I/O权限的特权级，IF控制中断的打开和关闭
 	proc->s_reg.eflags = 0x1202;	
 	// 启动进程，扣动扳机，砰！		
 	
@@ -567,11 +571,10 @@ void TestA()
 	//int gs_base = Seg2PhyAddr(0x0039);
 	int i = 0;
 	while(1){
-		disp_str_colour("Hello, World!", 0x0F);
+		//disp_str_colour("Hello, World!", 0x0C);
+		disp_int(5);
 		disp_str("\n");
-		disp_int(12);
-		disp_str(".");
-		delay(4);
+		//delay(1);
 	}
 }
 
