@@ -50,25 +50,6 @@ void test();
 void spurious_irq(int irq);
 void init_propt();
 
-// 初始化描述符
-// void InitDescriptor(void *desc, unsigned int base, unsigned int limit, unsigned short attribute);
-void InitDescriptor(Descriptor *desc, unsigned int base, unsigned int limit, unsigned short attribute);
-// 根据段名求物理地址
-unsigned int Seg2PhyAddr(unsigned int selector);
-// 根据虚拟地址求物理地址
-// unsigned int VirAddr2PhyAddr(unsigned int base, unsigned int offset);
-unsigned int VirAddr2PhyAddr(unsigned int base, void *offset);
-// 内核的入口函数
-void kernel_main();
-// 进程A的进程体
-void TestA();
-// 启动进程
-void restart();
-// 进程A的堆栈
-int proc_stack[128];
-
-
-
 const int INIT_MASTER_VEC_NO = 0x20;
 const int INIT_SLAVE_VEC_NO = 0x28;
 
@@ -182,6 +163,23 @@ typedef struct{
 // 变量--进程
 TSS tss;
 Proc proc_table[1];
+
+// 初始化描述符
+// void InitDescriptor(void *desc, unsigned int base, unsigned int limit, unsigned short attribute);
+void InitDescriptor(Descriptor *desc, unsigned int base, unsigned int limit, unsigned short attribute);
+// 根据段名求物理地址
+unsigned int Seg2PhyAddr(unsigned int selector);
+// 根据虚拟地址求物理地址
+// unsigned int VirAddr2PhyAddr(unsigned int base, unsigned int offset);
+unsigned int VirAddr2PhyAddr(unsigned int base, void *offset);
+// 内核的入口函数
+void kernel_main();
+// 进程A的进程体
+void TestA();
+// 启动进程
+void restart();
+// 进程A的堆栈
+int proc_stack[128];
 
 void ReloadGDT()
 {
