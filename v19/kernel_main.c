@@ -66,7 +66,8 @@ const int INIT_SLAVE_VEC_NO = 0x28;
 //#define CS_SELECTOR 0x1000;
 #define CS_SELECTOR 0x08
 #define DS_SELECTOR 0x30
-#define GS_SELECTOR 0x38
+//#define GS_SELECTOR 0x38
+#define GS_SELECTOR 0x3b
 #define TSS_SELECTOR 0x40	//1000  000 ---> 100 0000
 #define LDT_FIRST_SELECTOR 0x48
 
@@ -129,24 +130,32 @@ typedef struct{
 // 进程表 start
 typedef struct{
 	// 中断处理程序压栈，手工压栈
-	unsigned short gs;	
-	unsigned short fs;	
-	unsigned short es;	
-	unsigned short ds;
+	//unsigned short gs;	
+	//unsigned short fs;	
+	//unsigned short es;	
+	//unsigned short ds;
+	
+	unsigned int gs;	
+	unsigned int fs;	
+	unsigned int es;	
+	unsigned int ds;	
 	// pushad压栈，顺序固定	
 	unsigned int edi;	
 	unsigned int esi;	
 	unsigned int ebp;	
-	unsigned int esp;	
+	unsigned int kernel_esp;	
 	unsigned int ebx;	
 	unsigned int edx;	
 	unsigned int ecx;	
 	unsigned int eax;
 	// 中断发生时压栈
 	unsigned int eip;
-	unsigned short cs;
+	unsigned int cs;
+	//unsigned short cs;
 	unsigned int eflags;
-	unsigned short ss;
+	//unsigned short ss;
+	unsigned int esp;	// 漏掉了这个
+	unsigned int ss;
 }Regs;
 
 typedef struct{
@@ -438,16 +447,20 @@ void init_propt()
 	int tss_size = sizeof(TSS);
 	Memset(&tss, 0, tss_size);
 	tss.iobase = tss_size;
+	tss.ss0 = DS_SELECTOR;
 	int ds_phy_addr = Seg2PhyAddr(DS_SELECTOR);
 	// int tss_base = VirAddr2PhyAddr(ds_phy_addr, tss);		
 	int tss_base = VirAddr2PhyAddr(ds_phy_addr, &tss);		
-	int tss_attribute = 0x0c92;		// todo tss的属性怎么确定？
+	// int tss_attribute = 0x0c92;		// todo tss的属性怎么确定？
+	// 难点。抄的于上神的。
+	int tss_attribute = 0x89;		// todo tss的属性怎么确定？
 	InitDescriptor(&gdt[TSS_SELECTOR_INDEX], tss_base, tss_size - 1, tss_attribute);				
 			
 	// 初始化LDT
 	int ldt_size = 2 * sizeof(Descriptor);
-	int ldt_attribute = 0x0c92;          // todo ldt的属性怎么确定？	
-	int ldt_base = VirAddr2PhyAddr(ds_phy_addr, &proc_table[0]);
+	// int ldt_attribute = 0x0c92;          // todo ldt的属性怎么确定？	
+	int ldt_attribute = 0x82;          // todo ldt的属性怎么确定？	
+	int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[0].ldts);
 	InitDescriptor(&gdt[LDT_FIRST_SELECTOR_INDEX], ldt_base, ldt_size - 1, ldt_attribute);
 }
 
@@ -468,13 +481,14 @@ void InitDescriptor(Descriptor *desc, unsigned int base, unsigned int limit, uns
 unsigned int Seg2PhyAddr(unsigned int selector)
 {
 	Descriptor desc = gdt[selector >> 3];
-	int addr = ((desc & 0xFFFF0000) >> 16) | (((desc >> 32) & 0xFF) << 16) | (((desc >> 56) & 0xFF) << 24);
+	//int addr = ((desc & 0xFFFF0000) >> 16) | (((desc >> 32) & 0xFF) << 16) | (((desc >> 56) & 0xFF) << 24);
+	int addr = desc.seg_base_below | (desc.seg_base_middle << 16) | (desc.seg_base_high << 24);
 	return addr;
 }
  // 根据虚拟地址求物理地址
-unsigned int VirAddr2PhyAddr(unsigned int base, unsigned int offset)
+unsigned int VirAddr2PhyAddr(unsigned int base, void *offset)
 {
-	int addr = base + offset;
+	int addr = base + (int)offset;
 	return addr;
 }
 
@@ -488,23 +502,49 @@ void kernel_main()
 	//proc->ldts[0] = ;
 	Memcpy(&proc->ldts[0], &gdt[CS_SELECTOR_INDEX], sizeof(Descriptor));
 	// 修改ldt描述符的属性。全局cs的属性是 0c9ah。
-	proc->ldts[0].seg_attr1 = 0xcd;
+	//proc->ldts[0].seg_attr1 = 0xcd;
+	//proc->ldts[0].seg_attr1 = 0xda;
+	proc->ldts[0].seg_attr1 = 0xba;
 	Memcpy(&proc->ldts[1], &gdt[DS_SELECTOR_INDEX], sizeof(Descriptor));
-	// 修改ldt描述符的属性
-	proc->ldts[1].seg_attr1 = 0xcd;
+	// 修改ldt描述符的属性。全局ds的属性是 0c92h
+	// proc->ldts[1].seg_attr1 = 0xd2;
+	proc->ldts[1].seg_attr1 = 0xb2;
+	// proc->ldts[1].seg_attr1 = 0xb2;
 
 	// 初始化进程表的段寄存器
 	proc->s_reg.cs = 0x05;	// 000 0101		
 	proc->s_reg.ds = 0x0D;	// 000 1101		
 	proc->s_reg.fs = 0x0D;	// 000 1101		
 	proc->s_reg.es = 0x0D;	// 000 1101		
-	proc->s_reg.ss = 0x0D;	// 000 1101		
-	proc->s_reg.gs = GS_SELECTOR;	
+	//proc->s_reg.ss = 0x0D;	// 000 1101	
+	proc->s_reg.ss = 0x0D;	// 000 1100	
+	// 需要修改gs的TI和RPL	
+	// proc->s_reg.gs = GS_SELECTOR;	
+	// proc->s_reg.gs = GS_SELECTOR | (0x101);
+	//proc->s_reg.gs = GS_SELECTOR;
+	//proc->s_reg.gs = GS_SELECTOR & (0x001);
+	// 0x3b--> 0011 1011 --> 0011 1 011
+	// 1001
+	proc->s_reg.gs = GS_SELECTOR & (0xFFF9);
+	// proc->s_reg.gs = 0x0D;
 	// 初始化进程表的通用寄存器
-	proc->s_reg.eip = TestA;
-	proc->s_reg.esp = proc_stack + 128;
-	
+	proc->s_reg.eip = (int)TestA;
+	// proc->s_reg.eip = TestA;
+	proc->s_reg.esp = (int)(proc_stack + 128);
+	// proc->s_reg.esp = proc_stack + 128;
+	// 抄的于上神的。需要自己弄清楚。我已经理解了。
+	proc->s_reg.eflags = 0x1202;	
 	// 启动进程，扣动扳机，砰！		
+	
+	dis_pos = 0;
+	// 清屏
+	for(int i = 0; i < 80 * 25 * 2; i++){
+		disp_str(" ");
+	}	
+
+	dis_pos = 0;
+	disp_int(33);
+
 	restart();
 
 	while(1){}
@@ -512,7 +552,8 @@ void kernel_main()
 
 void TestA()
 {
-	disp_str("A");
-	disp_int(12);
-	disp_str("\n");
+	dis_pos = 0;
+	//while(1){
+		disp_int(3);
+	//}
 }
