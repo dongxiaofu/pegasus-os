@@ -1,7 +1,8 @@
 [section .bss]
 Stack	resb	1024*2
 StackTop:
-
+; TSS选择子
+TSS_SELECTOR	equ	0x40
 [section .data]
 
 
@@ -9,12 +10,16 @@ StackTop:
 [section .text]
 extern gdt_ptr
 extern idt_ptr
+extern tss
+extern proc_table
+
 extern ReloadGDT
 extern exception_handler
 
 extern dis_pos
 extern test
 extern spurious_irq
+extern kernel_main
 
 global disp_str
 global disp_str_colour
@@ -76,6 +81,13 @@ _start:
 	jmp 0x8:csinit
 	;jmp $
 csinit:
+	; 加载tss
+	; 怎么使用C代码中的常量？
+	; ltr TSS_SELECTOR
+	ltr [TSS_SELECTOR]
+	jmp kernel_main
+
+	hlt
 	sti
 	hlt
 	mov ah, 0Bh
@@ -334,7 +346,23 @@ hwint1:
 %endmacro
 
 
+; 启动进程
+restart:
+	mov esp, [proc_table]
+	; 加载ldt
+	lldt [proc_table + 52]
+	; 设置tss.esp0
+	lea eax, [proc_table + 52]
+	mov [tss + 4], eax 
+	; 出栈 	
+	pop gs
+	pop fs
+	pop es
+	pop ds
 
+	popad
+	
+	iretd
 
 
 
