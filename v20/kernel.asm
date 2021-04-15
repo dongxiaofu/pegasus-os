@@ -96,6 +96,7 @@ csinit:
 	mov ah, 0Bh
 	mov al, 'M'
 	mov [gs:(80 * 20 + 41) * 2], ax
+	jmp $
 	hlt
 	;mov word [dis_pos], 0
 	;mov esp, StackTop
@@ -335,7 +336,12 @@ exception:
 %endmacro
 
 hwint0:
-	hwint_master 0
+	inc byte [gs:(80*20 + 41)*2]
+        ; 发送EOF
+        mov al, 20h
+        out 20h, al
+	iretd
+	;hwint_master 0
 	;ret
 hwint1:
 	hwint_master 1
