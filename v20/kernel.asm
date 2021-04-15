@@ -12,6 +12,7 @@ extern gdt_ptr
 extern idt_ptr
 extern tss
 extern proc_table
+extern ticks
 
 extern ReloadGDT
 extern exception_handler
@@ -336,13 +337,34 @@ exception:
 %endmacro
 
 hwint0:
-	inc byte [gs:(80*20 + 41)*2]
+	;inc byte [gs:(80*20 + 41)*2]
         ; 发送EOF
-        mov al, 20h
-        out 20h, al
-	iretd
+        ;mov al, 20h
+        ;out 20h, al
+	;iretd
 	;hwint_master 0
 	;ret
+	
+	; 建立快照
+	pushad
+	push ds
+	push es
+	push fs
+	push gs
+
+	mov esp, StackTop
+	inc byte [gs:(80*20 + 41)*2]
+	inc dword [ticks]
+	push ax
+	mov al, 20h
+	out 20h, al
+	pop ax
+	
+
+	; 启动进程
+	jmp restart
+
+
 hwint1:
 	hwint_master 1
 	;ret ; 奇怪，这个函数不能用这个结尾。

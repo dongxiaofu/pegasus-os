@@ -575,9 +575,12 @@ void TestA()
 	//}
 	//int gs_base = Seg2PhyAddr(0x0039);
 	int i = 0;
-	while(1){
+	int c = 0;
+	while(c > -20){
 		//disp_str_colour("Hello, World!", 0x0C);
 		disp_int(5);
+		disp_str("====");
+		disp_int(ticks);
 		disp_str("\n");
 		//delay(1);
 	}
