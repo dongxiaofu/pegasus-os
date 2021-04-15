@@ -1,5 +1,6 @@
 //extern InterruptTest; 
 int dis_pos;
+int ticks = 0;
 typedef void (*int_handle) ();
 void disp_str(char *str);
 // void disp_str_colour(char *str, int colour);
@@ -439,6 +440,10 @@ void spurious_irq(int irq)
 {
 	disp_str_colour("\n------------irq start---------------\n", 0x0B);
 	disp_int(irq);
+	ticks++;
+	disp_str("[");
+	disp_int(ticks);
+	disp_str("]");
 	disp_str_colour("\n------------irq end---------------\n", 0x0C);
 }
 
