@@ -13,6 +13,7 @@ extern idt_ptr
 extern tss
 extern proc_table
 extern ticks
+extern proc_ready_table
 
 extern ReloadGDT
 extern exception_handler
@@ -21,6 +22,7 @@ extern dis_pos
 extern test
 extern spurious_irq
 extern kernel_main
+extern schedule_process
 
 global disp_str
 global disp_str_colour
@@ -358,9 +360,11 @@ hwint0:
 	push ax
 	mov al, 20h
 	out 20h, al
+	sub esp, 4
+	call schedule_process	
+	add esp, 4
 	pop ax
 	
-
 	; 启动进程
 	jmp restart
 
@@ -380,19 +384,22 @@ hwint1:
 
 ; 启动进程
 restart:
-	;;xchg bx, bx
+	xchg bx, bx
 	;mov esp, [proc_table]
-	mov eax, proc_table
-	mov esp, eax
+	;mov eax, proc_table
+	;mov esp, eax
 	; 加载ldt
 	;lldt [proc_table + 52]
 	;lldt [proc_table + 64]
-	lldt [proc_table + 68]
+	;lldt [proc_table + 68]
+	mov esp, [proc_ready_table]
+	lldt [esp + 68]
 	;lldt [proc_table + 56]
 	; 设置tss.esp0
 	;lea eax, [proc_table + 52]
 	;lea eax, [proc_table + 56]
-	lea eax, [proc_table + 68]
+	;lea eax, [proc_table + 68]
+	lea eax, [esp + 68]
 	mov [tss + 4], eax 
 	xchg bx, bx
 	; 出栈 	

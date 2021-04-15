@@ -1,6 +1,8 @@
 //extern InterruptTest; 
 int dis_pos;
 int ticks = 0;
+//static unsigned int counter = 0;
+unsigned int counter;
 typedef void (*int_handle) ();
 void disp_str(char *str);
 // void disp_str_colour(char *str, int colour);
@@ -175,7 +177,22 @@ typedef struct{
 
 // 变量--进程
 TSS tss;
-Proc proc_table[1];
+#define PROC_NUM 3
+Proc proc_table[PROC_NUM];
+Proc *proc_ready_table;
+typedef void (*Func)();
+
+typedef struct{
+	Func func_name;
+	unsigned short stack_size;
+}Task;
+
+// 进程A、B、C的堆栈大小
+#define A_STACK_SIZE 128
+#define B_STACK_SIZE 128
+#define C_STACK_SIZE 128
+// 进程栈
+#define STACK_SIZE (A_STACK_SIZE + B_STACK_SIZE + C_STACK_SIZE)
 
 // 初始化描述符
 // void InitDescriptor(void *desc, unsigned int base, unsigned int limit, unsigned short attribute);
@@ -189,12 +206,22 @@ unsigned int VirAddr2PhyAddr(unsigned int base, void *offset);
 void kernel_main();
 // 进程A的进程体
 void TestA();
+void TestB();
+void TestC();
 // 启动进程
 void restart();
 void delay(int time);
+// 调度进程
+void schedule_process();
 // 进程A的堆栈
-int proc_stack[128];
+int proc_stack[STACK_SIZE];
 
+//Task task_table[PROC_NUM] = {
+Task task_table[3] = {
+	{TestA, A_STACK_SIZE},
+	{TestB, B_STACK_SIZE},
+	{TestC, C_STACK_SIZE},
+};
 void ReloadGDT()
 {
 	//disp_str_colour("AAAA", 0x0C);
@@ -464,14 +491,16 @@ void init_propt()
 	// 难点。抄的于上神的。
 	int tss_attribute = 0x89;		// todo tss的属性怎么确定？
 	InitDescriptor(&gdt[TSS_SELECTOR_INDEX], tss_base, tss_size - 1, tss_attribute);				
-			
-	// 初始化LDT
-	int ldt_size = 2 * sizeof(Descriptor);
-	// int ldt_attribute = 0x0c92;          // todo ldt的属性怎么确定？	
-	int ldt_attribute = 0x82;          // todo ldt的属性怎么确定？	
-	int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[0].ldts);
-	InitDescriptor(&gdt[LDT_FIRST_SELECTOR_INDEX], ldt_base, ldt_size - 1, ldt_attribute);
-
+	for(int i = 0; i < PROC_NUM; i++){			
+		// 初始化LDT
+		int ldt_size = 2 * sizeof(Descriptor);
+		// int ldt_attribute = 0x0c92;          // todo ldt的属性怎么确定？	
+		int ldt_attribute = 0x82;          // todo ldt的属性怎么确定？	
+		// int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[0].ldts);
+		//int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table.ldts);
+		int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[i].ldts);
+		InitDescriptor(&gdt[LDT_FIRST_SELECTOR_INDEX], ldt_base, ldt_size - 1, ldt_attribute);
+	}
 	// gs
 	InitDescriptor(&gdt[7], 0xb8000, 0x0FFFF, 0x0F2);
 }
@@ -513,49 +542,60 @@ unsigned int VirAddr2PhyAddr(unsigned int base, void *offset)
 
 void kernel_main()
 {
+	counter = 0;
 	Proc *proc = proc_table;
-	
-	proc->ldt_selector = LDT_FIRST_SELECTOR;
-	
-	//proc->ldts[0] = ;
-	Memcpy(&proc->ldts[0], &gdt[CS_SELECTOR_INDEX], sizeof(Descriptor));
-	// 修改ldt描述符的属性。全局cs的属性是 0c9ah。
-	//proc->ldts[0].seg_attr1 = 0xcd;
-	//proc->ldts[0].seg_attr1 = 0xda;
-	proc->ldts[0].seg_attr1 = 0xba;
-	Memcpy(&proc->ldts[1], &gdt[DS_SELECTOR_INDEX], sizeof(Descriptor));
-	// 修改ldt描述符的属性。全局ds的属性是 0c92h
-	// proc->ldts[1].seg_attr1 = 0xd2;
-	proc->ldts[1].seg_attr1 = 0xb2;
-	// proc->ldts[1].seg_attr1 = 0xb2;
+	for(int i = 0; i < PROC_NUM; i++){	
+		proc->ldt_selector = LDT_FIRST_SELECTOR;
+		
+		//proc->ldts[0] = ;
+		Memcpy(&proc->ldts[0], &gdt[CS_SELECTOR_INDEX], sizeof(Descriptor));
+		// 修改ldt描述符的属性。全局cs的属性是 0c9ah。
+		//proc->ldts[0].seg_attr1 = 0xcd;
+		//proc->ldts[0].seg_attr1 = 0xda;
+		proc->ldts[0].seg_attr1 = 0xba;
+		Memcpy(&proc->ldts[1], &gdt[DS_SELECTOR_INDEX], sizeof(Descriptor));
+		// 修改ldt描述符的属性。全局ds的属性是 0c92h
+		// proc->ldts[1].seg_attr1 = 0xd2;
+		proc->ldts[1].seg_attr1 = 0xb2;
+		// proc->ldts[1].seg_attr1 = 0xb2;
 
-	// 初始化进程表的段寄存器
-	proc->s_reg.cs = 0x05;	// 000 0101		
-	proc->s_reg.ds = 0x0D;	// 000 1101		
-	proc->s_reg.fs = 0x0D;	// 000 1101		
-	proc->s_reg.es = 0x0D;	// 000 1101		
-	//proc->s_reg.ss = 0x0D;	// 000 1101	
-	proc->s_reg.ss = 0x0D;	// 000 1100	
-	// 需要修改gs的TI和RPL	
-	// proc->s_reg.gs = GS_SELECTOR;	
-	// proc->s_reg.gs = GS_SELECTOR | (0x101);
-	//proc->s_reg.gs = GS_SELECTOR;
-	//proc->s_reg.gs = GS_SELECTOR & (0x001);
-	// 0x3b--> 0011 1011 --> 0011 1 011
-	// 1001
-	proc->s_reg.gs = GS_SELECTOR & (0xFFF9);
-	// proc->s_reg.gs = 0x0D;
-	// 初始化进程表的通用寄存器
-	proc->s_reg.eip = (int)TestA;
-	// proc->s_reg.eip = TestA;
-	proc->s_reg.esp = (int)(proc_stack + 128);
-	// proc->s_reg.esp = proc_stack + 128;
-	// 抄的于上神的。需要自己弄清楚。我已经理解了。
-	// IOPL = 1, IF = 1
-	// IOPL 控制I/O权限的特权级，IF控制中断的打开和关闭
-	proc->s_reg.eflags = 0x1202;	
+		// 初始化进程表的段寄存器
+		proc->s_reg.cs = 0x05;	// 000 0101		
+		proc->s_reg.ds = 0x0D;	// 000 1101		
+		proc->s_reg.fs = 0x0D;	// 000 1101		
+		proc->s_reg.es = 0x0D;	// 000 1101		
+		//proc->s_reg.ss = 0x0D;	// 000 1101	
+		proc->s_reg.ss = 0x0D;	// 000 1100	
+		// 需要修改gs的TI和RPL	
+		// proc->s_reg.gs = GS_SELECTOR;	
+		// proc->s_reg.gs = GS_SELECTOR | (0x101);
+		//proc->s_reg.gs = GS_SELECTOR;
+		//proc->s_reg.gs = GS_SELECTOR & (0x001);
+		// 0x3b--> 0011 1011 --> 0011 1 011
+		// 1001
+		proc->s_reg.gs = GS_SELECTOR & (0xFFF9);
+		// proc->s_reg.gs = 0x0D;
+		// 初始化进程表的通用寄存器
+		// proc->s_reg.eip = (int)TestA;
+		//proc->s_reg.eip = (int)task_table.func_name;
+		proc->s_reg.eip = (int)task_table[i].func_name;
+		// proc->s_reg.eip = TestA;
+
+		proc->s_reg.esp = (int)(proc_stack + 128);
+		// proc->s_reg.esp = proc_stack + 128;
+		// 抄的于上神的。需要自己弄清楚。我已经理解了。
+		// IOPL = 1, IF = 1
+		// IOPL 控制I/O权限的特权级，IF控制中断的打开和关闭
+		proc->s_reg.eflags = 0x1202;	
+		
+		proc++;
+		// error: lvalue required as increment operand
+		//task_table++;
+	}
 	// 启动进程，扣动扳机，砰！		
-	
+	//proc_ready_table = &proc_table[1];	
+	//proc_ready_table = &proc_table[2];	
+	proc_ready_table = proc_table;	
 	dis_pos = 0;
 	// 清屏
 	for(int i = 0; i < 80 * 25 * 2; i++){
@@ -569,7 +609,6 @@ void kernel_main()
 
 void TestA()
 {
-	dis_pos = 0;
 	//while(1){
 	//	disp_int(3);
 	//}
@@ -579,14 +618,10 @@ void TestA()
 	while(c > 0){
 		//isp_str_colour("Hello, World!", 0x0C);
 		//c++;
-		disp_int(5);
-		disp_str("====");
-		disp_int(ticks);
-		disp_str("\n");
-		//delay(1);
+		disp_str_colour("A", 0x0B);
+		disp_int(1);
+		delay(1);
 	}
-
-	while(1){}
 }
 
 void delay(int time)
@@ -597,4 +632,62 @@ void delay(int time)
 			}
 		}
 	}
+}
+
+void TestB()
+{
+	//while(1){
+	//	disp_int(3);
+	//}
+	//int gs_base = Seg2PhyAddr(0x0039);
+	int i = 0;
+	int c = 1;
+	while(c > 0){
+		//isp_str_colour("Hello, World!", 0x0C);
+		//c++;
+		disp_str("B");
+		disp_int(2);
+		delay(4);
+	}
+}
+
+void TestC()
+{
+	//while(1){
+	//	disp_int(3);
+	//}
+	//int gs_base = Seg2PhyAddr(0x0039);
+	int i = 0;
+	int c = 1;
+	while(c > 0){
+		//isp_str_colour("Hello, World!", 0x0C);
+		//c++;
+		disp_str("C");
+		disp_int(3);
+		//delay(4);
+		delay(5);
+	}
+}
+// 进程调度次数
+//unsigned int counter = 0;
+void schedule_process()
+{
+	//extern unsigned int counter;
+	if(counter < PROC_NUM - 1){
+		//proc_ready_table = &proc_table[counter++];
+		counter++;
+		proc_ready_table = &proc_table[counter];
+	}else{
+		proc_ready_table = proc_table;
+		counter = 0;
+	}
+	return;
+	counter++;
+	// if(counter == PROC_NUM){
+	if(counter == PROC_NUM - 1){
+		counter = 0;
+		proc_ready_table = proc_table;
+	}
+	// proc_ready_table++;	
+	// counter++;
 }
