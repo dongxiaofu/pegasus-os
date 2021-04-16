@@ -14,6 +14,7 @@ extern tss
 extern proc_table
 extern ticks
 extern proc_ready_table
+extern k_reenter
 
 extern ReloadGDT
 extern exception_handler
@@ -341,21 +342,31 @@ hwint0:
 	mov dx, ss
 	mov ds, dx
 	mov es, dx
-
+	xchg bx, bx	
+	mov al, 20h
+	out 20h, al	
+	sti;
+	;inc word [k_reenter]
+	inc dword [k_reenter]
+	;cmp k_reenter, 0
+	;cmp [k_reenter], 0
+	cmp dword [k_reenter], 0
+	;jnz restore
+	jne restore
 	mov esp, StackTop
-	xchg bx, bx
-	sti
+	;sti
 	inc byte [gs:0]
 	push ax
 	call schedule_process	
-	mov al, 20h
-	out 20h, al
+	;mov al, 20h
+	;out 20h, al
 	;call schedule_process	
 	pop ax
 	xchg bx, bx
 	cli	
 	; 启动进程
-	jmp restart
+	;jmp restart
+	jne restore
 
 
 hwint1:
@@ -398,6 +409,34 @@ restart:
 	popad
 	iretd
 
+; 恢复进程
+restore:
+	;mov esp, [proc_table]
+	;mov eax, proc_table
+	;mov esp, eax
+	; 加载ldt
+	;lldt [proc_table + 52]
+	;lldt [proc_table + 64]
+	;lldt [proc_table + 68]
+	;dec word [k_reenter]
+	dec dword [k_reenter]
+	mov esp, [proc_ready_table]
+	lldt [esp + 68]
+	;lldt [proc_table + 56]
+	; 设置tss.esp0
+	;lea eax, [proc_table + 52]
+	;lea eax, [proc_table + 56]
+	;lea eax, [proc_table + 68]
+	lea eax, [esp + 68]
+	mov [tss + 4], eax 
+	; 出栈 	
+	pop gs
+	pop fs
+	pop es
+	pop ds
+
+	popad
+	iretd
 
 
 

@@ -1,6 +1,11 @@
 //extern InterruptTest; 
 int dis_pos;
 int ticks = 0;
+// 标识时钟中断是否重入
+//unsigned char k_reenter;
+//char k_reenter;
+//short k_reenter;
+int k_reenter;
 //static unsigned int counter = 0;
 unsigned int counter;
 typedef void (*int_handle) ();
@@ -543,6 +548,8 @@ unsigned int VirAddr2PhyAddr(unsigned int base, void *offset)
 void kernel_main()
 {
 	counter = 0;
+	// 在这个项目的C代码中，全局变量如此赋值才有效。原因未知，实践要求如此。
+	k_reenter = -1;
 	Proc *proc = proc_table;
 	for(int i = 0; i < PROC_NUM; i++){	
 		//proc->ldt_selector = LDT_FIRST_SELECTOR + i<<3;
