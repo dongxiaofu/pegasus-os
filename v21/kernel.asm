@@ -94,7 +94,7 @@ csinit:
 	mov ax, TSS_SELECTOR
 	ltr ax
 	jmp kernel_main
-	
+	jmp $	
 	sti
 	mov ah, 0Bh
 	mov al, 'M'
@@ -117,21 +117,6 @@ csinit:
 	;int 0x0
 
 	hlt
-
-	;times	131072	db	0
-	;times	131072	db	0
-	;times	131072	db	0
-	;times	131072	db	0
-	;times	131072	db	0
-	;times	131072	db	0
-	;times	131072	db	0
-	;times	131072	db	0
-	;times	85537	db	0
-	;times	85537	db	0
-
-
-
-
 
 ; 中断例程
 InterruptTest:
@@ -346,25 +331,29 @@ hwint0:
 	;iretd
 	;hwint_master 0
 	;ret
-	
 	; 建立快照
 	pushad
 	push ds
 	push es
 	push fs
 	push gs
+	
+	mov dx, ss
+	mov ds, dx
+	mov es, dx
 
 	mov esp, StackTop
-	inc byte [gs:(80*20 + 41)*2]
-	inc dword [ticks]
+	xchg bx, bx
+	sti
+	inc byte [gs:0]
 	push ax
+	call schedule_process	
 	mov al, 20h
 	out 20h, al
-	sub esp, 4
-	call schedule_process	
-	add esp, 4
+	;call schedule_process	
 	pop ax
-	
+	xchg bx, bx
+	cli	
 	; 启动进程
 	jmp restart
 
@@ -384,7 +373,6 @@ hwint1:
 
 ; 启动进程
 restart:
-	xchg bx, bx
 	;mov esp, [proc_table]
 	;mov eax, proc_table
 	;mov esp, eax
@@ -401,7 +389,6 @@ restart:
 	;lea eax, [proc_table + 68]
 	lea eax, [esp + 68]
 	mov [tss + 4], eax 
-	xchg bx, bx
 	; 出栈 	
 	pop gs
 	pop fs
@@ -409,7 +396,6 @@ restart:
 	pop ds
 
 	popad
-	xchg bx, bx	
 	iretd
 
 
