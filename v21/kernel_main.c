@@ -499,7 +499,7 @@ void init_propt()
 		// int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[0].ldts);
 		//int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table.ldts);
 		int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[i].ldts);
-		InitDescriptor(&gdt[LDT_FIRST_SELECTOR_INDEX], ldt_base, ldt_size - 1, ldt_attribute);
+		InitDescriptor(&gdt[LDT_FIRST_SELECTOR_INDEX+i], ldt_base, ldt_size - 1, ldt_attribute);
 	}
 	// gs
 	InitDescriptor(&gdt[7], 0xb8000, 0x0FFFF, 0x0F2);
@@ -515,8 +515,8 @@ void InitDescriptor(Descriptor *desc, unsigned int base, unsigned int limit, uns
 	//desc->seg_base_middle = (base >> 16) & 0xF;
 	desc->seg_base_middle = (base >> 16) & 0xFF;
 	desc->seg_attr1 = attribute & 0xFF;
-	//desc->seg_limit_high_and_attr2 = (((attribute >> 8) & 0xF) << 4) | ((limit >> 16) & 0x0F); 	
-	desc->seg_limit_high_and_attr2 = ((attribute >> 8) & 0xF0) | ((limit >> 16) & 0x0F); 	
+	desc->seg_limit_high_and_attr2 = (((attribute >> 8) & 0xF) << 4) | ((limit >> 16) & 0x0F); 	
+	//desc->seg_limit_high_and_attr2 = ((attribute >> 8) & 0xF0) | ((limit >> 16) & 0x0F); 	
 	//desc->seg_base_high = (base >> 24) & 0xF;
 	desc->seg_base_high = (unsigned char)((base >> 24) & 0xFF);
 }
@@ -545,8 +545,9 @@ void kernel_main()
 	counter = 0;
 	Proc *proc = proc_table;
 	for(int i = 0; i < PROC_NUM; i++){	
-		proc->ldt_selector = LDT_FIRST_SELECTOR;
-		
+		//proc->ldt_selector = LDT_FIRST_SELECTOR + i<<3;
+		proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
+		proc->pid = i;	
 		//proc->ldts[0] = ;
 		Memcpy(&proc->ldts[0], &gdt[CS_SELECTOR_INDEX], sizeof(Descriptor));
 		// 修改ldt描述符的属性。全局cs的属性是 0c9ah。
@@ -581,7 +582,8 @@ void kernel_main()
 		proc->s_reg.eip = (int)task_table[i].func_name;
 		// proc->s_reg.eip = TestA;
 
-		proc->s_reg.esp = (int)(proc_stack + 128);
+		//proc->s_reg.esp = (int)(proc_stack + 128 * i);
+		proc->s_reg.esp = (int)(proc_stack + 128 * (i+1));
 		// proc->s_reg.esp = proc_stack + 128;
 		// 抄的于上神的。需要自己弄清楚。我已经理解了。
 		// IOPL = 1, IF = 1
@@ -601,7 +603,7 @@ void kernel_main()
 	for(int i = 0; i < 80 * 25 * 2; i++){
 		disp_str(" ");
 	}	
-
+	dis_pos = 2;
 	restart();
 
 	while(1){}
@@ -609,17 +611,10 @@ void kernel_main()
 
 void TestA()
 {
-	//while(1){
-	//	disp_int(3);
-	//}
-	//int gs_base = Seg2PhyAddr(0x0039);
-	int i = 0;
-	int c = 1;
-	while(c > 0){
-		//isp_str_colour("Hello, World!", 0x0C);
-		//c++;
+	while(1){
 		disp_str_colour("A", 0x0B);
 		disp_int(1);
+		disp_str(".");
 		delay(1);
 	}
 }
@@ -628,7 +623,7 @@ void delay(int time)
 {
 	for(int i = 0; i < time; i++){
 		for(int j = 0; j < 10; j++){
-			for(int k = 0; k < 1000; k++){
+			for(int k = 0; k < 10000; k++){
 			}
 		}
 	}
@@ -636,58 +631,58 @@ void delay(int time)
 
 void TestB()
 {
-	//while(1){
-	//	disp_int(3);
-	//}
-	//int gs_base = Seg2PhyAddr(0x0039);
-	int i = 0;
-	int c = 1;
-	while(c > 0){
-		//isp_str_colour("Hello, World!", 0x0C);
-		//c++;
+	while(1){
 		disp_str("B");
 		disp_int(2);
-		delay(4);
+		disp_str(".");
+		delay(1);
 	}
 }
 
 void TestC()
 {
-	//while(1){
-	//	disp_int(3);
-	//}
-	//int gs_base = Seg2PhyAddr(0x0039);
-	int i = 0;
-	int c = 1;
-	while(c > 0){
-		//isp_str_colour("Hello, World!", 0x0C);
-		//c++;
+	while(1){
 		disp_str("C");
 		disp_int(3);
-		//delay(4);
-		delay(5);
+		disp_str(".");
+		delay(1);
 	}
 }
 // 进程调度次数
 //unsigned int counter = 0;
 void schedule_process()
 {
-	//extern unsigned int counter;
-	if(counter < PROC_NUM - 1){
-		//proc_ready_table = &proc_table[counter++];
-		counter++;
-		proc_ready_table = &proc_table[counter];
-	}else{
-		proc_ready_table = proc_table;
-		counter = 0;
-	}
-	return;
+	//disp_str("[");
+	//disp_int(proc_ready_table->pid);
+	//disp_str("]");
+	//proc_ready_table++;
+	//if(proc_ready_table >= proc_table + PROC_NUM){
+	//	proc_ready_table = proc_table;
+	//}
+	//proc_ready_table = &proc_table[1];
+	//return;
 	counter++;
-	// if(counter == PROC_NUM){
-	if(counter == PROC_NUM - 1){
-		counter = 0;
-		proc_ready_table = proc_table;
-	}
-	// proc_ready_table++;	
-	// counter++;
+	proc_ready_table = &proc_table[counter%3];
+	disp_str("[");
+	disp_int(proc_ready_table->pid);
+	disp_str("]");
+	return;
+//	//extern unsigned int counter;
+//	if(counter < PROC_NUM - 1){
+//		//proc_ready_table = &proc_table[counter++];
+//		counter++;
+//		proc_ready_table = &proc_table[counter];
+//	}else{
+//		proc_ready_table = proc_table;
+//		counter = 0;
+//	}
+//	return;
+//	counter++;
+//	// if(counter == PROC_NUM){
+//	if(counter == PROC_NUM - 1){
+//		counter = 0;
+//		proc_ready_table = proc_table;
+//	}
+//	// proc_ready_table++;	
+//	// counter++;
 }
