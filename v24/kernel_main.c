@@ -175,7 +175,11 @@ typedef struct{
 	unsigned short ldt_selector;
 	// ldt
 	Descriptor ldts[2];	
-	unsigned int pid;		
+	unsigned int pid;
+	// 进程剩余可用的时钟中断次数
+	unsigned int ticks;
+	// 进程优先级
+	unsigned int priority;
 }Proc;
 
 // 进程表 end
@@ -217,7 +221,7 @@ void TestC();
 void restart();
 void delay(int time);
 // 调度进程
-void schedule_process();
+// void schedule_process();
 // 进程A的堆栈
 int proc_stack[STACK_SIZE];
 
@@ -245,6 +249,12 @@ int get_ticks();
 // 延迟函数 start
 void milli_delay(unsigned milli_sec);
 // 延迟函数 end
+// 进程调度 start
+// 时钟中断处理函数
+void clock_handler();
+// 进程调度
+void schedule_process();
+// 进程调度 end
 void ReloadGDT()
 {
 	//disp_str_colour("AAAA", 0x0C);
@@ -634,6 +644,11 @@ void kernel_main()
 	//proc_ready_table = &proc_table[1];	
 	//proc_ready_table = &proc_table[2];	
 	proc_ready_table = proc_table;	
+	
+	// 初始化进程优先级
+	proc_table[0].ticks = proc_table[0].priority = 30;
+	proc_table[1].ticks = proc_table[1].priority = 90;
+	proc_table[2].ticks = proc_table[2].priority = 150;
 	dis_pos = 0;
 	// 清屏
 	for(int i = 0; i < 80 * 25 * 2; i++){
@@ -695,6 +710,25 @@ void TestC()
 //unsigned int counter = 0;
 void schedule_process()
 {
+	Proc *p;
+	unsigned int greatest_ticks = 0;
+
+	while(!greatest_ticks){
+		for(p = proc_table; p < proc_table + PROC_NUM; p++){
+			if(p->ticks > greatest_ticks){
+				greatest_ticks = p->ticks;
+				proc_ready_table = p;
+			}
+		}
+		
+		while(!greatest_ticks){
+			for(p = proc_table; p < proc_table + PROC_NUM; p++){
+				p->ticks = p->priority;
+			}
+		}
+
+	}
+	
 	//disp_str("[");
 	//disp_int(proc_ready_table->pid);
 	//disp_str("]");
@@ -704,13 +738,13 @@ void schedule_process()
 	//}
 	//proc_ready_table = &proc_table[1];
 	//return;
-	counter++;
-	ticks++;
-	proc_ready_table = &proc_table[counter%3];
-	disp_str("[");
-	disp_int(proc_ready_table->pid);
-	disp_str("]");
-	return;
+	//counter++;
+	//ticks++;
+	//proc_ready_table = &proc_table[counter%3];
+	//disp_str("[");
+	//disp_int(proc_ready_table->pid);
+	//disp_str("]");
+	//return;
 //	//extern unsigned int counter;
 //	if(counter < PROC_NUM - 1){
 //		//proc_ready_table = &proc_table[counter++];
@@ -744,4 +778,18 @@ void milli_delay(unsigned int milli_sec)
 	int t = get_ticks();
 
 	while(((get_ticks() - t) / 100 * 1000)  < milli_sec){}
+}
+
+void clock_handler()
+{
+	proc_ready_table->ticks--;
+	ticks++;
+
+	if(k_reenter != 0){
+		//return proc_ready_table;
+		return;
+	}
+
+	// 调度进程
+	schedule_process();
 }
