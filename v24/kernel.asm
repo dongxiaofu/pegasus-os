@@ -24,7 +24,7 @@ extern dis_pos
 extern test
 extern spurious_irq
 extern kernel_main
-extern schedule_process
+extern clock_handler
 
 global disp_str
 global disp_str_colour
@@ -359,7 +359,8 @@ hwint0:
 	;sti
 	inc byte [gs:0]
 	push ax
-	call schedule_process	
+	;call schedule_process	
+	call clock_handler
 	;mov al, 20h
 	;out 20h, al
 	;call schedule_process	
