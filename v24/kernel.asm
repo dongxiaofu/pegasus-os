@@ -352,12 +352,12 @@ hwint0:
 	inc dword [k_reenter]
 	;cmp k_reenter, 0
 	;cmp [k_reenter], 0
-	cmp dword [k_reenter], 0
+	;cmp dword [k_reenter], 0
 	;jnz restore
-	jne restore
+	;jne restore
 	mov esp, StackTop
 	;sti
-	inc byte [gs:0]
+	;inc byte [gs:0]
 	push ax
 	;call schedule_process	
 	call clock_handler
