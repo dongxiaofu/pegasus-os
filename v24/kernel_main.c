@@ -646,15 +646,15 @@ void kernel_main()
 	proc_ready_table = proc_table;	
 	
 	// 初始化进程优先级
-	proc_table[0].ticks = proc_table[0].priority = 30;
-	proc_table[1].ticks = proc_table[1].priority = 90;
-	proc_table[2].ticks = proc_table[2].priority = 150;
+	proc_table[0].ticks = proc_table[0].priority = 150;
+	proc_table[1].ticks = proc_table[1].priority = 50;
+	proc_table[2].ticks = proc_table[2].priority = 30;
 	dis_pos = 0;
 	// 清屏
 	for(int i = 0; i < 80 * 25 * 2; i++){
 		disp_str(" ");
 	}	
-	dis_pos = 2;
+	dis_pos = 0;
 	restart();
 
 	while(1){}
@@ -663,13 +663,13 @@ void kernel_main()
 void TestA()
 {
 	while(1){
-		disp_int(get_ticks());
-		disp_str_colour("A", 0x0B);
-		disp_int(1);
+		//disp_int(get_ticks());
+		disp_str_colour("A", 0x0A);
+		//disp_int(1);
 		disp_str(".");
 		//delay(1);
 		//milli_delay(10);
-		milli_delay(1000);
+		milli_delay(200);
 	}
 }
 
@@ -686,24 +686,24 @@ void delay(int time)
 void TestB()
 {
 	while(1){
-		disp_int(get_ticks());
+		//disp_int(get_ticks());
 		disp_str("B");
 		disp_str(".");
 		//delay(1);
 		//milli_delay(20);
-		milli_delay(1000);
+		milli_delay(200);
 	}
 }
 
 void TestC()
 {
 	while(1){
-		disp_int(get_ticks());
+		//disp_int(get_ticks());
 		disp_str("C");
 		disp_str(".");
 		//delay(1);
 		//milli_delay(30);
-		milli_delay(1000);
+		milli_delay(200);
 	}
 }
 // 进程调度次数
@@ -721,7 +721,8 @@ void schedule_process()
 			}
 		}
 		
-		while(!greatest_ticks){
+		//while(!greatest_ticks){
+		if(!greatest_ticks){
 			for(p = proc_table; p < proc_table + PROC_NUM; p++){
 				p->ticks = p->priority;
 			}
@@ -789,6 +790,10 @@ void clock_handler()
 		//return proc_ready_table;
 		return;
 	}
+	
+	if(proc_ready_table->ticks > 0){
+		return;
+	}	
 
 	// 调度进程
 	schedule_process();
