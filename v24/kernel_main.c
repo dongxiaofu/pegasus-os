@@ -242,6 +242,9 @@ int_handle sys_call_table[1] = {
 // 导入汇编中的函数
 int get_ticks();
 // 系统调用 end
+// 延迟函数 start
+void milli_delay(unsigned milli_sec);
+// 延迟函数 end
 void ReloadGDT()
 {
 	//disp_str_colour("AAAA", 0x0C);
@@ -649,7 +652,9 @@ void TestA()
 		disp_str_colour("A", 0x0B);
 		disp_int(1);
 		disp_str(".");
-		delay(1);
+		//delay(1);
+		//milli_delay(10);
+		milli_delay(1000);
 	}
 }
 
@@ -669,7 +674,9 @@ void TestB()
 		disp_int(get_ticks());
 		disp_str("B");
 		disp_str(".");
-		delay(1);
+		//delay(1);
+		//milli_delay(20);
+		milli_delay(1000);
 	}
 }
 
@@ -679,7 +686,9 @@ void TestC()
 		disp_int(get_ticks());
 		disp_str("C");
 		disp_str(".");
-		delay(1);
+		//delay(1);
+		//milli_delay(30);
+		milli_delay(1000);
 	}
 }
 // 进程调度次数
@@ -725,7 +734,14 @@ void schedule_process()
 
 int sys_get_ticks()
 {
-	disp_str("@@");
+	//disp_str("@@");
 	
 	return ticks;
+}
+
+void milli_delay(unsigned int milli_sec)
+{
+	int t = get_ticks();
+
+	while(((get_ticks() - t) / 100 * 1000)  < milli_sec){}
 }
