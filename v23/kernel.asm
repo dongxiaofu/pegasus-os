@@ -4,7 +4,8 @@ StackTop:
 ; TSS选择子
 TSS_SELECTOR	equ	0x40
 [section .data]
-
+; 系统调用
+extern sys_call_table
 
 
 [section .text]
@@ -50,7 +51,8 @@ global page_fault
 global coprocessor_error_fault
 global align_check_fault
 global simd_float_exception_fault
-
+; 系统调用
+global sys_call
 
 ; 内部中断
 global hwint0
@@ -68,7 +70,7 @@ _start:
 	;jmp $
 	;jmp $
 	;jmp $
-	;;;;;;xchg; bx, bx
+	;;;;;;;xchg; bx, bx
 	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
@@ -83,10 +85,10 @@ _start:
 	lgdt [gdt_ptr]
 	lidt [idt_ptr]
 	jmp 0x8:csinit
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	;jmp $
 csinit:
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	; 加载tss
 	; 怎么使用C代码中的常量？
 	; ltr TSS_SELECTOR
@@ -129,7 +131,7 @@ InterruptTest:
 
 ; 打印字符串
 disp_str:
-	;xchg bx, bx
+	;;xchg bx, bx
 	push ebp
 	mov ebp, esp
 	;push edi
@@ -140,7 +142,7 @@ disp_str:
 	;mov esi, [ebp + 4]; ebp + 4，乱码。那么，[ebp + 4]存储的是什么？
 	mov esi, [ebp + 8]
 	mov edi, [dis_pos]
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 
 .1:
 	lodsb
@@ -161,7 +163,7 @@ disp_str:
 	pop eax
 	jmp .1
 .3:
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	mov [gs:edi], ax
 	add edi, 2
 	jmp .1
@@ -178,12 +180,12 @@ disp_str:
 
 ; 打印字符串，设置颜色
 disp_str_colour:
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	push ebp
 	mov ebp, esp
 	;push edi
 	;push esi
-	;;;;xchg bx, bx	
+	;;;;;xchg bx, bx	
 	mov esi, [ebp + 8]
 	; ebp + 4 就是颜色
 	;mov eax, [ebp + 4]
@@ -207,7 +209,7 @@ disp_str_colour:
 	;mov esp, ebp
 	;pop ebp
 	;ret
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 
 .1:
 	lodsb
@@ -228,7 +230,7 @@ disp_str_colour:
 	pop eax
 	jmp .1
 .3:
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	mov [gs:edi], ax
 	add edi, 2
 	jmp .1
@@ -362,7 +364,7 @@ hwint0:
 	;out 20h, al
 	;call schedule_process	
 	pop ax
-	xchg bx, bx
+	;xchg bx, bx
 	cli	
 	; 启动进程
 	;jmp restart
@@ -381,6 +383,58 @@ hwint1:
 	add esp, 4
 %endmacro
 
+
+
+; 系统调用中断 start
+sys_call:
+	; 建立快照
+	pushad
+	push ds
+	push es
+	push fs
+	push gs
+	xchg bx, bx	
+	; 中间代码修改eax使用
+	; 从gs到eax，距离是多少个字节？11个	
+	; 中间代码修改eax使用
+	mov esi, esp
+		
+	sti
+	; 中间代码
+	; 需要切换到内核栈吗？
+	mov esp, StackTop 
+	push esi
+	call [sys_call_table + 4 * eax]
+	; 修改请求系统调用的进程的进程表中的堆栈
+	; 获取堆栈中的eax是个难题：
+	; 1. 怎么获取进程表的堆栈？proc_ready_table不能用，esp指向的不是堆栈的最开始位置
+	; 2. 	
+	xchg bx, bx
+	pop esi
+	mov [esi + 11 * 4], eax
+	;mov [esi + 12 * 4], eax
+	;pop esi
+	cli
+	; 恢复进程。不能使用restart，因为，不能使用proc_ready_table
+	; jmp restart	
+	;sub esi, 68
+	mov esp, esi
+	;lldt [esp + 68]
+	;lldt [esp + 4]
+	lldt [esp + 68]
+	;lea eax, [esp + 4]
+	lea eax, [esp + 68]
+	mov [tss + 4], eax
+	
+	pop gs
+	pop fs
+	pop es
+	pop ds
+	popad
+
+	iretd
+
+; 系统调用中断 end
 
 ; 启动进程
 restart:

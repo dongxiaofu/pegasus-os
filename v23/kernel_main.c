@@ -1,6 +1,6 @@
 //extern InterruptTest; 
 int dis_pos;
-int ticks = 0;
+unsigned int ticks;
 // 标识时钟中断是否重入
 //unsigned char k_reenter;
 //char k_reenter;
@@ -227,6 +227,21 @@ Task task_table[3] = {
 	{TestB, B_STACK_SIZE},
 	{TestC, C_STACK_SIZE},
 };
+
+// 系统调用 start
+#define NR_GET_TICKS	0
+typedef void *system_call;
+int sys_get_ticks();
+void sys_call();
+//system_call sys_call_table[1] = {
+int_handle sys_call_table[1] = {
+	// warning: initialization of 'void (*)()' from incompatible pointer type 'int (*)()' [-Wincompatible-pointer-types]
+	// sys_get_ticks
+	(int_handle) sys_get_ticks
+};
+// 导入汇编中的函数
+int get_ticks();
+// 系统调用 end
 void ReloadGDT()
 {
 	//disp_str_colour("AAAA", 0x0C);
@@ -431,6 +446,16 @@ void init_internal_interrupt()
 	InitInterruptDesc(16,coprocessor_error_fault,0x08,0x0E);
 	InitInterruptDesc(17,align_check_fault,0x08,0x0E);
 	InitInterruptDesc(18,simd_float_exception_fault,0x08,0x0E);	
+
+
+	// 系统调用
+	// 属性可能需要修改
+	//InitInterruptDesc(0x90,sys_get_ticks,0x08,0x0E);	
+	// interrupt(): soft_int && (gate.dpl < CPL)
+	// InitInterruptDesc(0x90,sys_call,0x08,0x0E);	
+	// 0x08--->1000b--->特权级是0
+	// 1010b-->0xA--->特权级是1
+	InitInterruptDesc(0x90,sys_call,0x0A,0x0E);	
 }
 
 void test()
@@ -547,6 +572,7 @@ unsigned int VirAddr2PhyAddr(unsigned int base, void *offset)
 
 void kernel_main()
 {
+	ticks = 0;
 	counter = 0;
 	// 在这个项目的C代码中，全局变量如此赋值才有效。原因未知，实践要求如此。
 	k_reenter = -1;
@@ -619,6 +645,7 @@ void kernel_main()
 void TestA()
 {
 	while(1){
+		disp_int(get_ticks());
 		disp_str_colour("A", 0x0B);
 		disp_int(1);
 		disp_str(".");
@@ -639,8 +666,8 @@ void delay(int time)
 void TestB()
 {
 	while(1){
+		disp_int(get_ticks());
 		disp_str("B");
-		disp_int(2);
 		disp_str(".");
 		delay(1);
 	}
@@ -649,8 +676,8 @@ void TestB()
 void TestC()
 {
 	while(1){
+		disp_int(get_ticks());
 		disp_str("C");
-		disp_int(3);
 		disp_str(".");
 		delay(1);
 	}
@@ -669,6 +696,7 @@ void schedule_process()
 	//proc_ready_table = &proc_table[1];
 	//return;
 	counter++;
+	ticks++;
 	proc_ready_table = &proc_table[counter%3];
 	disp_str("[");
 	disp_int(proc_ready_table->pid);
@@ -692,4 +720,12 @@ void schedule_process()
 //	}
 //	// proc_ready_table++;	
 //	// counter++;
+}
+
+
+int sys_get_ticks()
+{
+	disp_str("@@");
+	
+	return ticks;
 }
