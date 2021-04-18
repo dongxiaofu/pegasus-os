@@ -186,7 +186,7 @@ typedef struct{
 
 // 变量--进程
 TSS tss;
-#define PROC_NUM 3
+#define PROC_NUM 4
 Proc proc_table[PROC_NUM];
 Proc *proc_ready_table;
 typedef void (*Func)();
@@ -200,8 +200,9 @@ typedef struct{
 #define A_STACK_SIZE 128
 #define B_STACK_SIZE 128
 #define C_STACK_SIZE 128
+#define TTY_STACK_SIZE 128
 // 进程栈
-#define STACK_SIZE (A_STACK_SIZE + B_STACK_SIZE + C_STACK_SIZE)
+#define STACK_SIZE (A_STACK_SIZE + B_STACK_SIZE + C_STACK_SIZE + TTY_STACK_SIZE)
 
 // 初始化描述符
 // void InitDescriptor(void *desc, unsigned int base, unsigned int limit, unsigned short attribute);
@@ -225,11 +226,12 @@ void delay(int time);
 // 进程A的堆栈
 int proc_stack[STACK_SIZE];
 
-//Task task_table[PROC_NUM] = {
-Task task_table[3] = {
+Task task_table[PROC_NUM] = {
+//Task task_table[3] = {
 	{TestA, A_STACK_SIZE},
 	{TestB, B_STACK_SIZE},
 	{TestC, C_STACK_SIZE},
+	{TTY, TTY_STACK_SIZE},
 };
 
 // 系统调用 start
@@ -802,11 +804,45 @@ void clock_handler()
 
 // 键盘 start
 // 键盘中断例程的中间代码
+#define KEYBOARD_BUF_SIZE 10;
+// 中断例程的缓冲区结构体
+typedef struct{
+	char *head;
+	char *tail;
+	int counter;
+	char buf[KEYBOARD_BUF_SIZE];
+}KeyboardBuffer;
+// 中断例程的缓冲区
+KeyboardBuffer keyboard_buffer;
+// 从端口读取一个字节，汇编函数
 char in_byte(unsigned short port);
 void keyboard_handler();
+// 从中断例程的缓冲区读取数据
+void keyboard_read();
 void keyboard_handler()
 {
-	char scan_code = in_byte(0x60);
-	disp_int(scan_code);
+	//char scan_code = in_byte(0x60);
+	//disp_int(scan_code);
+	int port = 0x60;
+	if(keyboard_buffer.counter < KEYBOARD_BUF_SIZE){
+		*(keyboard_buffer.head) = in_byte(port);
+		keyboard_buffer.head++;
+		keyboard_buffer.counter++;
+		if(keyboard_buffer.counter == KEYBOARD_BUF_SIZE){
+			keyboard_buffer.head = keyboard_buffer.buf;
+		}
+	}
+}
+
+void keyboard_read()
+{
+	if(keyboard_buffer.counter > 0){
+		char scan_code = *(keyboard_buffer.tail);
+		keyboard_buffer.tail++;
+		keyboard_buffer.counter--;
+		if(keyboard_buffer.counter == 0){
+			keyboard_buffer.tail = keyboard_buffer.buf;
+		}
+	}
 }
 // 键盘 end
