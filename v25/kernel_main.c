@@ -257,6 +257,29 @@ void clock_handler();
 // 进程调度
 void schedule_process();
 // 进程调度 end
+
+
+// 键盘 start
+// 键盘中断例程的中间代码
+#define KEYBOARD_BUF_SIZE 10;
+// 中断例程的缓冲区结构体
+typedef struct{
+	char *head;
+	char *tail;
+	int counter;
+	char buf[KEYBOARD_BUF_SIZE];
+}KeyboardBuffer;
+// 中断例程的缓冲区
+KeyboardBuffer keyboard_buffer;
+// 从端口读取一个字节，汇编函数
+char in_byte(unsigned short port);
+void keyboard_handler();
+// 从中断例程的缓冲区读取数据
+void keyboard_read();
+// 终端任务进程体
+void TTY();
+// 键盘 end
+
 void ReloadGDT()
 {
 	//disp_str_colour("AAAA", 0x0C);
@@ -646,11 +669,17 @@ void kernel_main()
 	//proc_ready_table = &proc_table[1];	
 	//proc_ready_table = &proc_table[2];	
 	proc_ready_table = proc_table;	
+
+
+	// 键盘
+	keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
+	keyboard_buffer.counter = 0;
 	
 	// 初始化进程优先级
-	proc_table[0].ticks = proc_table[0].priority = 150;
+	proc_table[0].ticks = proc_table[0].priority = 10;
 	proc_table[1].ticks = proc_table[1].priority = 50;
 	proc_table[2].ticks = proc_table[2].priority = 30;
+	proc_table[3].ticks = proc_table[3].priority = 300;
 	dis_pos = 0;
 	// 清屏
 	for(int i = 0; i < 80 * 25 * 2; i++){
@@ -666,9 +695,9 @@ void TestA()
 {
 	while(1){
 		//disp_int(get_ticks());
-		disp_str_colour("A", 0x0A);
+		//disp_str_colour("A", 0x0A);
 		//disp_int(1);
-		disp_str(".");
+		//disp_str(".");
 		//delay(1);
 		//milli_delay(10);
 		milli_delay(200);
@@ -689,8 +718,8 @@ void TestB()
 {
 	while(1){
 		//disp_int(get_ticks());
-		disp_str("B");
-		disp_str(".");
+		//disp_str("B");
+		//disp_str(".");
 		//delay(1);
 		//milli_delay(20);
 		milli_delay(200);
@@ -701,8 +730,8 @@ void TestC()
 {
 	while(1){
 		//disp_int(get_ticks());
-		disp_str("C");
-		disp_str(".");
+		//disp_str("C");
+		//disp_str(".");
 		//delay(1);
 		//milli_delay(30);
 		milli_delay(200);
@@ -801,24 +830,7 @@ void clock_handler()
 	schedule_process();
 }
 
-
 // 键盘 start
-// 键盘中断例程的中间代码
-#define KEYBOARD_BUF_SIZE 10;
-// 中断例程的缓冲区结构体
-typedef struct{
-	char *head;
-	char *tail;
-	int counter;
-	char buf[KEYBOARD_BUF_SIZE];
-}KeyboardBuffer;
-// 中断例程的缓冲区
-KeyboardBuffer keyboard_buffer;
-// 从端口读取一个字节，汇编函数
-char in_byte(unsigned short port);
-void keyboard_handler();
-// 从中断例程的缓冲区读取数据
-void keyboard_read();
 void keyboard_handler()
 {
 	//char scan_code = in_byte(0x60);
@@ -838,11 +850,21 @@ void keyboard_read()
 {
 	if(keyboard_buffer.counter > 0){
 		char scan_code = *(keyboard_buffer.tail);
+
+		disp_int(scan_code);
+
 		keyboard_buffer.tail++;
 		keyboard_buffer.counter--;
 		if(keyboard_buffer.counter == 0){
 			keyboard_buffer.tail = keyboard_buffer.buf;
 		}
+	}
+}
+
+void TTY()
+{
+	while(1){
+		keyboard_read();
 	}
 }
 // 键盘 end
