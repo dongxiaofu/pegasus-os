@@ -519,7 +519,9 @@ void spurious_irq(int irq)
 
 void init_propt()
 {
+	// 时钟中断IDT
 	InitInterruptDesc(INIT_MASTER_VEC_NO + 0, hwint0 ,0x08,0x0E);	
+	// 键盘中断IDT
 	InitInterruptDesc(INIT_MASTER_VEC_NO + 1, hwint1 ,0x08,0x0E);	
 	
 	// 初始化tss
