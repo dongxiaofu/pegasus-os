@@ -218,6 +218,8 @@ void kernel_main();
 void TestA();
 void TestB();
 void TestC();
+// 终端--任务进程体，键盘
+void TTY();
 // 启动进程
 void restart();
 void delay(int time);
@@ -261,7 +263,8 @@ void schedule_process();
 
 // 键盘 start
 // 键盘中断例程的中间代码
-#define KEYBOARD_BUF_SIZE 10;
+// #define KEYBOARD_BUF_SIZE 10; // 不能有逗号
+#define KEYBOARD_BUF_SIZE 10
 // 中断例程的缓冲区结构体
 typedef struct{
 	char *head;
@@ -276,8 +279,6 @@ char in_byte(unsigned short port);
 void keyboard_handler();
 // 从中断例程的缓冲区读取数据
 void keyboard_read();
-// 终端任务进程体
-void TTY();
 // 键盘 end
 
 void ReloadGDT()
