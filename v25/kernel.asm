@@ -25,12 +25,15 @@ extern test
 extern spurious_irq
 extern kernel_main
 extern clock_handler
+extern disp_int
+extern keyboard_handler
 
 global disp_str
 global disp_str_colour
 global _start
 global InterruptTest
 global restart
+global in_byte
 
 ; 内部中断
 global divide_zero_fault
@@ -70,7 +73,7 @@ _start:
 	;jmp $
 	;jmp $
 	;jmp $
-	;;;;;;;xchg; bx, bx
+	;;;;;;;;xchg; bx, bx
 	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
@@ -85,10 +88,10 @@ _start:
 	lgdt [gdt_ptr]
 	lidt [idt_ptr]
 	jmp 0x8:csinit
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	;jmp $
 csinit:
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	; 加载tss
 	; 怎么使用C代码中的常量？
 	; ltr TSS_SELECTOR
@@ -131,7 +134,7 @@ InterruptTest:
 
 ; 打印字符串
 disp_str:
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	push ebp
 	mov ebp, esp
 	;push edi
@@ -142,7 +145,7 @@ disp_str:
 	;mov esi, [ebp + 4]; ebp + 4，乱码。那么，[ebp + 4]存储的是什么？
 	mov esi, [ebp + 8]
 	mov edi, [dis_pos]
-	;;;;;;xchg bx, bx
+	;;;;;;;xchg bx, bx
 
 .1:
 	lodsb
@@ -163,7 +166,7 @@ disp_str:
 	pop eax
 	jmp .1
 .3:
-	;;;;;;xchg bx, bx
+	;;;;;;;xchg bx, bx
 	mov [gs:edi], ax
 	add edi, 2
 	jmp .1
@@ -180,12 +183,12 @@ disp_str:
 
 ; 打印字符串，设置颜色
 disp_str_colour:
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	push ebp
 	mov ebp, esp
 	;push edi
 	;push esi
-	;;;;;xchg bx, bx	
+	;;;;;;xchg bx, bx	
 	mov esi, [ebp + 8]
 	; ebp + 4 就是颜色
 	;mov eax, [ebp + 4]
@@ -209,7 +212,7 @@ disp_str_colour:
 	;mov esp, ebp
 	;pop ebp
 	;ret
-	;;;;;;xchg bx, bx
+	;;;;;;;xchg bx, bx
 
 .1:
 	lodsb
@@ -230,7 +233,7 @@ disp_str_colour:
 	pop eax
 	jmp .1
 .3:
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	mov [gs:edi], ax
 	add edi, 2
 	jmp .1
@@ -344,7 +347,7 @@ hwint0:
 	mov dx, ss
 	mov ds, dx
 	mov es, dx
-	xchg bx, bx	
+	;xchg bx, bx	
 	mov al, 20h
 	out 20h, al	
 	sti;
@@ -365,7 +368,7 @@ hwint0:
 	;out 20h, al
 	;call schedule_process	
 	pop ax
-	;xchg bx, bx
+	;;xchg bx, bx
 	cli	
 	; 启动进程
 	;jmp restart
@@ -373,10 +376,34 @@ hwint0:
 
 
 hwint1:
-	hwint_master 1
+	;hwint_master 1
 	;ret ; 奇怪，这个函数不能用这个结尾。
+	;in al, 0x60
+	;push ax
+	;call disp_int
+	;add esp, 4
+	;ret
 
+	; 建立快照
+	pushad
+	push ds
+	push es
+	push fs
+	push gs
+	
+	mov dx, ss
+	mov ds, dx
+	mov es, dx
 
+	mov al, 20h
+	out 20h, al
+
+	sti	
+	; 中间代码
+	mov esp, StackTop
+	call keyboard_handler
+	cli
+	jne restore
 
 %macro hwint_slave 1
 	push %1
@@ -394,7 +421,7 @@ sys_call:
 	push es
 	push fs
 	push gs
-	xchg bx, bx	
+	;xchg bx, bx	
 	; 中间代码修改eax使用
 	; 从gs到eax，距离是多少个字节？11个	
 	; 中间代码修改eax使用
@@ -410,7 +437,7 @@ sys_call:
 	; 获取堆栈中的eax是个难题：
 	; 1. 怎么获取进程表的堆栈？proc_ready_table不能用，esp指向的不是堆栈的最开始位置
 	; 2. 	
-	xchg bx, bx
+	;xchg bx, bx
 	pop esi
 	mov [esi + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
@@ -493,7 +520,36 @@ restore:
 	popad
 	iretd
 
+; 读取一个字节
+in_byte:
+	xchg bx, bx
+	;mov ebp, esp
+	push ebp
+	mov ebp, esp
+	push edx
+	;push ax
+	; 必须有这两句，才能让中断多次发生。	
+	; 放到中断例程中
+	;mov al, 20h
+	;out 20h, al	
 
+	; in_byte的参数
+	xor edx, edx
+	mov dx, [ebp + 8]
+	xor eax, eax
+	;in byte al, [ebp + 8]
+	; error: invalid combination of opcode and operands
+	; 不能用bx，原因未知
+	;in al, bx
+	in al, dx
+
+	nop
+	nop
+
+	;pop ax
+	pop ebx
+	pop ebp
+	ret
 
 
 

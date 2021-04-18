@@ -798,3 +798,15 @@ void clock_handler()
 	// 调度进程
 	schedule_process();
 }
+
+
+// 键盘 start
+// 键盘中断例程的中间代码
+char in_byte(unsigned short port);
+void keyboard_handler();
+void keyboard_handler()
+{
+	char scan_code = in_byte(0x60);
+	disp_int(scan_code);
+}
+// 键盘 end
