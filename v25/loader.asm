@@ -276,7 +276,7 @@ READ_FILE_OVER:
 	; 开启保护模式 start
 	;cli
 	;mov dx, BaseOfLoaderPhyAddr + 0	
-	;;;;;xchg	bx, bx
+	;;;;;;xchg	bx, bx
 	mov 	dword [GdtPtr + 2], BaseOfLoaderPhyAddr + LABEL_GDT
 	lgdt [GdtPtr]	
 	
@@ -516,7 +516,7 @@ ALIGN	32
 [BITS	32]
 
 LABEL_PM_START:
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	mov ax, SelectFlatWR
 	mov ds, ax
 	mov es, ax
@@ -610,7 +610,8 @@ Init_8259A:
 	; OCW1
 	;mov al, 11111110b
 	;mov al, 11111101b
-	mov al, 11111100b
+	;mov al, 11111100b
+	mov al, 11111101b
 	out 0x21, al
 	call io_delay
 
@@ -715,7 +716,7 @@ Memcpy:
 	;mov si, [bp + 12]        ; p_off，即 src
 	;mov cx, [bp + 16]       ; 程序头的个数，即p_size
 
-	;;;;;;xchg bx, bx
+	;;;;;;;xchg bx, bx
 	mov edi, [ebp + 8]        ; p_vaddr，即 dst
 	mov esi, [ebp + 12]        ; p_off，即 src
 	mov ecx, [ebp + 16]       ; 程序头的个数，即p_size
@@ -740,7 +741,7 @@ Memcpy:
 	jmp .1
 
 .2:
-	;;;;;;xchg bx, bx
+	;;;;;;;xchg bx, bx
 	;pop es
 	mov eax, [ebp + 8]
 
