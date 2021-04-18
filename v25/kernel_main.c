@@ -267,18 +267,22 @@ void schedule_process();
 #define KEYBOARD_BUF_SIZE 10
 // 中断例程的缓冲区结构体
 typedef struct{
-	char *head;
-	char *tail;
+	unsigned char *head;
+	unsigned char *tail;
 	int counter;
-	char buf[KEYBOARD_BUF_SIZE];
+	unsigned char buf[KEYBOARD_BUF_SIZE];
 }KeyboardBuffer;
 // 中断例程的缓冲区
 KeyboardBuffer keyboard_buffer;
 // 从端口读取一个字节，汇编函数
-char in_byte(unsigned short port);
+unsigned char in_byte(unsigned short port);
 void keyboard_handler();
 // 从中断例程的缓冲区读取数据
 void keyboard_read();
+
+void disable_int();
+void enable_int();
+
 // 键盘 end
 
 void ReloadGDT()
@@ -673,6 +677,7 @@ void kernel_main()
 
 
 	// 键盘
+	Memset(keyboard_buffer.buf, 0, sizeof(keyboard_buffer.buf));
 	keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
 	keyboard_buffer.counter = 0;
 	
@@ -701,7 +706,7 @@ void TestA()
 		//disp_str(".");
 		//delay(1);
 		//milli_delay(10);
-		milli_delay(200);
+		milli_delay(20);
 	}
 }
 
@@ -723,7 +728,7 @@ void TestB()
 		//disp_str(".");
 		//delay(1);
 		//milli_delay(20);
-		milli_delay(200);
+		milli_delay(20);
 	}
 }
 
@@ -735,7 +740,7 @@ void TestC()
 		//disp_str(".");
 		//delay(1);
 		//milli_delay(30);
-		milli_delay(200);
+		milli_delay(20);
 	}
 }
 // 进程调度次数
@@ -838,27 +843,39 @@ void keyboard_handler()
 	//disp_int(scan_code);
 	int port = 0x60;
 	if(keyboard_buffer.counter < KEYBOARD_BUF_SIZE){
-		*(keyboard_buffer.head) = in_byte(port);
+		//unsigned char scan_code = 0x9E;//in_byte(port);
+		disable_int();
+		// 耗费了巨量时间
+		unsigned char scan_code = in_byte(port);
+		//scan_code = scan_code;
+		//disp_int(scan_code);
+		*(keyboard_buffer.head) = scan_code;//in_byte(port);
 		keyboard_buffer.head++;
 		keyboard_buffer.counter++;
-		if(keyboard_buffer.counter == KEYBOARD_BUF_SIZE){
+		//if(keyboard_buffer.counter == KEYBOARD_BUF_SIZE){
+		if(keyboard_buffer.head > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
 			keyboard_buffer.head = keyboard_buffer.buf;
 		}
+		enable_int();
 	}
 }
 
 void keyboard_read()
 {
 	if(keyboard_buffer.counter > 0){
-		char scan_code = *(keyboard_buffer.tail);
+		disable_int();
+		//char scan_code = *(keyboard_buffer.tail);
+		unsigned char scan_code = *(keyboard_buffer.tail);
 
 		disp_int(scan_code);
 
 		keyboard_buffer.tail++;
 		keyboard_buffer.counter--;
-		if(keyboard_buffer.counter == 0){
+		//if(keyboard_buffer.counter == 0){
+		if(keyboard_buffer.tail > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
 			keyboard_buffer.tail = keyboard_buffer.buf;
 		}
+		enable_int();
 	}
 }
 

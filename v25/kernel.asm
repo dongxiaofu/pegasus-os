@@ -34,6 +34,11 @@ global _start
 global InterruptTest
 global restart
 global in_byte
+; 关闭中断
+global disable_int:
+; 打开中断
+global enable_int
+
 
 ; 内部中断
 global divide_zero_fault
@@ -395,14 +400,20 @@ hwint1:
 	mov ds, dx
 	mov es, dx
 
+	mov al, 11111110b
+	out 21h, al
 	mov al, 20h
 	out 20h, al
 
 	sti	
+	inc dword [k_reenter]
 	; 中间代码
 	mov esp, StackTop
 	call keyboard_handler
-	cli
+
+	mov al, 11111100b
+	out 21h, al
+
 	jne restore
 
 %macro hwint_slave 1
@@ -520,8 +531,21 @@ restore:
 	popad
 	iretd
 
-; 读取一个字节
 in_byte:
+	xor edx, edx
+	mov edx, [esp + 4]
+	xor eax, eax
+	xchg bx, bx
+	in al, dx
+	;movzx eax, al
+	;in ax, dx
+	nop
+	nop
+
+	ret
+
+; 读取一个字节
+in_byte2:
 	xchg bx, bx
 	;mov ebp, esp
 	push ebp
@@ -542,7 +566,9 @@ in_byte:
 	; 不能用bx，原因未知
 	;in al, bx
 	in al, dx
-
+	;and al, 0xFF	
+	;in eax, dx
+	;movzx eax, al
 	nop
 	nop
 
@@ -551,7 +577,15 @@ in_byte:
 	pop ebp
 	ret
 
+; 打开中断
+disable_int:
+	cli
+	ret
 
+; 关闭中断
+enable_int:
+	sti
+	ret
 
 
 
