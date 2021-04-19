@@ -287,6 +287,19 @@ void enable_int();
 
 // 从中断例程的缓冲区读取一个字符，供keyboard_read调用
 unsigned char read_from_keyboard_buf();
+// 扫描码是不是0xE0
+unsigned char is_e0;
+// 扫描码是不是左右shift
+unsigned char is_shift;
+// 是否打印字符
+unsigned char is_disp;
+// 初始化键盘中断例程
+void init_keyboard_handler();
+// shift_r、shift_l等特权常量，值是它们的Make Code
+// 和keymap.h中的定义重复了，故在后面加了1
+#define SHIFT_R1 0x36
+#define SHIFT_L1 0x2A
+
 // 键盘 end
 
 void ReloadGDT()
@@ -684,6 +697,8 @@ void kernel_main()
 	Memset(keyboard_buffer.buf, 0, sizeof(keyboard_buffer.buf));
 	keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
 	keyboard_buffer.counter = 0;
+	// 初始键盘中断例程
+	//init_keyboard_handler();
 	
 	// 初始化进程优先级
 	proc_table[0].ticks = proc_table[0].priority = 0;
@@ -697,6 +712,7 @@ void kernel_main()
 		disp_str(" ");
 	}	
 	dis_pos = 0;
+	init_keyboard_handler();
 	restart();
 
 	while(1){}
@@ -899,15 +915,38 @@ void keyboard_read()
 	if(scan_code == 0xE1){
 
 	}else if(scan_code == 0xE0){
-
+		is_e0 = 1;
 	}else{
+		if(scan_code == SHIFT_R1 | scan_code == SHIFT_L1){
+			is_shift = 1;
+		}
+
 		// 是不是Make Code
 		unsigned char make = (scan_code & 0x80) ? 0 : 1;
-		if(make){
-			unsigned char ch[2];
-			Memset(ch, 0, 2);
-			ch[0] = keymap[MAP_COLS * scan_code];
-			disp_str(ch);		
+		//if(is_shift != 1 && make){
+		if(scan_code && make){
+			unsigned char cols = 0;
+			if(is_shift == 1){
+				cols = 1;
+				//is_shift = 0;
+				//is_disp = 0;
+			}
+			// is_e0 == 1 不等价于 is_e0
+			// 上面说错了 is_e0 是0，if不成立；is_e0非0，if成立。
+			//if(is_e0 == 1){
+			if(is_e0){
+				cols = 2;
+				//is_e0 = 0;
+				//is_disp = 0;
+			}
+			if(scan_code != SHIFT_L1 && scan_code != SHIFT_R1){
+				unsigned char ch[2];
+				Memset(ch, 0, 2);
+				ch[0] = keymap[MAP_COLS * scan_code + cols];
+				disp_str(ch);
+				is_shift = 0;
+				is_e0 = 0;
+			}
 		}
 	}	
 }
@@ -918,4 +957,16 @@ void TTY()
 		keyboard_read();
 	}
 }
+
+void init_keyboard_handler()
+{
+	//unsigned char is_e0 = 0;
+	//如果用上面的语句创建is_e0，是局部变量，没有修改全局变量is_e0的值。
+	is_e0 = 0;
+	//unsigned char is_shift = 0;
+	is_shift = 0;
+	//unsigned char is_disp = 1;
+	dis_pos = 0;
+}
+
 // 键盘 end
