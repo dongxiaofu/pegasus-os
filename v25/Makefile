@@ -23,13 +23,13 @@ loader.bin:pmtest2.asm
 	# nasm -o loader.bin pmtest2.asm
 	nasm -o loader.bin loader.asm
 
-kernel.bin:kernel.asm string.asm kernel_main.c syscall.asm
+kernel.bin:kernel.asm string.asm main.c syscall.asm
 	nasm -o kernel.o -f elf kernel.asm
 	#ld -s -Ttext 0x30400  -o kernel.bin  kernel.o string.o kernel_main.o -m elf_i386 
 	nasm -o string.o -f elf string.asm
 	nasm -o syscall.o -f elf syscall.asm
 	# gcc -c -fno-builtin -o kernel_main.o kernel_main.c -m32
-	gcc -g -c -fno-builtin -o kernel_main.o kernel_main.c -m32
+	gcc -g -c -fno-builtin -o kernel_main.o main.c -m32
 	# ld -s -Ttext 0x60400  -o kernel.bin  kernel.o -m elf_i386 
 	#ld -s -Ttext 0x6400  -o kernel.bin  kernel.o -m elf_i386 
 	# ld -s  -o kernel.bin  kernel.o -m elf_i386 
