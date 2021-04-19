@@ -1,10 +1,13 @@
 #define NR_SCAN_CODES 128
 #define MAP_COLS 3
 
+// 识别不可打印字符
+#define FLAG_EXT 0x0100
+
 // 映射数组中的常量start
-#define ESC	1
-#define BACKSPACE	2
-#define TAB	3
+#define ESC	1  + FLAG_EXT
+#define BACKSPACE	2  + FLAG_EXT
+#define TAB	3 + FLAG_EXT
 #define Q	4
 #define W	5
 #define E	6
@@ -15,10 +18,10 @@
 #define I	11
 #define O	12
 #define P	13
-#define ENTER	14
-#define PAD_ENTER	15
-#define CTRL_L	16
-#define CTRL_R	17
+#define ENTER	14  + FLAG_EXT
+#define PAD_ENTER	15  + FLAG_EXT
+#define CTRL_L	16  + FLAG_EXT
+#define CTRL_R	17  + FLAG_EXT
 #define A	18
 #define S	19
 #define D	20
@@ -28,7 +31,7 @@
 #define J	24
 #define K	25
 #define L	26
-#define SHIFT_L	27
+#define SHIFT_L	27 + FLAG_EXT
 #define Z	28
 #define X	29
 #define C	30
@@ -36,51 +39,55 @@
 #define B	32
 #define N	33
 #define M	34
-#define PAD_SLASH	35
-#define SHIFT_R	36
-#define ALT_L	37
-#define ALT_R	38
-#define CAPS_LOCK	39
-#define F1	40
-#define F2	41
-#define F3	42
-#define F4	43
-#define F5	44
-#define F6	45
-#define F7	46
-#define F8	47
-#define F9	48
-#define F10	49
-#define NUM_LOCK	50
-#define SCROLL_LOCK	51
-#define PAD_HOME	52
-#define HOME	53
-#define PAD_UP	54
-#define UP	55
-#define PAD_PAGEUP	56
-#define PAGEUP	57
-#define PAD_MINUS	58
-#define PAD_LEFT	59
-#define LEFT	60
-#define PAD_MID	61
-#define PAD_RIGHT	62
-#define RIGHT	63
-#define PAD_PLUS	64
-#define PAD_END	65
-#define END	66
-#define PAD_DOWN	67
-#define DOWN	68
-#define PAD_PAGEDOWN	69
-#define PAGEDOWN	70
-#define PAD_INS	71
-#define INSERT	72
-#define PAD_DOT	73
-#define DELETE	74
-#define F11	75
-#define F12	76
-#define GUI_L	77
-#define GUI_R	78
-#define APPS	79
+#define PAD_SLASH	35 + FLAG_EXT
+#define SHIFT_R	36 + FLAG_EXT
+#define ALT_L	37 + FLAG_EXT
+#define ALT_R	38 + FLAG_EXT
+#define CAPS_LOCK	39 + FLAG_EXT
+#define F1	40 + FLAG_EXT
+#define F2	41 + FLAG_EXT
+#define F3	42 + FLAG_EXT
+#define F4	43 + FLAG_EXT
+#define F5	44 + FLAG_EXT
+#define F6	45 + FLAG_EXT
+#define F7	46 + FLAG_EXT
+#define F8	47 + FLAG_EXT
+#define F9	48 + FLAG_EXT
+#define F10	49 + FLAG_EXT
+#define NUM_LOCK	50 + FLAG_EXT
+#define SCROLL_LOCK	51 + FLAG_EXT
+#define PAD_HOME	52 + FLAG_EXT
+#define HOME	53 + FLAG_EXT
+#define PAD_UP	54 + FLAG_EXT
+#define UP	55 + FLAG_EXT
+#define PAD_PAGEUP	56 + FLAG_EXT
+#define PAGEUP	57 + FLAG_EXT
+#define PAD_MINUS	58 + FLAG_EXT
+#define PAD_LEFT	59 + FLAG_EXT
+#define LEFT	60 + FLAG_EXT
+#define PAD_MID	61 + FLAG_EXT
+#define PAD_RIGHT	62 + FLAG_EXT
+#define RIGHT	63 + FLAG_EXT
+#define PAD_PLUS	64 + FLAG_EXT
+#define PAD_END	65 + FLAG_EXT
+#define END	66 + FLAG_EXT
+#define PAD_DOWN	67 + FLAG_EXT
+#define DOWN	68 + FLAG_EXT
+#define PAD_PAGEDOWN	69 + FLAG_EXT
+#define PAGEDOWN	70 + FLAG_EXT
+#define PAD_INS	71 + FLAG_EXT
+#define INSERT	72 + FLAG_EXT
+#define PAD_DOT	73 + FLAG_EXT
+#define DELETE	74 + FLAG_EXT
+#define F11	75 + FLAG_EXT
+#define F12	76 + FLAG_EXT
+#define GUI_L	77 + FLAG_EXT
+#define GUI_R	78 + FLAG_EXT
+#define APPS	79 + FLAG_EXT
+
+// pause
+#define PAUSE 80 + FLAG_EXT
+#define PRINT_SCREEN 81 + FLAG_EXT
 // 映射数组中的常量 end
 
 
