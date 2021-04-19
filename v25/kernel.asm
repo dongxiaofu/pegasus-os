@@ -78,7 +78,7 @@ _start:
 	;jmp $
 	;jmp $
 	;jmp $
-	;;;;;;;;xchg; bx, bx
+	;;;;;;;;;xhcg; bx, bx
 	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
@@ -93,10 +93,10 @@ _start:
 	lgdt [gdt_ptr]
 	lidt [idt_ptr]
 	jmp 0x8:csinit
-	;;;;;xchg bx, bx
+	;;;;;;xhcg bx, bx
 	;jmp $
 csinit:
-	;;;;;xchg bx, bx
+	;;;;;;xhcg bx, bx
 	; 加载tss
 	; 怎么使用C代码中的常量？
 	; ltr TSS_SELECTOR
@@ -139,7 +139,7 @@ InterruptTest:
 
 ; 打印字符串
 disp_str:
-	;;;xchg bx, bx
+	;;;;xhcg bx, bx
 	push ebp
 	mov ebp, esp
 	;push edi
@@ -150,7 +150,7 @@ disp_str:
 	;mov esi, [ebp + 4]; ebp + 4，乱码。那么，[ebp + 4]存储的是什么？
 	mov esi, [ebp + 8]
 	mov edi, [dis_pos]
-	;;;;;;;xchg bx, bx
+	;;;;;;;;xhcg bx, bx
 
 .1:
 	lodsb
@@ -171,7 +171,7 @@ disp_str:
 	pop eax
 	jmp .1
 .3:
-	;;;;;;;xchg bx, bx
+	;;;;;;;;xhcg bx, bx
 	mov [gs:edi], ax
 	add edi, 2
 	jmp .1
@@ -188,12 +188,12 @@ disp_str:
 
 ; 打印字符串，设置颜色
 disp_str_colour:
-	;;;;xchg bx, bx
+	;;;;;xhcg bx, bx
 	push ebp
 	mov ebp, esp
 	;push edi
 	;push esi
-	;;;;;;xchg bx, bx	
+	;;;;;;;xhcg bx, bx	
 	mov esi, [ebp + 8]
 	; ebp + 4 就是颜色
 	;mov eax, [ebp + 4]
@@ -217,7 +217,7 @@ disp_str_colour:
 	;mov esp, ebp
 	;pop ebp
 	;ret
-	;;;;;;;xchg bx, bx
+	;;;;;;;;xhcg bx, bx
 
 .1:
 	lodsb
@@ -238,7 +238,7 @@ disp_str_colour:
 	pop eax
 	jmp .1
 .3:
-	;;;;;xchg bx, bx
+	;;;;;;xhcg bx, bx
 	mov [gs:edi], ax
 	add edi, 2
 	jmp .1
@@ -352,7 +352,7 @@ hwint0:
 	mov dx, ss
 	mov ds, dx
 	mov es, dx
-	;xchg bx, bx	
+	;;xhcg bx, bx	
 	mov al, 20h
 	out 20h, al	
 	sti;
@@ -373,11 +373,12 @@ hwint0:
 	;out 20h, al
 	;call schedule_process	
 	pop ax
-	;;xchg bx, bx
+	;;;xhcg bx, bx
 	cli	
 	; 启动进程
 	;jmp restart
-	jne restore
+	;jne restore
+	jmp restore
 
 
 hwint1:
@@ -409,12 +410,16 @@ hwint1:
 	inc dword [k_reenter]
 	; 中间代码
 	mov esp, StackTop
+	xchg bx, bx
 	call keyboard_handler
-
+	xchg bx, bx
 	mov al, 11111100b
 	out 21h, al
-
-	jne restore
+	xchg bx, bx
+	; 没有比较，为啥用jne？因为这是修改之前的代码后遗漏的地方.
+	; 导致键盘缓冲区出现Invalid Code。
+	;jne restore
+	jmp restore
 
 %macro hwint_slave 1
 	push %1
@@ -432,7 +437,7 @@ sys_call:
 	push es
 	push fs
 	push gs
-	;xchg bx, bx	
+	;;xhcg bx, bx	
 	; 中间代码修改eax使用
 	; 从gs到eax，距离是多少个字节？11个	
 	; 中间代码修改eax使用
@@ -448,7 +453,7 @@ sys_call:
 	; 获取堆栈中的eax是个难题：
 	; 1. 怎么获取进程表的堆栈？proc_ready_table不能用，esp指向的不是堆栈的最开始位置
 	; 2. 	
-	;xchg bx, bx
+	;;xhcg bx, bx
 	pop esi
 	mov [esi + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
@@ -512,6 +517,7 @@ restore:
 	;lldt [proc_table + 64]
 	;lldt [proc_table + 68]
 	;dec word [k_reenter]
+	xchg bx, bx
 	dec dword [k_reenter]
 	mov esp, [proc_ready_table]
 	lldt [esp + 68]
@@ -529,13 +535,14 @@ restore:
 	pop ds
 
 	popad
+	xchg bx, bx
 	iretd
 
 in_byte:
 	xor edx, edx
 	mov edx, [esp + 4]
 	xor eax, eax
-	xchg bx, bx
+	;xhcg bx, bx
 	in al, dx
 	;movzx eax, al
 	;in ax, dx
@@ -546,7 +553,7 @@ in_byte:
 
 ; 读取一个字节
 in_byte2:
-	xchg bx, bx
+	;xhcg bx, bx
 	;mov ebp, esp
 	push ebp
 	mov ebp, esp

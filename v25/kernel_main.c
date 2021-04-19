@@ -264,7 +264,7 @@ void schedule_process();
 // 键盘 start
 // 键盘中断例程的中间代码
 // #define KEYBOARD_BUF_SIZE 10; // 不能有逗号
-#define KEYBOARD_BUF_SIZE 10
+#define KEYBOARD_BUF_SIZE 800
 // 中断例程的缓冲区结构体
 typedef struct{
 	unsigned char *head;
@@ -682,10 +682,11 @@ void kernel_main()
 	keyboard_buffer.counter = 0;
 	
 	// 初始化进程优先级
-	proc_table[0].ticks = proc_table[0].priority = 10;
-	proc_table[1].ticks = proc_table[1].priority = 50;
-	proc_table[2].ticks = proc_table[2].priority = 30;
-	proc_table[3].ticks = proc_table[3].priority = 300;
+	proc_table[0].ticks = proc_table[0].priority = 0;
+	proc_table[1].ticks = proc_table[1].priority = 0;
+	proc_table[2].ticks = proc_table[2].priority = 0;
+	proc_table[3].ticks = proc_table[3].priority = 2;
+	proc_ready_table = &proc_table[3];
 	dis_pos = 0;
 	// 清屏
 	for(int i = 0; i < 80 * 25 * 2; i++){
@@ -706,7 +707,7 @@ void TestA()
 		//disp_str(".");
 		//delay(1);
 		//milli_delay(10);
-		milli_delay(20);
+		//milli_delay(1);
 	}
 }
 
@@ -728,7 +729,7 @@ void TestB()
 		//disp_str(".");
 		//delay(1);
 		//milli_delay(20);
-		milli_delay(20);
+		//milli_delay(1);
 	}
 }
 
@@ -740,7 +741,7 @@ void TestC()
 		//disp_str(".");
 		//delay(1);
 		//milli_delay(30);
-		milli_delay(20);
+		//milli_delay(1);
 	}
 }
 // 进程调度次数
@@ -749,8 +750,10 @@ void schedule_process()
 {
 	Proc *p;
 	unsigned int greatest_ticks = 0;
-
+	proc_ready_table = &proc_table[3];
+	return;
 	while(!greatest_ticks){
+		//for(p = proc_table; p < proc_table + PROC_NUM; p++){
 		for(p = proc_table; p < proc_table + PROC_NUM; p++){
 			if(p->ticks > greatest_ticks){
 				greatest_ticks = p->ticks;
@@ -853,7 +856,8 @@ void keyboard_handler()
 		keyboard_buffer.head++;
 		keyboard_buffer.counter++;
 		//if(keyboard_buffer.counter == KEYBOARD_BUF_SIZE){
-		if(keyboard_buffer.head > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
+		//if(keyboard_buffer.head > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
+		if(keyboard_buffer.head >= keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
 			keyboard_buffer.head = keyboard_buffer.buf;
 		}
 		enable_int();
@@ -872,7 +876,8 @@ void keyboard_read()
 		keyboard_buffer.tail++;
 		keyboard_buffer.counter--;
 		//if(keyboard_buffer.counter == 0){
-		if(keyboard_buffer.tail > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
+		//if(keyboard_buffer.tail > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
+		if(keyboard_buffer.tail >= keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
 			keyboard_buffer.tail = keyboard_buffer.buf;
 		}
 		enable_int();
