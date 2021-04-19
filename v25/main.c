@@ -1,4 +1,6 @@
 //extern InterruptTest; 
+#include "keymap.h"
+
 int dis_pos;
 unsigned int ticks;
 // 标识时钟中断是否重入
@@ -283,6 +285,8 @@ void keyboard_read();
 void disable_int();
 void enable_int();
 
+// 从中断例程的缓冲区读取一个字符，供keyboard_read调用
+unsigned char read_from_keyboard_buf();
 // 键盘 end
 
 void ReloadGDT()
@@ -864,14 +868,16 @@ void keyboard_handler()
 	}
 }
 
-void keyboard_read()
+unsigned char read_from_keyboard_buf()
+//void keyboard_read()
 {
+	unsigned char scan_code = 0;
 	if(keyboard_buffer.counter > 0){
 		disable_int();
 		//char scan_code = *(keyboard_buffer.tail);
-		unsigned char scan_code = *(keyboard_buffer.tail);
+		scan_code = *(keyboard_buffer.tail);
 
-		disp_int(scan_code);
+		//disp_int(scan_code);
 
 		keyboard_buffer.tail++;
 		keyboard_buffer.counter--;
@@ -882,6 +888,28 @@ void keyboard_read()
 		}
 		enable_int();
 	}
+	
+	return scan_code;
+}
+
+void keyboard_read()
+{
+	unsigned char scan_code = read_from_keyboard_buf();
+
+	if(scan_code == 0xE1){
+
+	}else if(scan_code == 0xE0){
+
+	}else{
+		// 是不是Make Code
+		unsigned char make = (scan_code & 0x80) ? 0 : 1;
+		if(make){
+			unsigned char ch[2];
+			Memset(ch, 0, 2);
+			ch[0] = keymap[MAP_COLS * scan_code];
+			disp_str(ch);		
+		}
+	}	
 }
 
 void TTY()
