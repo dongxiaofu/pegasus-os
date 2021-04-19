@@ -300,6 +300,9 @@ void init_keyboard_handler();
 #define SHIFT_R1 0x36
 #define SHIFT_L1 0x2A
 
+// 打印扫描码等功能
+void in_process(unsigned int key);
+
 // 键盘 end
 
 void ReloadGDT()
@@ -911,18 +914,58 @@ unsigned char read_from_keyboard_buf()
 void keyboard_read()
 {
 	unsigned char scan_code = read_from_keyboard_buf();
-
+	// 从映射数组中解析出来的值
+	unsigned int key = 0;
+	unsigned char make = 0;
 	if(scan_code == 0xE1){
+		// 解析Pause
+		unsigned char make_code[6] = {0xE1, 0x1D, 0x45, 0xE1, 0x9D, 0xC5};
+		char is_pause = 1;
+		for(int i = 1; i < 6; i++){
+			if(read_from_keyboard_buf() != make_code[i]){
+				is_pause = 0;
+				break;
+			}
+		}	
+		
+		if(is_pause){
+			key = PAUSE; 
+		}
 
 	}else if(scan_code == 0xE0){
-		is_e0 = 1;
-	}else{
+		// 按下
+		if(read_from_keyboard_buf() == 0x2A){
+			if(read_from_keyboard_buf() == 0xE0){
+				if(read_from_keyboard_buf() == 0x37){
+					key = PRINT_SCREEN;
+					make = 1;
+				}
+			}
+		}
+
+		// 松开
+		if(read_from_keyboard_buf() == 0xB7){
+			if(read_from_keyboard_buf() == 0xE0){
+				if(read_from_keyboard_buf() == 0xAA){
+					key = PRINT_SCREEN;
+					make = 0;
+				}
+			}
+		}
+
+		if(key == 0){
+			is_e0 = 1;
+		}
+	}
+
+	if(key != PAUSE && key  != PRINT_SCREEN){
+
 		if(scan_code == SHIFT_R1 | scan_code == SHIFT_L1){
 			is_shift = 1;
 		}
 
 		// 是不是Make Code
-		unsigned char make = (scan_code & 0x80) ? 0 : 1;
+		make = (scan_code & 0x80) ? 0 : 1;
 		//if(is_shift != 1 && make){
 		if(scan_code && make){
 			unsigned char cols = 0;
@@ -939,14 +982,18 @@ void keyboard_read()
 				//is_e0 = 0;
 				//is_disp = 0;
 			}
-			if(scan_code != SHIFT_L1 && scan_code != SHIFT_R1){
-				unsigned char ch[2];
-				Memset(ch, 0, 2);
-				ch[0] = keymap[MAP_COLS * scan_code + cols];
-				disp_str(ch);
-				is_shift = 0;
-				is_e0 = 0;
-			}
+			key = keymap[MAP_COLS * scan_code + cols];
+			//if(scan_code != SHIFT_L1 && scan_code != SHIFT_R1){
+			//	unsigned char ch[2];
+			//	Memset(ch, 0, 2);
+			//	ch[0] = keymap[MAP_COLS * scan_code + cols];
+			//	disp_str(ch);
+			//	is_shift = 0;
+			//	is_e0 = 0;
+			//}
+			// 处理字符打印等
+			// todo key，在上面处理
+			in_process(key);
 		}
 	}	
 }
@@ -967,6 +1014,21 @@ void init_keyboard_handler()
 	is_shift = 0;
 	//unsigned char is_disp = 1;
 	dis_pos = 0;
+}
+
+void in_process(unsigned int key)
+{
+	// 打印字符
+	unsigned char ch[2];
+	Memset(ch, 0, 2);
+	if(!(key & FLAG_EXT)){
+		ch[0] = key;
+		disp_str(ch);
+		
+		// 没有想到更好的方法，只能放到这个函数中，下策。
+		is_e0 = 0;
+		is_shift = 0;
+	}	
 }
 
 // 键盘 end
