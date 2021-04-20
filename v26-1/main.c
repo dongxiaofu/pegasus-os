@@ -716,6 +716,16 @@ void kernel_main()
 		disp_str(" ");
 	}	
 	dis_pos = 0;
+	
+	// 一个字符占用2个字节。需填充15行。
+        // 每行80个字节，共25行。
+        // 每行需打印40个字符。
+        for(int i = 0; i < 80*15; i++){
+                disp_str("A");
+		//dis_pos += 2;
+        }
+
+
 	init_keyboard_handler();
 	restart();
 
@@ -914,6 +924,7 @@ unsigned char read_from_keyboard_buf()
 
 void keyboard_read()
 {
+	while(keyboard_buffer.counter <= 0){}
 	unsigned char scan_code = read_from_keyboard_buf();
 	// 从映射数组中解析出来的值
 	unsigned int key = 0;
@@ -1014,11 +1025,17 @@ void init_keyboard_handler()
 	//unsigned char is_shift = 0;
 	is_shift = 0;
 	//unsigned char is_disp = 1;
-	dis_pos = 0;
+	//dis_pos = 0;
 }
 
 void in_process(unsigned int key)
 {
+	// 一个字符占用2个字节。需填充15行。
+	// 每行80个字节，共25行。
+	// 每行需打印40个字符。
+	//for(int i = 0; i < 40*15; i++){
+	//	disp_str("A");
+	//}
 	// 打印字符
 	unsigned char ch[2];
 	Memset(ch, 0, 2);
@@ -1039,6 +1056,39 @@ void in_process(unsigned int key)
 		// 没有想到更好的方法，只能放到这个函数中，下策。
 		is_e0 = 0;
 		is_shift = 0;
+	}else{
+		if(is_shift && (key != SHIFT_L1 && key != SHIFT_R1)){
+			switch(key){
+				case UP:
+					out_byte(0x3D4, 0xC);
+					out_byte(0x3D5, (80*15) >> 8);
+					out_byte(0x3D4, 0xD);
+					out_byte(0x3D5, 80*15);
+
+					is_shift = 0;
+					is_e0 = 0;
+					break;
+				case DOWN:
+					
+					out_byte(0x3D4, 0xC);
+					out_byte(0x3D5, (80*0) >> 8);
+					out_byte(0x3D4, 0xD);
+					out_byte(0x3D5, 80*0);
+
+					is_shift = 0;
+					is_e0 = 0;
+					break;
+				default:
+					// 这个break必须有，否则，会报下面的错误。
+					// main.c:1053:5: error: label at end of compound statement
+					//is_shift = 0;
+					//is_e0 = 0;
+					break;
+					
+			}
+			//is_shift = 0;
+			//is_e0 = 0;
+		}	
 	}	
 }
 
