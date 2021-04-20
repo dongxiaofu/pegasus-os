@@ -142,5 +142,5 @@ foreach($arr as $v){
 }
 $arr3 = array_unique($arr2);
 foreach($arr3 as $v){
-	echo '#define ' . $v . '	' . $counter++ . "\n";
+	echo '#define ' . $v . '	0x' . $counter++ .  " + FLAG_EXT\n";
 }
