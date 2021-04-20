@@ -34,6 +34,7 @@ global _start
 global InterruptTest
 global restart
 global in_byte
+global out_byte
 ; 关闭中断
 global disable_int:
 ; 打开中断
@@ -550,6 +551,27 @@ in_byte:
 	nop
 
 	ret
+
+;实现这个函数，疑点很多。
+;1.在函数内修改了edx、eax，需要把它们放入堆栈吗？于上神没有这样做。
+;2.写入的数据是一个字节，out dx,al使用al还是ax？断点调试再看。
+;out_byte(int port, char ch)
+out_byte:
+	xor edx, edx
+	xor eax, eax
+	
+	mov edx, [esp + 4]	; port
+	mov eax, [esp + 8]	; ch
+
+	out dx, al
+
+	nop
+	nop
+
+	ret
+
+
+
 
 ; 读取一个字节
 in_byte2:
