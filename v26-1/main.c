@@ -278,6 +278,7 @@ typedef struct{
 KeyboardBuffer keyboard_buffer;
 // 从端口读取一个字节，汇编函数
 unsigned char in_byte(unsigned short port);
+void out_byte(unsigned int port, unsigned short value);
 void keyboard_handler();
 // 从中断例程的缓冲区读取数据
 void keyboard_read();
@@ -1024,6 +1025,16 @@ void in_process(unsigned int key)
 	if(!(key & FLAG_EXT)){
 		ch[0] = key;
 		disp_str(ch);
+		
+		//disp_str("pos:");
+		//disp_int(dis_pos);
+		// 设置光标位置
+		// Cursor Location High Register
+		out_byte(0x3D4, 0x0E);
+		out_byte(0x3D5, (dis_pos/2) >> 8);
+		// Cursor Location Low Register
+		out_byte(0x3D4, 0xF);
+		out_byte(0x3D5, dis_pos/2);
 		
 		// 没有想到更好的方法，只能放到这个函数中，下策。
 		is_e0 = 0;
