@@ -1,6 +1,4 @@
 //extern InterruptTest; 
-#include "keymap.h"
-
 int dis_pos;
 unsigned int ticks;
 // 标识时钟中断是否重入
@@ -202,9 +200,9 @@ typedef struct{
 #define A_STACK_SIZE 128
 #define B_STACK_SIZE 128
 #define C_STACK_SIZE 128
-#define TaskTTY_STACK_SIZE 128
+#define TTY_STACK_SIZE 128
 // 进程栈
-#define STACK_SIZE (A_STACK_SIZE + B_STACK_SIZE + C_STACK_SIZE + TaskTTY_STACK_SIZE)
+#define STACK_SIZE (A_STACK_SIZE + B_STACK_SIZE + C_STACK_SIZE + TTY_STACK_SIZE)
 
 // 初始化描述符
 // void InitDescriptor(void *desc, unsigned int base, unsigned int limit, unsigned short attribute);
@@ -221,7 +219,7 @@ void TestA();
 void TestB();
 void TestC();
 // 终端--任务进程体，键盘
-void TaskTTY();
+void TTY();
 // 启动进程
 void restart();
 void delay(int time);
@@ -235,7 +233,7 @@ Task task_table[PROC_NUM] = {
 	{TestA, A_STACK_SIZE},
 	{TestB, B_STACK_SIZE},
 	{TestC, C_STACK_SIZE},
-	{TaskTTY, TaskTTY_STACK_SIZE},
+	{TTY, TTY_STACK_SIZE},
 };
 
 // 系统调用 start
@@ -266,82 +264,22 @@ void schedule_process();
 // 键盘 start
 // 键盘中断例程的中间代码
 // #define KEYBOARD_BUF_SIZE 10; // 不能有逗号
-#define KEYBOARD_BUF_SIZE 800
+#define KEYBOARD_BUF_SIZE 10
 // 中断例程的缓冲区结构体
 typedef struct{
-	unsigned char *head;
-	unsigned char *tail;
+	char *head;
+	char *tail;
 	int counter;
-	unsigned char buf[KEYBOARD_BUF_SIZE];
+	char buf[KEYBOARD_BUF_SIZE];
 }KeyboardBuffer;
 // 中断例程的缓冲区
 KeyboardBuffer keyboard_buffer;
 // 从端口读取一个字节，汇编函数
-unsigned char in_byte(unsigned short port);
-void out_byte(unsigned int port, unsigned short value);
+char in_byte(unsigned short port);
 void keyboard_handler();
 // 从中断例程的缓冲区读取数据
 void keyboard_read();
-
-void disable_int();
-void enable_int();
-
-// 从中断例程的缓冲区读取一个字符，供keyboard_read调用
-unsigned char read_from_keyboard_buf();
-// 扫描码是不是0xE0
-unsigned char is_e0;
-// 扫描码是不是左右shift
-unsigned char is_shift;
-// 是否打印字符
-unsigned char is_disp;
-// 初始化键盘中断例程
-void init_keyboard_handler();
-// shift_r、shift_l等特权常量，值是它们的Make Code
-// 和keymap.h中的定义重复了，故在后面加了1
-#define SHIFT_R1 0x36
-#define SHIFT_L1 0x2A
-
-// 打印扫描码等功能
-void in_process(unsigned int key);
-
 // 键盘 end
-
-
-// TaskTTY start
-#define TTY_BUF_SIZE 800
-#define TTY_NUM 3
-// 当前tty
-unsigned char current_tty;
-
-typedef struct{
-	unsigned int vm_original_addr;
-	unsigned int vm_limit;
-	unsigned int start_video_addr;
-}CONSOLE;
-
-typedef struct{
-	unsigned int *head;
-	unsigned int *tail
-	unsigned char buf[TTY_BUF_SIZE];
-
-	CONSOLE *console;
-}TTY;
-
-TTY tty_table[TTY_NUM];
-CONSOLE console_table[TTY_NUM];
-
-void init_tty();
-void init_screen(TTY *tty);
-void select_console(unsigned char tty_index);
-void put_key(TTY *tty, unsigned char key);
-void scroll_up(TTY *tty);
-void scroll_down(TTY *tty);
-void out_char(TTY *tty, unsigned char key);
-void tty_do_read();
-void tty_do_write();
-
-
-// TaskTTY end
 
 void ReloadGDT()
 {
@@ -735,35 +673,20 @@ void kernel_main()
 
 
 	// 键盘
-	Memset(keyboard_buffer.buf, 0, sizeof(keyboard_buffer.buf));
 	keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
 	keyboard_buffer.counter = 0;
-	// 初始键盘中断例程
-	//init_keyboard_handler();
 	
 	// 初始化进程优先级
-	proc_table[0].ticks = proc_table[0].priority = 0;
-	proc_table[1].ticks = proc_table[1].priority = 0;
-	proc_table[2].ticks = proc_table[2].priority = 0;
-	proc_table[3].ticks = proc_table[3].priority = 2;
-	proc_ready_table = &proc_table[3];
+	proc_table[0].ticks = proc_table[0].priority = 10;
+	proc_table[1].ticks = proc_table[1].priority = 50;
+	proc_table[2].ticks = proc_table[2].priority = 30;
+	proc_table[3].ticks = proc_table[3].priority = 300;
 	dis_pos = 0;
 	// 清屏
 	for(int i = 0; i < 80 * 25 * 2; i++){
 		disp_str(" ");
 	}	
 	dis_pos = 0;
-	
-	// 一个字符占用2个字节。需填充15行。
-        // 每行80个字节，共25行。
-        // 每行需打印40个字符。
-        for(int i = 0; i < 80*15; i++){
-                disp_str("A");
-		//dis_pos += 2;
-        }
-
-
-	init_keyboard_handler();
 	restart();
 
 	while(1){}
@@ -778,7 +701,7 @@ void TestA()
 		//disp_str(".");
 		//delay(1);
 		//milli_delay(10);
-		//milli_delay(1);
+		milli_delay(200);
 	}
 }
 
@@ -800,7 +723,7 @@ void TestB()
 		//disp_str(".");
 		//delay(1);
 		//milli_delay(20);
-		//milli_delay(1);
+		milli_delay(200);
 	}
 }
 
@@ -812,7 +735,7 @@ void TestC()
 		//disp_str(".");
 		//delay(1);
 		//milli_delay(30);
-		//milli_delay(1);
+		milli_delay(200);
 	}
 }
 // 进程调度次数
@@ -821,10 +744,8 @@ void schedule_process()
 {
 	Proc *p;
 	unsigned int greatest_ticks = 0;
-	proc_ready_table = &proc_table[3];
-	return;
+
 	while(!greatest_ticks){
-		//for(p = proc_table; p < proc_table + PROC_NUM; p++){
 		for(p = proc_table; p < proc_table + PROC_NUM; p++){
 			if(p->ticks > greatest_ticks){
 				greatest_ticks = p->ticks;
@@ -917,216 +838,34 @@ void keyboard_handler()
 	//disp_int(scan_code);
 	int port = 0x60;
 	if(keyboard_buffer.counter < KEYBOARD_BUF_SIZE){
-		//unsigned char scan_code = 0x9E;//in_byte(port);
-		disable_int();
-		// 耗费了巨量时间
-		unsigned char scan_code = in_byte(port);
-		//scan_code = scan_code;
-		//disp_int(scan_code);
-		*(keyboard_buffer.head) = scan_code;//in_byte(port);
+		*(keyboard_buffer.head) = in_byte(port);
 		keyboard_buffer.head++;
 		keyboard_buffer.counter++;
-		//if(keyboard_buffer.counter == KEYBOARD_BUF_SIZE){
-		//if(keyboard_buffer.head > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
-		if(keyboard_buffer.head >= keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
+		if(keyboard_buffer.counter == KEYBOARD_BUF_SIZE){
 			keyboard_buffer.head = keyboard_buffer.buf;
 		}
-		enable_int();
 	}
-}
-
-unsigned char read_from_keyboard_buf()
-//void keyboard_read()
-{
-	unsigned char scan_code = 0;
-	if(keyboard_buffer.counter > 0){
-		disable_int();
-		//char scan_code = *(keyboard_buffer.tail);
-		scan_code = *(keyboard_buffer.tail);
-
-		//disp_int(scan_code);
-
-		keyboard_buffer.tail++;
-		keyboard_buffer.counter--;
-		//if(keyboard_buffer.counter == 0){
-		//if(keyboard_buffer.tail > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
-		if(keyboard_buffer.tail >= keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
-			keyboard_buffer.tail = keyboard_buffer.buf;
-		}
-		enable_int();
-	}
-	
-	return scan_code;
 }
 
 void keyboard_read()
 {
-	while(keyboard_buffer.counter <= 0){}
-	unsigned char scan_code = read_from_keyboard_buf();
-	// 从映射数组中解析出来的值
-	unsigned int key = 0;
-	unsigned char make = 0;
-	if(scan_code == 0xE1){
-		// 解析Pause
-		unsigned char make_code[6] = {0xE1, 0x1D, 0x45, 0xE1, 0x9D, 0xC5};
-		char is_pause = 1;
-		for(int i = 1; i < 6; i++){
-			if(read_from_keyboard_buf() != make_code[i]){
-				is_pause = 0;
-				break;
-			}
-		}	
-		
-		if(is_pause){
-			key = PAUSE; 
-		}
+	if(keyboard_buffer.counter > 0){
+		char scan_code = *(keyboard_buffer.tail);
 
-	}else if(scan_code == 0xE0){
-		// 按下
-		if(read_from_keyboard_buf() == 0x2A){
-			if(read_from_keyboard_buf() == 0xE0){
-				if(read_from_keyboard_buf() == 0x37){
-					key = PRINT_SCREEN;
-					make = 1;
-				}
-			}
-		}
+		disp_int(scan_code);
 
-		// 松开
-		if(read_from_keyboard_buf() == 0xB7){
-			if(read_from_keyboard_buf() == 0xE0){
-				if(read_from_keyboard_buf() == 0xAA){
-					key = PRINT_SCREEN;
-					make = 0;
-				}
-			}
-		}
-
-		if(key == 0){
-			is_e0 = 1;
+		keyboard_buffer.tail++;
+		keyboard_buffer.counter--;
+		if(keyboard_buffer.counter == 0){
+			keyboard_buffer.tail = keyboard_buffer.buf;
 		}
 	}
-
-	if(key != PAUSE && key  != PRINT_SCREEN){
-
-		if(scan_code == SHIFT_R1 | scan_code == SHIFT_L1){
-			is_shift = 1;
-		}
-
-		// 是不是Make Code
-		make = (scan_code & 0x80) ? 0 : 1;
-		//if(is_shift != 1 && make){
-		if(scan_code && make){
-			unsigned char cols = 0;
-			if(is_shift == 1){
-				cols = 1;
-				//is_shift = 0;
-				//is_disp = 0;
-			}
-			// is_e0 == 1 不等价于 is_e0
-			// 上面说错了 is_e0 是0，if不成立；is_e0非0，if成立。
-			//if(is_e0 == 1){
-			if(is_e0){
-				cols = 2;
-				//is_e0 = 0;
-				//is_disp = 0;
-			}
-			key = keymap[MAP_COLS * scan_code + cols];
-			//if(scan_code != SHIFT_L1 && scan_code != SHIFT_R1){
-			//	unsigned char ch[2];
-			//	Memset(ch, 0, 2);
-			//	ch[0] = keymap[MAP_COLS * scan_code + cols];
-			//	disp_str(ch);
-			//	is_shift = 0;
-			//	is_e0 = 0;
-			//}
-			// 处理字符打印等
-			// todo key，在上面处理
-			in_process(key);
-		}
-	}	
 }
 
-void TaskTTY()
+void TTY()
 {
 	while(1){
 		keyboard_read();
 	}
 }
-
-void init_keyboard_handler()
-{
-	//unsigned char is_e0 = 0;
-	//如果用上面的语句创建is_e0，是局部变量，没有修改全局变量is_e0的值。
-	is_e0 = 0;
-	//unsigned char is_shift = 0;
-	is_shift = 0;
-	//unsigned char is_disp = 1;
-	//dis_pos = 0;
-}
-
-void in_process(unsigned int key)
-{
-	// 一个字符占用2个字节。需填充15行。
-	// 每行80个字节，共25行。
-	// 每行需打印40个字符。
-	//for(int i = 0; i < 40*15; i++){
-	//	disp_str("A");
-	//}
-	// 打印字符
-	unsigned char ch[2];
-	Memset(ch, 0, 2);
-	if(!(key & FLAG_EXT)){
-		ch[0] = key;
-		disp_str(ch);
-		
-		//disp_str("pos:");
-		//disp_int(dis_pos);
-		// 设置光标位置
-		// Cursor Location High Register
-		out_byte(0x3D4, 0x0E);
-		out_byte(0x3D5, (dis_pos/2) >> 8);
-		// Cursor Location Low Register
-		out_byte(0x3D4, 0xF);
-		out_byte(0x3D5, dis_pos/2);
-		
-		// 没有想到更好的方法，只能放到这个函数中，下策。
-		is_e0 = 0;
-		is_shift = 0;
-	}else{
-		if(is_shift && (key != SHIFT_L1 && key != SHIFT_R1)){
-			switch(key){
-				case UP:
-					out_byte(0x3D4, 0xC);
-					out_byte(0x3D5, (80*15) >> 8);
-					out_byte(0x3D4, 0xD);
-					out_byte(0x3D5, 80*15);
-
-					is_shift = 0;
-					is_e0 = 0;
-					break;
-				case DOWN:
-					
-					out_byte(0x3D4, 0xC);
-					out_byte(0x3D5, (80*0) >> 8);
-					out_byte(0x3D4, 0xD);
-					out_byte(0x3D5, 80*0);
-
-					is_shift = 0;
-					is_e0 = 0;
-					break;
-				default:
-					// 这个break必须有，否则，会报下面的错误。
-					// main.c:1053:5: error: label at end of compound statement
-					//is_shift = 0;
-					//is_e0 = 0;
-					break;
-					
-			}
-			//is_shift = 0;
-			//is_e0 = 0;
-		}	
-	}	
-}
-
 // 键盘 end
