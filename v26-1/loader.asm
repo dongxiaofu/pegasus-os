@@ -609,8 +609,8 @@ Init_8259A:
 	 
 	; OCW1
 	;mov al, 11111110b
-	mov al, 11111101b
-	;mov al, 11111100b
+	;mov al, 11111101b
+	mov al, 11111100b
 	;mov al, 11111101b
 	out 0x21, al
 	call io_delay

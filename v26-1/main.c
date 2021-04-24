@@ -1068,13 +1068,13 @@ void keyboard_read(TTY *tty)
 
 void TaskTTY()
 {
-	keyboard_buffer.buf[0] = 0x1E;	
-	keyboard_buffer.buf[1] = 0x30;	
-	keyboard_buffer.buf[2] = 0x2E;	
-	keyboard_buffer.buf[3] = 0x20;	
-	keyboard_buffer.buf[4] = 0x12;	
-	keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
-	keyboard_buffer.counter = 5;
+	//keyboard_buffer.buf[0] = 0x1E;	
+	//keyboard_buffer.buf[1] = 0x30;	
+	//keyboard_buffer.buf[2] = 0x2E;	
+	//keyboard_buffer.buf[3] = 0x20;	
+	//keyboard_buffer.buf[4] = 0x12;	
+	//keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
+	//keyboard_buffer.counter = 5;
 
 	init_tty();
 	select_console(0);
@@ -1289,7 +1289,7 @@ void out_char(CONSOLE *console, unsigned char key)
 			//if(tty->console->cursor > 0){
 			if(console->cursor > console->original_addr){
 				*(addr_in_vm - 1) = ' ';
-				*(addr_in_vm - 2) = DEFAULT_COLOUR;
+				*(addr_in_vm - 2) = 0x00;//DEFAULT_COLOUR;
 				console->cursor--;
 			}
 			break;
