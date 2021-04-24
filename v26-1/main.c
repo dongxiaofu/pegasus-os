@@ -1090,7 +1090,7 @@ void TaskTTY()
 
 
 	init_tty();
-	select_console(0);
+	select_console(1);
 	while(1){
 		for(TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++){
 			tty_do_read(tty);
@@ -1223,7 +1223,7 @@ void select_console(unsigned char tty_index)
 	// 不确定这个写法是否能达到预期目的
 	current_tty = &tty_table[tty_index];
 
-	//flush(current_tty);
+	flush(current_tty);
 }
 
 void flush(TTY *tty)
@@ -1434,9 +1434,9 @@ void init_screen(TTY *tty)
 	tty->console->cursor = tty->console->start_video_addr = tty->console->original_addr;
 
 	if(index > 0){
-		disp_str("#");
-		disp_int(index + 1);
-		tty->console->cursor += 2;
+		//disp_str("#");
+		//disp_int(index + 1);
+		//tty->console->cursor += 2;
 	}
 }
 
@@ -1452,6 +1452,12 @@ void init_tty()
 		tty->counter = 0;
 		// 初始化console
 		init_screen(tty);
+		if(tty - tty_table > 0){
+			out_char(tty, '#');
+			out_char(tty, 49 + tty - tty_table);
+			//tty->console->cursor++;		
+	
+		}
 	}
 }
 
