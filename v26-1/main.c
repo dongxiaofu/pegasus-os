@@ -1090,7 +1090,7 @@ void TaskTTY()
 
 
 	init_tty();
-	select_console(1);
+	select_console(0);
 	while(1){
 		for(TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++){
 			tty_do_read(tty);
