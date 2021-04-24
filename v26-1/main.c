@@ -1194,6 +1194,15 @@ void in_process(TTY *tty, unsigned int key)
 					//out_char(tty->console, '\b');
 					put_key(tty, '\b');
 					break;
+				case F1:
+					select_console(0);
+					break;
+				case F2:
+					select_console(1);
+					break;
+				case F3:
+					select_console(2);
+					break;
 				default:
 					break;
 			}
