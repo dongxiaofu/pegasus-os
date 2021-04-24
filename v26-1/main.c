@@ -16,7 +16,7 @@
 // 打印字符的默认颜色
 #define DEFAULT_COLOUR 0x0A
 // 当前tty
-TTY *current_tty;
+//TTY *current_tty;
 
 typedef struct{
 	unsigned int original_addr;
@@ -27,12 +27,15 @@ typedef struct{
 
 typedef struct{
 	unsigned int *head;
-	unsigned int *tail
-	unsigned char buf[TTY_BUF_SIZE];
+	unsigned int *tail;
+	//unsigned char buf[TTY_BUF_SIZE];
+	unsigned int buf[TTY_BUF_SIZE];
+	unsigned int counter;
 
 	CONSOLE *console;
 }TTY;
 
+TTY *current_tty;
 TTY tty_table[TTY_NUM];
 CONSOLE console_table[TTY_NUM];
 
@@ -42,7 +45,8 @@ void select_console(unsigned char tty_index);
 void put_key(TTY *tty, unsigned char key);
 void scroll_up(TTY *tty);
 void scroll_down(TTY *tty);
-void out_char(TTY *tty, unsigned char key);
+//void out_char(TTY *tty, unsigned char key);
+void out_char(CONSOLE *console, unsigned char key);
 void tty_do_read(TTY *tty);
 void tty_do_write(TTY *tty);
 void init_screen(TTY *tty);
@@ -772,7 +776,7 @@ void kernel_main()
         // 每行80个字节，共25行。
         // 每行需打印40个字符。
         for(int i = 0; i < 80*15; i++){
-                disp_str("A");
+                //disp_str("A");
 		//dis_pos += 2;
         }
 
@@ -980,6 +984,7 @@ void keyboard_read(TTY *tty)
 	// 从映射数组中解析出来的值
 	unsigned int key = 0;
 	unsigned char make = 0;
+	//scan_code = 0x30;
 	if(scan_code == 0xE1){
 		// 解析Pause
 		unsigned char make_code[6] = {0xE1, 0x1D, 0x45, 0xE1, 0x9D, 0xC5};
@@ -1063,6 +1068,14 @@ void keyboard_read(TTY *tty)
 
 void TaskTTY()
 {
+	keyboard_buffer.buf[0] = 0x1E;	
+	keyboard_buffer.buf[1] = 0x30;	
+	keyboard_buffer.buf[2] = 0x2E;	
+	keyboard_buffer.buf[3] = 0x20;	
+	keyboard_buffer.buf[4] = 0x12;	
+	keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
+	keyboard_buffer.counter = 5;
+
 	init_tty();
 	select_console(0);
 	while(1){
@@ -1096,9 +1109,9 @@ void in_process(TTY *tty, unsigned int key)
 	unsigned char ch[2];
 	Memset(ch, 0, 2);
 	if(!(key & FLAG_EXT)){
-		ch[0] = key;
-		out_char(tty, key);
-
+		// ch[0] = key;
+		// out_char(tty->console, key);
+		put_key(tty, key);
 
 		// disp_str(ch);
 		
@@ -1142,10 +1155,10 @@ void in_process(TTY *tty, unsigned int key)
 					is_e0 = 0;
 					break;
 				case ENTER:
-					out_char(tty, '\n');
+					out_char(tty->console, '\n');
 					break;
 				case BACKSPACE:
-					out_char(tty, '\b');
+					out_char(tty->console, '\b');
 					break;
 				default:
 					// 这个break必须有，否则，会报下面的错误。
@@ -1160,10 +1173,12 @@ void in_process(TTY *tty, unsigned int key)
 		}else{
 			switch(key){
 				case ENTER:
-					out_char(tty, "\n");
+					//out_char(tty->console, '\n');
+					put_key(tty, '\n');
 					break;
 				case BACKSPACE:
-					out_char(tty, "\b");
+					//out_char(tty->console, '\b');
+					put_key(tty, '\b');
 					break;
 				default:
 					break;
@@ -1205,12 +1220,12 @@ void set_console_start_video_addr(unsigned int start_video_addr)
 ======================================================*/
 void put_key(TTY *tty, unsigned char key)
 {
-	if(tty->counter > 0){
+	if(tty->counter < KEYBOARD_BUF_SIZE){
 		*(tty->head) = key;
 		tty->head++;
 		tty->counter++;
-		if(tty->head == tty->tty_buf_table + KEYBOARD_BUF_SIZE){
-			tty->head = tty->tty_buf_table;
+		if(tty->head == tty->buf + KEYBOARD_BUF_SIZE){
+			tty->head = tty->buf;
 		}
 	}
 }
@@ -1236,7 +1251,7 @@ void scroll_up(TTY *tty)
 ======================================================*/
 void scroll_down(TTY *tty)
 {
-	if(tty->console->start_video_addr + 2 * SCREEN_SIZE < tty->console->original_addr + tty->console->limit){
+	if(tty->console->start_video_addr + 2 * SCREEN_SIZE < tty->console->original_addr + tty->console->vm_limit){
 		set_console_start_video_addr(tty->console->start_video_addr + SCREEN_SIZE);
 	}
 }
@@ -1248,26 +1263,34 @@ void scroll_down(TTY *tty)
 2. 退格符。
 3. 普通字符。
 ======================================================*/
-void out_char(TTY *tty, unsigned char key)
+//void out_char(TTY *tty, unsigned char key)
+void out_char(CONSOLE *console, unsigned char key)
 {
-	unsigned int addr_in_vm = VM_BASE_ADDR + tty->console->cursor * 2;
+	// unsigned int addr_in_vm = VM_BASE_ADDR + tty->console->cursor * 2;
+	//(unsigned char*) addr_in_vm = (unsigned char *)(VM_BASE_ADDR + tty->console->cursor * 2);
+	//unsigned char* addr_in_vm = (unsigned char *)(VM_BASE_ADDR + console->cursor * 2);
+	//unsigned char* addr_in_vm = (unsigned char *)(console->cursor * 2);
+	//unsigned char* addr_in_vm = (unsigned char *)(console->cursor);
+	unsigned char* addr_in_vm = (unsigned char *)(VM_BASE_ADDR + console->cursor * 2);
+	//unsigned char* addr_in_vm = (unsigned char *)(VM_BASE_ADDR + 0);
 
+	//key = 'C';
 	switch(key){
 		case '\n':
 			// 换行
 			// 看了于上神的代码，我才写出来。唉-----
-			if(tty->console->cursor < tty->console->original_addr + tty->console->vm_limit - SCREEN_WIDTH){
-				tty->console->cursor = tty->console->original_addr + 
-				((tty->console->cursor - tty->console->original_addr)/SCREEN_WIDTH + 1) * SCREEN_WIDTH;
+			if(console->cursor < console->original_addr + console->vm_limit - SCREEN_WIDTH){
+				console->cursor = console->original_addr + 
+				((console->cursor - console->original_addr)/SCREEN_WIDTH + 1) * SCREEN_WIDTH;
 			}
 			break;
 		case '\b':
 			// 退格
 			//if(tty->console->cursor > 0){
-			if(tty->console->cursor > tty->console->original_addr){
-				*(addr_in_vm - 2) = ' ';
-				*(addr_in_vm - 1) = DEFAULT_COLOUR;
-				tty->console->cursor--;
+			if(console->cursor > console->original_addr){
+				*(addr_in_vm - 1) = ' ';
+				*(addr_in_vm - 2) = DEFAULT_COLOUR;
+				console->cursor--;
 			}
 			break;
 		default:
@@ -1276,10 +1299,14 @@ void out_char(TTY *tty, unsigned char key)
 			// 总看别人的代码，那么，这是我自己写的还是抄别人的？
 			// 实在实在想不出来，再去看别人的。
 			// 这个分支，完全只是普通的逻辑，没有任何领域知识。我应该完全能够独立写出来。
-			if(tty->console->cursor + 1 < tty->console->original_addr + tty->console->vm_limit){
-				*(addr_in_vm + 1) = key;
-				*(addr_in_vm + 2) = DEFAULT_COLOUR;
-				tty->console->cursor++;
+			if(console->cursor + 1 < console->original_addr + console->vm_limit){
+				//key = 'F';
+				*(addr_in_vm + 2) = key;
+				//*(addr_in_vm + 1) = key;
+				//*(addr_in_vm + 2) = DEFAULT_COLOUR;
+				*(addr_in_vm + 1) = DEFAULT_COLOUR;
+				console->cursor++;
+				//console->cursor = console->cursor + 1;
 			}
 			break;
 	}
@@ -1287,8 +1314,8 @@ void out_char(TTY *tty, unsigned char key)
 	// 向下滚屏
 	// 什么时候需要滚屏？我又不记得了。独立分析出来！
 	// 超过一屏数据时，需要滚屏。
-	while(tty->console->cursor - tty->console->start_video_addr > SCREEN_SIZE){
-		scroll_down(tty);
+	while(console->cursor - console->start_video_addr > SCREEN_SIZE){
+		//scroll_down(tty);
 	}
 }
 
@@ -1302,7 +1329,7 @@ void out_char(TTY *tty, unsigned char key)
 void tty_do_read(TTY *tty)
 {
 	// if条件，似乎可以不要
-	if(keyboard_buffer.counter > 0){
+	if(tty == current_tty && keyboard_buffer.counter > 0){
 		keyboard_read(tty);
 	}
 }
@@ -1313,14 +1340,18 @@ void tty_do_read(TTY *tty)
 ======================================================*/
 void tty_do_write(TTY *tty)
 {
-	while(tty->console->counter > 0){
-		unsigned char key = *(tty->console->tail);
-		tty->console->tail++;
-		tty->console->counter--;
-		if(tty->console->tail == tty->buf + KEYBOARD_BUF_SIZE){
-			tty->console->tail == tty->buf;
+	//disp_str("111\n");
+	while(tty->counter > 0){
+		//disp_str("222\n");
+		unsigned char key = *(tty->tail);
+		//key = 'F';
+		tty->tail++;
+		tty->counter--;
+		if(tty->tail == tty->buf + KEYBOARD_BUF_SIZE){
+			tty->tail == tty->buf;
 		}
-		out_char(tty, key);
+		//key = 'B';
+		out_char(tty->console, key);
 	}
 }
 
@@ -1333,14 +1364,19 @@ void tty_do_write(TTY *tty)
 void init_screen(TTY *tty)
 {
 	unsigned int index = tty - tty_table;
-	CONSOLE *console = &console_table[index];
+	//CONSOLE *console = &console_table[index];
+	tty->console = console_table + index;
+	
+	
 
 	// 单位转换为字
-	console->vm_limit = (VM_TOTAL / TTY_NUM) >> 1;
+	tty->console->vm_limit = (VM_TOTAL / TTY_NUM) >> 1;
 
-	console->original_addr = VM_BASE_ADDR + index * console->vm_limit;
+	//tty->console->original_addr = VM_BASE_ADDR + index * tty->console->vm_limit;
+	tty->console->original_addr = index * tty->console->vm_limit;
 
-	console->cursor = console->start_video_addr = console->original_addr;
+	//tty->console->cursor = tty->console->start_video_addr = tty->console->original_addr;
+	tty->console->cursor = tty->console->start_video_addr = tty->console->original_addr;
 }
 
 /*====================================================
