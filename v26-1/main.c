@@ -281,7 +281,7 @@ unsigned char in_byte(unsigned short port);
 void out_byte(unsigned int port, unsigned short value);
 void keyboard_handler();
 // 从中断例程的缓冲区读取数据
-void keyboard_read();
+void keyboard_read(TTY *tty);
 
 void disable_int();
 void enable_int();
@@ -302,7 +302,7 @@ void init_keyboard_handler();
 #define SHIFT_L1 0x2A
 
 // 打印扫描码等功能
-void in_process(unsigned int key);
+void in_process(TTY *tty, unsigned int key);
 
 // 键盘 end
 
@@ -974,7 +974,7 @@ unsigned char read_from_keyboard_buf()
 	return scan_code;
 }
 
-void keyboard_read()
+void keyboard_read(TTY *tty)
 {
 	while(keyboard_buffer.counter <= 0){}
 	unsigned char scan_code = read_from_keyboard_buf();
@@ -1057,15 +1057,18 @@ void keyboard_read()
 			//}
 			// 处理字符打印等
 			// todo key，在上面处理
-			in_process(key);
+			in_process(tty, key);
 		}
 	}	
 }
 
 void TaskTTY()
 {
+	init_tty();
+	select_console(0);
 	while(1){
-		keyboard_read();
+		tty_do_read();
+		tty_do_write();
 	}
 }
 
@@ -1080,7 +1083,7 @@ void init_keyboard_handler()
 	//dis_pos = 0;
 }
 
-void in_process(unsigned int key)
+void in_process(TTY *tty, unsigned int key)
 {
 	// 一个字符占用2个字节。需填充15行。
 	// 每行80个字节，共25行。
@@ -1093,17 +1096,20 @@ void in_process(unsigned int key)
 	Memset(ch, 0, 2);
 	if(!(key & FLAG_EXT)){
 		ch[0] = key;
-		disp_str(ch);
+		out_char(tty, key);
+
+
+		// disp_str(ch);
 		
-		//disp_str("pos:");
-		//disp_int(dis_pos);
-		// 设置光标位置
-		// Cursor Location High Register
-		out_byte(0x3D4, 0x0E);
-		out_byte(0x3D5, (dis_pos/2) >> 8);
-		// Cursor Location Low Register
-		out_byte(0x3D4, 0xF);
-		out_byte(0x3D5, dis_pos/2);
+		// //disp_str("pos:");
+		// //disp_int(dis_pos);
+		// // 设置光标位置
+		// // Cursor Location High Register
+		// out_byte(0x3D4, 0x0E);
+		// out_byte(0x3D5, (dis_pos/2) >> 8);
+		// // Cursor Location Low Register
+		// out_byte(0x3D4, 0xF);
+		// out_byte(0x3D5, dis_pos/2);
 		
 		// 没有想到更好的方法，只能放到这个函数中，下策。
 		is_e0 = 0;
@@ -1112,23 +1118,33 @@ void in_process(unsigned int key)
 		if(is_shift && (key != SHIFT_L1 && key != SHIFT_R1)){
 			switch(key){
 				case UP:
-					out_byte(0x3D4, 0xC);
-					out_byte(0x3D5, (80*15) >> 8);
-					out_byte(0x3D4, 0xD);
-					out_byte(0x3D5, 80*15);
+					// out_byte(0x3D4, 0xC);
+					// out_byte(0x3D5, (80*15) >> 8);
+					// out_byte(0x3D4, 0xD);
+					// out_byte(0x3D5, 80*15);
+
+					scroll_up(tty);
 
 					is_shift = 0;
 					is_e0 = 0;
 					break;
 				case DOWN:
 					
-					out_byte(0x3D4, 0xC);
-					out_byte(0x3D5, (80*0) >> 8);
-					out_byte(0x3D4, 0xD);
-					out_byte(0x3D5, 80*0);
+					// out_byte(0x3D4, 0xC);
+					// out_byte(0x3D5, (80*0) >> 8);
+					// out_byte(0x3D4, 0xD);
+					// out_byte(0x3D5, 80*0);
+
+					scroll_down(tty);
 
 					is_shift = 0;
 					is_e0 = 0;
+					break;
+				case ENTER:
+					out_char(tty, "\n");
+					break;
+				case BACKSPACE:
+					out_char(tty, "\b");
 					break;
 				default:
 					// 这个break必须有，否则，会报下面的错误。
@@ -1140,6 +1156,17 @@ void in_process(unsigned int key)
 			}
 			//is_shift = 0;
 			//is_e0 = 0;
+		}else{
+			switch(key){
+				case ENTER:
+					out_char(tty, "\n");
+					break;
+				case BACKSPACE:
+					out_char(tty, "\b");
+					break;
+				default:
+					break;
+			}
 		}	
 	}	
 }
@@ -1161,7 +1188,10 @@ void select_console(unsigned char tty_index)
 
 void set_console_start_video_addr(unsigned int start_video_addr)
 {
-
+	out_byte(0x3D4, 0xC);
+	out_byte(0x3D5, start_video_addr >> 8);
+	out_byte(0x3D4, 0xD);
+	out_byte(0x3D5, start_video_addr);
 }
 
 /*====================================================
@@ -1272,7 +1302,7 @@ void tty_do_read(TTY *tty)
 {
 	// if条件，似乎可以不要
 	if(keyboard_buffer.counter > 0){
-		keyboard_read();
+		keyboard_read(tty);
 	}
 }
 
