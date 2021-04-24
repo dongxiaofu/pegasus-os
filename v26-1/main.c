@@ -1078,11 +1078,23 @@ void TaskTTY()
 	//keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
 	//keyboard_buffer.counter = 5;
 
+	// // 设置光标位置
+		 // Cursor Location High Register
+		 //out_byte(0x3D4, 0x0E);
+		 ////out_byte(0x3D5, ((VM_BASE_ADDR + dis_pos)/2) >> 8);
+		 //out_byte(0x3D5, (VM_BASE_ADDR) >> 8);
+		 //// Cursor Location Low Register
+		 //out_byte(0x3D4, 0xF);
+		 ////out_byte(0x3D5, (VM_BASE_ADDR + dis_pos)/2);
+		 //out_byte(0x3D5, VM_BASE_ADDR);
+
+
 	init_tty();
 	select_console(0);
 	while(1){
 		for(TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++){
 			tty_do_read(tty);
+			//tty->counter = 5;
 			tty_do_write(tty);
 		}
 	}
@@ -1207,12 +1219,17 @@ void select_console(unsigned char tty_index)
 
 void flush(TTY *tty)
 {
-	set_cursor(VM_BASE_ADDR + tty->console->cursor);
-	set_console_start_video_addr(VM_BASE_ADDR + tty->console->start_video_addr);
+	//set_cursor(VM_BASE_ADDR + tty->console->cursor);
+	//set_cursor(tty->console->cursor + 1);
+	set_cursor(tty->console->cursor);
+	//set_cursor(0);
+	//set_console_start_video_addr(VM_BASE_ADDR + tty->console->start_video_addr);
+	set_console_start_video_addr(tty->console->start_video_addr);
 }
 
 void set_cursor(unsigned int cursor)
 {
+	//cursor = 80;
 	// 设置光标位置
 	// Cursor Location High Register
 	out_byte(0x3D4, 0x0E);
@@ -1310,9 +1327,11 @@ void out_char(TTY *tty, unsigned char key)
 			if(tty->console->cursor > tty->console->original_addr){
 				//*(addr_in_vm - 1) = ' ';
 				//*(addr_in_vm - 2) = 0x00;//DEFAULT_COLOUR;
+				tty->console->cursor--;
 				*(addr_in_vm - 2) = ' ';
 				*(addr_in_vm - 1) = 0x00;
-				tty->console->cursor--;
+				//set_cursor(0);	
+				//tty->console->cursor--;
 			}
 			break;
 		default:
