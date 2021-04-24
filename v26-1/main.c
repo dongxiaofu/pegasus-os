@@ -6,7 +6,7 @@
 #define TTY_NUM 3
 // 一屏占用的显存空间。
 // todo 我不确定是不是整个值。
-#define SCREEN_SIZE 80 * 15
+#define SCREEN_SIZE 80 * 25
 // 一行的宽度
 #define SCREEN_WIDTH 80
 // 显存的初始地址
@@ -1423,6 +1423,12 @@ void init_screen(TTY *tty)
 
 	//tty->console->cursor = tty->console->start_video_addr = tty->console->original_addr;
 	tty->console->cursor = tty->console->start_video_addr = tty->console->original_addr;
+
+	if(index > 0){
+		disp_str("#");
+		disp_int(index + 1);
+		tty->console->cursor += 2;
+	}
 }
 
 /*====================================================
