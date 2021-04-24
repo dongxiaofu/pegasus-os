@@ -40,7 +40,9 @@ TTY tty_table[TTY_NUM];
 CONSOLE console_table[TTY_NUM];
 
 // 设置console的start_video_addr
+void set_cursor(unsigned int cursor);
 void set_console_start_video_addr(unsigned int start_video_addr);
+void flush(TTY *tty);
 void select_console(unsigned char tty_index);
 void put_key(TTY *tty, unsigned char key);
 void scroll_up(TTY *tty);
@@ -1199,8 +1201,26 @@ void select_console(unsigned char tty_index)
 
 	// 不确定这个写法是否能达到预期目的
 	current_tty = &tty_table[tty_index];
+
+	flush(current_tty);
 }
 
+void flush(TTY *tty)
+{
+	set_cursor(tty->console->cursor);
+	set_console_start_video_addr(tty->console->start_video_addr);
+}
+
+void set_cursor(unsigned int cursor)
+{
+	// 设置光标位置
+	// Cursor Location High Register
+	out_byte(0x3D4, 0x0E);
+	out_byte(0x3D5, cursor >> 8);
+	// Cursor Location Low Register
+	out_byte(0x3D4, 0xF);
+	out_byte(0x3D5, cursor);
+}
 
 void set_console_start_video_addr(unsigned int start_video_addr)
 {
@@ -1317,6 +1337,8 @@ void out_char(CONSOLE *console, unsigned char key)
 	while(console->cursor - console->start_video_addr > SCREEN_SIZE){
 		//scroll_down(tty);
 	}
+
+	//flush();
 }
 
 /*====================================================
@@ -1367,10 +1389,11 @@ void init_screen(TTY *tty)
 	//CONSOLE *console = &console_table[index];
 	tty->console = console_table + index;
 	
-	
+	// 把字节数转换为字
+	unsigned video_mem_size_by_word = VM_TOTAL >> 1;
 
 	// 单位转换为字
-	tty->console->vm_limit = (VM_TOTAL / TTY_NUM) >> 1;
+	tty->console->vm_limit = video_mem_size_by_word / TTY_NUM;
 
 	//tty->console->original_addr = VM_BASE_ADDR + index * tty->console->vm_limit;
 	tty->console->original_addr = index * tty->console->vm_limit;
