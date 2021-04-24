@@ -1,6 +1,57 @@
 //extern InterruptTest; 
 #include "keymap.h"
 
+// TaskTTY start
+#define TTY_BUF_SIZE 800
+#define TTY_NUM 3
+// 一屏占用的显存空间。
+// todo 我不确定是不是整个值。
+#define SCREEN_SIZE 80 * 15
+// 一行的宽度
+#define SCREEN_WIDTH 80
+// 显存的初始地址
+#define VM_BASE_ADDR 0xb8000
+// 显存的总大小
+#define VM_TOTAL (0xBFFFF - 0xb8000)
+// 打印字符的默认颜色
+#define DEFAULT_COLOUR 0x0A
+// 当前tty
+TTY *current_tty;
+
+typedef struct{
+	unsigned int original_addr;
+	unsigned int vm_limit;
+	unsigned int start_video_addr;
+	unsigned int cursor;
+}CONSOLE;
+
+typedef struct{
+	unsigned int *head;
+	unsigned int *tail
+	unsigned char buf[TTY_BUF_SIZE];
+
+	CONSOLE *console;
+}TTY;
+
+TTY tty_table[TTY_NUM];
+CONSOLE console_table[TTY_NUM];
+
+// 设置console的start_video_addr
+void set_console_start_video_addr(unsigned int start_video_addr);
+void select_console(unsigned char tty_index);
+void put_key(TTY *tty, unsigned char key);
+void scroll_up(TTY *tty);
+void scroll_down(TTY *tty);
+void out_char(TTY *tty, unsigned char key);
+void tty_do_read(TTY *tty);
+void tty_do_write(TTY *tty);
+void init_screen(TTY *tty);
+void init_tty();
+
+
+
+// TaskTTY end
+
 int dis_pos;
 unsigned int ticks;
 // 标识时钟中断是否重入
@@ -305,58 +356,6 @@ void init_keyboard_handler();
 void in_process(TTY *tty, unsigned int key);
 
 // 键盘 end
-
-
-// TaskTTY start
-#define TTY_BUF_SIZE 800
-#define TTY_NUM 3
-// 一屏占用的显存空间。
-// todo 我不确定是不是整个值。
-#define SCREEN_SIZE 80 * 15
-// 一行的宽度
-#define SCREEN_WIDTH 80
-// 显存的初始地址
-#define VM_BASE_ADDR 0xb8000
-// 显存的总大小
-#define VM_TOTAL (0xBFFFF - 0xb8000)
-// 打印字符的默认颜色
-#define DEFAULT_COLOUR 0x0A
-// 当前tty
-TTY *current_tty;
-
-typedef struct{
-	unsigned int vm_original_addr;
-	unsigned int vm_limit;
-	unsigned int start_video_addr;
-	unsigned int cursor;
-}CONSOLE;
-
-typedef struct{
-	unsigned int *head;
-	unsigned int *tail
-	unsigned char buf[TTY_BUF_SIZE];
-
-	CONSOLE *console;
-}TTY;
-
-TTY tty_table[TTY_NUM];
-CONSOLE console_table[TTY_NUM];
-
-// 设置console的start_video_addr
-void set_console_start_video_addr(unsigned int start_video_addr);
-void select_console(unsigned char tty_index);
-void put_key(TTY *tty, unsigned char key);
-void scroll_up(TTY *tty);
-void scroll_down(TTY *tty);
-void out_char(TTY *tty, unsigned char key);
-void tty_do_read(TTY *tty);
-void tty_do_write(TTY *tty);
-void init_screen(TTY *tty);
-void init_tty();
-
-
-
-// TaskTTY end
 
 void ReloadGDT()
 {
@@ -1067,8 +1066,10 @@ void TaskTTY()
 	init_tty();
 	select_console(0);
 	while(1){
-		tty_do_read();
-		tty_do_write();
+		for(TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++){
+			tty_do_read(tty);
+			tty_do_write(tty);
+		}
 	}
 }
 
@@ -1141,10 +1142,10 @@ void in_process(TTY *tty, unsigned int key)
 					is_e0 = 0;
 					break;
 				case ENTER:
-					out_char(tty, "\n");
+					out_char(tty, '\n');
 					break;
 				case BACKSPACE:
-					out_char(tty, "\b");
+					out_char(tty, '\b');
 					break;
 				default:
 					// 这个break必须有，否则，会报下面的错误。
@@ -1317,7 +1318,7 @@ void tty_do_write(TTY *tty)
 		tty->console->tail++;
 		tty->console->counter--;
 		if(tty->console->tail == tty->buf + KEYBOARD_BUF_SIZE){
-			tty->console->tail == tty->buf
+			tty->console->tail == tty->buf;
 		}
 		out_char(tty, key);
 	}
