@@ -47,8 +47,8 @@ void select_console(unsigned char tty_index);
 void put_key(TTY *tty, unsigned char key);
 void scroll_up(TTY *tty);
 void scroll_down(TTY *tty);
-//void out_char(TTY *tty, unsigned char key);
-void out_char(CONSOLE *console, unsigned char key);
+void out_char(TTY *tty, unsigned char key);
+//void out_char(CONSOLE *console, unsigned char key);
 void tty_do_read(TTY *tty);
 void tty_do_write(TTY *tty);
 void init_screen(TTY *tty);
@@ -1157,10 +1157,10 @@ void in_process(TTY *tty, unsigned int key)
 					is_e0 = 0;
 					break;
 				case ENTER:
-					out_char(tty->console, '\n');
+					out_char(tty, '\n');
 					break;
 				case BACKSPACE:
-					out_char(tty->console, '\b');
+					out_char(tty, '\b');
 					break;
 				default:
 					// 这个break必须有，否则，会报下面的错误。
@@ -1202,13 +1202,13 @@ void select_console(unsigned char tty_index)
 	// 不确定这个写法是否能达到预期目的
 	current_tty = &tty_table[tty_index];
 
-	flush(current_tty);
+	//flush(current_tty);
 }
 
 void flush(TTY *tty)
 {
-	set_cursor(tty->console->cursor);
-	set_console_start_video_addr(tty->console->start_video_addr);
+	set_cursor(VM_BASE_ADDR + tty->console->cursor);
+	set_console_start_video_addr(VM_BASE_ADDR + tty->console->start_video_addr);
 }
 
 void set_cursor(unsigned int cursor)
@@ -1283,15 +1283,15 @@ void scroll_down(TTY *tty)
 2. 退格符。
 3. 普通字符。
 ======================================================*/
-//void out_char(TTY *tty, unsigned char key)
-void out_char(CONSOLE *console, unsigned char key)
+void out_char(TTY *tty, unsigned char key)
+//void out_char(CONSOLE *console, unsigned char key)
 {
 	// unsigned int addr_in_vm = VM_BASE_ADDR + tty->console->cursor * 2;
 	//(unsigned char*) addr_in_vm = (unsigned char *)(VM_BASE_ADDR + tty->console->cursor * 2);
 	//unsigned char* addr_in_vm = (unsigned char *)(VM_BASE_ADDR + console->cursor * 2);
 	//unsigned char* addr_in_vm = (unsigned char *)(console->cursor * 2);
 	//unsigned char* addr_in_vm = (unsigned char *)(console->cursor);
-	unsigned char* addr_in_vm = (unsigned char *)(VM_BASE_ADDR + console->cursor * 2);
+	unsigned char* addr_in_vm = (unsigned char *)(VM_BASE_ADDR + tty->console->cursor * 2);
 	//unsigned char* addr_in_vm = (unsigned char *)(VM_BASE_ADDR + 0);
 
 	//key = 'C';
@@ -1299,18 +1299,20 @@ void out_char(CONSOLE *console, unsigned char key)
 		case '\n':
 			// 换行
 			// 看了于上神的代码，我才写出来。唉-----
-			if(console->cursor < console->original_addr + console->vm_limit - SCREEN_WIDTH){
-				console->cursor = console->original_addr + 
-				((console->cursor - console->original_addr)/SCREEN_WIDTH + 1) * SCREEN_WIDTH;
+			if(tty->console->cursor < tty->console->original_addr + tty->console->vm_limit - SCREEN_WIDTH){
+				tty->console->cursor = tty->console->original_addr + 
+				((tty->console->cursor - tty->console->original_addr)/SCREEN_WIDTH + 1) * SCREEN_WIDTH;
 			}
 			break;
 		case '\b':
 			// 退格
 			//if(tty->console->cursor > 0){
-			if(console->cursor > console->original_addr){
-				*(addr_in_vm - 1) = ' ';
-				*(addr_in_vm - 2) = 0x00;//DEFAULT_COLOUR;
-				console->cursor--;
+			if(tty->console->cursor > tty->console->original_addr){
+				//*(addr_in_vm - 1) = ' ';
+				//*(addr_in_vm - 2) = 0x00;//DEFAULT_COLOUR;
+				*(addr_in_vm - 2) = ' ';
+				*(addr_in_vm - 1) = 0x00;
+				tty->console->cursor--;
 			}
 			break;
 		default:
@@ -1319,13 +1321,15 @@ void out_char(CONSOLE *console, unsigned char key)
 			// 总看别人的代码，那么，这是我自己写的还是抄别人的？
 			// 实在实在想不出来，再去看别人的。
 			// 这个分支，完全只是普通的逻辑，没有任何领域知识。我应该完全能够独立写出来。
-			if(console->cursor + 1 < console->original_addr + console->vm_limit){
+			if(tty->console->cursor + 1 < tty->console->original_addr + tty->console->vm_limit){
 				//key = 'F';
-				*(addr_in_vm + 2) = key;
+				//*(addr_in_vm + 2) = key;
+				*addr_in_vm++ = key;
 				//*(addr_in_vm + 1) = key;
 				//*(addr_in_vm + 2) = DEFAULT_COLOUR;
-				*(addr_in_vm + 1) = DEFAULT_COLOUR;
-				console->cursor++;
+				//*(addr_in_vm + 1) = DEFAULT_COLOUR;
+				*addr_in_vm++ = DEFAULT_COLOUR;
+				tty->console->cursor++;
 				//console->cursor = console->cursor + 1;
 			}
 			break;
@@ -1334,11 +1338,11 @@ void out_char(CONSOLE *console, unsigned char key)
 	// 向下滚屏
 	// 什么时候需要滚屏？我又不记得了。独立分析出来！
 	// 超过一屏数据时，需要滚屏。
-	while(console->cursor - console->start_video_addr > SCREEN_SIZE){
-		//scroll_down(tty);
+	while(tty->console->cursor - tty->console->start_video_addr > SCREEN_SIZE){
+		scroll_down(tty);
 	}
 
-	//flush();
+	flush(tty);
 }
 
 /*====================================================
@@ -1373,7 +1377,7 @@ void tty_do_write(TTY *tty)
 			tty->tail == tty->buf;
 		}
 		//key = 'B';
-		out_char(tty->console, key);
+		out_char(tty, key);
 	}
 }
 
