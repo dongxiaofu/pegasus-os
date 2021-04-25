@@ -2,6 +2,7 @@
 
 global Memcpy
 global Memset
+global Strcpy
 Memcpy:
 	push ebp
 	mov ebp, esp
@@ -78,4 +79,53 @@ Memset:
 	pop ebp	
 	;mov esp, ebp
 	;;;;;xchg bx, bx
+
 	ret	
+
+; char* Strcpy(char *dest, char *src)
+Strcpy:
+	push ebp
+	mov ebp, esp
+
+	mov esi, [ebp + 12]
+	mov edi, [ebp + 8]
+
+.1:
+	mov byte al, [esi]
+	inc esi
+	
+	cmp al, 0
+	jz .2	
+
+	mov byte [edi], al
+	inc edi
+
+	jmp .1
+
+.2:
+	; 返回值
+	mov eax, [ebp + 8]
+	
+	pop ebp
+	ret
+
+
+; int Strlen(char *str)
+Strlen:
+	push ebp
+	mov ebp, esp
+
+	mov esi, [ebp + 8]
+	
+.1:
+	mov byte al, [esi]
+	;cmp al, 0
+	;jz .2
+	inc esi
+	cmp al, 0
+	jz .2
+	jmp .1
+.2:
+	mov eax, esi
+	pop ebp
+	ret 
