@@ -239,6 +239,8 @@ typedef struct{
 	unsigned int ticks;
 	// 进程优先级
 	unsigned int priority;
+	// 本进程使用哪个tty，tty_table的索引
+	unsigned int tty_index;
 }Proc;
 
 // 进程表 end
@@ -297,14 +299,17 @@ Task task_table[PROC_NUM] = {
 
 // 系统调用 start
 #define NR_GET_TICKS	0
+#define _NR_WRITE	1
 typedef void *system_call;
 int sys_get_ticks();
+void sys_write(char *buf, int len, Proc *proc);
 void sys_call();
 //system_call sys_call_table[1] = {
-int_handle sys_call_table[1] = {
+int_handle sys_call_table[2] = {
 	// warning: initialization of 'void (*)()' from incompatible pointer type 'int (*)()' [-Wincompatible-pointer-types]
 	// sys_get_ticks
-	(int_handle) sys_get_ticks
+	(int_handle) sys_get_ticks,
+	(int_handle) sys_write
 };
 // 导入汇编中的函数
 int get_ticks();
@@ -743,6 +748,9 @@ void kernel_main()
 		// IOPL = 1, IF = 1
 		// IOPL 控制I/O权限的特权级，IF控制中断的打开和关闭
 		proc->s_reg.eflags = 0x1202;	
+
+
+		proc->tty_index = 0;
 		
 		proc++;
 		// error: lvalue required as increment operand
@@ -767,6 +775,9 @@ void kernel_main()
 	proc_table[2].ticks = proc_table[2].priority = 0;
 	proc_table[3].ticks = proc_table[3].priority = 2;
 	proc_ready_table = &proc_table[3];
+
+	proc_table[0].tty_index = proc_table[1].tty_index = 0;
+	proc_table[2].tty_index = 1;
 	dis_pos = 0;
 	// 清屏
 	for(int i = 0; i < 80 * 25 * 2; i++){
@@ -903,6 +914,18 @@ int sys_get_ticks()
 	//disp_str("@@");
 	
 	return ticks;
+}
+
+void sys_write(char *buf, int len, Proc *proc)
+{
+	TTY *tty = &tty_table[proc - proc_table];
+	int i = len;
+	char *p = buf;
+	while(i > 0){
+		out_char(tty, *p);
+		p++;
+		i--;
+	}	
 }
 
 void milli_delay(unsigned int milli_sec)

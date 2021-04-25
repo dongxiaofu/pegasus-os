@@ -448,6 +448,8 @@ sys_call:
 	; 中间代码
 	; 需要切换到内核栈吗？
 	mov esp, StackTop 
+	push ebx
+	push ecx
 	push esi
 	call [sys_call_table + 4 * eax]
 	; 修改请求系统调用的进程的进程表中的堆栈
@@ -456,6 +458,7 @@ sys_call:
 	; 2. 	
 	;;xhcg bx, bx
 	pop esi
+	add esp, 8
 	mov [esi + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
 	;pop esi
