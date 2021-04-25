@@ -3,6 +3,8 @@
 global Memcpy
 global Memset
 global Strcpy
+global Strlen
+
 Memcpy:
 	push ebp
 	mov ebp, esp

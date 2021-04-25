@@ -311,7 +311,7 @@ int_handle sys_call_table[2] = {
 	(int_handle) sys_get_ticks,
 	(int_handle) sys_write
 };
-// 导入汇编中的函数
+// 从汇编中导入的函数
 int get_ticks();
 // 系统调用 end
 // 延迟函数 start
@@ -368,6 +368,16 @@ void in_process(TTY *tty, unsigned int key);
 
 // 键盘 end
 
+// printf start
+char *Strcpy(char *dest, char *src);
+int Strlen(char *buf);
+
+// 只支持%x
+void Printf(char *fmt, ...);
+int vsprintf(char *buf, char *fmt, char *var_list);
+void write(char *buf, int len);
+
+// printf end
 void ReloadGDT()
 {
 	//disp_str_colour("AAAA", 0x0C);
@@ -770,10 +780,10 @@ void kernel_main()
 	//init_keyboard_handler();
 	
 	// 初始化进程优先级
-	proc_table[0].ticks = proc_table[0].priority = 0;
-	proc_table[1].ticks = proc_table[1].priority = 0;
-	proc_table[2].ticks = proc_table[2].priority = 0;
-	proc_table[3].ticks = proc_table[3].priority = 2;
+	proc_table[0].ticks = proc_table[0].priority = 50;
+	proc_table[1].ticks = proc_table[1].priority = 30;
+	proc_table[2].ticks = proc_table[2].priority = 30;
+	proc_table[3].ticks = proc_table[3].priority = 40;
 	proc_ready_table = &proc_table[3];
 
 	proc_table[0].tty_index = proc_table[1].tty_index = 0;
@@ -803,8 +813,11 @@ void kernel_main()
 void TestA()
 {
 	while(1){
+		dis_pos = 0;
+		//Printf("<a ticks:%x\n>", get_ticks());
+		milli_delay(30);
 		//disp_int(get_ticks());
-		//disp_str_colour("A", 0x0A);
+		disp_str_colour("A", 0x0A);
 		//disp_int(1);
 		//disp_str(".");
 		//delay(1);
@@ -826,6 +839,8 @@ void delay(int time)
 void TestB()
 {
 	while(1){
+		Printf("<b ticks:%x\n>", get_ticks());
+		milli_delay(30);
 		//disp_int(get_ticks());
 		//disp_str("B");
 		//disp_str(".");
@@ -838,6 +853,8 @@ void TestB()
 void TestC()
 {
 	while(1){
+		Printf("<c ticks:%x\n>", get_ticks());
+		milli_delay(30);
 		//disp_int(get_ticks());
 		//disp_str("C");
 		//disp_str(".");
@@ -852,8 +869,8 @@ void schedule_process()
 {
 	Proc *p;
 	unsigned int greatest_ticks = 0;
-	proc_ready_table = &proc_table[3];
-	return;
+	//proc_ready_table = &proc_table[3];
+	//return;
 	while(!greatest_ticks){
 		//for(p = proc_table; p < proc_table + PROC_NUM; p++){
 		for(p = proc_table; p < proc_table + PROC_NUM; p++){
@@ -1485,3 +1502,46 @@ void init_tty()
 }
 
 // TTY end
+//
+// 只支持%x
+void Printf(char *fmt, ...)
+{
+	char buf[256];
+	// 理解这句，耗费了大量时间。
+	char *var_list = (char *)((char *)&fmt + 4);
+	int len = vsprintf(buf, fmt, var_list);
+	write(buf, len);	
+}
+
+int vsprintf(char *buf, char *fmt, char *var_list)
+{
+	// 指向buf
+	char *p;
+	// 转换数字使用
+	char tmp[256];	
+	char *next_arg = var_list;
+	for(p = fmt; *fmt; fmt++ ){
+		if(*fmt != '%'){
+			p++;
+			continue;
+		}
+		// 跳过%
+		fmt++;
+		switch(*fmt){
+			case 'x':
+				atoi(tmp, *(int *)next_arg);
+				Strcpy(buf, tmp);
+				next_arg += 4;
+				p += Strlen(tmp);	
+				break;
+			case 's':
+
+				break;
+			default:
+				break;
+		}
+	}
+
+	return (p - buf);	
+}
+// printf end
