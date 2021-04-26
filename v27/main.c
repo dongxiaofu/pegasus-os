@@ -780,14 +780,17 @@ void kernel_main()
 	//init_keyboard_handler();
 	
 	// 初始化进程优先级
-	proc_table[0].ticks = proc_table[0].priority = 50;
-	proc_table[1].ticks = proc_table[1].priority = 30;
-	proc_table[2].ticks = proc_table[2].priority = 30;
-	proc_table[3].ticks = proc_table[3].priority = 40;
-	proc_ready_table = &proc_table[3];
+	proc_table[0].ticks = proc_table[0].priority = 51;
+	proc_table[1].ticks = proc_table[1].priority = 51;
+	proc_table[2].ticks = proc_table[2].priority = 51;
+	proc_table[3].ticks = proc_table[3].priority = 51;
+	//proc_ready_table = &proc_table[3];
 
-	proc_table[0].tty_index = proc_table[1].tty_index = 0;
-	proc_table[2].tty_index = 1;
+	proc_table[0].tty_index = 0;
+	proc_table[1].tty_index = 1;
+	proc_table[2].tty_index = 2;
+	proc_table[3].tty_index = 0;
+	//proc_ready_table = &proc_table[3];
 	dis_pos = 0;
 	// 清屏
 	for(int i = 0; i < 80 * 25 * 2; i++){
@@ -813,11 +816,18 @@ void kernel_main()
 void TestA()
 {
 	while(1){
-		dis_pos = 0;
-		//Printf("<a ticks:%x\n>", get_ticks());
-		milli_delay(30);
+		//dis_pos = 0;
+		select_console(0);
+		int t = get_ticks();
+		if(t < 300){
+			out_char(current_tty, 'A');
+		}
+		//disp_int(t);
+		// out_char(current_tty, 'A');
+		//Printf("T:%x", t);
+		milli_delay(20);
 		//disp_int(get_ticks());
-		disp_str_colour("A", 0x0A);
+		//disp_str_colour("A", 0x0A);
 		//disp_int(1);
 		//disp_str(".");
 		//delay(1);
@@ -838,8 +848,14 @@ void delay(int time)
 
 void TestB()
 {
+	select_console(1);
 	while(1){
-		Printf("<b ticks:%x\n>", get_ticks());
+		select_console(1);
+		//Printf("<b ticks:%x\n>", get_ticks());
+		int t = get_ticks();
+		if(t < 600){
+			out_char(current_tty, 'B');
+		}
 		milli_delay(30);
 		//disp_int(get_ticks());
 		//disp_str("B");
@@ -852,8 +868,14 @@ void TestB()
 
 void TestC()
 {
+	select_console(2);
 	while(1){
-		Printf("<c ticks:%x\n>", get_ticks());
+		//Printf("<c ticks:%x\n>", get_ticks());
+		select_console(2);
+		int t = get_ticks();
+		if(t < 900){
+			out_char(current_tty, 'C');
+		}
 		milli_delay(30);
 		//disp_int(get_ticks());
 		//disp_str("C");
@@ -935,7 +957,8 @@ int sys_get_ticks()
 
 void sys_write(char *buf, int len, Proc *proc)
 {
-	TTY *tty = &tty_table[proc - proc_table];
+	//TTY *tty = &tty_table[proc - proc_table];
+	TTY *tty = &tty_table[proc->tty_index];
 	int i = len;
 	char *p = buf;
 	while(i > 0){
@@ -1021,7 +1044,8 @@ unsigned char read_from_keyboard_buf()
 
 void keyboard_read(TTY *tty)
 {
-	while(keyboard_buffer.counter <= 0){}
+	while(keyboard_buffer.counter <= 0){
+	}
 	unsigned char scan_code = read_from_keyboard_buf();
 	// 从映射数组中解析出来的值
 	unsigned int key = 0;
@@ -1131,6 +1155,7 @@ void TaskTTY()
 
 	init_tty();
 	select_console(0);
+	Printf("T:%x", 3);
 	while(1){
 		for(TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++){
 			tty_do_read(tty);
@@ -1507,10 +1532,13 @@ void init_tty()
 void Printf(char *fmt, ...)
 {
 	char buf[256];
+	Memset(buf, 0, 256);
 	// 理解这句，耗费了大量时间。
 	char *var_list = (char *)((char *)&fmt + 4);
 	int len = vsprintf(buf, fmt, var_list);
-	write(buf, len);	
+	char str[2] = {'A', 0};
+	len = 2;
+	write(str, len);	
 }
 
 int vsprintf(char *buf, char *fmt, char *var_list)
@@ -1519,10 +1547,12 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 	char *p;
 	// 转换数字使用
 	char tmp[256];	
+	Memset(tmp, 0, 256);
 	char *next_arg = var_list;
-	for(p = fmt; *fmt; fmt++ ){
+	for(p = buf; *fmt; fmt++ ){
 		if(*fmt != '%'){
-			p++;
+			*p++ = *fmt;
+			//p++;
 			continue;
 		}
 		// 跳过%
@@ -1530,9 +1560,11 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 		switch(*fmt){
 			case 'x':
 				atoi(tmp, *(int *)next_arg);
-				Strcpy(buf, tmp);
+				//Strcpy(buf, tmp);
+				Strcpy(p, tmp);
 				next_arg += 4;
-				p += Strlen(tmp);	
+				int len2 = Strlen(tmp);
+				p += len2;//Strlen(tmp);	
 				break;
 			case 's':
 

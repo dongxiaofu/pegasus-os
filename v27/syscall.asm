@@ -16,11 +16,12 @@ get_ticks:
 
 ; int write(char *buf, int len)
 write:
+	xchg bx, bx
 	mov eax, _NR_WRITE
 	; 第2个参数
-	mov ebx, [ebp+8]
+	mov ebx, [esp+8]
 	; 第1个参数
-	mov ecx, [ebp+4]
+	mov ecx, [esp+4]
 
 	int INT_VECTOR_TICKS
 

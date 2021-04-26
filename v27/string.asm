@@ -58,7 +58,7 @@ Memcpy:
 
 ; Memset(void *dest, char character, int size)
 Memset:
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	push ebp
 	mov ebp, esp	
 	
@@ -76,11 +76,11 @@ Memset:
 	inc esi		
 	jmp .1
 .2:
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	pop eax
 	pop ebp	
 	;mov esp, ebp
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 
 	ret	
 
@@ -116,7 +116,8 @@ Strcpy:
 Strlen:
 	push ebp
 	mov ebp, esp
-
+	push ecx
+	mov ecx, 0
 	mov esi, [ebp + 8]
 	
 .1:
@@ -124,10 +125,12 @@ Strlen:
 	;cmp al, 0
 	;jz .2
 	inc esi
+	inc ecx
 	cmp al, 0
 	jz .2
 	jmp .1
 .2:
-	mov eax, esi
+	mov eax, ecx
+	pop ecx
 	pop ebp
 	ret 
