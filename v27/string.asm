@@ -63,6 +63,8 @@ Memset:
 	mov ebp, esp	
 	
 	push eax
+	push esi
+	push ecx
 	
 	mov ecx, [ebp + 16]	; size
 	mov esi, [ebp + 8]	; dest
@@ -77,6 +79,8 @@ Memset:
 	jmp .1
 .2:
 	;;;;;;xchg bx, bx
+	pop ecx
+	pop esi
 	pop eax
 	pop ebp	
 	;mov esp, ebp

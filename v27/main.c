@@ -258,10 +258,14 @@ typedef struct{
 }Task;
 
 // 进程A、B、C的堆栈大小
-#define A_STACK_SIZE 128
-#define B_STACK_SIZE 128
-#define C_STACK_SIZE 128
-#define TaskTTY_STACK_SIZE 128
+#define A_STACK_SIZE 4096
+#define B_STACK_SIZE 4096
+#define C_STACK_SIZE 4096
+#define TaskTTY_STACK_SIZE 1024
+//#define A_STACK_SIZE 128
+//#define B_STACK_SIZE 128
+//#define C_STACK_SIZE 128
+//#define TaskTTY_STACK_SIZE 128
 // 进程栈
 #define STACK_SIZE (A_STACK_SIZE + B_STACK_SIZE + C_STACK_SIZE + TaskTTY_STACK_SIZE)
 
@@ -780,17 +784,18 @@ void kernel_main()
 	//init_keyboard_handler();
 	
 	// 初始化进程优先级
-	proc_table[0].ticks = proc_table[0].priority = 51;
-	proc_table[1].ticks = proc_table[1].priority = 51;
-	proc_table[2].ticks = proc_table[2].priority = 51;
-	proc_table[3].ticks = proc_table[3].priority = 51;
+	proc_table[0].ticks = proc_table[0].priority = 5;
+	proc_table[1].ticks = proc_table[1].priority = 3;
+	proc_table[2].ticks = proc_table[2].priority = 4;
+	proc_table[3].ticks = proc_table[3].priority = 6;
 	//proc_ready_table = &proc_table[3];
 
 	proc_table[0].tty_index = 0;
 	proc_table[1].tty_index = 1;
 	proc_table[2].tty_index = 2;
-	proc_table[3].tty_index = 0;
-	//proc_ready_table = &proc_table[3];
+	proc_table[3].tty_index = 2;
+	proc_ready_table = &proc_table[3];
+	//proc_ready_table = &proc_table[0];
 	dis_pos = 0;
 	// 清屏
 	for(int i = 0; i < 80 * 25 * 2; i++){
@@ -815,8 +820,17 @@ void kernel_main()
 
 void TestA()
 {
+	//Printf("<a ticks:%x\n>", get_ticks());
+	int i = 0;
 	while(1){
-		Printf("<a ticks:%x\n>", get_ticks());
+		//Printf("<a ticks:%x\n>", get_ticks());
+		if( i < 2){
+			//get_ticks();
+			Printf("at:%x", get_ticks());
+			//disp_str_colour("A", 0x0A);
+			Printf("a:%x", 1);
+		}
+		i++;
 		//dis_pos = 0;
 		// select_console(0);
 		// int t = get_ticks();
@@ -826,7 +840,7 @@ void TestA()
 		//disp_int(t);
 		// out_char(current_tty, 'A');
 		//Printf("T:%x", t);
-		milli_delay(20);
+		//milli_delay(10);
 		//disp_int(get_ticks());
 		//disp_str_colour("A", 0x0A);
 		//disp_int(1);
@@ -849,15 +863,22 @@ void delay(int time)
 
 void TestB()
 {
+		//Printf("<b ticks:%x\n>", get_ticks());
 	// select_console(1);
+	int i = 0;
 	while(1){
 		// select_console(1);
-		Printf("<b ticks:%x\n>", get_ticks());
+		//Printf("<b ticks:%x\n>", get_ticks());
+		if( i < 10){
+			Printf("bt:%x", get_ticks());
+			Printf("b:%x", 2);
+		}
+		i++;
 		// int t = get_ticks();
 		// if(t < 600){
 		// 	out_char(current_tty, 'B');
 		// }
-		milli_delay(30);
+		//milli_delay(10);
 		//disp_int(get_ticks());
 		//disp_str("B");
 		//disp_str(".");
@@ -869,15 +890,22 @@ void TestB()
 
 void TestC()
 {
+		//Printf("<c ticks:%x\n>", get_ticks());
 	// select_console(2);
+	int i = 0;
 	while(1){
-		Printf("<c ticks:%x\n>", get_ticks());
+		if( i < 10){
+			Printf("ct:%x", get_ticks());
+			Printf("c:%x", 3);
+		}
+		i++;
+		//Printf("<c ticks:%x\n>", get_ticks());
 		// select_console(2);
 		// int t = get_ticks();
 		// if(t < 900){
 		// 	out_char(current_tty, 'C');
 		// }
-		milli_delay(30);
+		//milli_delay(10);
 		//disp_int(get_ticks());
 		//disp_str("C");
 		//disp_str(".");
@@ -1156,7 +1184,7 @@ void TaskTTY()
 
 	init_tty();
 	select_console(0);
-	Printf("T:%x", 3);
+	//Printf("T:%x", 3);
 	while(1){
 		for(TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++){
 			tty_do_read(tty);
@@ -1537,9 +1565,10 @@ void Printf(char *fmt, ...)
 	// 理解这句，耗费了大量时间。
 	char *var_list = (char *)((char *)&fmt + 4);
 	int len = vsprintf(buf, fmt, var_list);
-	char str[2] = {'A', 0};
-	len = 2;
-	write(str, len);	
+	//char str[2] = {'A', 0};
+	//len = 2;
+	write(buf, len);	
+	return;
 }
 
 int vsprintf(char *buf, char *fmt, char *var_list)
@@ -1547,8 +1576,14 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 	// 指向buf
 	char *p;
 	// 转换数字使用
-	char tmp[256];	
-	Memset(tmp, 0, 256);
+	// 使用256会导致gdt中的数据被擦除，从而导致各种奇怪的问题，比如，proc_ready_table中的数据被修改。
+	// 耗费了八个小时左右才发现这个问题。
+	//char tmp[256];	
+	//char tmp[128];	
+	char tmp[64];	
+	//return 0;
+	Memset(tmp, 0, sizeof(tmp));
+	//Memset(tmp, 0, 256);
 	char *next_arg = var_list;
 	for(p = buf; *fmt; fmt++ ){
 		if(*fmt != '%'){
