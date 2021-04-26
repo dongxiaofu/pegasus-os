@@ -411,12 +411,12 @@ hwint1:
 	inc dword [k_reenter]
 	; 中间代码
 	mov esp, StackTop
-	xchg bx, bx
+	;xchg bx, bx
 	call keyboard_handler
-	xchg bx, bx
+	;xchg bx, bx
 	mov al, 11111100b
 	out 21h, al
-	xchg bx, bx
+	;xchg bx, bx
 	; 没有比较，为啥用jne？因为这是修改之前的代码后遗漏的地方.
 	; 导致键盘缓冲区出现Invalid Code。
 	;jne restore
@@ -432,6 +432,7 @@ hwint1:
 
 ; 系统调用中断 start
 sys_call:
+	xchg bx, bx
 	; 建立快照
 	pushad
 	push ds
@@ -448,17 +449,19 @@ sys_call:
 	; 中间代码
 	; 需要切换到内核栈吗？
 	mov esp, StackTop 
+	;push dword proc_ready_table
+	push dword [proc_ready_table]
 	push ebx
 	push ecx
-	push esi
+	;push esi
 	call [sys_call_table + 4 * eax]
 	; 修改请求系统调用的进程的进程表中的堆栈
 	; 获取堆栈中的eax是个难题：
 	; 1. 怎么获取进程表的堆栈？proc_ready_table不能用，esp指向的不是堆栈的最开始位置
 	; 2. 	
 	;;xhcg bx, bx
-	pop esi
-	add esp, 8
+	;pop esi
+	add esp, 12
 	mov [esi + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
 	;pop esi
@@ -521,7 +524,7 @@ restore:
 	;lldt [proc_table + 64]
 	;lldt [proc_table + 68]
 	;dec word [k_reenter]
-	xchg bx, bx
+	;xchg bx, bx
 	dec dword [k_reenter]
 	mov esp, [proc_ready_table]
 	lldt [esp + 68]
@@ -539,7 +542,7 @@ restore:
 	pop ds
 
 	popad
-	xchg bx, bx
+	;xchg bx, bx
 	iretd
 
 in_byte:
