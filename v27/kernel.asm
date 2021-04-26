@@ -1,5 +1,6 @@
 [section .bss]
-Stack	resb	1024*2
+;Stack	resb	1024*2
+Stack	resb	1024*1024
 StackTop:
 ; TSS选择子
 TSS_SELECTOR	equ	0x40
@@ -444,7 +445,11 @@ sys_call:
 	; 从gs到eax，距离是多少个字节？11个	
 	; 中间代码修改eax使用
 	mov esi, esp
-		
+	
+	;mov dx, ss
+	;mov ds, dx
+	;mov es, dx	
+	
 	sti
 	; 中间代码
 	; 需要切换到内核栈吗？
@@ -469,7 +474,8 @@ sys_call:
 	; 恢复进程。不能使用restart，因为，不能使用proc_ready_table
 	; jmp restart	
 	;sub esi, 68
-	mov esp, esi
+	;mov esp, esi
+	mov esp, [proc_ready_table]
 	;lldt [esp + 68]
 	;lldt [esp + 4]
 	lldt [esp + 68]
@@ -482,7 +488,8 @@ sys_call:
 	pop es
 	pop ds
 	popad
-
+	
+	;ret
 	iretd
 
 ; 系统调用中断 end
