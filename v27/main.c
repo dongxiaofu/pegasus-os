@@ -816,12 +816,13 @@ void kernel_main()
 void TestA()
 {
 	while(1){
+		Printf("<a ticks:%x\n>", get_ticks());
 		//dis_pos = 0;
-		select_console(0);
-		int t = get_ticks();
-		if(t < 300){
-			out_char(current_tty, 'A');
-		}
+		// select_console(0);
+		// int t = get_ticks();
+		// if(t < 300){
+		// 	out_char(current_tty, 'A');
+		// }
 		//disp_int(t);
 		// out_char(current_tty, 'A');
 		//Printf("T:%x", t);
@@ -848,14 +849,14 @@ void delay(int time)
 
 void TestB()
 {
-	select_console(1);
+	// select_console(1);
 	while(1){
-		select_console(1);
-		//Printf("<b ticks:%x\n>", get_ticks());
-		int t = get_ticks();
-		if(t < 600){
-			out_char(current_tty, 'B');
-		}
+		// select_console(1);
+		Printf("<b ticks:%x\n>", get_ticks());
+		// int t = get_ticks();
+		// if(t < 600){
+		// 	out_char(current_tty, 'B');
+		// }
 		milli_delay(30);
 		//disp_int(get_ticks());
 		//disp_str("B");
@@ -868,14 +869,14 @@ void TestB()
 
 void TestC()
 {
-	select_console(2);
+	// select_console(2);
 	while(1){
-		//Printf("<c ticks:%x\n>", get_ticks());
-		select_console(2);
-		int t = get_ticks();
-		if(t < 900){
-			out_char(current_tty, 'C');
-		}
+		Printf("<c ticks:%x\n>", get_ticks());
+		// select_console(2);
+		// int t = get_ticks();
+		// if(t < 900){
+		// 	out_char(current_tty, 'C');
+		// }
 		milli_delay(30);
 		//disp_int(get_ticks());
 		//disp_str("C");
