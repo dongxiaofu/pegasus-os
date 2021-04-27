@@ -824,7 +824,7 @@ void kernel_main()
 void TestA()
 {
 	//Printf("<a ticks:%x\n>", get_ticks());
-	int i = 0;
+	unsigned int i = 0;
 	while(1){
 		//Printf("<a ticks:%x\n>", get_ticks());
 		if( i < 2){
@@ -868,7 +868,7 @@ void TestB()
 {
 		//Printf("<b ticks:%x\n>", get_ticks());
 	// select_console(1);
-	int i = 0;
+	unsigned int i = 0;
 	while(1){
 		// select_console(1);
 		//Printf("<b ticks:%x\n>", get_ticks());
@@ -895,7 +895,7 @@ void TestC()
 {
 		//Printf("<c ticks:%x\n>", get_ticks());
 	// select_console(2);
-	int i = 0;
+	unsigned int i = 0;
 	while(1){
 		if( i < 10){
 			Printf("ct:%x", get_ticks());
