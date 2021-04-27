@@ -734,6 +734,9 @@ void kernel_main()
 		// proc->ldts[1].seg_attr1 = 0xb2;
 
 		// 初始化进程表的段寄存器
+		// 我又看不懂当初写的代码了。
+		// 一定要写非常详细的注释。
+		// 0101：rpl是01，TI是1，在ldt中的索引是0。
 		proc->s_reg.cs = 0x05;	// 000 0101		
 		proc->s_reg.ds = 0x0D;	// 000 1101		
 		proc->s_reg.fs = 0x0D;	// 000 1101		
