@@ -433,7 +433,6 @@ hwint1:
 
 ; 系统调用中断 start
 sys_call:
-	xchg bx, bx
 	; 建立快照
 	pushad
 	push ds
@@ -523,6 +522,7 @@ restart:
 
 ; 恢复进程
 restore:
+	xchg bx, bx
 	;mov esp, [proc_table]
 	;mov eax, proc_table
 	;mov esp, eax
