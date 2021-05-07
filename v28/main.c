@@ -247,8 +247,13 @@ typedef struct{
 
 // 变量--进程
 TSS tss;
-#define PROC_NUM 4
-Proc proc_table[PROC_NUM];
+// 用户进程的数量
+#define USER_PROC_NUM 10
+// 系统任务的数量
+#define TASK_PROC_NUM 5
+// 系统任何和用户进程的进程表都存储在这个数组中
+Proc proc_table[TASK_PROC_NUM + USER_PROC_NUM];
+// 即将或正在执行的进程的进程表
 Proc *proc_ready_table;
 typedef void (*Func)();
 
@@ -257,17 +262,22 @@ typedef struct{
 	unsigned short stack_size;
 }Task;
 
+// 进程栈默认大小
+#define DEFAULT_STACK_SIZE 4096
+
 // 进程A、B、C的堆栈大小
-#define A_STACK_SIZE 4096
-#define B_STACK_SIZE 4096
-#define C_STACK_SIZE 4096
-#define TaskTTY_STACK_SIZE 1024
+#define A_STACK_SIZE DEFAULT_STACK_SIZE
+#define B_STACK_SIZE DEFAULT_STACK_SIZE
+#define C_STACK_SIZE DEFAULT_STACK_SIZE
+// 系统进程
+#define TaskTTY_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_SYS_SIZE DEFAULT_STACK_SIZE
 //#define A_STACK_SIZE 128
 //#define B_STACK_SIZE 128
 //#define C_STACK_SIZE 128
 //#define TaskTTY_STACK_SIZE 128
 // 进程栈
-#define STACK_SIZE (A_STACK_SIZE + B_STACK_SIZE + C_STACK_SIZE + TaskTTY_STACK_SIZE)
+#define STACK_SIZE (A_STACK_SIZE + B_STACK_SIZE + C_STACK_SIZE + TaskTTY_STACK_SIZE + TASK_SYS_SIZE)
 
 // 初始化描述符
 // void InitDescriptor(void *desc, unsigned int base, unsigned int limit, unsigned short attribute);
@@ -285,20 +295,25 @@ void TestB();
 void TestC();
 // 终端--任务进程体，键盘
 void TaskTTY();
+// 系统任务进程
+void TaskSys();
 // 启动进程
 void restart();
 void delay(int time);
 // 调度进程
 // void schedule_process();
-// 进程A的堆栈
+// 进程的堆栈
 int proc_stack[STACK_SIZE];
-
-Task task_table[PROC_NUM] = {
-//Task task_table[3] = {
+// 用户进程元数据
+Task user_task_table[USER_PROC_NUM] = {
 	{TestA, A_STACK_SIZE},
 	{TestB, B_STACK_SIZE},
 	{TestC, C_STACK_SIZE},
+};
+// 系统任务元数据
+Task sys_task_table[TASK_PROC_NUM] = {
 	{TaskTTY, TaskTTY_STACK_SIZE},
+	{TasSys, TASK_SYS_SIZE},
 };
 
 // 系统调用 start
@@ -659,12 +674,20 @@ void init_propt()
 	int tss_base = VirAddr2PhyAddr(ds_phy_addr, &tss);		
 	// int tss_attribute = 0x0c92;		// todo tss的属性怎么确定？
 	// 难点。抄的于上神的。
+	// 改成0x889也行。
 	int tss_attribute = 0x89;		// todo tss的属性怎么确定？
 	InitDescriptor(&gdt[TSS_SELECTOR_INDEX], tss_base, tss_size - 1, tss_attribute);				
-	for(int i = 0; i < PROC_NUM; i++){			
+	for(int i = 0; i < USER_PROC_NUM; i++){			
 		// 初始化LDT
 		int ldt_size = 2 * sizeof(Descriptor);
 		// int ldt_attribute = 0x0c92;          // todo ldt的属性怎么确定？	
+		// LDT描述符的属性是在GDT中的描述符的属性，图示：
+		// L->DPL，E->TYPE
+		//  7 6 5 4 3 2 1 0
+		// |P|L|L|S|E|E|E|E|
+		// 0x82：1000 0010
+		// 改成0x882也可以。
+		// 这并不是最终的属性，在初始化进程时，会修改。
 		int ldt_attribute = 0x82;          // todo ldt的属性怎么确定？	
 		// int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[0].ldts);
 		//int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table.ldts);
@@ -717,7 +740,7 @@ void kernel_main()
 	// 在这个项目的C代码中，全局变量如此赋值才有效。原因未知，实践要求如此。
 	k_reenter = -1;
 	Proc *proc = proc_table;
-	for(int i = 0; i < PROC_NUM; i++){	
+	for(int i = 0; i < USER_PROC_NUM; i++){	
 		//proc->ldt_selector = LDT_FIRST_SELECTOR + i<<3;
 		proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
 		proc->pid = i;	
@@ -726,11 +749,11 @@ void kernel_main()
 		// 修改ldt描述符的属性。全局cs的属性是 0c9ah。
 		//proc->ldts[0].seg_attr1 = 0xcd;
 		//proc->ldts[0].seg_attr1 = 0xda;
-		proc->ldts[0].seg_attr1 = 0xba;
+		proc->ldts[0].seg_attr1 = 0xba;			// 1011 1010
 		Memcpy(&proc->ldts[1], &gdt[DS_SELECTOR_INDEX], sizeof(Descriptor));
 		// 修改ldt描述符的属性。全局ds的属性是 0c92h
 		// proc->ldts[1].seg_attr1 = 0xd2;
-		proc->ldts[1].seg_attr1 = 0xb2;
+		proc->ldts[1].seg_attr1 = 0xb2;			// 1011 0010
 		// proc->ldts[1].seg_attr1 = 0xb2;
 
 		// 初始化进程表的段寄存器
@@ -764,7 +787,7 @@ void kernel_main()
 		// 抄的于上神的。需要自己弄清楚。我已经理解了。
 		// IOPL = 1, IF = 1
 		// IOPL 控制I/O权限的特权级，IF控制中断的打开和关闭
-		proc->s_reg.eflags = 0x1202;	
+		proc->s_reg.eflags = 0x1202;	// 0001 0010 0000 0010
 
 
 		proc->tty_index = 0;
@@ -926,8 +949,8 @@ void schedule_process()
 	//proc_ready_table = &proc_table[3];
 	//return;
 	while(!greatest_ticks){
-		//for(p = proc_table; p < proc_table + PROC_NUM; p++){
-		for(p = proc_table; p < proc_table + PROC_NUM; p++){
+		//for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
+		for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
 			if(p->ticks > greatest_ticks){
 				greatest_ticks = p->ticks;
 				proc_ready_table = p;
@@ -936,7 +959,7 @@ void schedule_process()
 		
 		//while(!greatest_ticks){
 		if(!greatest_ticks){
-			for(p = proc_table; p < proc_table + PROC_NUM; p++){
+			for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
 				p->ticks = p->priority;
 			}
 		}
@@ -947,7 +970,7 @@ void schedule_process()
 	//disp_int(proc_ready_table->pid);
 	//disp_str("]");
 	//proc_ready_table++;
-	//if(proc_ready_table >= proc_table + PROC_NUM){
+	//if(proc_ready_table >= proc_table + USER_PROC_NUM){
 	//	proc_ready_table = proc_table;
 	//}
 	//proc_ready_table = &proc_table[1];
@@ -960,7 +983,7 @@ void schedule_process()
 	//disp_str("]");
 	//return;
 //	//extern unsigned int counter;
-//	if(counter < PROC_NUM - 1){
+//	if(counter < USER_PROC_NUM - 1){
 //		//proc_ready_table = &proc_table[counter++];
 //		counter++;
 //		proc_ready_table = &proc_table[counter];
@@ -970,8 +993,8 @@ void schedule_process()
 //	}
 //	return;
 //	counter++;
-//	// if(counter == PROC_NUM){
-//	if(counter == PROC_NUM - 1){
+//	// if(counter == USER_PROC_NUM){
+//	if(counter == USER_PROC_NUM - 1){
 //		counter = 0;
 //		proc_ready_table = proc_table;
 //	}
@@ -1195,6 +1218,11 @@ void TaskTTY()
 			tty_do_write(tty);
 		}
 	}
+}
+
+void TaskSys()
+{
+	
 }
 
 void init_keyboard_handler()
