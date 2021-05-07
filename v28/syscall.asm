@@ -9,6 +9,7 @@ INT_VECTOR_TICKS	equ	0x90
 [section .text]
 
 get_ticks:
+	xchg bx, bx
 	mov eax, _NR_GET_TICKS
 	int INT_VECTOR_TICKS
 	ret
