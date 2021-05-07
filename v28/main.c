@@ -248,9 +248,9 @@ typedef struct{
 // 变量--进程
 TSS tss;
 // 用户进程的数量
-#define USER_PROC_NUM 10
+#define USER_PROC_NUM 3
 // 系统任务的数量
-#define TASK_PROC_NUM 5
+#define TASK_PROC_NUM 2
 // 系统任何和用户进程的进程表都存储在这个数组中
 Proc proc_table[TASK_PROC_NUM + USER_PROC_NUM];
 // 即将或正在执行的进程的进程表
@@ -313,7 +313,7 @@ Task user_task_table[USER_PROC_NUM] = {
 // 系统任务元数据
 Task sys_task_table[TASK_PROC_NUM] = {
 	{TaskTTY, TaskTTY_STACK_SIZE},
-	{TasSys, TASK_SYS_SIZE},
+	{TaskSys, TASK_SYS_SIZE},
 };
 
 // 系统调用 start
@@ -610,7 +610,8 @@ void init_internal_interrupt()
 	// InitInterruptDesc(0x90,sys_call,0x08,0x0E);	
 	// 0x08--->1000b--->特权级是0
 	// 1010b-->0xA--->特权级是1
-	InitInterruptDesc(0x90,sys_call,0x0A,0x0E);	
+	// 1110b-->0xE--->特权级应该是3
+	InitInterruptDesc(0x90,sys_call,0x0E,0x0E);	
 }
 
 void test()
@@ -740,24 +741,27 @@ void kernel_main()
 	// 在这个项目的C代码中，全局变量如此赋值才有效。原因未知，实践要求如此。
 	k_reenter = -1;
 	Proc *proc;
-	Task task;
+	Task *task;
 	unsigned int eflags;
 	unsigned char rpl;
 	unsigned char dpl;
 	for(int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++){	
-		proc = proc_table[i];
+		proc = proc_table + i;
 		if(i < TASK_PROC_NUM){
 			task = sys_task_table + i;
 			eflags = 0x1202;
 			rpl = 1;
 			dpl = 1;
 			proc->ticks = proc->priority = 15;
+			proc->tty_index = 0;
 		}else{
 			task = user_task_table + i - TASK_PROC_NUM;
 			eflags = 0x202;
+			//eflags = 0x1202;
 			rpl = 3;
 			dpl = 3;
 			proc->ticks = proc->priority = 5;
+			proc->tty_index = 1;
 		}
 
 		//proc->ldt_selector = LDT_FIRST_SELECTOR + i<<3;
@@ -819,9 +823,7 @@ void kernel_main()
 		//proc->s_reg.eflags = 0x1202;	// 0001 0010 0000 0010
 		proc->s_reg.eflags = eflags;
 
-		proc->tty_index = 0;
-
-		proc_table[i] = proc;
+		//proc->tty_index = 0;
 	}
 	// 启动进程，扣动扳机，砰！		
 	//proc_ready_table = &proc_table[1];	
@@ -1226,8 +1228,13 @@ void TaskTTY()
 
 void TaskSys()
 {
+	int i = 0;
 	while(1){
-		Printf("%s\n", "I am TaskSys");
+		if(i < 10){
+
+			Printf("%x\n", 777);
+			i++;
+		}
 	}
 }
 
