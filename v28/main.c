@@ -677,7 +677,7 @@ void init_propt()
 	// 改成0x889也行。
 	int tss_attribute = 0x89;		// todo tss的属性怎么确定？
 	InitDescriptor(&gdt[TSS_SELECTOR_INDEX], tss_base, tss_size - 1, tss_attribute);				
-	for(int i = 0; i < USER_PROC_NUM; i++){			
+	for(int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++){			
 		// 初始化LDT
 		int ldt_size = 2 * sizeof(Descriptor);
 		// int ldt_attribute = 0x0c92;          // todo ldt的属性怎么确定？	
@@ -739,8 +739,27 @@ void kernel_main()
 	counter = 0;
 	// 在这个项目的C代码中，全局变量如此赋值才有效。原因未知，实践要求如此。
 	k_reenter = -1;
-	Proc *proc = proc_table;
-	for(int i = 0; i < USER_PROC_NUM; i++){	
+	Proc *proc;
+	Task task;
+	unsigned int eflags;
+	unsigned char rpl;
+	unsigned char dpl;
+	for(int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++){	
+		proc = proc_table[i];
+		if(i < TASK_PROC_NUM){
+			task = sys_task_table + i;
+			eflags = 0x1202;
+			rpl = 1;
+			dpl = 1;
+			proc->ticks = proc->priority = 15;
+		}else{
+			task = user_task_table + i - TASK_PROC_NUM;
+			eflags = 0x202;
+			rpl = 3;
+			dpl = 3;
+			proc->ticks = proc->priority = 5;
+		}
+
 		//proc->ldt_selector = LDT_FIRST_SELECTOR + i<<3;
 		proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
 		proc->pid = i;	
@@ -749,23 +768,33 @@ void kernel_main()
 		// 修改ldt描述符的属性。全局cs的属性是 0c9ah。
 		//proc->ldts[0].seg_attr1 = 0xcd;
 		//proc->ldts[0].seg_attr1 = 0xda;
-		proc->ldts[0].seg_attr1 = 0xba;			// 1011 1010
+		//proc->ldts[0].seg_attr1 = 0xba;			// 1011 1010
+		proc->ldts[0].seg_attr1 = 0x9a | (dpl << 5);				// 1001	1010
 		Memcpy(&proc->ldts[1], &gdt[DS_SELECTOR_INDEX], sizeof(Descriptor));
 		// 修改ldt描述符的属性。全局ds的属性是 0c92h
 		// proc->ldts[1].seg_attr1 = 0xd2;
-		proc->ldts[1].seg_attr1 = 0xb2;			// 1011 0010
+		// proc->ldts[1].seg_attr1 = 0xb2;			// 1011 0010
+		proc->ldts[1].seg_attr1 = 0x92 | (dpl << 5);			// 1001 0010
 		// proc->ldts[1].seg_attr1 = 0xb2;
 
 		// 初始化进程表的段寄存器
 		// 我又看不懂当初写的代码了。
 		// 一定要写非常详细的注释。
 		// 0101：rpl是01，TI是1，在ldt中的索引是0。
-		proc->s_reg.cs = 0x05;	// 000 0101		
-		proc->s_reg.ds = 0x0D;	// 000 1101		
-		proc->s_reg.fs = 0x0D;	// 000 1101		
-		proc->s_reg.es = 0x0D;	// 000 1101		
+		unsigned short cs = 0x4 | rpl;
+		unsigned short ds = 0xC | rpl;
+		// proc->s_reg.cs = 0x05;	// 000 0101		
+		// proc->s_reg.ds = 0x0D;	// 000 1101		
+		// proc->s_reg.fs = 0x0D;	// 000 1101		
+		// proc->s_reg.es = 0x0D;	// 000 1101		
+		// //proc->s_reg.ss = 0x0D;	// 000 1101	
+		// proc->s_reg.ss = 0x0D;	// 000 1100	
+		proc->s_reg.cs = cs;
+		proc->s_reg.ds = ds;
+		proc->s_reg.fs = ds;
+		proc->s_reg.es = ds;
 		//proc->s_reg.ss = 0x0D;	// 000 1101	
-		proc->s_reg.ss = 0x0D;	// 000 1100	
+		proc->s_reg.ss = ds;	// 000 1100	
 		// 需要修改gs的TI和RPL	
 		// proc->s_reg.gs = GS_SELECTOR;	
 		// proc->s_reg.gs = GS_SELECTOR | (0x101);
@@ -778,7 +807,7 @@ void kernel_main()
 		// 初始化进程表的通用寄存器
 		// proc->s_reg.eip = (int)TestA;
 		//proc->s_reg.eip = (int)task_table.func_name;
-		proc->s_reg.eip = (int)task_table[i].func_name;
+		proc->s_reg.eip = (int)task->func_name;
 		// proc->s_reg.eip = TestA;
 
 		//proc->s_reg.esp = (int)(proc_stack + 128 * i);
@@ -787,14 +816,12 @@ void kernel_main()
 		// 抄的于上神的。需要自己弄清楚。我已经理解了。
 		// IOPL = 1, IF = 1
 		// IOPL 控制I/O权限的特权级，IF控制中断的打开和关闭
-		proc->s_reg.eflags = 0x1202;	// 0001 0010 0000 0010
-
+		//proc->s_reg.eflags = 0x1202;	// 0001 0010 0000 0010
+		proc->s_reg.eflags = eflags;
 
 		proc->tty_index = 0;
-		
-		proc++;
-		// error: lvalue required as increment operand
-		//task_table++;
+
+		proc_table[i] = proc;
 	}
 	// 启动进程，扣动扳机，砰！		
 	//proc_ready_table = &proc_table[1];	
@@ -808,35 +835,12 @@ void kernel_main()
 	keyboard_buffer.counter = 0;
 	// 初始键盘中断例程
 	//init_keyboard_handler();
-	
-	// 初始化进程优先级
-	proc_table[0].ticks = proc_table[0].priority = 5;
-	proc_table[1].ticks = proc_table[1].priority = 3;
-	proc_table[2].ticks = proc_table[2].priority = 4;
-	proc_table[3].ticks = proc_table[3].priority = 6;
-	//proc_ready_table = &proc_table[3];
-
-	proc_table[0].tty_index = 0;
-	proc_table[1].tty_index = 1;
-	proc_table[2].tty_index = 2;
-	proc_table[3].tty_index = 2;
-	proc_ready_table = &proc_table[3];
-	//proc_ready_table = &proc_table[0];
 	dis_pos = 0;
 	// 清屏
 	for(int i = 0; i < 80 * 25 * 2; i++){
 		disp_str(" ");
 	}	
 	dis_pos = 0;
-	
-	// 一个字符占用2个字节。需填充15行。
-        // 每行80个字节，共25行。
-        // 每行需打印40个字符。
-        for(int i = 0; i < 80*15; i++){
-                //disp_str("A");
-		//dis_pos += 2;
-        }
-
 
 	init_keyboard_handler();
 	restart();
@@ -950,7 +954,7 @@ void schedule_process()
 	//return;
 	while(!greatest_ticks){
 		//for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
-		for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
+		for(p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++){
 			if(p->ticks > greatest_ticks){
 				greatest_ticks = p->ticks;
 				proc_ready_table = p;
@@ -959,7 +963,7 @@ void schedule_process()
 		
 		//while(!greatest_ticks){
 		if(!greatest_ticks){
-			for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
+			for(p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++){
 				p->ticks = p->priority;
 			}
 		}
@@ -1222,7 +1226,9 @@ void TaskTTY()
 
 void TaskSys()
 {
-	
+	while(1){
+		Printf("%s\n", "I am TaskSys");
+	}
 }
 
 void init_keyboard_handler()
