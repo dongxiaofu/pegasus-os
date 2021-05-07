@@ -77,9 +77,9 @@ _start:
 	;times	131072	db	0
 	;times	131072	db	0
 	;times	131072	db	0
-	;jmp $
-	;jmp $
-	;jmp $
+	jmp $
+	jmp $
+	jmp $
 	;;;;;;;;;xhcg; bx, bx
 	
 	;mov word [dis_pos], 0

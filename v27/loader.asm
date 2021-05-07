@@ -565,7 +565,7 @@ LABEL_PM_START:
 	; 测试读写5M之上的内存读写 end
 
 
-	;;xhcg bx, bx
+	xchg bx, bx
 	jmp SelectFlatX:0x30400
 	jmp $
 	jmp $
