@@ -33,7 +33,7 @@ write:
 
 ; int write_debug(char *buf, int len);
 write_debug:
-	;xchg bx, bx
+	xchg bx, bx
 	mov eax, _NR_WRITE_DEBUG
 	;mov eax, _NR_WRITE
 	; 第2个参数
