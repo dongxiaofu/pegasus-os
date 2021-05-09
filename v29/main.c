@@ -64,7 +64,7 @@ unsigned int ticks;
 //unsigned char k_reenter;
 //char k_reenter;
 //short k_reenter;
-int k_reenter;
+unsigned int k_reenter;
 //static unsigned int counter = 0;
 unsigned int counter;
 typedef void (*int_handle) ();
@@ -285,7 +285,7 @@ void InitDescriptor(Descriptor *desc, unsigned int base, unsigned int limit, uns
 // 根据段名求物理地址
 unsigned int Seg2PhyAddr(unsigned int selector);
 // 进程中的段
-unsigned int Seg2PhyAddrLDT(unsigned int selector, Proc *proc)
+unsigned int Seg2PhyAddrLDT(unsigned int selector, Proc *proc);
 // 根据虚拟地址求物理地址
 // unsigned int VirAddr2PhyAddr(unsigned int base, unsigned int offset);
 unsigned int VirAddr2PhyAddr(unsigned int base, void *offset);
@@ -327,7 +327,8 @@ typedef void *system_call;
 int sys_get_ticks();
 void sys_write(char *buf, int len, Proc *proc);
 // debug function start
-void sys_printx(char *error_msg, int caller_pid);
+void sys_printx(char *error_msg, Proc *proc);
+//void sys_printx(char *error_msg, int caller_id);
 // debug function end
 void sys_call();
 //system_call sys_call_table[1] = {
@@ -402,11 +403,17 @@ int Strlen(char *buf);
 // 只支持%x
 void Printf(char *fmt, ...);
 
+// 根据进程ID获取进程表的指针
+Proc *pid2proc(int pid);
+// 根据进程表的指针计算进程ID。
+int proc2pid(Proc *proc);
 // debug start
 // panic的魔数
 #define PANIC_MAGIC 58
 // assert的魔数
 #define ASSERT_MAGIC 59
+int vsprintf(char *buf, char *fmt, char *var_list);
+void write(char *buf, int len);
 void printx(char *fmt, ...);
 int write_debug(char *buf, int len);
 // int vsprintf_debug(char *buf, char *fmt, char *var_list);
@@ -415,18 +422,18 @@ void panic(char *error_msg);
 void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line);
 
 // todo __BASE_FILE__ 正确性未知
-#define asseert if(exp)
+#define asseert if(exp) ; \
 	else assertion_failure(#exp, __FILE__, __BASE_FILE__, __LINE__)
 
 
 // debug end
-int vsprintf(char *buf, char *fmt, char *var_list);
-void write(char *buf, int len);
+//int vsprintf(char *buf, char *fmt, char *var_list);
+//void write(char *buf, int len);
 
 // 根据进程ID获取进程表的指针
-Proc *pid2proc(int pid);
-// 根据进程表的指针计算进程ID。
-int proc2pid(Proc *proc);
+//Proc *pid2proc(int pid);
+//// 根据进程表的指针计算进程ID。
+//int proc2pid(Proc *proc);
 
 // printf end
 void ReloadGDT()
@@ -784,7 +791,8 @@ void kernel_main()
 	ticks = 0;
 	counter = 0;
 	// 在这个项目的C代码中，全局变量如此赋值才有效。原因未知，实践要求如此。
-	k_reenter = -1;
+	//k_reenter = -1;
+	k_reenter = 0;
 	Proc *proc;
 	Task *task;
 	unsigned int eflags;
@@ -805,7 +813,7 @@ void kernel_main()
 			//eflags = 0x1202;
 			rpl = 3;
 			dpl = 3;
-			proc->ticks = proc->priority = 5;
+			proc->ticks = proc->priority = 10;
 			proc->tty_index = 1;
 		}
 
@@ -899,7 +907,10 @@ void TestA()
 {
 	//Printf("<a ticks:%x\n>", get_ticks());
 	unsigned int i = 0;
-	Printf("Ticks:%x\n", ticks);
+	panic("hello, world");
+	Printf("%c%s\n", 'B', "How are you?");
+	//Printf("Ti:%s\n", "ticks, Hello, World, welecom!");
+	//Printf("Ti:%x\n", 99999);
 	while(1){
 		//Printf("<a ticks:%x\n>", get_ticks());
 		if( i < 2){
@@ -1675,6 +1686,7 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 	Memset(tmp, 0, sizeof(tmp));
 	//Memset(tmp, 0, 256);
 	char *next_arg = var_list;
+	int len2 = 0;
 	for(p = buf; *fmt; fmt++ ){
 		if(*fmt != '%'){
 			*p++ = *fmt;
@@ -1690,25 +1702,23 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 				//Strcpy(buf, tmp);
 				Strcpy(p, tmp);
 				next_arg += 4;
-				int len2 = Strlen(tmp);
+				len2 = Strlen(tmp);
 				p += len2;//Strlen(tmp);	
 				break;
 			case 's':
-				char *str = *((char **)next_arg);
-				Strcpy(p, tmp);
+				//char *str = *(char **)next_arg;
+				Strcpy(p, *(char **)next_arg);
+				len2 = Strlen(*(char **)next_arg);
 				next_arg += 4;
-				int len2 = Strlen(tmp);
+				//len2 = 6;//Strlen(*(char **)next_arg);
 				p += len2;//Strlen(tmp);
 				break;
-			case 'd_todo':
-
-				break;
 			case 'c':
-				char c = *((char *)next_arg);
+				//char c = *(char *)next_arg;
 				*p++;
-				*p = c;
+				*p = *(char *)next_arg;
 				next_arg += 4;
-				int len2 = Strlen(tmp);
+				len2 = Strlen(tmp);
 				p += len2;//Strlen(tmp);
 				break;
 			default:
@@ -1727,21 +1737,22 @@ void printx(char *fmt, ...)
 {
 	char buf[256];
 	char *var_list = (char *)((char *)&fmt + 4);
-	int len = vsprintf(char *buf, fmt, var_list);
+	int len = vsprintf(buf, fmt, var_list);
 	write_debug(buf, len);
 }
 
 // 系统调用，使用汇编代码实现
 // void write_debug(char *buf, int len);
-void sys_printx(char *error_msg, int caller_pid)
+void sys_printx(char *error_msg, Proc *proc)
+//void sys_printx(char *error_msg, int caller_pid)
 {
 	int line_addr;
 	int base;
-	Proc *proc = pid2proc(caller_pid);
+	//Proc *proc = pid2proc(caller_pid);
 
 	if(k_reenter == 0){
 		
-		int ds = proc->ds;
+		int ds = proc->s_reg.ds;
 		base = Seg2PhyAddrLDT(ds, proc);
 	}else if(k_reenter > 0){
 		base = Seg2PhyAddr(DS_SELECTOR);
