@@ -355,11 +355,14 @@ hwint0:
 	mov ds, dx
 	mov es, dx
 	;;xhcg bx, bx	
+	mov al, 11111101b
+	out 21h, al
 	mov al, 20h
 	out 20h, al	
+	inc dword [k_reenter]
 	sti;
 	;inc word [k_reenter]
-	inc dword [k_reenter]
+	;inc dword [k_reenter]
 	;cmp k_reenter, 0
 	;cmp [k_reenter], 0
 	;cmp dword [k_reenter], 0
@@ -376,7 +379,10 @@ hwint0:
 	;call schedule_process	
 	pop ax
 	;;;xhcg bx, bx
+	mov al, 11111100b
+	out 21h, al
 	cli	
+	dec dword [k_reenter]
 	; 启动进程
 	;jmp restart
 	;jne restore
@@ -408,16 +414,19 @@ hwint1:
 	mov al, 20h
 	out 20h, al
 
-	sti	
 	inc dword [k_reenter]
+	sti	
+	;inc dword [k_reenter]
 	; 中间代码
 	mov esp, StackTop
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	call keyboard_handler
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	mov al, 11111100b
 	out 21h, al
-	;;xchg bx, bx
+	cli
+	dec dword [k_reenter]
+	;;;xchg bx, bx
 	; 没有比较，为啥用jne？因为这是修改之前的代码后遗漏的地方.
 	; 导致键盘缓冲区出现Invalid Code。
 	;jne restore
@@ -449,12 +458,14 @@ sys_call:
 	;mov ds, dx
 	;mov es, dx	
 	
-	sti
+	xchg bx, bx
 	inc dword [k_reenter]
+	sti
+	;inc dword [k_reenter]
 	; 中间代码
 	; 需要切换到内核栈吗？
 	mov esp, StackTop 
-	dec dword [k_reenter]
+	;dec dword [k_reenter]
 	;push dword proc_ready_table
 	push dword [proc_ready_table]
 	push ebx
@@ -476,6 +487,7 @@ sys_call:
 	; jmp restart	
 	;sub esi, 68
 	;mov esp, esi
+	dec dword [k_reenter]
 	mov esp, [proc_ready_table]
 	;lldt [esp + 68]
 	;lldt [esp + 4]
@@ -504,6 +516,7 @@ restart:
 	;lldt [proc_table + 52]
 	;lldt [proc_table + 64]
 	;lldt [proc_table + 68]
+	; 不能放到前面
 	dec dword [k_reenter]
 	mov esp, [proc_ready_table]
 	lldt [esp + 68]
@@ -525,7 +538,7 @@ restart:
 
 ; 恢复进程
 restore:
-	;xchg bx, bx
+	;;xchg bx, bx
 	;mov esp, [proc_table]
 	;mov eax, proc_table
 	;mov esp, eax
@@ -534,8 +547,9 @@ restore:
 	;lldt [proc_table + 64]
 	;lldt [proc_table + 68]
 	;dec word [k_reenter]
-	;;xchg bx, bx
-	dec dword [k_reenter]
+	;;;xchg bx, bx
+	; 能放到前面，和其他函数在形式上比较相似
+	;dec dword [k_reenter]
 	mov esp, [proc_ready_table]
 	lldt [esp + 68]
 	;lldt [proc_table + 56]
@@ -552,7 +566,7 @@ restore:
 	pop ds
 
 	popad
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	iretd
 
 in_byte:
