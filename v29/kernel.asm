@@ -450,9 +450,11 @@ sys_call:
 	;mov es, dx	
 	
 	sti
+	inc dword [k_reenter]
 	; 中间代码
 	; 需要切换到内核栈吗？
 	mov esp, StackTop 
+	dec dword [k_reenter]
 	;push dword proc_ready_table
 	push dword [proc_ready_table]
 	push ebx

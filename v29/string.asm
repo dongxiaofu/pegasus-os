@@ -118,7 +118,6 @@ Strcpy:
 
 ; int Strlen(char *str)
 Strlen:
-	xchg bx, bx
 	push ebp
 	mov ebp, esp
 	push ecx

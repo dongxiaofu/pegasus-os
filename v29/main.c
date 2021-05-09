@@ -813,7 +813,7 @@ void kernel_main()
 			//eflags = 0x1202;
 			rpl = 3;
 			dpl = 3;
-			proc->ticks = proc->priority = 10;
+			proc->ticks = proc->priority = 5;
 			proc->tty_index = 1;
 		}
 
