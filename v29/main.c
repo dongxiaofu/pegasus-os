@@ -284,6 +284,8 @@ typedef struct{
 void InitDescriptor(Descriptor *desc, unsigned int base, unsigned int limit, unsigned short attribute);
 // 根据段名求物理地址
 unsigned int Seg2PhyAddr(unsigned int selector);
+// 进程中的段
+unsigned int Seg2PhyAddrLDT(unsigned int selector, Proc *proc)
 // 根据虚拟地址求物理地址
 // unsigned int VirAddr2PhyAddr(unsigned int base, unsigned int offset);
 unsigned int VirAddr2PhyAddr(unsigned int base, void *offset);
@@ -317,18 +319,24 @@ Task sys_task_table[TASK_PROC_NUM] = {
 };
 
 // 系统调用 start
+#define SYS_CALL_FUNCTION_NUM 3
 #define NR_GET_TICKS	0
 #define _NR_WRITE	1
+#define _NR_WRITE_DEBUG	2
 typedef void *system_call;
 int sys_get_ticks();
 void sys_write(char *buf, int len, Proc *proc);
+// debug function start
+void sys_printx(char *error_msg, int caller_pid);
+// debug function end
 void sys_call();
 //system_call sys_call_table[1] = {
-int_handle sys_call_table[2] = {
+int_handle sys_call_table[SYS_CALL_FUNCTION_NUM] = {
 	// warning: initialization of 'void (*)()' from incompatible pointer type 'int (*)()' [-Wincompatible-pointer-types]
 	// sys_get_ticks
 	(int_handle) sys_get_ticks,
-	(int_handle) sys_write
+	(int_handle) sys_write,
+	(int_handle) sys_printx
 };
 // 从汇编中导入的函数
 int get_ticks();
@@ -393,8 +401,32 @@ int Strlen(char *buf);
 
 // 只支持%x
 void Printf(char *fmt, ...);
+
+// debug start
+// panic的魔数
+#define PANIC_MAGIC 58
+// assert的魔数
+#define ASSERT_MAGIC 59
+void printx(char *fmt, ...);
+int write_debug(char *buf, int len);
+// int vsprintf_debug(char *buf, char *fmt, char *var_list);
+void spin(char *error_msg);
+void panic(char *error_msg);
+void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line);
+
+// todo __BASE_FILE__ 正确性未知
+#define asseert if(exp)
+	else assertion_failure(#exp, __FILE__, __BASE_FILE__, __LINE__)
+
+
+// debug end
 int vsprintf(char *buf, char *fmt, char *var_list);
 void write(char *buf, int len);
+
+// 根据进程ID获取进程表的指针
+Proc *pid2proc(int pid);
+// 根据进程表的指针计算进程ID。
+int proc2pid(Proc *proc);
 
 // printf end
 void ReloadGDT()
@@ -726,6 +758,19 @@ unsigned int Seg2PhyAddr(unsigned int selector)
 		| (unsigned char)((desc.seg_base_high<<24) & 0xFF000000);
 	return addr;
 }
+
+// 根据段名求物理地址
+unsigned int Seg2PhyAddrLDT(unsigned int selector, Proc *proc)
+{
+	Descriptor desc = proc->ldts[selector >> 3];
+	//int addr = ((desc & 0xFFFF0000) >> 16) | (((desc >> 32) & 0xFF) << 16) | (((desc >> 56) & 0xFF) << 24);
+	//int addr = desc.seg_base_below | (desc.seg_base_middle << 16) | (desc.seg_base_high << 24);
+	//int addr = (desc.seg_base_below & 0xFFFF) | ((desc.seg_base_middle & 0xFF0000)) | ((desc.seg_base_high & 0xFF000000));
+	int addr=(desc.seg_base_below & 0xFFFF) | ((desc.seg_base_middle << 16) & 0xFF0000) 
+		| (unsigned char)((desc.seg_base_high<<24) & 0xFF000000);
+	return addr;
+}
+
  // 根据虚拟地址求物理地址
 unsigned int VirAddr2PhyAddr(unsigned int base, void *offset)
 {
@@ -1639,6 +1684,7 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 		// 跳过%
 		fmt++;
 		switch(*fmt){
+			case 'd':
 			case 'x':
 				atoi(tmp, *(int *)next_arg);
 				//Strcpy(buf, tmp);
@@ -1648,7 +1694,22 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 				p += len2;//Strlen(tmp);	
 				break;
 			case 's':
+				char *str = *((char **)next_arg);
+				Strcpy(p, tmp);
+				next_arg += 4;
+				int len2 = Strlen(tmp);
+				p += len2;//Strlen(tmp);
+				break;
+			case 'd_todo':
 
+				break;
+			case 'c':
+				char c = *((char *)next_arg);
+				*p++;
+				*p = c;
+				next_arg += 4;
+				int len2 = Strlen(tmp);
+				p += len2;//Strlen(tmp);
 				break;
 			default:
 				break;
@@ -1658,3 +1719,90 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 	return (p - buf);	
 }
 // printf end
+
+
+
+// debug start
+void printx(char *fmt, ...)
+{
+	char buf[256];
+	char *var_list = (char *)((char *)&fmt + 4);
+	int len = vsprintf(char *buf, fmt, var_list);
+	write_debug(buf, len);
+}
+
+// 系统调用，使用汇编代码实现
+// void write_debug(char *buf, int len);
+void sys_printx(char *error_msg, int caller_pid)
+{
+	int line_addr;
+	int base;
+	Proc *proc = pid2proc(caller_pid);
+
+	if(k_reenter == 0){
+		
+		int ds = proc->ds;
+		base = Seg2PhyAddrLDT(ds, proc);
+	}else if(k_reenter > 0){
+		base = Seg2PhyAddr(DS_SELECTOR);
+	}
+	line_addr = base + error_msg;
+
+
+	// 打印字符串
+	TTY *tty = &tty_table[proc->tty_index];
+	char *p = (char *)line_addr;
+	while(*p != '\0'){
+		out_char(tty, *p);
+		p++;
+	}
+
+
+	char magic = error_msg[0];
+	if(magic == ASSERT_MAGIC){
+		if(k_reenter > 0){
+			disable_int();
+			__asm__("hlt");
+		}else{
+
+		}
+	}else if(magic == PANIC_MAGIC){
+		__asm__("hlt");
+	}
+
+	return;
+}
+
+void spin(char *error_msg)
+{
+	while(1){}
+}
+
+void panic(char *error_msg)
+{
+	printx("%c%s\n", PANIC_MAGIC, error_msg);
+}
+
+void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line)
+{
+	printx("%c%s error in\nfile:%s\nbase_file:%s\nline:%d\n",
+		ASSERT_MAGIC, exp, filename, base_filename, line);
+}
+
+
+// debug end
+
+Proc *pid2proc(int pid)
+{
+	Proc *proc = proc_table + pid;
+	// todo 用局部变量当返回值，曾经遇到过出错。要当心。
+	return proc;
+}
+
+int proc2pid(Proc *proc)
+{
+	int pid = proc - proc_table;
+	return pid;
+}
+
+
