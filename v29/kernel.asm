@@ -412,12 +412,12 @@ hwint1:
 	inc dword [k_reenter]
 	; 中间代码
 	mov esp, StackTop
-	;xchg bx, bx
+	;;xchg bx, bx
 	call keyboard_handler
-	;xchg bx, bx
+	;;xchg bx, bx
 	mov al, 11111100b
 	out 21h, al
-	;xchg bx, bx
+	;;xchg bx, bx
 	; 没有比较，为啥用jne？因为这是修改之前的代码后遗漏的地方.
 	; 导致键盘缓冲区出现Invalid Code。
 	;jne restore
@@ -502,6 +502,7 @@ restart:
 	;lldt [proc_table + 52]
 	;lldt [proc_table + 64]
 	;lldt [proc_table + 68]
+	dec dword [k_reenter]
 	mov esp, [proc_ready_table]
 	lldt [esp + 68]
 	;lldt [proc_table + 56]
@@ -522,7 +523,7 @@ restart:
 
 ; 恢复进程
 restore:
-	xchg bx, bx
+	;xchg bx, bx
 	;mov esp, [proc_table]
 	;mov eax, proc_table
 	;mov esp, eax
@@ -531,7 +532,7 @@ restore:
 	;lldt [proc_table + 64]
 	;lldt [proc_table + 68]
 	;dec word [k_reenter]
-	;xchg bx, bx
+	;;xchg bx, bx
 	dec dword [k_reenter]
 	mov esp, [proc_ready_table]
 	lldt [esp + 68]
@@ -549,7 +550,7 @@ restore:
 	pop ds
 
 	popad
-	;xchg bx, bx
+	;;xchg bx, bx
 	iretd
 
 in_byte:
