@@ -854,6 +854,7 @@ void TestA()
 {
 	//Printf("<a ticks:%x\n>", get_ticks());
 	unsigned int i = 0;
+	Printf("Ticks:%x\n", ticks);
 	while(1){
 		//Printf("<a ticks:%x\n>", get_ticks());
 		if( i < 2){

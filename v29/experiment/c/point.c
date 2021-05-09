@@ -12,7 +12,11 @@ int main(int argc, char **argv)
 	printf("b = %d\n", b);
 	int *e = &b;
 	printf("e = %d\n", *e);
-	int *f = b;
-	printf("f = %d\n", *f);
+	//int *f = b;
+	//printf("f = %d\n", *f);
+
+	char *str = "hello";
+	char **ps = &str;
+
 	return 0;
 }
