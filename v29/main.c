@@ -327,7 +327,8 @@ typedef void *system_call;
 int sys_get_ticks();
 void sys_write(char *buf, int len, Proc *proc);
 // debug function start
-void sys_printx(char *error_msg, Proc *proc);
+void sys_printx(char *error_msg, int len, Proc *proc);
+//void sys_printx(char *error_msg, Proc *proc);
 //void sys_printx(char *error_msg, int caller_id);
 // debug function end
 void sys_call();
@@ -422,7 +423,8 @@ void panic(char *error_msg);
 void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line);
 
 // todo __BASE_FILE__ 正确性未知
-#define asseert if(exp) ; \
+//#define assert if(exp) ; 
+#define assert(exp)  if(exp) ; \
 	else assertion_failure(#exp, __FILE__, __BASE_FILE__, __LINE__)
 
 
@@ -907,7 +909,9 @@ void TestA()
 {
 	//Printf("<a ticks:%x\n>", get_ticks());
 	unsigned int i = 0;
-	panic("hello, world");
+	assert(i==0);
+	assert(proc_ready_table == 894);
+	//panic("hello, world");
 	Printf("%c%s\n", 'B', "How are you?");
 	//Printf("Ti:%s\n", "ticks, Hello, World, welecom!");
 	//Printf("Ti:%x\n", 99999);
@@ -1715,10 +1719,9 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 				break;
 			case 'c':
 				//char c = *(char *)next_arg;
-				*p++;
 				*p = *(char *)next_arg;
 				next_arg += 4;
-				len2 = Strlen(tmp);
+				len2 = 1;
 				p += len2;//Strlen(tmp);
 				break;
 			default:
@@ -1743,7 +1746,7 @@ void printx(char *fmt, ...)
 
 // 系统调用，使用汇编代码实现
 // void write_debug(char *buf, int len);
-void sys_printx(char *error_msg, Proc *proc)
+void sys_printx(char *error_msg, int len, Proc *proc)
 //void sys_printx(char *error_msg, int caller_pid)
 {
 	int line_addr;
@@ -1763,13 +1766,28 @@ void sys_printx(char *error_msg, Proc *proc)
 	// 打印字符串
 	TTY *tty = &tty_table[proc->tty_index];
 	char *p = (char *)line_addr;
-	while(*p != '\0'){
+	char magic = *p;
+	while(len > 0){
+		if(*p == ASSERT_MAGIC || *p == PANIC_MAGIC){
+			p++;
+			continue;
+		}
 		out_char(tty, *p);
 		p++;
+		len--;
 	}
+	// 字符串中有空格时不能打印出来
+	//while(*p != '\0'){
+	//	if(*p == ASSERT_MAGIC || *p == PANIC_MAGIC){
+	//		p++;
+	//		continue;
+	//	}
+	//	out_char(tty, *p);
+	//	p++;
+	//}
 
 
-	char magic = error_msg[0];
+	//char magic = error_msg[0];
 	if(magic == ASSERT_MAGIC){
 		if(k_reenter > 0){
 			disable_int();
@@ -1778,6 +1796,7 @@ void sys_printx(char *error_msg, Proc *proc)
 
 		}
 	}else if(magic == PANIC_MAGIC){
+		disable_int();
 		__asm__("hlt");
 	}
 
@@ -1792,12 +1811,14 @@ void spin(char *error_msg)
 void panic(char *error_msg)
 {
 	printx("%c%s\n", PANIC_MAGIC, error_msg);
+	//Printf("%c%s\n", PANIC_MAGIC, error_msg);
 }
 
 void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line)
 {
-	printx("%c%s error in\nfile:%s\nbase_file:%s\nline:%d\n",
+	printx("%c%s error in file [%s],base_file [%]s,line [%d]\n\n",
 		ASSERT_MAGIC, exp, filename, base_filename, line);
+	spin("Stop Here!\n");
 }
 
 

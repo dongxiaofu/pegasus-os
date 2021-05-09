@@ -11,7 +11,7 @@ INT_VECTOR_TICKS	equ	0x90
 [section .text]
 
 get_ticks:
-	;xchg bx, bx
+	;;xchg bx, bx
 	mov eax, _NR_GET_TICKS
 	int INT_VECTOR_TICKS
 	ret
@@ -19,7 +19,7 @@ get_ticks:
 
 ; int write(char *buf, int len)
 write:
-	;xchg bx, bx
+	;;xchg bx, bx
 	mov eax, _NR_WRITE
 	; 第2个参数
 	mov ebx, [esp+8]
