@@ -120,6 +120,8 @@ void init_propt();
 const int INIT_MASTER_VEC_NO = 0x20;
 const int INIT_SLAVE_VEC_NO = 0x28;
 
+
+
 // 描述符在gdt中的索引
 // #define CS_SELECTOR_INDEX 1;
 #define CS_SELECTOR_INDEX 1
@@ -228,6 +230,40 @@ typedef struct{
 	unsigned int ss;
 }Regs;
 
+// ipc0 start
+// 能用enum吗？不能很快心算出”能不能“这个结果，先不用，减小难度。
+#define RUNNING	0
+#define SENDING 1
+#define RECEIVING 2
+
+// send_rec的function的取值
+#define SEND 1
+#define RECEIVE 2
+#define BOTH	3
+
+// todo 根据目前的需求，下面的成员都是必需的。
+typedef struct{
+	int source;		// 谁发送的消息
+	int type;		// 这条消息要求接收者做什么。例如，获取时钟中断次数。
+	int val;		// 消息中的数据。
+}Message;
+
+// 发送消息的进程队列的成员的数据类型
+struct MsgSender
+{
+	//Proc *sender;
+	int sender_pid;
+	struct MsgSender *next;
+};
+// 旧设计非常矛盾。必须在Proc前定义，却又要使用Proc，这要求Proc在本结构体前定义。
+//struct MsgSender
+//{
+//	Proc *sender;
+//	struct MsgSender *next;
+//};
+
+// ipc0 end
+
 typedef struct{
 	Regs s_reg;
 	// ldt选择子
@@ -241,6 +277,17 @@ typedef struct{
 	unsigned int priority;
 	// 本进程使用哪个tty，tty_table的索引
 	unsigned int tty_index;
+	// 进程名称
+	char name[20];
+
+	// ipc start
+	int p_flag;		// 进程的状态：RUNNING等
+	Message *p_msg;	// 指向消息体
+	int p_send_to;	// 要向哪个进程发送消息，目标进程ID
+	int p_receive_from;	// 要从哪个进程接收消息，目标进程ID
+	struct MsgSender *header;	// 要给本进程发送消息的进程的队列的头指针
+
+	// ipc end
 }Proc;
 
 // 进程表 end
@@ -251,6 +298,10 @@ TSS tss;
 #define USER_PROC_NUM 3
 // 系统任务的数量
 #define TASK_PROC_NUM 2
+// 消息收发对象是任意进程时，目标进程的pid是这个值
+#define ANY (USER_PROC_NUM + TASK_PROC_NUM + 10)
+// 消息收发对象是无对象时，目标进程的pid是这个值
+#define NO_TASK (USER_PROC_NUM + TASK_PROC_NUM + 25)
 // 系统任何和用户进程的进程表都存储在这个数组中
 Proc proc_table[TASK_PROC_NUM + USER_PROC_NUM];
 // 即将或正在执行的进程的进程表
@@ -319,10 +370,13 @@ Task sys_task_table[TASK_PROC_NUM] = {
 };
 
 // 系统调用 start
-#define SYS_CALL_FUNCTION_NUM 3
+#define SYS_CALL_FUNCTION_NUM 5
 #define NR_GET_TICKS	0
 #define _NR_WRITE	1
 #define _NR_WRITE_DEBUG	2
+#define _NR_SEND_MSG	3
+#define _NR_RECEIVE_MSG	4
+
 typedef void *system_call;
 int sys_get_ticks();
 void sys_write(char *buf, int len, Proc *proc);
@@ -331,6 +385,14 @@ void sys_printx(char *error_msg, int len, Proc *proc);
 //void sys_printx(char *error_msg, Proc *proc);
 //void sys_printx(char *error_msg, int caller_id);
 // debug function end
+
+// ipc start
+// send_msg 通过sys_call调用
+int sys_send_msg(Message *msg, int receiver_pid, Proc *sender);
+// receive_msg 通过sys_call调用
+int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver);
+// ipc end
+
 void sys_call();
 //system_call sys_call_table[1] = {
 int_handle sys_call_table[SYS_CALL_FUNCTION_NUM] = {
@@ -338,7 +400,9 @@ int_handle sys_call_table[SYS_CALL_FUNCTION_NUM] = {
 	// sys_get_ticks
 	(int_handle) sys_get_ticks,
 	(int_handle) sys_write,
-	(int_handle) sys_printx
+	(int_handle) sys_printx,
+	(int_handle) sys_send_msg,
+	(int_handle) sys_receive_msg
 };
 // 从汇编中导入的函数
 int get_ticks();
@@ -436,6 +500,28 @@ void assertion_failure(char *exp, char *filename, char *base_filename, unsigned 
 //Proc *pid2proc(int pid);
 //// 根据进程表的指针计算进程ID。
 //int proc2pid(Proc *proc);
+
+
+// ipc start
+// // send_msg 通过sys_call调用
+// int sys_send_msg(Message *msg, int receiver_pid, Proc *sender);
+// // receive_msg 通过sys_call调用
+// int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver);
+// 系统调用
+int send_msg(Message *msg, int receiver_pid);
+// 系统调用
+int receive_msg(Message *msg, int sender_pid);
+// send_rec封装send_msg和receive_msg，直接被外部使用
+// function：选择发送还是接收还是其他;pid，sender或receiver的进程id
+int send_rec(int function, Message *msg, int pid);
+// 阻塞进程
+int block(Proc *proc);
+// 解决阻塞
+int unblock(Proc *proc);
+// 为什么用宏？以后可能会不使用Memcpy
+#define phycopy Memcpy
+
+// ipc end
 
 // printf end
 void ReloadGDT()
@@ -878,6 +964,14 @@ void kernel_main()
 		//proc->s_reg.eflags = 0x1202;	// 0001 0010 0000 0010
 		proc->s_reg.eflags = eflags;
 
+
+		// ipc start
+		//proc->header = {-1, NULL};
+		//*(proc->header) = {-1, NULL};
+		proc->header->sender_pid = -1;
+		proc->header->next = 0;
+		// ipc end
+
 		//proc->tty_index = 0;
 	}
 	// 启动进程，扣动扳机，砰！		
@@ -1018,16 +1112,19 @@ void schedule_process()
 	while(!greatest_ticks){
 		//for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
 		for(p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++){
-			if(p->ticks > greatest_ticks){
+			if(p->p_flag == RUNNING && p->ticks > greatest_ticks){
 				greatest_ticks = p->ticks;
 				proc_ready_table = p;
 			}
 		}
 		
+		//p_flag需要参与运算吗？目前，是否参与都行，看具体需求。
 		//while(!greatest_ticks){
 		if(!greatest_ticks){
 			for(p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++){
-				p->ticks = p->priority;
+				if(p->p_flag == RUNNING){
+					p->ticks = p->priority;
+				}
 			}
 		}
 
@@ -1601,7 +1698,7 @@ void tty_do_write(TTY *tty)
 		tty->tail++;
 		tty->counter--;
 		if(tty->tail == tty->buf + KEYBOARD_BUF_SIZE){
-			tty->tail == tty->buf;
+			tty->tail = tty->buf;
 		}
 		//key = 'B';
 		out_char(tty, key);
@@ -1836,5 +1933,182 @@ int proc2pid(Proc *proc)
 	int pid = proc - proc_table;
 	return pid;
 }
+
+// ipc start
+// send_msg 通过sys_call调用
+int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
+{
+	Proc *receiver = pid2proc(receiver_pid);
+	int sender_pid = proc2pid(sender);
+	if(receiver->p_flag == RECEIVING && (receiver->p_receive_from == sender_pid
+		|| receiver->p_receive_from == ANY)){
+		// 计算msg的线性地址
+		int ds = sender->s_reg.ds;
+		int base = Seg2PhyAddrLDT(ds, sender);
+		int msg_line_addr = base + msg;
+		int msg_size = sizeof(Message);
+		// 从sender中把消息复制到receiver
+		phycopy(receiver->p_msg, msg_line_addr, msg_size);
+		// 重置sender
+		sender->p_msg = 0;
+		sender->p_send_to = 0;
+		// 重置receiver
+		receiver->p_msg = 0;
+		receiver->p_flag = RUNNING;
+		receiver->p_receive_from = 0;
+
+		// 解除receiver的阻塞。
+		unblock(receiver);
+	}else{
+		sender->p_msg = msg;
+		sender->p_send_to = receiver_pid;
+		sender->p_flag = SENDING;
+		// 把sender中的消息放入receiver的p_send_queue把sender中的消息放入receiver的p_send_queue
+		struct MsgSender *current = receiver->header;
+		struct MsgSender *pre = receiver->header;
+		while(current != 0x0){
+			pre = current;
+			current = current->next;
+		}
+		// pre->next = {sender_pid, NULL};
+		// pre->next = &{sender_pid, 0x0};
+		pre->next->sender_pid = sender_pid;
+		pre->next->next = 0;
+		// 阻塞sender
+		block(sender);
+	}
+
+	return 0;
+}
+
+// receive_msg 通过sys_call调用
+int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
+{
+	int copy_ok = 0;
+	int p_from;
+	
+	Proc *sender = pid2proc(sender_pid);
+	int receiver_id = proc2pid(receiver);
+
+	if(sender_pid == ANY){
+		if(receiver->header->next != 0x0){
+			p_from = receiver->header->next->sender_pid;
+			// header是头指针；把第一个进程从队列中移除
+			receiver->header->next = receiver->header->next->next;
+			copy_ok = 1;
+		}
+	}else if(0 <= sender_pid && sender_pid < USER_PROC_NUM + TASK_PROC_NUM){
+		if(sender->p_flag == SENDING && (sender->p_send_to == ANY 
+					|| sender->p_send_to == receiver_id)){
+			// 遍历receiver的发送消息的进程队列，从中移除sender
+			// 本质是，从发送消息的进程队列中移除sender
+			struct MsgSender *current = receiver->header;
+			struct MsgSender *pre = receiver->header;
+			while(current != 0x0){
+				if(current->sender_pid == sender_pid){
+					break;
+				}
+				// 难点：下面这句，应该在break语句的上面还是下面？
+				// 心算能力强，心算就能计算出结果。可我的心算能力不强。
+				// 在我的设计中，在上面还是下面，结果一样。可能和我的
+				// 队列设置了头结点指针有关。
+				pre = current;
+				current = current->next;
+			}
+
+			// 移除sender
+			pre->next = current->next;
+			
+			copy_ok = 1;
+			p_from = sender_pid;
+		}
+	}
+
+
+	if(copy_ok == 1){
+		Proc *p_from_proc = pid2proc(p_from);
+		// 计算msg的线性地址
+		int ds = receiver->s_reg.ds;
+                int base = Seg2PhyAddrLDT(ds, receiver);
+                int msg_line_addr = base + msg;
+                int msg_size = sizeof(Message);
+                // 从receiver中把消息复制到sender
+                phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);		
+
+		// 重置sender
+                p_from_proc->p_msg = 0;
+                p_from_proc->p_flag = RUNNING;
+                p_from_proc->p_send_to = 0;
+                // 重置receiver
+                receiver->p_msg = 0;
+                receiver->p_receive_from = 0;
+		// 解除sender的阻塞
+		// unblock(sender);
+		unblock(p_from_proc);
+	}else{
+		receiver->p_flag = RECEIVING;
+		receiver->p_msg = msg;
+		
+		if(sender_pid == ANY){
+			receiver->p_receive_from = ANY;
+		}else{
+			receiver->p_receive_from = sender_pid;
+		}
+
+		block(receiver);
+	}
+
+	return 0;
+}
+
+// 系统调用--用汇编实现
+// int send_msg(Message *msg, int receiver_pid)
+// {
+
+// }
+
+// 系统调用--用汇编实现
+// int receive_msg(Message *msg, int sender_pid)
+// {
+
+// }
+
+// send_rec封装send_msg和receive_msg，直接被外部使用
+// function：选择发送还是接收还是其他;pid，sender或receiver的进程id
+int send_rec(int function, Message *msg, int pid)
+{
+	int ret;
+	switch(function){
+		case SEND:
+			ret = send_msg(msg, pid);
+			break;
+		case RECEIVE:
+			ret = receive_msg(msg, pid);
+			break;
+		case BOTH:
+			// 两个函数都使用pid，正确吗？
+			ret = send_msg(msg, pid);	// pid是receiver
+			ret = receive_msg(msg, pid);	// pid是sender
+			break;
+		default:
+			panic("function is invalid\n");
+			break;
+	}
+	return 0;
+}
+// 阻塞进程
+int block(Proc *proc)
+{
+	// 判断，调试函数
+	schedule_process();
+	return 0;
+}
+// 解除阻塞
+int unblock(Proc *proc)
+{
+	// do nothing
+	return 0;
+}
+// ipc end
 
 
