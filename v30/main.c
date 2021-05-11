@@ -241,6 +241,9 @@ typedef struct{
 #define RECEIVE 2
 #define BOTH	3
 
+// Message 中的type的取值
+#define TICKS_TASK_SYS_TYPE 1 
+
 // todo 根据目前的需求，下面的成员都是必需的。
 typedef struct{
 	int source;		// 谁发送的消息
@@ -252,9 +255,16 @@ typedef struct{
 struct MsgSender
 {
 	//Proc *sender;
-	int sender_pid;
+	unsigned int sender_pid;
+	//struct MsgSender next;
 	struct MsgSender *next;
 };
+//struct MsgSender
+//{
+//	//Proc *sender;
+//	int sender_pid;
+//	struct MsgSender *next;
+//};
 // 旧设计非常矛盾。必须在Proc前定义，却又要使用Proc，这要求Proc在本结构体前定义。
 //struct MsgSender
 //{
@@ -286,6 +296,7 @@ typedef struct{
 	int p_send_to;	// 要向哪个进程发送消息，目标进程ID
 	int p_receive_from;	// 要从哪个进程接收消息，目标进程ID
 	struct MsgSender *header;	// 要给本进程发送消息的进程的队列的头指针
+	//struct MsgSender header;	// 要给本进程发送消息的进程的队列的头指针
 
 	// ipc end
 }Proc;
@@ -387,6 +398,8 @@ void sys_printx(char *error_msg, int len, Proc *proc);
 // debug function end
 
 // ipc start
+// 死锁检测
+int dead_lock(int src, int dest);
 // send_msg 通过sys_call调用
 int sys_send_msg(Message *msg, int receiver_pid, Proc *sender);
 // receive_msg 通过sys_call调用
@@ -406,6 +419,7 @@ int_handle sys_call_table[SYS_CALL_FUNCTION_NUM] = {
 };
 // 从汇编中导入的函数
 int get_ticks();
+int get_ticks_ipc();
 // 系统调用 end
 // 延迟函数 start
 void milli_delay(unsigned milli_sec);
@@ -901,8 +915,8 @@ void kernel_main()
 			//eflags = 0x1202;
 			rpl = 3;
 			dpl = 3;
-			proc->ticks = proc->priority = 5;
-			proc->tty_index = 1;
+			proc->ticks = proc->priority = 10;
+			proc->tty_index = i - TASK_PROC_NUM;
 		}
 
 		//proc->ldt_selector = LDT_FIRST_SELECTOR + i<<3;
@@ -968,8 +982,11 @@ void kernel_main()
 		// ipc start
 		//proc->header = {-1, NULL};
 		//*(proc->header) = {-1, NULL};
-		proc->header->sender_pid = -1;
-		proc->header->next = 0;
+		// proc->header->sender_pid = -1;
+		// proc->header->next = 0;
+		// struct MsgSender header = {-1, NULL};
+		//struct MsgSender header = {-1, 0};
+		//proc->header = &header;
 		// ipc end
 
 		//proc->tty_index = 0;
@@ -999,23 +1016,31 @@ void kernel_main()
 	while(1){}
 }
 
+#define A_PRINT_NUM 30
+#define B_PRINT_NUM 30
+#define C_PRINT_NUM 30
+
 void TestA()
 {
 	//Printf("<a ticks:%x\n>", get_ticks());
 	unsigned int i = 0;
 	assert(i==0);
-	assert(proc_ready_table == 894);
+	//assert(proc_ready_table == 894);
 	//panic("hello, world");
-	Printf("%c%s\n", 'B', "How are you?");
+	//Printf("%c%s\n", 'B', "How are you?");
 	//Printf("Ti:%s\n", "ticks, Hello, World, welecom!");
 	//Printf("Ti:%x\n", 99999);
 	while(1){
 		//Printf("<a ticks:%x\n>", get_ticks());
-		if( i < 2){
+		//select_console(0);
+		//assert(i < 5);
+		if( i < A_PRINT_NUM){
 			//get_ticks();
-			Printf("at:%x", get_ticks());
+			//int t_ipc = get_ticks_ipc();
+			//Printf("a_t_ipc = %x\n", t_ipc);
+			//milli_delay(20);
+			Printf("a_t:%x\n", get_ticks_ipc());
 			//disp_str_colour("A", 0x0A);
-			Printf("a:%x", 1);
 		}
 		i++;
 		//dis_pos = 0;
@@ -1054,11 +1079,13 @@ void TestB()
 	// select_console(1);
 	unsigned int i = 0;
 	while(1){
-		// select_console(1);
+		//select_console(1);
 		//Printf("<b ticks:%x\n>", get_ticks());
-		if( i < 10){
-			Printf("bt:%x", get_ticks());
-			Printf("b:%x", 2);
+		if( i < B_PRINT_NUM){
+			//int t_ipc = get_ticks_ipc();
+			//Printf("b_t_ipc = %x\n", t_ipc);
+			Printf("b_t0:%x\n", 2);
+			Printf("b_t:%x\n", get_ticks_ipc());
 		}
 		i++;
 		// int t = get_ticks();
@@ -1081,9 +1108,12 @@ void TestC()
 	// select_console(2);
 	unsigned int i = 0;
 	while(1){
-		if( i < 10){
-			Printf("ct:%x", get_ticks());
-			Printf("c:%x", 3);
+		//select_console(2);
+		if( i < C_PRINT_NUM){
+			//int t_ipc = get_ticks_ipc();
+			//Printf("c_t_ipc = %x\n", t_ipc);
+			Printf("c_t0:%x\n", 3);
+			Printf("c_t:%x\n", get_ticks_ipc());
 		}
 		i++;
 		//Printf("<c ticks:%x\n>", get_ticks());
@@ -1386,12 +1416,21 @@ void TaskTTY()
 
 void TaskSys()
 {
-	int i = 0;
 	while(1){
-		if(i < 10){
-
-			Printf("%x\n", 777);
-			i++;
+		//Message *msg;
+		Message msg;
+		Memset(&msg, 0, sizeof(Message));
+		int ret = receive_msg(&msg, ANY);
+		int type = msg.type;
+		int source = msg.source;
+		switch(type){
+			case TICKS_TASK_SYS_TYPE:
+				msg.val = ticks;
+				ret = send_msg(&msg, source);
+				break;
+			default:
+				
+				break;
 		}
 	}
 }
@@ -1659,12 +1698,13 @@ void out_char(TTY *tty, unsigned char key)
 			break;
 	}
 
+	// 有bug，导致只能打印部分字符。故，暂时不滚屏。
 	// 向下滚屏
 	// 什么时候需要滚屏？我又不记得了。独立分析出来！
 	// 超过一屏数据时，需要滚屏。
-	while(tty->console->cursor - tty->console->start_video_addr > SCREEN_SIZE){
-		scroll_down(tty);
-	}
+	//while(tty->console->cursor - tty->console->start_video_addr > SCREEN_SIZE){
+	//	scroll_down(tty);
+	//}
 
 	flush(tty);
 }
@@ -1935,11 +1975,35 @@ int proc2pid(Proc *proc)
 }
 
 // ipc start
+int dead_lock(int src, int dest)
+{
+	Proc *src_proc = pid2proc(src);
+	Proc *dest_proc = pid2proc(dest);
+	while(1){
+		// Proc *src_proc = pid2proc(src);
+		// Proc *dest_proc = pid2proc(dest);
+		if (dest_proc->p_flag == SENDING){
+			if(dest_proc->p_send_to == src){
+				panic("dead lock!\n");
+				return 1;
+			}
+			dest_proc = pid2proc(dest_proc->p_send_to);	
+		}else{
+			break;
+		}
+	}
+
+	return 0;
+}
 // send_msg 通过sys_call调用
 int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 {
 	Proc *receiver = pid2proc(receiver_pid);
 	int sender_pid = proc2pid(sender);
+
+	// 死锁检测
+	dead_lock(sender_pid, receiver_pid);
+
 	if(receiver->p_flag == RECEIVING && (receiver->p_receive_from == sender_pid
 		|| receiver->p_receive_from == ANY)){
 		// 计算msg的线性地址
@@ -1959,21 +2023,63 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 
 		// 解除receiver的阻塞。
 		unblock(receiver);
+
+		// 调试函数
+		assert(sender->p_msg == 0);
+		assert(sender->p_send_to == 0);
+		assert(receiver->p_msg == 0);
+		assert(receiver->p_flag == 0);
+		assert(receiver->p_receive_from == 0);
+
 	}else{
 		sender->p_msg = msg;
 		sender->p_send_to = receiver_pid;
 		sender->p_flag = SENDING;
 		// 把sender中的消息放入receiver的p_send_queue把sender中的消息放入receiver的p_send_queue
-		struct MsgSender *current = receiver->header;
-		struct MsgSender *pre = receiver->header;
-		while(current != 0x0){
-			pre = current;
-			current = current->next;
+		//struct MsgSender *current = receiver->header;
+		//struct MsgSender *pre = receiver->header;
+		// 上面的写法会导致pre、current的内存地址是0。我认为，是它们导致出现死锁。
+		// 不在这个项目这样写，没有问题。
+		//struct MsgSender *current = receiver->header;
+		//struct MsgSender *pre = receiver->header;
+		////while(*current != 0x0){
+		////while(current != 0x0){
+		//while(current->sender_pid != -1){
+		//	pre = current;
+		//	current = current->next;
+		//}
+		//// pre->next = {sender_pid, NULL};
+		//// pre->next = &{sender_pid, 0x0};
+		//pre->next->sender_pid = sender_pid;
+		//pre->next->next = 0;
+
+		if(receiver->header == 0x0){
+			struct MsgSender msg_sender = {sender_pid, 0};
+			//receiver->header->next = &msg_sender;
+			receiver->header = &msg_sender;
+		}else{
+			// struct MsgSender *current = receiver->header->next;
+			// struct MsgSender *current = receiver->header->next;
+			struct MsgSender *current = receiver->header;
+			struct MsgSender *pre = receiver->header;
+			//while(*current != 0x0){
+			//while(current != 0x0){
+			while(current  != 0){
+				pre = current;
+				current = current->next;
+			}
+			// pre->next = {sender_pid, NULL};
+			// pre->next = &{sender_pid, 0x0};
+			pre->next->sender_pid = sender_pid;
+			pre->next->next = 0;
 		}
-		// pre->next = {sender_pid, NULL};
-		// pre->next = &{sender_pid, 0x0};
-		pre->next->sender_pid = sender_pid;
-		pre->next->next = 0;
+		
+		// 调试函数
+		assert(sender->p_flag == SENDING);
+		assert(sender->p_send_to == receiver_pid);
+		assert(sender->p_msg == msg);
+
+		assert(receiver->header != 0x0);
 		// 阻塞sender
 		block(sender);
 	}
@@ -1991,10 +2097,13 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
 	int receiver_id = proc2pid(receiver);
 
 	if(sender_pid == ANY){
-		if(receiver->header->next != 0x0){
-			p_from = receiver->header->next->sender_pid;
+		//if(receiver->header->next->sender_pid != 0x0){
+		if(receiver->header != 0x0){
+			// p_from = receiver->header->next->sender_pid;
+			p_from = receiver->header->sender_pid;
 			// header是头指针；把第一个进程从队列中移除
-			receiver->header->next = receiver->header->next->next;
+			// receiver->header->next = receiver->header->next->next;
+			receiver->header = receiver->header->next;
 			copy_ok = 1;
 		}
 	}else if(0 <= sender_pid && sender_pid < USER_PROC_NUM + TASK_PROC_NUM){
@@ -2004,8 +2113,13 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
 			// 本质是，从发送消息的进程队列中移除sender
 			struct MsgSender *current = receiver->header;
 			struct MsgSender *pre = receiver->header;
+			// struct MsgSender current = receiver->header;
+			// struct MsgSender pre = receiver->header;
+			//while(*current != 0x0){
+			// while(current->sender_pid != 0x0){
 			while(current != 0x0){
 				if(current->sender_pid == sender_pid){
+					copy_ok = 1;
 					break;
 				}
 				// 难点：下面这句，应该在break语句的上面还是下面？
@@ -2015,12 +2129,11 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
 				pre = current;
 				current = current->next;
 			}
-
-			// 移除sender
-			pre->next = current->next;
-			
-			copy_ok = 1;
-			p_from = sender_pid;
+			if(copy_ok == 1){
+				// 移除sender
+				pre->next = current->next;
+				p_from = sender_pid;
+			}
 		}
 	}
 
@@ -2045,6 +2158,15 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
 		// 解除sender的阻塞
 		// unblock(sender);
 		unblock(p_from_proc);
+
+		// 调试函数
+		assert(p_from_proc->p_msg == 0);
+		assert(p_from_proc->p_flag == RUNNING);
+		assert(p_from_proc->p_send_to == 0);
+
+		assert(receiver->p_msg == 0);
+		assert(receiver->p_receive_from == 0);
+
 	}else{
 		receiver->p_flag = RECEIVING;
 		receiver->p_msg = msg;
@@ -2054,6 +2176,10 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
 		}else{
 			receiver->p_receive_from = sender_pid;
 		}
+
+		// 调试函数
+		assert(receiver->p_flag == RECEIVING);
+		assert(receiver->p_msg == msg);
 
 		block(receiver);
 	}
@@ -2109,6 +2235,18 @@ int unblock(Proc *proc)
 	// do nothing
 	return 0;
 }
+
+int get_ticks_ipc()
+{
+	Message msg;
+	Memset(&msg, 0, sizeof(Message));
+	msg.source = 2;
+	msg.type = TICKS_TASK_SYS_TYPE;
+	int ret = send_rec(BOTH, &msg, 1);
+	int ticks = msg.val;
+	return ticks;
+}
+
 // ipc end
 
 

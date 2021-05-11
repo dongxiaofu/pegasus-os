@@ -1,11 +1,23 @@
 #include <stdio.h>
 
+struct Person{
+	int age;
+	struct Person *next;
+};
+
 int main(int argc, char **argv)
 {
 	//int *a;
+	int *k;
 	int b = 7;
 	int *a = (int *)(&b);
+	int *f;
+	char *tmp;
 	int c = 9;
+	struct Person p2 = {47, NULL};
+	struct Person person;
+	person.age = 52;
+	person.next = &p2;
 	*a = c;
 	printf("a = %p\n", a);
 	printf("*a = %d\n", *a);

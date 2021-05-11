@@ -856,9 +856,9 @@ void TestA()
 	unsigned int i = 0;
 	while(1){
 		//Printf("<a ticks:%x\n>", get_ticks());
-		if( i < 2){
+		if( i < 100){
 			//get_ticks();
-			Printf("at:%x", get_ticks());
+			Printf("at:%x\n", get_ticks());
 			//disp_str_colour("A", 0x0A);
 			Printf("a:%x", 1);
 		}
@@ -1504,9 +1504,9 @@ void out_char(TTY *tty, unsigned char key)
 	// 向下滚屏
 	// 什么时候需要滚屏？我又不记得了。独立分析出来！
 	// 超过一屏数据时，需要滚屏。
-	while(tty->console->cursor - tty->console->start_video_addr > SCREEN_SIZE){
-		scroll_down(tty);
-	}
+	//while(tty->console->cursor - tty->console->start_video_addr > SCREEN_SIZE){
+	//	scroll_down(tty);
+	//}
 
 	flush(tty);
 }

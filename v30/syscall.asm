@@ -14,6 +14,7 @@ INT_VECTOR_TICKS	equ	0x90
 
 [section .text]
 
+;使用ICP改写了
 get_ticks:
 	;;xchg bx, bx
 	mov eax, _NR_GET_TICKS
