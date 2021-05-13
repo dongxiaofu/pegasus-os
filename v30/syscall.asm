@@ -16,7 +16,7 @@ INT_VECTOR_TICKS	equ	0x90
 
 ;使用ICP改写了
 get_ticks:
-	;;xchg bx, bx
+	;;;;xhcg bx, bx
 	mov eax, _NR_GET_TICKS
 	int INT_VECTOR_TICKS
 	ret
@@ -24,7 +24,7 @@ get_ticks:
 
 ; int write(char *buf, int len)
 write:
-	;;xchg bx, bx
+	;;;;xhcg bx, bx
 	mov eax, _NR_WRITE
 	; 第2个参数
 	mov ebx, [esp+8]
@@ -38,7 +38,7 @@ write:
 
 ; int write_debug(char *buf, int len);
 write_debug:
-	xchg bx, bx
+	;;xhcg bx, bx
 	mov eax, _NR_WRITE_DEBUG
 	;mov eax, _NR_WRITE
 	; 第2个参数
