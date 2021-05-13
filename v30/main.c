@@ -306,7 +306,7 @@ typedef struct{
 // 变量--进程
 TSS tss;
 // 用户进程的数量
-#define USER_PROC_NUM 3
+#define USER_PROC_NUM 1
 // 系统任务的数量
 #define TASK_PROC_NUM 2
 // 消息收发对象是任意进程时，目标进程的pid是这个值
@@ -907,15 +907,16 @@ void kernel_main()
 			eflags = 0x1202;
 			rpl = 1;
 			dpl = 1;
-			proc->ticks = proc->priority = 15;
-			proc->tty_index = 0;
+			//proc->ticks = proc->priority = 15;
+			proc->ticks = proc->priority = 2;
+			proc->tty_index = 1;
 		}else{
 			task = user_task_table + i - TASK_PROC_NUM;
 			eflags = 0x202;
 			//eflags = 0x1202;
 			rpl = 3;
 			dpl = 3;
-			proc->ticks = proc->priority = 10;
+			proc->ticks = proc->priority = 1;
 			proc->tty_index = i - TASK_PROC_NUM;
 		}
 
@@ -1016,9 +1017,9 @@ void kernel_main()
 	while(1){}
 }
 
-#define A_PRINT_NUM 30
-#define B_PRINT_NUM 30
-#define C_PRINT_NUM 30
+#define A_PRINT_NUM 500
+#define B_PRINT_NUM 20
+#define C_PRINT_NUM 20
 
 void TestA()
 {
@@ -1037,10 +1038,18 @@ void TestA()
 		if( i < A_PRINT_NUM){
 			//get_ticks();
 			//int t_ipc = get_ticks_ipc();
+			//int t_ipc = get_ticks();
 			//Printf("a_t_ipc = %x\n", t_ipc);
 			//milli_delay(20);
-			Printf("a_t:%x\n", get_ticks_ipc());
+			//Printf("a_t:%x", 2);
+			Printf("%x", 2);
+			//Printf("a_t:%x", get_ticks_ipc());
 			//disp_str_colour("A", 0x0A);
+			//Printf("%c--", 'A');
+			//Printf("flag:%x--,", proc_table[2].p_flag);
+			//Printf("send_to:%x--,", proc_table[2].p_send_to);
+			//Printf("receive_from:%x--,", proc_table[2].p_receive_from);
+			//Printf("%c", '\n');
 		}
 		i++;
 		//dis_pos = 0;
@@ -1083,9 +1092,10 @@ void TestB()
 		//Printf("<b ticks:%x\n>", get_ticks());
 		if( i < B_PRINT_NUM){
 			//int t_ipc = get_ticks_ipc();
-			//Printf("b_t_ipc = %x\n", t_ipc);
-			Printf("b_t0:%x\n", 2);
-			Printf("b_t:%x\n", get_ticks_ipc());
+			int t_ipc = get_ticks();
+			Printf("b_t_ipc = %x", t_ipc);
+			//Printf("b_t0:%x\n", 2);
+			//Printf("b_t:%x\n", get_ticks_ipc());
 		}
 		i++;
 		// int t = get_ticks();
@@ -1111,9 +1121,10 @@ void TestC()
 		//select_console(2);
 		if( i < C_PRINT_NUM){
 			//int t_ipc = get_ticks_ipc();
-			//Printf("c_t_ipc = %x\n", t_ipc);
-			Printf("c_t0:%x\n", 3);
-			Printf("c_t:%x\n", get_ticks_ipc());
+			int t_ipc = get_ticks();
+			Printf("c_t_ipc = %x", t_ipc);
+			//Printf("c_t0:%x\n", 3);
+			//Printf("c_t:%x\n", get_ticks_ipc());
 		}
 		i++;
 		//Printf("<c ticks:%x\n>", get_ticks());
@@ -1226,11 +1237,13 @@ void milli_delay(unsigned int milli_sec)
 
 void clock_handler()
 {
-	proc_ready_table->ticks--;
+	if(proc_ready_table->ticks > 0){
+		proc_ready_table->ticks--;
+	}
 	ticks++;
 
-	if(k_reenter != 0){
-		//return proc_ready_table;
+	if(k_reenter != 0 ){
+		//return proc_ready_tab
 		return;
 	}
 	
@@ -1418,15 +1431,21 @@ void TaskSys()
 {
 	while(1){
 		//Message *msg;
+			//Printf("%c--", 'S');
+			//Printf("flag:%x--,", proc_table[1].p_flag);
+			//Printf("send_to:%x--,", proc_table[1].p_send_to);
+			//Printf("receive_from:%x--,", proc_table[1].p_receive_from);
+			//Printf("%c", '\n');
+		//return;
 		Message msg;
 		Memset(&msg, 0, sizeof(Message));
-		int ret = receive_msg(&msg, ANY);
+		int ret = 3;//receive_msg(&msg, ANY);
 		int type = msg.type;
 		int source = msg.source;
 		switch(type){
 			case TICKS_TASK_SYS_TYPE:
 				msg.val = ticks;
-				ret = send_msg(&msg, source);
+				ret = 4;//send_msg(&msg, source);
 				break;
 			default:
 				
@@ -1984,7 +2003,16 @@ int dead_lock(int src, int dest)
 		// Proc *dest_proc = pid2proc(dest);
 		if (dest_proc->p_flag == SENDING){
 			if(dest_proc->p_send_to == src){
-				panic("dead lock!\n");
+				// panic("dead lock!\n");
+				//Printf("%x---->%x---->", src, dest);
+				// 打印死锁环
+				Proc *p = dest_proc;
+				do{
+					// Printf("%x---->%x---->", proc2pid(p), p->p_send_to);
+					p = pid2proc(p->p_send_to);	
+				}while(p->pid != src);
+				//Printf("%x\n", src);
+				// Printf("%x---->%x---->", proc2pid(p), src);
 				return 1;
 			}
 			dest_proc = pid2proc(dest_proc->p_send_to);	
@@ -2002,7 +2030,9 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 	int sender_pid = proc2pid(sender);
 
 	// 死锁检测
-	dead_lock(sender_pid, receiver_pid);
+	if(dead_lock(sender_pid, receiver_pid) == 1){
+		panic("dead lock\n");
+	}
 
 	if(receiver->p_flag == RECEIVING && (receiver->p_receive_from == sender_pid
 		|| receiver->p_receive_from == ANY)){
@@ -2214,7 +2244,12 @@ int send_rec(int function, Message *msg, int pid)
 		case BOTH:
 			// 两个函数都使用pid，正确吗？
 			ret = send_msg(msg, pid);	// pid是receiver
+			//while(proc_table[1].p_flag != RUNNING){
+
+			//}
+			assert(proc_table[1].p_flag == RUNNING);
 			ret = receive_msg(msg, pid);	// pid是sender
+			assert(msg->val != 0);
 			break;
 		default:
 			panic("function is invalid\n");
@@ -2226,6 +2261,7 @@ int send_rec(int function, Message *msg, int pid)
 int block(Proc *proc)
 {
 	// 判断，调试函数
+	//k_reenter--;
 	schedule_process();
 	return 0;
 }

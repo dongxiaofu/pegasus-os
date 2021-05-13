@@ -1,10 +1,15 @@
 [section .bss]
 ;Stack	resb	1024*2
-Stack	resb	1024*1024
+;Stack	resb	1024*1024
+_BootMessage:	db	"Hello,World OS!"
+BootMessage	equ	$ - _BootMessage
+Stack	resb	1024*1024*8
 StackTop:
 ; TSS选择子
 TSS_SELECTOR	equ	0x40
 [section .data]
+msg1	db	"esp:", "$"
+msg2	db	"tss.esp0:", "$"
 ; 系统调用
 extern sys_call_table
 
@@ -81,7 +86,7 @@ _start:
 	;jmp $
 	;jmp $
 	;;;;;;;;;xhcg; bx, bx
-	
+	xchg bx, bx	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
 	mov ah, 0Bh
@@ -106,6 +111,7 @@ csinit:
 	xor eax, eax
 	mov ax, TSS_SELECTOR
 	ltr ax
+	;xchg bx, bx
 	jmp kernel_main
 	jmp $	
 	sti
@@ -337,6 +343,7 @@ exception:
 %endmacro
 
 hwint0:
+	;xhcg bx, bx
 	;inc byte [gs:(80*20 + 41)*2]
         ; 发送EOF
         ;mov al, 20h
@@ -351,9 +358,21 @@ hwint0:
 	push fs
 	push gs
 	
+	mov ecx, esp
+	mov esp, StackTop
+	; 中断种类1
+	mov eax, 1
+	push dword eax
+	push ecx
+	call check_tss_esp0	
+	pop ecx
+	pop eax
+	mov esp, ecx
+
 	mov dx, ss
 	mov ds, dx
 	mov es, dx
+	mov fs, dx
 	;;xhcg bx, bx	
 	mov al, 11111101b
 	out 21h, al
@@ -371,16 +390,17 @@ hwint0:
 	mov esp, StackTop
 	;sti
 	;inc byte [gs:0]
-	push ax
+	;push ax
 	;call schedule_process	
 	call clock_handler
 	;mov al, 20h
 	;out 20h, al
 	;call schedule_process	
-	pop ax
+	;pop ax
 	;;;xhcg bx, bx
 	mov al, 11111100b
 	out 21h, al
+	;;xchg bx, bx
 	cli	
 	dec dword [k_reenter]
 	; 启动进程
@@ -405,9 +425,21 @@ hwint1:
 	push fs
 	push gs
 	
+	mov ecx, esp
+	mov esp, StackTop
+	; 中断种类2
+	mov eax, 2
+	push dword eax
+	push ecx
+	call check_tss_esp0	
+	pop ecx
+	pop eax
+	mov esp, ecx
+
 	mov dx, ss
 	mov ds, dx
 	mov es, dx
+	mov fs, dx
 
 	mov al, 11111110b
 	out 21h, al
@@ -419,14 +451,14 @@ hwint1:
 	;inc dword [k_reenter]
 	; 中间代码
 	mov esp, StackTop
-	;;;xchg bx, bx
+	;;;;;xhcg bx, bx
 	call keyboard_handler
-	;;;xchg bx, bx
+	;;;;;xhcg bx, bx
 	mov al, 11111100b
 	out 21h, al
 	cli
 	dec dword [k_reenter]
-	;;;xchg bx, bx
+	;;;;;xhcg bx, bx
 	; 没有比较，为啥用jne？因为这是修改之前的代码后遗漏的地方.
 	; 导致键盘缓冲区出现Invalid Code。
 	;jne restore
@@ -453,24 +485,48 @@ sys_call:
 	; 从gs到eax，距离是多少个字节？11个	
 	; 中间代码修改eax使用
 	mov esi, esp
+	;mov edx, esp
 	
-	;mov dx, ss
-	;mov ds, dx
-	;mov es, dx	
+	mov esp, StackTop
+	push esi
+	push eax
+	push ebx
+	push ecx
+
+	mov ecx, esi
+	; 中断种类3
+	mov eax, 3
+	push dword eax
+	push ecx
+	call check_tss_esp0	
+	add esp, 8
 	
-	xchg bx, bx
+	pop ecx
+	pop ebx
+	pop eax
+	pop esi
+
+	mov esp, esi
+        
+	mov dx, ss
+	mov ds, dx
+	mov es, dx	
+	mov fs, dx
+	
+	;;xchg bx, bx
 	inc dword [k_reenter]
 	sti
 	;inc dword [k_reenter]
 	; 中间代码
 	; 需要切换到内核栈吗？
 	mov esp, StackTop 
+	push esi
 	;dec dword [k_reenter]
 	;push dword proc_ready_table
 	push dword [proc_ready_table]
 	push ebx
 	push ecx
-	;push esi
+	;;xchg bx, bx
 	call [sys_call_table + 4 * eax]
 	; 修改请求系统调用的进程的进程表中的堆栈
 	; 获取堆栈中的eax是个难题：
@@ -479,9 +535,11 @@ sys_call:
 	;;xhcg bx, bx
 	;pop esi
 	add esp, 12
+	pop esi
 	mov [esi + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
 	;pop esi
+	;;xchg bx, bx
 	cli
 	; 恢复进程。不能使用restart，因为，不能使用proc_ready_table
 	; jmp restart	
@@ -494,7 +552,7 @@ sys_call:
 	lldt [esp + 68]
 	;lea eax, [esp + 4]
 	lea eax, [esp + 68]
-	mov [tss + 4], eax
+	mov dword [tss + 4], eax
 	
 	pop gs
 	pop fs
@@ -538,7 +596,7 @@ restart:
 
 ; 恢复进程
 restore:
-	;;xchg bx, bx
+	;;;;xhcg bx, bx
 	;mov esp, [proc_table]
 	;mov eax, proc_table
 	;mov esp, eax
@@ -547,8 +605,8 @@ restore:
 	;lldt [proc_table + 64]
 	;lldt [proc_table + 68]
 	;dec word [k_reenter]
-	;;;xchg bx, bx
-	; 能放到前面，和其他函数在形式上比较相似
+	;;;;;xhcg bx, bx
+	; 能放到前dword 面，和其他函数在形式上比较相似
 	;dec dword [k_reenter]
 	mov esp, [proc_ready_table]
 	lldt [esp + 68]
@@ -558,15 +616,16 @@ restore:
 	;lea eax, [proc_table + 56]
 	;lea eax, [proc_table + 68]
 	lea eax, [esp + 68]
-	mov [tss + 4], eax 
+	mov dword [tss + 4], eax 
 	; 出栈 	
 	pop gs
 	pop fs
 	pop es
 	pop ds
 
+	;;xchg bx, bx
 	popad
-	;;;xchg bx, bx
+	;;xchg bx, bx
 	iretd
 
 in_byte:
@@ -646,5 +705,98 @@ enable_int:
 	sti
 	ret
 
+; 检查tss.esp0和CPU使用 堆栈是否一致
+check_tss_esp0:
+	push ebp
+	mov ebp, esp
+	; CPU选择的堆栈
+	mov eax, [ebp+8]
+	; 出现错误的中断种类
+	mov ebx, [ebp+12]
 
+	add eax, 68
+	; tss中的堆栈
+	mov edx, [tss+4]
+	cmp eax, edx
+	;pop ebp
+	;ret
+	; 二者相等就跳转到2
+	je .2
+.1:
+	; 打印错误的堆栈
+	push eax
+	push edx
+	mov word [dis_pos], 0
+	push dword msg1
+	call disp_str
+	add esp, 4
+	pop edx
+	pop eax
+
+	; 打印中断种类
+	push dword edx	
+	push dword eax
+	push dword ebx
+	call disp_int
+	add esp, 4
+	pop eax
+	pop edx
+
+	push dword edx	
+	push dword eax
+	call disp_int
+	pop eax
+	pop edx
+
+	push dword edx	
+	push dword eax
+	push dword [k_reenter]
+	call disp_int
+	add esp, 4
+	pop eax
+	pop edx
+
+	; 打印tss.esp0中的eip
+	push dword edx	
+	push dword eax
+	push dword [edx - 20]
+	call disp_int
+	add esp, 4
+	pop eax
+	pop edx
+
+
+	; 打印cpu选择的esp中的eip
+	push dword edx	
+	push dword eax
+	push dword [eax - 20]
+	call disp_int
+	add esp, 4
+	pop eax
+	pop edx
+	
+	; 打印proc_ready_table
+	push dword edx	
+	push dword eax
+	push dword [proc_ready_table]
+	call disp_int
+	add esp, 4
+	pop eax
+	pop edx
+
+	;打印StackTop
+	push dword edx	
+	push dword eax
+	push dword StackTop
+	call disp_int
+	add esp, 4
+	pop eax
+	pop edx
+
+	pop ebp
+	hlt
+	ret
+.2:
+	pop ebp
+	ret	
 
