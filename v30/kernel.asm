@@ -597,7 +597,7 @@ restore:
 	lea eax, [esp + 68]
 	mov dword [tss + 4], eax 
 reenter_restore:
-	inc dword [k_reenter]
+	dec dword [k_reenter]
 	; 出栈 	
 	pop gs
 	pop fs
