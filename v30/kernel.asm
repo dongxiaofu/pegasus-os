@@ -353,19 +353,6 @@ hwint0:
 	pushad
 	push ds
 	push es
-	push fs
-	push gs
-	
-	mov ecx, esp
-	mov esp, StackTop
-	; 中断种类1
-	mov eax, 1
-	push dword eax
-	push ecx
-	call check_tss_esp0	
-	pop ecx
-	pop eax
-	mov esp, ecx
 
 	mov dx, ss
 	mov ds, dx
@@ -377,6 +364,11 @@ hwint0:
 	mov al, 20h
 	out 20h, al	
 	inc dword [k_reenter]
+	cmp dword [k_reenter], 0
+	jne .2
+.1:
+	mov esp, StackTop
+.2:
 	sti;
 	;inc word [k_reenter]
 	;inc dword [k_reenter]
@@ -385,7 +377,7 @@ hwint0:
 	;cmp dword [k_reenter], 0
 	;jnz restore
 	;jne restore
-	mov esp, StackTop
+	;mov esp, StackTop
 	;sti
 	;inc byte [gs:0]
 	;push ax
@@ -407,7 +399,7 @@ hwint0:
 	;jmp restore
 	cmp dword [k_reenter], 0
 	;je restore
-	je reenter_restore
+	jne reenter_restore
 	jmp restore
 
 
@@ -427,16 +419,6 @@ hwint1:
 	push fs
 	push gs
 	
-	mov ecx, esp
-	mov esp, StackTop
-	; 中断种类2
-	mov eax, 2
-	push dword eax
-	push ecx
-	call check_tss_esp0	
-	pop ecx
-	pop eax
-	mov esp, ecx
 
 	mov dx, ss
 	mov ds, dx
@@ -448,11 +430,17 @@ hwint1:
 	mov al, 20h
 	out 20h, al
 
+
 	inc dword [k_reenter]
+	cmp dword [k_reenter], 0
+	jne .2
+.1:
+	mov esp, StackTop
+.2:
 	sti	
 	;inc dword [k_reenter]
 	; 中间代码
-	mov esp, StackTop
+	;mov esp, StackTop
 	;;;;;xhcg bx, bx
 	call keyboard_handler
 	;;;;;xhcg bx, bx
@@ -467,7 +455,7 @@ hwint1:
 	;jmp restore
 	cmp dword [k_reenter], 0
 	;je restore
-	je reenter_restore
+	jne reenter_restore
 	jmp restore
 
 %macro hwint_slave 1
@@ -493,27 +481,6 @@ sys_call:
 	mov esi, esp
 	;mov edx, esp
 	
-	mov esp, StackTop
-	push esi
-	push eax
-	push ebx
-	push ecx
-
-	mov ecx, esi
-	; 中断种类3
-	mov eax, 3
-	push dword eax
-	push ecx
-	call check_tss_esp0	
-	add esp, 8
-	
-	pop ecx
-	pop ebx
-	pop eax
-	pop esi
-
-	mov esp, esi
-        
 	mov dx, ss
 	mov ds, dx
 	mov es, dx	
@@ -521,11 +488,16 @@ sys_call:
 	
 	;;xchg bx, bx
 	inc dword [k_reenter]
+	cmp dword [k_reenter], 0
+	jne .2
+.1:
+	mov esp, StackTop 
+.2:
 	sti
 	;inc dword [k_reenter]
 	; 中间代码
 	; 需要切换到内核栈吗？
-	mov esp, StackTop 
+	;mov esp, StackTop 
 	push esi
 	;dec dword [k_reenter]
 	;push dword proc_ready_table
@@ -554,7 +526,7 @@ sys_call:
 	;dec dword [k_reenter]
 	cmp dword [k_reenter], 0
 	;je restore
-	je reenter_restore
+	jne reenter_restore
 	jmp restore
 
 	;mov esp, [proc_ready_table]
