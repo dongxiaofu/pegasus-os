@@ -152,6 +152,7 @@ typedef struct{
 }Descriptor;
 
 Descriptor gdt[128];
+// Descriptor gdt[10];
 
 unsigned char idt_ptr[6];
 //门描述符
@@ -306,7 +307,7 @@ typedef struct{
 // 变量--进程
 TSS tss;
 // 用户进程的数量
-#define USER_PROC_NUM 1
+#define USER_PROC_NUM 2
 // 系统任务的数量
 #define TASK_PROC_NUM 2
 // 消息收发对象是任意进程时，目标进程的pid是这个值
@@ -546,6 +547,7 @@ void ReloadGDT()
 	//disp_int(0x3);
 	//disp_str_colour("Hello,World\n", 0x0C);
 	//return;
+	//Memset(&gdt, 0, sizeof(Descriptor) * 128);
 	Memcpy(&gdt,
 		(void *)(*((int *)(&gdt_ptr[2]))),
 		*((short *)(&gdt_ptr[0]))
@@ -1017,8 +1019,8 @@ void kernel_main()
 	while(1){}
 }
 
-#define A_PRINT_NUM 500
-#define B_PRINT_NUM 20
+#define A_PRINT_NUM 20
+#define B_PRINT_NUM 5
 #define C_PRINT_NUM 20
 
 void TestA()
@@ -1042,8 +1044,8 @@ void TestA()
 			//Printf("a_t_ipc = %x\n", t_ipc);
 			//milli_delay(20);
 			//Printf("a_t:%x", 2);
-			Printf("%x", 2);
-			//Printf("a_t:%x", get_ticks_ipc());
+			//Printf("%x", 2);
+			Printf("%x", get_ticks_ipc());
 			//disp_str_colour("A", 0x0A);
 			//Printf("%c--", 'A');
 			//Printf("flag:%x--,", proc_table[2].p_flag);
@@ -1092,10 +1094,10 @@ void TestB()
 		//Printf("<b ticks:%x\n>", get_ticks());
 		if( i < B_PRINT_NUM){
 			//int t_ipc = get_ticks_ipc();
-			int t_ipc = get_ticks();
-			Printf("b_t_ipc = %x", t_ipc);
-			//Printf("b_t0:%x\n", 2);
-			//Printf("b_t:%x\n", get_ticks_ipc());
+			//int t_ipc = get_ticks();
+			//Printf("%x", t_ipc);
+			//Printf("%x\n", 3);
+			Printf("b_t:%x\n", get_ticks_ipc());
 		}
 		i++;
 		// int t = get_ticks();
@@ -1120,8 +1122,9 @@ void TestC()
 	while(1){
 		//select_console(2);
 		if( i < C_PRINT_NUM){
-			//int t_ipc = get_ticks_ipc();
-			int t_ipc = get_ticks();
+			int t_ipc = get_ticks_ipc();
+			//int t_ipc = get_ticks();
+			//int t_ipc = 5;
 			Printf("c_t_ipc = %x", t_ipc);
 			//Printf("c_t0:%x\n", 3);
 			//Printf("c_t:%x\n", get_ticks_ipc());
@@ -1439,13 +1442,13 @@ void TaskSys()
 		//return;
 		Message msg;
 		Memset(&msg, 0, sizeof(Message));
-		int ret = 3;//receive_msg(&msg, ANY);
+		int ret = receive_msg(&msg, ANY);
 		int type = msg.type;
 		int source = msg.source;
 		switch(type){
 			case TICKS_TASK_SYS_TYPE:
 				msg.val = ticks;
-				ret = 4;//send_msg(&msg, source);
+				ret = send_msg(&msg, source);
 				break;
 			default:
 				
@@ -1842,6 +1845,7 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 	//char tmp[256];	
 	//char tmp[128];	
 	char tmp[64];	
+	//char tmp[4];	
 	//return 0;
 	Memset(tmp, 0, sizeof(tmp));
 	//Memset(tmp, 0, 256);

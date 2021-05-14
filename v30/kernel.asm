@@ -1,9 +1,7 @@
 [section .bss]
 ;Stack	resb	1024*2
 ;Stack	resb	1024*1024
-_BootMessage:	db	"Hello,World OS!"
-BootMessage	equ	$ - _BootMessage
-Stack	resb	1024*1024*8
+Stack	resb	1024*2
 StackTop:
 ; TSS选择子
 TSS_SELECTOR	equ	0x40
@@ -402,10 +400,14 @@ hwint0:
 	out 21h, al
 	;;xchg bx, bx
 	cli	
-	dec dword [k_reenter]
+	;dec dword [k_reenter]
 	; 启动进程
 	;jmp restart
 	;jne restore
+	;jmp restore
+	cmp dword [k_reenter], 0
+	;je restore
+	je reenter_restore
 	jmp restore
 
 
@@ -457,11 +459,15 @@ hwint1:
 	mov al, 11111100b
 	out 21h, al
 	cli
-	dec dword [k_reenter]
+	;dec dword [k_reenter]
 	;;;;;xhcg bx, bx
 	; 没有比较，为啥用jne？因为这是修改之前的代码后遗漏的地方.
 	; 导致键盘缓冲区出现Invalid Code。
 	;jne restore
+	;jmp restore
+	cmp dword [k_reenter], 0
+	;je restore
+	je reenter_restore
 	jmp restore
 
 %macro hwint_slave 1
@@ -540,28 +546,29 @@ sys_call:
 	;mov [esi + 12 * 4], eax
 	;pop esi
 	;;xchg bx, bx
-	cli
+	;cli
 	; 恢复进程。不能使用restart，因为，不能使用proc_ready_table
 	; jmp restart	
 	;sub esi, 68
 	;mov esp, esi
-	dec dword [k_reenter]
-	mov esp, [proc_ready_table]
+	;dec dword [k_reenter]
+	cmp dword [k_reenter], 0
+	;je restore
+	je reenter_restore
+	jmp restore
+
+	;mov esp, [proc_ready_table]
 	;lldt [esp + 68]
-	;lldt [esp + 4]
-	lldt [esp + 68]
-	;lea eax, [esp + 4]
-	lea eax, [esp + 68]
-	mov dword [tss + 4], eax
-	
-	pop gs
-	pop fs
-	pop es
-	pop ds
-	popad
-	
-	;ret
-	iretd
+	;lea eax, [esp + 68]
+	;mov dword [tss + 4], eax
+	;
+	;pop gs
+	;pop fs
+	;pop es
+	;pop ds
+	;popad
+	;
+	;iretd
 
 ; 系统调用中断 end
 
@@ -617,6 +624,8 @@ restore:
 	;lea eax, [proc_table + 68]
 	lea eax, [esp + 68]
 	mov dword [tss + 4], eax 
+reenter_restore:
+	inc dword [k_reenter]
 	; 出栈 	
 	pop gs
 	pop fs
@@ -726,7 +735,7 @@ check_tss_esp0:
 	; 打印错误的堆栈
 	push eax
 	push edx
-	mov word [dis_pos], 0
+	;mov word [dis_pos], 0
 	push dword msg1
 	call disp_str
 	add esp, 4
@@ -794,7 +803,7 @@ check_tss_esp0:
 	pop edx
 
 	pop ebp
-	hlt
+	;hlt
 	ret
 .2:
 	pop ebp
