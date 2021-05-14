@@ -7,6 +7,9 @@ struct Person{
 
 int main(int argc, char **argv)
 {
+	char *str2 = "";// = "hello";
+	*str2 = 'A';
+	
 	//int *a;
 	int *k;
 	int b = 7;

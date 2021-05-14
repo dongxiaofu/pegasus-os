@@ -1,6 +1,12 @@
 //extern InterruptTest; 
 #include "keymap.h"
+//#define DEBUG 1
+#define DEBUG 0
 
+#define DEFAULT_STR_SIZE 512
+// 必须作为全局变量。如果作为局部变量，然后初始化，会覆盖其他数据。
+// 目前的内存机制，就是这样。
+// char inner_buf[DEFAULT_STR_SIZE];
 // TaskTTY start
 #define TTY_BUF_SIZE 800
 #define TTY_NUM 3
@@ -152,7 +158,6 @@ typedef struct{
 }Descriptor;
 
 Descriptor gdt[128];
-// Descriptor gdt[10];
 
 unsigned char idt_ptr[6];
 //门描述符
@@ -307,7 +312,7 @@ typedef struct{
 // 变量--进程
 TSS tss;
 // 用户进程的数量
-#define USER_PROC_NUM 2
+#define USER_PROC_NUM 3
 // 系统任务的数量
 #define TASK_PROC_NUM 2
 // 消息收发对象是任意进程时，目标进程的pid是这个值
@@ -326,7 +331,8 @@ typedef struct{
 }Task;
 
 // 进程栈默认大小
-#define DEFAULT_STACK_SIZE 4096
+// #define DEFAULT_STACK_SIZE 32768	// 这个值，导致无法加载内核
+#define DEFAULT_STACK_SIZE 1024
 
 // 进程A、B、C的堆栈大小
 #define A_STACK_SIZE DEFAULT_STACK_SIZE
@@ -405,6 +411,11 @@ int dead_lock(int src, int dest);
 int sys_send_msg(Message *msg, int receiver_pid, Proc *sender);
 // receive_msg 通过sys_call调用
 int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver);
+
+// 把整型数字转成指定进制的字符串
+// void itoa(int value, char **str, int base);
+char *itoa(int value, char **str, int base);
+
 // ipc end
 
 void sys_call();
@@ -480,6 +491,7 @@ void in_process(TTY *tty, unsigned int key);
 char *Strcpy(char *dest, char *src);
 int Strlen(char *buf);
 
+char* i2a(int val, int base, char ** ps);
 // 只支持%x
 void Printf(char *fmt, ...);
 
@@ -902,6 +914,7 @@ void kernel_main()
 	unsigned int eflags;
 	unsigned char rpl;
 	unsigned char dpl;
+	char *p_task_stack = proc_stack + STACK_SIZE;
 	for(int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++){	
 		proc = proc_table + i;
 		if(i < TASK_PROC_NUM){
@@ -909,8 +922,8 @@ void kernel_main()
 			eflags = 0x1202;
 			rpl = 1;
 			dpl = 1;
-			//proc->ticks = proc->priority = 15;
-			proc->ticks = proc->priority = 2;
+			proc->ticks = proc->priority = 15;
+			//proc->ticks = proc->priority = 2;
 			proc->tty_index = 1;
 		}else{
 			task = user_task_table + i - TASK_PROC_NUM;
@@ -918,7 +931,7 @@ void kernel_main()
 			//eflags = 0x1202;
 			rpl = 3;
 			dpl = 3;
-			proc->ticks = proc->priority = 1;
+			proc->ticks = proc->priority = 10;
 			proc->tty_index = i - TASK_PROC_NUM;
 		}
 
@@ -973,7 +986,9 @@ void kernel_main()
 		// proc->s_reg.eip = TestA;
 
 		//proc->s_reg.esp = (int)(proc_stack + 128 * i);
-		proc->s_reg.esp = (int)(proc_stack + 128 * (i+1));
+		// proc->s_reg.esp = (int)(proc_stack + 128 * (i+1));
+		proc->s_reg.esp = (int)(p_task_stack);
+		p_task_stack -= DEFAULT_STACK_SIZE;
 		// proc->s_reg.esp = proc_stack + 128;
 		// 抄的于上神的。需要自己弄清楚。我已经理解了。
 		// IOPL = 1, IF = 1
@@ -1019,20 +1034,15 @@ void kernel_main()
 	while(1){}
 }
 
-#define A_PRINT_NUM 20
-#define B_PRINT_NUM 5
-#define C_PRINT_NUM 20
+#define A_PRINT_NUM 100
+#define B_PRINT_NUM 100
+#define C_PRINT_NUM 50
 
 void TestA()
 {
-	//Printf("<a ticks:%x\n>", get_ticks());
-	unsigned int i = 0;
+	unsigned int i = 10;
+	//Printf("i=%d\n", 98457);
 	assert(i==0);
-	//assert(proc_ready_table == 894);
-	//panic("hello, world");
-	//Printf("%c%s\n", 'B', "How are you?");
-	//Printf("Ti:%s\n", "ticks, Hello, World, welecom!");
-	//Printf("Ti:%x\n", 99999);
 	while(1){
 		//Printf("<a ticks:%x\n>", get_ticks());
 		//select_console(0);
@@ -1097,7 +1107,8 @@ void TestB()
 			//int t_ipc = get_ticks();
 			//Printf("%x", t_ipc);
 			//Printf("%x\n", 3);
-			Printf("b_t:%x\n", get_ticks_ipc());
+			//Printf("i=%d\n", 9);
+			Printf("b_t:%x", get_ticks_ipc());
 		}
 		i++;
 		// int t = get_ticks();
@@ -1122,6 +1133,7 @@ void TestC()
 	while(1){
 		//select_console(2);
 		if( i < C_PRINT_NUM){
+			//Printf("i=%d\n", 5);
 			int t_ipc = get_ticks_ipc();
 			//int t_ipc = get_ticks();
 			//int t_ipc = 5;
@@ -1443,6 +1455,9 @@ void TaskSys()
 		Message msg;
 		Memset(&msg, 0, sizeof(Message));
 		int ret = receive_msg(&msg, ANY);
+		if(ret != 0){
+			return;
+		}
 		int type = msg.type;
 		int source = msg.source;
 		switch(type){
@@ -1839,7 +1854,13 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 {
 	// 指向buf
 	char *p;
-	// 转换数字使用
+	// 必须作为全局变量。如果作为局部变量，然后初始化，会覆盖其他数据。
+	// 目前的内存机制，就是这样。
+	//char inner_buf[DEFAULT_STR_SIZE];
+	// Memset(inner_buf, 0, DEFAULT_STR_SIZE);
+	char inner_buf[DEFAULT_STR_SIZE];
+	char *str = inner_buf;
+	 // 转换数字使用
 	// 使用256会导致gdt中的数据被擦除，从而导致各种奇怪的问题，比如，proc_ready_table中的数据被修改。
 	// 耗费了八个小时左右才发现这个问题。
 	//char tmp[256];	
@@ -1860,7 +1881,19 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 		// 跳过%
 		fmt++;
 		switch(*fmt){
-			case 'd':
+			//case 'd':;
+			case 'd':{
+				int m = *(int *)next_arg;
+				itoa(m, &str, 10);
+				//i2a(m, 10, &str);
+				//Strcpy(p, str);
+				Strcpy(p, inner_buf);
+			      	next_arg += 4;
+				// len2 = Strlen(str);
+				len2 = Strlen(inner_buf);
+				p += len2;
+				break;
+			}
 			case 'x':
 				atoi(tmp, *(int *)next_arg);
 				//Strcpy(buf, tmp);
@@ -1914,7 +1947,6 @@ void sys_printx(char *error_msg, int len, Proc *proc)
 	//Proc *proc = pid2proc(caller_pid);
 
 	if(k_reenter == 0){
-		
 		int ds = proc->s_reg.ds;
 		base = Seg2PhyAddrLDT(ds, proc);
 	}else if(k_reenter > 0){
@@ -1976,9 +2008,11 @@ void panic(char *error_msg)
 
 void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line)
 {
-	printx("%c%s error in file [%s],base_file [%]s,line [%d]\n\n",
-		ASSERT_MAGIC, exp, filename, base_filename, line);
+	printx("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
+	//Printf("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
+	ASSERT_MAGIC, exp, filename, base_filename, 8456);
 	spin("Stop Here!\n");
+	return;
 }
 
 
@@ -2032,7 +2066,13 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 {
 	Proc *receiver = pid2proc(receiver_pid);
 	int sender_pid = proc2pid(sender);
+	if(DEBUG == 1){
+		Printf("sender = %x, receiver = %x\n", sender_pid, receiver_pid);
 
+		assert((sender_pid == 1) || (sender_pid == 2) || (sender_pid == 3) || (receiver_pid == 15));
+		assert((receiver_pid == 1) || (receiver_pid == 2) || (receiver_pid == 3) || (receiver_pid == 15));
+	}
+	msg->source = sender_pid;
 	// 死锁检测
 	if(dead_lock(sender_pid, receiver_pid) == 1){
 		panic("dead lock\n");
@@ -2128,8 +2168,13 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
 	int p_from;
 	
 	Proc *sender = pid2proc(sender_pid);
-	int receiver_id = proc2pid(receiver);
+	int receiver_pid = proc2pid(receiver);
+	if(DEBUG == 1){	
+		Printf("sender = %x, receiver = %x\n", sender_pid, receiver_pid);
 
+		assert((sender_pid == 1) || (sender_pid == 2) || (sender_pid == 3) || (sender_pid == 15));
+		assert((receiver_pid == 1) || (receiver_pid == 2) || (receiver_pid == 3) || (receiver_pid == 15));
+}
 	if(sender_pid == ANY){
 		//if(receiver->header->next->sender_pid != 0x0){
 		if(receiver->header != 0x0){
@@ -2142,7 +2187,7 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
 		}
 	}else if(0 <= sender_pid && sender_pid < USER_PROC_NUM + TASK_PROC_NUM){
 		if(sender->p_flag == SENDING && (sender->p_send_to == ANY 
-					|| sender->p_send_to == receiver_id)){
+					|| sender->p_send_to == receiver_pid)){
 			// 遍历receiver的发送消息的进程队列，从中移除sender
 			// 本质是，从发送消息的进程队列中移除sender
 			struct MsgSender *current = receiver->header;
@@ -2251,9 +2296,11 @@ int send_rec(int function, Message *msg, int pid)
 			//while(proc_table[1].p_flag != RUNNING){
 
 			//}
-			assert(proc_table[1].p_flag == RUNNING);
-			ret = receive_msg(msg, pid);	// pid是sender
-			assert(msg->val != 0);
+			//assert(proc_table[1].p_flag == RUNNING);
+			if(ret == 0){
+				ret = receive_msg(msg, pid);	// pid是sender
+				assert(msg->val != 0);
+			}
 			break;
 		default:
 			panic("function is invalid\n");
@@ -2280,13 +2327,45 @@ int get_ticks_ipc()
 {
 	Message msg;
 	Memset(&msg, 0, sizeof(Message));
-	msg.source = 2;
+	//msg.source = 2;
 	msg.type = TICKS_TASK_SYS_TYPE;
 	int ret = send_rec(BOTH, &msg, 1);
 	int ticks = msg.val;
 	return ticks;
 }
 
+// 把整型数字转成指定进制的字符串
+//void itoa(int value, char *str, int base)
+char *itoa(int value, char **str, int base)
+{
+	int remainder = value % base;
+	int queotion = value / base;
+	// 这是递归啊，怎么会用while呢？
+	//while(queotion > 0){
+	//	itoa(queotion, str, base);
+	//}
+	if(queotion){
+		itoa(queotion, str, base);
+	}
+	// *str++，是这样写吗？没有把握。不是！致命的常规错误，耗费了很长时间。
+	// *str++ = remainder + '0';
+
+	*((*str)++) = remainder + '0';
+	return *str;
+}
 // ipc end
 
+char* i2a(int val, int base, char ** ps)
+{
+	int m = val % base;
+	int q = val / base;
+	if (q) {
+		i2a(q, base, ps);
+	}
+	*(*ps)++ = (m < 10) ? (m + '0') : (m - 10 + 'A');
+	// 等价于
+	// unsigned char c = (m < 10) ? (m + '0') : (m - 10 + 'A');
+	// *ps++ = &c;
 
+	return *ps;
+}

@@ -1,7 +1,8 @@
 [section .bss]
-;Stack	resb	1024*2
-;Stack	resb	1024*1024
 Stack	resb	1024*2
+;Stack	resb	1024*1024
+;Stack	resb	1024*1024*16
+;Stack	resb	1024*2
 StackTop:
 ; TSS选择子
 TSS_SELECTOR	equ	0x40
@@ -353,6 +354,8 @@ hwint0:
 	pushad
 	push ds
 	push es
+	push fs
+	push gs
 
 	mov dx, ss
 	mov ds, dx
