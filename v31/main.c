@@ -1,4 +1,6 @@
 #include "main.h"
+#include "keymap.h"
+#include "string.h"
 //
 void ReloadGDT()
 {
