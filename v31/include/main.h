@@ -71,7 +71,7 @@ unsigned int ticks;
 unsigned int k_reenter;
 //static unsigned int counter = 0;
 unsigned int counter;
-typedef void (*int_handle) ();
+// typedef void (*int_handle) ();
 void disp_str(char *str);
 // void disp_str_colour(char *str, int colour);
 void disp_str_colour2(int str, int colour);
@@ -113,18 +113,17 @@ unsigned char gdt_ptr[6];
 // void Memcpy(void *dst, void *src, int size);
 // void Memset(void *dest, char character, int size);
 //void InitInterruptDesc(int vec_no, int_handle offset); 
-void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type);
+// void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type);
 // 初始化内部中断
-void init_internal_interrupt();
+// void init_internal_interrupt();
 
 void test();
 
 void spurious_irq(int irq);
 void init_propt();
 
-const int INIT_MASTER_VEC_NO = 0x20;
-const int INIT_SLAVE_VEC_NO = 0x28;
-
+// const int INIT_MASTER_VEC_NO = 0x20;
+// const int INIT_SLAVE_VEC_NO = 0x28;
 
 
 // 描述符在gdt中的索引
@@ -146,94 +145,94 @@ const int INIT_SLAVE_VEC_NO = 0x28;
 #define LDT_FIRST_SELECTOR 0x48
 
 
-typedef struct{
-	unsigned short seg_limit_below;
-	unsigned short seg_base_below;
-	unsigned char  seg_base_middle;
-	unsigned char seg_attr1;
-	unsigned char seg_limit_high_and_attr2;
-	unsigned char seg_base_high;
-	//char seg_base_high;
-}Descriptor;
-
-Descriptor gdt[128];
-
-unsigned char idt_ptr[6];
-//门描述符
-typedef struct{
-	unsigned short offset_below;
-	unsigned short selector;
-	unsigned char paramCount;
-	unsigned char type_other_attribute;
-	unsigned short offset_high;
-}Gate;
-
-Gate idt[256];
+//typedef struct{
+//	unsigned short seg_limit_below;
+//	unsigned short seg_base_below;
+//	unsigned char  seg_base_middle;
+//	unsigned char seg_attr1;
+//	unsigned char seg_limit_high_and_attr2;
+//	unsigned char seg_base_high;
+//	//char seg_base_high;
+//}Descriptor;
+//
+//Descriptor gdt[128];
+//
+//unsigned char idt_ptr[6];
+////门描述符
+//typedef struct{
+//	unsigned short offset_below;
+//	unsigned short selector;
+//	unsigned char paramCount;
+//	unsigned char type_other_attribute;
+//	unsigned short offset_high;
+//}Gate;
+//
+//Gate idt[256];
 
 // tss
-typedef struct{
-	// 上一个任务的TSS指针
-	unsigned int last_tss_ptr;
-	unsigned int esp0;
-	unsigned int ss0;
-	unsigned int esp1;
-	unsigned int ss1;
-	unsigned int esp2;
-	unsigned int ss2;
-	unsigned int cr3;
-	unsigned int eip;
-	unsigned int eflags;
-	unsigned int eax;
-	unsigned int ecx;
-	unsigned int edx;
-	unsigned int ebx;
-	unsigned int esp;
-	unsigned int ebp;
-	unsigned int esi;
-	unsigned int edi;
-	unsigned int es;
-	unsigned int cs;
-	unsigned int ss;
-	unsigned int ds;
-	unsigned int fs;
-	unsigned int gs;
-	unsigned int ldt;
-	unsigned int trace;
-	unsigned int iobase;
-}TSS;
+//typedef struct{
+//	// 上一个任务的TSS指针
+//	unsigned int last_tss_ptr;
+//	unsigned int esp0;
+//	unsigned int ss0;
+//	unsigned int esp1;
+//	unsigned int ss1;
+//	unsigned int esp2;
+//	unsigned int ss2;
+//	unsigned int cr3;
+//	unsigned int eip;
+//	unsigned int eflags;
+//	unsigned int eax;
+//	unsigned int ecx;
+//	unsigned int edx;
+//	unsigned int ebx;
+//	unsigned int esp;
+//	unsigned int ebp;
+//	unsigned int esi;
+//	unsigned int edi;
+//	unsigned int es;
+//	unsigned int cs;
+//	unsigned int ss;
+//	unsigned int ds;
+//	unsigned int fs;
+//	unsigned int gs;
+//	unsigned int ldt;
+//	unsigned int trace;
+//	unsigned int iobase;
+//}TSS;
 
 // 进程表 start
-typedef struct{
-	// 中断处理程序压栈，手工压栈
-	//unsigned short gs;	
-	//unsigned short fs;	
-	//unsigned short es;	
-	//unsigned short ds;
-	
-	unsigned int gs;	
-	unsigned int fs;	
-	unsigned int es;	
-	unsigned int ds;	
-	// pushad压栈，顺序固定	
-	unsigned int edi;	
-	unsigned int esi;	
-	unsigned int ebp;	
-	// 在这里消耗了很多时间。为啥需要在这里补上一个值？这是因为popad依次出栈的数据中有这么个值，
-	// 如果不补上这一位，出栈时数据不能依次正确更新到寄存器中。
-	unsigned int kernel_esp;	
-	unsigned int ebx;	
-	unsigned int edx;	
-	unsigned int ecx;	
-	unsigned int eax;
-	// 中断发生时压栈
-	unsigned int eip;
-	unsigned int cs;
-	//unsigned short cs;
-	unsigned int eflags;
-	//unsigned short ss;
-	unsigned int esp;	// 漏掉了这个。iretd会出栈更新esp。
-	unsigned int ss;
-}Regs;
+//typedef struct{
+//	// 中断处理程序压栈，手工压栈
+//	//unsigned short gs;	
+//	//unsigned short fs;	
+//	//unsigned short es;	
+//	//unsigned short ds;
+//	
+//	unsigned int gs;	
+//	unsigned int fs;	
+//	unsigned int es;	
+//	unsigned int ds;	
+//	// pushad压栈，顺序固定	
+//	unsigned int edi;	
+//	unsigned int esi;	
+//	unsigned int ebp;	
+//	// 在这里消耗了很多时间。为啥需要在这里补上一个值？这是因为popad依次出栈的数据中有这么个值，
+//	// 如果不补上这一位，出栈时数据不能依次正确更新到寄存器中。
+//	unsigned int kernel_esp;	
+//	unsigned int ebx;	
+//	unsigned int edx;	
+//	unsigned int ecx;	
+//	unsigned int eax;
+//	// 中断发生时压栈
+//	unsigned int eip;
+//	unsigned int cs;
+//	//unsigned short cs;
+//	unsigned int eflags;
+//	//unsigned short ss;
+//	unsigned int esp;	// 漏掉了这个。iretd会出栈更新esp。
+//	unsigned int ss;
+//}Regs;
 
 // ipc0 start
 // 能用enum吗？不能很快心算出”能不能“这个结果，先不用，减小难度。
@@ -250,20 +249,20 @@ typedef struct{
 #define TICKS_TASK_SYS_TYPE 1 
 
 // todo 根据目前的需求，下面的成员都是必需的。
-typedef struct{
-	int source;		// 谁发送的消息
-	int type;		// 这条消息要求接收者做什么。例如，获取时钟中断次数。
-	int val;		// 消息中的数据。
-}Message;
-
-// 发送消息的进程队列的成员的数据类型
-struct MsgSender
-{
-	//Proc *sender;
-	unsigned int sender_pid;
-	//struct MsgSender next;
-	struct MsgSender *next;
-};
+//typedef struct{
+//	int source;		// 谁发送的消息
+//	int type;		// 这条消息要求接收者做什么。例如，获取时钟中断次数。
+//	int val;		// 消息中的数据。
+//}Message;
+//
+//// 发送消息的进程队列的成员的数据类型
+//struct MsgSender
+//{
+//	//Proc *sender;
+//	unsigned int sender_pid;
+//	//struct MsgSender next;
+//	struct MsgSender *next;
+//};
 //struct MsgSender
 //{
 //	//Proc *sender;
@@ -310,18 +309,18 @@ typedef struct{
 
 // 变量--进程
 TSS tss;
-// 用户进程的数量
-#define USER_PROC_NUM 3
-// 系统任务的数量
-#define TASK_PROC_NUM 4
-// 消息收发对象是任意进程时，目标进程的pid是这个值
-#define ANY (USER_PROC_NUM + TASK_PROC_NUM + 10)
-// 消息收发对象是无对象时，目标进程的pid是这个值
-#define NO_TASK (USER_PROC_NUM + TASK_PROC_NUM + 25)
-// 系统任何和用户进程的进程表都存储在这个数组中
-Proc proc_table[TASK_PROC_NUM + USER_PROC_NUM];
-// 即将或正在执行的进程的进程表
-Proc *proc_ready_table;
+//// 用户进程的数量
+//#define USER_PROC_NUM 3
+//// 系统任务的数量
+//#define TASK_PROC_NUM 4
+//// 消息收发对象是任意进程时，目标进程的pid是这个值
+//#define ANY (USER_PROC_NUM + TASK_PROC_NUM + 10)
+//// 消息收发对象是无对象时，目标进程的pid是这个值
+//#define NO_TASK (USER_PROC_NUM + TASK_PROC_NUM + 25)
+//// 系统任何和用户进程的进程表都存储在这个数组中
+//Proc proc_table[TASK_PROC_NUM + USER_PROC_NUM];
+//// 即将或正在执行的进程的进程表
+//Proc *proc_ready_table;
 typedef void (*Func)();
 
 typedef struct{
@@ -386,19 +385,20 @@ void delay(int time);
 // void schedule_process();
 // 进程的堆栈
 int proc_stack[STACK_SIZE];
+
 // 用户进程元数据
-Task user_task_table[USER_PROC_NUM] = {
-	{TestA, A_STACK_SIZE},
-	{TestB, B_STACK_SIZE},
-	{TestC, C_STACK_SIZE},
-};
-// 系统任务元数据
-Task sys_task_table[TASK_PROC_NUM] = {
-	{TaskTTY, TaskTTY_STACK_SIZE},
-	{TaskSys, TASK_SYS_SIZE},
-	{TaskHD, TASK_HD_SIZE},
-	{task_fs, TASK_FS_SIZE},
-};
+//Task user_task_table[USER_PROC_NUM] = {
+//	{TestA, A_STACK_SIZE},
+//	{TestB, B_STACK_SIZE},
+//	{TestC, C_STACK_SIZE},
+//};
+//// 系统任务元数据
+//Task sys_task_table[TASK_PROC_NUM] = {
+//	{TaskTTY, TaskTTY_STACK_SIZE},
+//	{TaskSys, TASK_SYS_SIZE},
+//	{TaskHD, TASK_HD_SIZE},
+//	{task_fs, TASK_FS_SIZE},
+//};
 
 // 系统调用 start
 #define SYS_CALL_FUNCTION_NUM 5
