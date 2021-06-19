@@ -1,4 +1,4 @@
-// #include "main.h"
+#include "string.h"
 
 // 硬盘驱动
 //
