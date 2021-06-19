@@ -268,8 +268,12 @@ void spurious_irq(int irq)
 
 void init_propt()
 {
+	// 时钟中断
 	InitInterruptDesc(INIT_MASTER_VEC_NO + 0, hwint0 ,0x08,0x0E);	
+	// 键盘中断
 	InitInterruptDesc(INIT_MASTER_VEC_NO + 1, hwint1 ,0x08,0x0E);	
+	// 硬盘中断
+	InitInterruptDesc(INIT_SLAVE_VEC_NO + 6, hwint14 ,0x08,0x0E);	
 
 	Memset(proc_table, 0, sizeof(proc_table));
 
