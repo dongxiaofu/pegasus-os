@@ -102,6 +102,7 @@ void simd_float_exception_fault();
 // 外部中断 start
 void hwint0();
 void hwint1();
+void hwint14();
 // 外部中断 end
 
 void atoi(char *str, int num);
@@ -312,7 +313,7 @@ TSS tss;
 // 用户进程的数量
 #define USER_PROC_NUM 3
 // 系统任务的数量
-#define TASK_PROC_NUM 3
+#define TASK_PROC_NUM 4
 // 消息收发对象是任意进程时，目标进程的pid是这个值
 #define ANY (USER_PROC_NUM + TASK_PROC_NUM + 10)
 // 消息收发对象是无对象时，目标进程的pid是这个值
@@ -340,6 +341,7 @@ typedef struct{
 #define TaskTTY_STACK_SIZE DEFAULT_STACK_SIZE
 #define TASK_SYS_SIZE DEFAULT_STACK_SIZE
 #define TASK_HD_SIZE DEFAULT_STACK_SIZE
+#define TASK_FS_SIZE DEFAULT_STACK_SIZE
 //#define A_STACK_SIZE 128
 //#define B_STACK_SIZE 128
 //#define C_STACK_SIZE 128
@@ -350,7 +352,8 @@ typedef struct{
 	+ C_STACK_SIZE \
 	+ TaskTTY_STACK_SIZE \
 	+ TASK_SYS_SIZE \
-	+ TASK_HD_SIZE)
+	+ TASK_HD_SIZE	\
+	+ TASK_FS_SIZE)
 
 // 初始化描述符
 // void InitDescriptor(void *desc, unsigned int base, unsigned int limit, unsigned short attribute);
@@ -374,6 +377,8 @@ void TaskTTY();
 void TaskSys();
 // 硬盘驱动
 void TaskHD();
+// 文件系统
+void task_fs();
 // 启动进程
 void restart();
 void delay(int time);
@@ -392,6 +397,7 @@ Task sys_task_table[TASK_PROC_NUM] = {
 	{TaskTTY, TaskTTY_STACK_SIZE},
 	{TaskSys, TASK_SYS_SIZE},
 	{TaskHD, TASK_HD_SIZE},
+	{task_fs, TASK_FS_SIZE},
 };
 
 // 系统调用 start

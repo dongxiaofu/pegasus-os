@@ -4,12 +4,12 @@ ASM	=	nasm
 CC	=	gcc
 LD	=	ld
 ASKFLAGS=	-I include/ -f elf
-CFLAGS	=	-I include/  -g -c -fno-builtin -m32	
+CFLAGS	=	-I include/ -I include/fs/  -g -c -fno-builtin -m32	
 LDFLAGS	=	-s -Ttext 0x30400 -m elf_i386
 
 BOOT = loader.bin boot.bin
 KERNEL	=	kernel.bin
-OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o
+OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o
 
 image:clean everything buildimg
 
@@ -40,17 +40,23 @@ boot.bin:boot.asm
 loader.bin:pmtest2.asm
 	nasm -o loader.bin loader.asm
 
-kernel.o:kernel.asm include/string.h
+# kernel.o:kernel.asm include/string.h include/hd.h
+kernel.o:kernel.asm
 	${ASM} ${ASKFLAGS} -o $@ $<
 
-string.o:string.asm  include/main.h include/string.h
+# string.o:string.asm  include/main.h include/string.h
+string.o:string.asm
 	${ASM} ${ASKFLAGS} -o $@ $<
 
-syscall.o:syscall.asm  include/main.h include/string.h
+#syscall.o:syscall.asm  include/main.h include/string.h
+syscall.o:syscall.asm
 	${ASM} ${ASKFLAGS} -o $@ $<
 
-kernel_main.o:main.c include/main.h include/string.h include/keymap.h
+kernel_main.o:main.c
 	${CC} ${CFLAGS} -o $@ $<
 
-hd.o:hd.c include/main.h include/string.h
+hd.o:hd.c
+	${CC} ${CFLAGS} -o $@ $<
+
+fs_main.o:fs/fs_main.c
 	${CC} ${CFLAGS} -o $@ $<

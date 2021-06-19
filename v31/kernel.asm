@@ -32,6 +32,7 @@ extern kernel_main
 extern clock_handler
 extern disp_int
 extern keyboard_handler
+extern hd_handle
 
 global disp_str
 global disp_str_colour
@@ -71,7 +72,17 @@ global sys_call
 ; 内部中断
 global hwint0
 global hwint1
+; 硬盘中断
+global hwint14
 
+; 打开8259A的级联中断
+global enable_8259A_casecade_irq
+; 关闭8259A的级联中断
+global disable_8259A_casecade_irq
+; 打开8259A的从片的硬盘中断
+global enable_8259A_slave_winchester_irq
+; 关闭8259A的从片的硬盘中断
+global disable_8259A_slave_winchester_irq
 
 
 _start:
@@ -364,44 +375,22 @@ hwint0:
 	;;xhcg bx, bx	
 	mov al, 11111101b
 	out 21h, al
+	; 置EOI位 start
 	mov al, 20h
 	out 20h, al	
+	; 置EOI位 end
 	inc dword [k_reenter]
 	cmp dword [k_reenter], 0
 	jne .2
 .1:
 	mov esp, StackTop
 .2:
-	sti;
-	;inc word [k_reenter]
-	;inc dword [k_reenter]
-	;cmp k_reenter, 0
-	;cmp [k_reenter], 0
-	;cmp dword [k_reenter], 0
-	;jnz restore
-	;jne restore
-	;mov esp, StackTop
-	;sti
-	;inc byte [gs:0]
-	;push ax
-	;call schedule_process	
+	sti
 	call clock_handler
-	;mov al, 20h
-	;out 20h, al
-	;call schedule_process	
-	;pop ax
-	;;;xhcg bx, bx
 	mov al, 11111100b
 	out 21h, al
-	;;xchg bx, bx
 	cli	
-	;dec dword [k_reenter]
-	; 启动进程
-	;jmp restart
-	;jne restore
-	;jmp restore
 	cmp dword [k_reenter], 0
-	;je restore
 	jne reenter_restore
 	jmp restore
 
@@ -460,6 +449,53 @@ hwint1:
 	;je restore
 	jne reenter_restore
 	jmp restore
+
+; 硬盘中断
+hwint14:
+	; 建立快照
+	pushad
+	push ds
+	push es
+	push fs
+	push gs
+
+	mov dx, ss
+	mov ds, dx
+	mov es, dx
+	mov fs, dx
+
+	; 禁用硬盘中断
+	call disable_8259A_slave_winchester_irq
+
+	; master置EOI位 start
+	mov al, 20h
+	out 20h, al	
+	; master置EOI位 end
+
+	; slave置EOI位 start
+	;mov al, A0h ; symbol `A0h' not defined
+	mov al, 0xA0
+	out 0xA0, al	
+	; slave置EOI位 end
+
+	inc dword [k_reenter]
+	cmp dword [k_reenter], 0
+	jne .2
+.1:
+	mov esp, StackTop
+.2:
+	sti	
+	; 调用硬盘中断
+	call hd_handle
+	
+	; 打开硬盘中断
+	call enable_8259A_slave_winchester_irq
+
+	cli
+	cmp dword [k_reenter], 0
+	jne reenter_restore
+	jmp restore
+
 
 %macro hwint_slave 1
 	push %1
@@ -784,3 +820,43 @@ check_tss_esp0:
 	pop ebp
 	ret	
 
+
+enable_8259A_casecade_irq:
+	push ax
+
+	in  al, 0x21
+	and  al, ~(1<<2)
+	out 0x21, al
+	
+	pop ax
+	ret
+
+disable_8259A_casecade_irq:
+	push ax
+
+	in al, 0x21
+	or al, 1<<2
+	out 0x21, al
+	
+	pop ax
+	ret
+
+enable_8259A_slave_winchester_irq:
+	push ax
+
+	in al, 0xA1
+	or al, ~(1<<6)
+	out 0xA1, al
+
+	pop ax
+	ret
+
+disable_8259A_slave_winchester_irq:
+	push ax	
+	
+	in al, 0xA1
+	or al, 1 << 6	
+	out 0xA1, al
+
+	pop ax
+	ret
