@@ -47,19 +47,19 @@ loader.bin:pmtest2.asm
 	# nasm -o loader.bin pmtest2.asm
 	nasm -o loader.bin loader.asm
 
-kernel.o:kernel.asm
+kernel.o:kernel.asm include/string.h
 	${ASM} ${ASKFLAGS} -o $@ $<
 
-string.o:string.asm  include/main.h
+string.o:string.asm  include/main.h include/string.h
 	${ASM} ${ASKFLAGS} -o $@ $<
 
-syscall.o:syscall.asm  include/main.h
+syscall.o:syscall.asm  include/main.h include/string.h
 	${ASM} ${ASKFLAGS} -o $@ $<
 
-kernel_main.o:main.c include/main.h
+kernel_main.o:main.c include/main.h include/string.h
 	${CC} ${CFLAGS} -o $@ $<
 
-hd.o:hd.c include/main.h
+hd.o:hd.c include/main.h include/string.h
 	${CC} ${CFLAGS} -o $@ $<
 	
 

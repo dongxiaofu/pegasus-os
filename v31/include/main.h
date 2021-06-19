@@ -1,6 +1,3 @@
-//extern InterruptTest; 
-//
-#include "keymap.h"
 //#define DEBUG 1
 #define DEBUG 0
 
@@ -112,8 +109,8 @@ void disp_int(int num);
 void InterruptTest();
 void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags);
 unsigned char gdt_ptr[6];
-void Memcpy(void *dst, void *src, int size);
-void Memset(void *dest, char character, int size);
+// void Memcpy(void *dst, void *src, int size);
+// void Memset(void *dest, char character, int size);
 //void InitInterruptDesc(int vec_no, int_handle offset); 
 void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type);
 // 初始化内部中断
@@ -498,8 +495,8 @@ void in_process(TTY *tty, unsigned int key);
 // 键盘 end
 
 // printf start
-char *Strcpy(char *dest, char *src);
-int Strlen(char *buf);
+// char *Strcpy(char *dest, char *src);
+// int Strlen(char *buf);
 
 char* i2a(int val, int base, char ** ps);
 // 只支持%x
