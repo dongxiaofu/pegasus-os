@@ -2328,6 +2328,7 @@ int unblock(Proc *proc)
 
 int get_ticks_ipc()
 {
+	//return ticks;
 	Message msg;
 	Memset(&msg, 0, sizeof(Message));
 	//msg.source = 2;
