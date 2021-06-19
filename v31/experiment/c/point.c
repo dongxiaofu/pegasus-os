@@ -7,8 +7,9 @@ struct Person{
 
 int main(int argc, char **argv)
 {
-	char *str2 = "";// = "hello";
-	*str2 = 'A';
+	// 会导致段错误
+	//char *str2 = "";// = "hello";
+	//*str2 = 'A';
 	
 	//int *a;
 	int *k;
@@ -32,6 +33,10 @@ int main(int argc, char **argv)
 
 	char *str = "hello";
 	char **ps = &str;
+	
+	char buf[4] = {0x00, 0x01, 0x02, 0x03};
+	short *buf2 = (short *)buf;
+
 
 	return 0;
 }
