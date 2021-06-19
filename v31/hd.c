@@ -1,3 +1,5 @@
+#include "global.h"
+#include "main.h"
 #include "string.h"
 #include "hd.h"
 
@@ -28,4 +30,16 @@ void init_hd()
 void hd_handle()
 {
 	Printf("%s\n", "HD handle is running!");
+	Message msg;	
+	send_rec(RECEIVE, &msg, ANY);
+	unsigned int type = msg.type;
+
+	switch(type){
+		case HD_DEV_OPEN:
+			Printf("%s\n", "Open HD");
+			break;
+		default:
+			Printf("%s\n", "Unknown Operation");
+			break;
+	}
 }
