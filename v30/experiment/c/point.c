@@ -33,5 +33,10 @@ int main(int argc, char **argv)
 	char *str = "hello";
 	char **ps = &str;
 
+	char buf[4] = {0x10, 0x01, 0x11, 0x00};
+	short *buf2 = (short *)buf;
+
+
+
 	return 0;
 }
