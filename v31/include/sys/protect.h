@@ -11,9 +11,7 @@ typedef struct{
         //char seg_base_high;
 }Descriptor;
 
-Descriptor gdt[128];
 
-unsigned char idt_ptr[6];
 //门描述符
 typedef struct{
         unsigned short offset_below;
@@ -22,9 +20,6 @@ typedef struct{
         unsigned char type_other_attribute;
         unsigned short offset_high;
 }Gate;
-
-Gate idt[256];
-
 
 // tss
 typedef struct{
@@ -57,29 +52,5 @@ typedef struct{
         unsigned int trace;
         unsigned int iobase;
 }TSS;
-
-unsigned char gdt_ptr[6];
-
-void init_propt();
-
-typedef void (*int_handle) ();
-void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type);
-// 初始化内部中断
-void init_internal_interrupt();
-
-
-// 初始化描述符
-// void InitDescriptor(void *desc, unsigned int base, unsigned int limit, unsigned short attribute);
-void InitDescriptor(Descriptor *desc, unsigned int base, unsigned int limit, unsigned short attribute);
-// 根据段名求物理地址
-unsigned int Seg2PhyAddr(unsigned int selector);
-// 进程中的段
-unsigned int Seg2PhyAddrLDT(unsigned int selector, Proc *proc);
-// 根据虚拟地址求物理地址
-// unsigned int VirAddr2PhyAddr(unsigned int base, unsigned int offset);
-unsigned int VirAddr2PhyAddr(unsigned int base, void *offset);
-
-
-TSS tss;
 
 #endif

@@ -1,11 +1,13 @@
 #include "const.h"
 #include "stdio.h"
-#include "process.h"
-#include "protect.h"
-#include "proto.h"
 #include "string.h"
+#include "protect.h"
+#include "process.h"
+#include "keymap.h"
 #include "keyboard.h"
 #include "console.h"
+#include "global.h"
+#include "proto.h"
 
 
 void select_console(unsigned char tty_index)

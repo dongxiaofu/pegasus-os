@@ -4,7 +4,7 @@ ASM	=	nasm
 CC	=	gcc
 LD	=	ld
 ASKFLAGS=	-I include/ -f elf
-CFLAGS	=	-I include/ -I include/fs/  -g -c -fno-builtin -m32	
+CFLAGS	=	-I include/ -I include/sys  -g -c -fno-builtin -m32	
 LDFLAGS	=	-s -Ttext 0x30400 -m elf_i386
 
 BOOT = loader.bin boot.bin

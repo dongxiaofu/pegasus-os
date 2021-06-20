@@ -1,12 +1,13 @@
 #include "const.h"
 #include "stdio.h"
-#include "process.h"
-#include "protect.h"
-#include "proto.h"
 #include "string.h"
+#include "protect.h"
+#include "process.h"
+#include "keymap.h"
 #include "keyboard.h"
 #include "console.h"
-#include "hd.h"
+#include "global.h"
+#include "proto.h"
 
 // 硬盘驱动
 void TaskHD()

@@ -1,9 +1,13 @@
 #include "const.h"
-#include "proto.h"
+#include "stdio.h"
 #include "string.h"
+#include "protect.h"
+#include "process.h"
 #include "keymap.h"
 #include "keyboard.h"
 #include "console.h"
+#include "global.h"
+#include "proto.h"
 
 
 // 进程调度次数
