@@ -1,3 +1,6 @@
+#ifndef _PEGASUS_OS_PROCESS_H
+#define _PEGASUS_OS_PROCESS_H
+
 // 进程表 start
 typedef struct{
         // 中断处理程序压栈，手工压栈
@@ -75,7 +78,6 @@ typedef struct{
         // ipc end
 }Proc;
 
-
 // 用户进程的数量
 #define USER_PROC_NUM 3
 // 系统任务的数量
@@ -86,6 +88,39 @@ typedef struct{
 #define NO_TASK (USER_PROC_NUM + TASK_PROC_NUM + 25)
 // 系统任何和用户进程的进程表都存储在这个数组中
 Proc proc_table[TASK_PROC_NUM + USER_PROC_NUM];
+
+typedef void (*Func)();
+
+typedef struct{
+        Func func_name;
+        unsigned short stack_size;
+}Task;
+
+// 进程栈默认大小
+// #define DEFAULT_STACK_SIZE 32768     // 这个值，导致无法加载内核
+#define DEFAULT_STACK_SIZE 1024
+
+// 进程A、B、C的堆栈大小
+#define A_STACK_SIZE DEFAULT_STACK_SIZE
+#define B_STACK_SIZE DEFAULT_STACK_SIZE
+#define C_STACK_SIZE DEFAULT_STACK_SIZE
+// 系统进程
+#define TaskTTY_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_SYS_SIZE DEFAULT_STACK_SIZE
+#define TASK_HD_SIZE DEFAULT_STACK_SIZE
+#define TASK_FS_SIZE DEFAULT_STACK_SIZE
+//#define A_STACK_SIZE 128
+//#define B_STACK_SIZE 128
+//#define C_STACK_SIZE 128
+//#define TaskTTY_STACK_SIZE 128
+// 进程栈
+#define STACK_SIZE (A_STACK_SIZE \
+        + B_STACK_SIZE \
+        + C_STACK_SIZE \
+        + TaskTTY_STACK_SIZE \
+        + TASK_SYS_SIZE \
+        + TASK_HD_SIZE  \
+        + TASK_FS_SIZE)
 
 // 用户进程元数据
 Task user_task_table[USER_PROC_NUM] = {
@@ -100,3 +135,42 @@ Task sys_task_table[TASK_PROC_NUM] = {
         {TaskHD, TASK_HD_SIZE},
         {task_fs, TASK_FS_SIZE},
 };
+
+// 进程的堆栈
+int proc_stack[STACK_SIZE];
+
+
+// 根据进程ID获取进程表的指针
+Proc *pid2proc(int pid);
+// 根据进程表的指针计算进程ID。
+int proc2pid(Proc *proc);
+
+
+
+// 进程调度 start
+// 时钟中断处理函数
+void clock_handler();
+// 进程调度
+void schedule_process();
+// 进程调度 end
+
+
+typedef void *system_call;
+int sys_get_ticks();
+void sys_write(char *buf, int len, Proc *proc);
+// debug function start
+void sys_printx(char *error_msg, int len, Proc *proc);
+
+void sys_call();
+//system_call sys_call_table[1] = {
+int_handle sys_call_table[SYS_CALL_FUNCTION_NUM] = {
+        // warning: initialization of 'void (*)()' from incompatible pointer type 'int (*)()' [-Wincompatible-pointer-types]
+        // sys_get_ticks
+        (int_handle) sys_get_ticks,
+        (int_handle) sys_write,
+        (int_handle) sys_printx,
+        (int_handle) sys_send_msg,
+        (int_handle) sys_receive_msg
+};
+
+#endif
