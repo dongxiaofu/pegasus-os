@@ -19,7 +19,7 @@ void TaskHD()
 	init_hd();
 
 	while(1){
-
+		hd_handle();
 	}
 }
 
@@ -41,13 +41,17 @@ void hd_handle()
 	Message msg;	
 	send_rec(RECEIVE, &msg, ANY);
 	unsigned int type = msg.type;
+	unsigned int source = msg.source;
 
 	switch(type){
 		case HD_DEV_OPEN:
-			Printf("%s\n", "Open HD");
+			Printf("%s:%d\n", "Open HD", source);
 			break;
 		default:
 			Printf("%s\n", "Unknown Operation");
 			break;
 	}
+
+	msg.source = 2;
+	send_rec(SEND, &msg, source);
 }
