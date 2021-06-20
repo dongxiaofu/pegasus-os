@@ -1,8 +1,10 @@
-#include "global.h"
-#include "main.h"
-
-#include "keymap.h"
+#include "const.h"
+#include "proto.h"
 #include "string.h"
+#include "keymap.h"
+#include "keyboard.h"
+#include "console.h"
+
 //
 void ReloadGDT()
 {

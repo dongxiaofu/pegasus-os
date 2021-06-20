@@ -1,3 +1,6 @@
+#ifndef _PEGASUS_OS_KEYMAP_H
+#define _PEGASUS_OS_KEYMAP_H
+
 #define NR_SCAN_CODES 128
 #define MAP_COLS 3
 
@@ -223,3 +226,5 @@ unsigned int keymap[NR_SCAN_CODES * MAP_COLS] = {
 /* 0x7E - ???		*/	0,		0,		0,
 /* 0x7F - ???		*/	0,		0,		0
 };
+
+#endif
