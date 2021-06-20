@@ -47,19 +47,28 @@ void test();
 void spurious_irq(int irq);
 
 
-
-
-
 // 启动进程
 void restart();
 void delay(int time);
 
 
 int sys_get_ticks();
-void sys_write(char *buf, int len, Proc *proc);
-void sys_printx(char *error_msg, int len, Proc *proc);
 void sys_call();
 
+// 根据段名求物理地址
+unsigned int Seg2PhyAddr(unsigned int selector);
+// 进程中的段
+unsigned int Seg2PhyAddrLDT(unsigned int selector, Proc *proc);
+// 根据虚拟地址求物理地址
+// unsigned int VirAddr2PhyAddr(unsigned int base, unsigned int offset);
+unsigned int VirAddr2PhyAddr(unsigned int base, void *offset);
+// process start
+// 根据进程ID获取进程表的指针
+Proc *pid2proc(int pid);
+// 根据进程表的指针计算进程ID。
+int proc2pid(Proc *proc);
+
+// process end
 
 // console.c  start
 // 设置console的start_video_addr
@@ -71,21 +80,14 @@ void put_key(TTY *tty, unsigned char key);
 void scroll_up(TTY *tty);
 void scroll_down(TTY *tty);
 void out_char(TTY *tty, unsigned char key);
+void sys_write(char *buf, int len, Proc *proc);
+void sys_printx(char *error_msg, int len, Proc *proc);
 //void out_char(CONSOLE *console, unsigned char key);
 void tty_do_read(TTY *tty);
 void tty_do_write(TTY *tty);
 void init_screen(TTY *tty);
 void init_tty();
 // console.c end
-
-// process start
-// 根据进程ID获取进程表的指针
-Proc *pid2proc(int pid);
-// 根据进程表的指针计算进程ID。
-int proc2pid(Proc *proc);
-
-// process end
-
 
 // protect.c start
 void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type);
@@ -94,13 +96,6 @@ void init_internal_interrupt();
 // 初始化描述符
 // void InitDescriptor(void *desc, unsigned int base, unsigned int limit, unsigned short attribute);
 void InitDescriptor(Descriptor *desc, unsigned int base, unsigned int limit, unsigned short attribute);
-// 根据段名求物理地址
-unsigned int Seg2PhyAddr(unsigned int selector);
-// 进程中的段
-unsigned int Seg2PhyAddrLDT(unsigned int selector, Proc *proc);
-// 根据虚拟地址求物理地址
-// unsigned int VirAddr2PhyAddr(unsigned int base, unsigned int offset);
-unsigned int VirAddr2PhyAddr(unsigned int base, void *offset);
 void init_propt();
 // protect.c end
 
@@ -112,6 +107,12 @@ int get_ticks_ipc();
 void milli_delay(unsigned milli_sec);
 // 延迟函数 end
 
+// 进程调度 start
+// 时钟中断处理函数
+void clock_handler();
+// 进程调度
+void schedule_process();
+// 进程调度 end
 // 系统调用
 int send_msg(Message *msg, int receiver_pid);
 // 系统调用
@@ -123,13 +124,6 @@ int send_rec(int function, Message *msg, int pid);
 int block(Proc *proc);
 // 解决阻塞
 int unblock(Proc *proc);
-
-/ 进程调度 start
-// 时钟中断处理函数
-void clock_handler();
-// 进程调度
-void schedule_process();
-// 进程调度 end
 
 // ipc start
 // 死锁检测
@@ -185,6 +179,7 @@ void TaskHD();
 // 文件系统
 void task_fs();
 
+void ReloadGDT();
 // 内核的入口函数
 void kernel_main();
 
