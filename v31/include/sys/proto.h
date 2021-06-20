@@ -147,8 +147,6 @@ void enable_8259A_casecade_irq();
 // 打开8259A的从片硬盘中断
 void enable_8259A_slave_winchester_irq();
 
-// 初始化硬盘
-void init_hd();
 // 硬盘驱动
 void hd_handle();
 // hd.c end
