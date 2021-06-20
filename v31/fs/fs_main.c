@@ -1,13 +1,14 @@
-#include "const.h"
 #include "stdio.h"
-#include "process.h"
-#include "protect.h"
-#include "proto.h"
 #include "string.h"
+#include "const.h"
+#include "type.h"
+#include "protect.h"
+#include "process.h"
 #include "keymap.h"
 #include "keyboard.h"
 #include "console.h"
-
+#include "proto.h"
+#include "global.h"
 
 void task_fs()
 {
