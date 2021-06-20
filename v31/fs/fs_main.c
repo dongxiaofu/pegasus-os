@@ -17,5 +17,7 @@ void task_fs()
 	msg.source = 3;
 	send_rec(BOTH, &msg, 2);
 
+	Printf("FS : %d\n", msg.source);
+
 	spin("Stopping\n");
 }

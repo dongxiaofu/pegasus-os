@@ -620,7 +620,9 @@ void sys_printx(char *error_msg, int len, Proc *proc)
 	}else if(k_reenter > 0){
 		base = Seg2PhyAddr(DS_SELECTOR);
 	}
-	line_addr = base + error_msg;
+	// line_addr = base + error_msg;
+	// line_addr = base + (int *)error_msg;
+	line_addr = base + (int)error_msg;
 
 
 	// 打印字符串
