@@ -10,10 +10,13 @@ ALT_R	include/sys/const.h	99;"	d
 ANY	include/sys/const.h	178;"	d
 APPS	include/sys/const.h	140;"	d
 ASKFLAGS	Makefile	/^ASKFLAGS=	-I include\/ -f elf$/;"	m
+ASKFLAGS	experiment/header-demo/Makefile	/^ASKFLAGS=	-I include\/ -f elf$/;"	m
 ASM	Makefile	/^ASM	=	nasm$/;"	m
+ASM	experiment/header-demo/Makefile	/^ASM		= nasm$/;"	m
 ASSERT	experiment/c/assert-demo.c	3;"	d	file:
 ASSERT_MAGIC	include/stdio.h	8;"	d
-A_PRINT_NUM	main.c	391;"	d	file:
+A_PRINT_NUM	main.c	325;"	d	file:
+A_SIZE	experiment/header-demo/include/a.h	2;"	d
 A_STACK_SIZE	include/sys/const.h	187;"	d
 B	include/sys/const.h	93;"	d
 BACKSPACE	include/sys/const.h	63;"	d
@@ -96,7 +99,8 @@ BS_VolLab	boot.asm	/^	BS_VolLab	DB 'OrangeS0.02'; 卷标, 必须 11 个字节$/;
 BS_VolLab	loader-error.asm	/^	BS_VolLab	DB 'OrangeS0.02'; 卷标, 必须 11 个字节$/;"	d
 BS_VolLab	loader.asm	/^	BS_VolLab	DB 'OrangeS0.02'; 卷标, 必须 11 个字节$/;"	d
 BS_VolLab	pmtest2.asm	/^	BS_VolLab	DB 'OrangeS0.02'; 卷标, 必须 11 个字节$/;"	d
-B_PRINT_NUM	main.c	392;"	d	file:
+B_PRINT_NUM	main.c	326;"	d	file:
+B_SIZE	experiment/header-demo/include/b.h	3;"	d
 B_STACK_SIZE	include/sys/const.h	188;"	d
 BaseOfFATEntry	boot.asm	/^BaseOfFATEntry	equ	0x1000$/;"	d
 BaseOfFATEntry	loader-error.asm	/^BaseOfFATEntry	equ	0x1000$/;"	d
@@ -125,6 +129,7 @@ BytesOfSector	loader.asm	/^BytesOfSector	equ	512	; 每个扇区包含的字节�
 C	include/sys/const.h	91;"	d
 CAPS_LOCK	include/sys/const.h	100;"	d
 CC	Makefile	/^CC	=	gcc$/;"	m
+CC	experiment/header-demo/Makefile	/^CC		= gcc$/;"	m
 CFLAGS	Makefile	/^CFLAGS	=	-I include\/ -I include\/sys  -g -c -fno-builtin -m32	$/;"	m
 COMPARE_FILENAME	boot.asm	/^COMPARE_FILENAME:$/;"	l
 COMPARE_FILENAME	loader-error.asm	/^COMPARE_FILENAME:$/;"	l
@@ -134,7 +139,7 @@ CS_SELECTOR	include/sys/const.h	19;"	d
 CS_SELECTOR_INDEX	include/sys/const.h	10;"	d
 CTRL_L	include/sys/const.h	77;"	d
 CTRL_R	include/sys/const.h	78;"	d
-C_PRINT_NUM	main.c	393;"	d	file:
+C_PRINT_NUM	main.c	327;"	d	file:
 C_STACK_SIZE	include/sys/const.h	189;"	d
 Code16Len	pmtest2.asm	/^Code16Len	equ	$ - LABEL_SEG_CODE16$/;"	d
 D	include/sys/const.h	81;"	d
@@ -147,7 +152,7 @@ DOWN	include/sys/const.h	129;"	d
 DS_SELECTOR	include/sys/const.h	20;"	d
 DS_SELECTOR_INDEX	include/sys/const.h	11;"	d
 DataLen	pmtest2.asm	/^DataLen			equ	$ - LABEL_DATA$/;"	d
-Descriptor	include/sys/protect.h	/^}Descriptor;$/;"	t	typeref:struct:__anon7
+Descriptor	include/sys/protect.h	/^}Descriptor;$/;"	t	typeref:struct:__anon4
 Disassembly	dis-k.asm	/^Disassembly of section .text:$/;"	l
 Disassembly	experiment/c/dis-ptr-str.asm	/^Disassembly of section .fini:$/;"	l
 Disassembly	experiment/c/dis-ptr-str.asm	/^Disassembly of section .init:$/;"	l
@@ -161,6 +166,7 @@ E	include/sys/const.h	67;"	d
 END	include/sys/const.h	127;"	d
 ENTER	include/sys/const.h	75;"	d
 ESC	include/sys/const.h	62;"	d
+EXTERN	include/sys/global.h	3;"	d
 F	include/sys/const.h	82;"	d
 F1	include/sys/const.h	101;"	d
 F10	include/sys/const.h	110;"	d
@@ -189,18 +195,20 @@ FILE_FOUND	loader.asm	/^FILE_FOUND:$/;"	l
 FILE_NOT_FOUND	boot.asm	/^FILE_NOT_FOUND:$/;"	l
 FILE_NOT_FOUND	loader-error.asm	/^FILE_NOT_FOUND:$/;"	l
 FILE_NOT_FOUND	loader.asm	/^FILE_NOT_FOUND:$/;"	l
+FLAGS	experiment/header-demo/Makefile	/^FLAGS		= -I include\/ -I \/usr\/include\/ -c -Wall -m32$/;"	m
 FLAG_EXT	include/sys/const.h	59;"	d
 FirstSectorOfRootDirectory	boot.asm	/^FirstSectorOfRootDirectory	equ	19$/;"	d
 FirstSectorOfRootDirectory	loader-error.asm	/^FirstSectorOfRootDirectory	equ	19$/;"	d
 FirstSectorOfRootDirectory	loader.asm	/^FirstSectorOfRootDirectory	equ	19$/;"	d
 Func	include/sys/type.h	/^typedef void (*Func)();$/;"	t
 G	include/sys/const.h	83;"	d
+GLOBAL_VARIABLES_HERE	global.c	1;"	d	file:
 GO_BACK_REAL_MODEL	loader.asm	/^GO_BACK_REAL_MODEL:$/;"	l
 GS_SELECTOR	include/sys/const.h	22;"	d
 GS_SELECTOR_INDEX	include/sys/const.h	12;"	d
 GUI_L	include/sys/const.h	138;"	d
 GUI_R	include/sys/const.h	139;"	d
-Gate	include/sys/protect.h	/^}Gate;$/;"	t	typeref:struct:__anon8
+Gate	include/sys/protect.h	/^}Gate;$/;"	t	typeref:struct:__anon5
 GdtLen	loader.asm	/^	GdtLen	equ		$ - LABEL_GDT$/;"	d
 GdtLen	pmtest2.asm	/^GdtLen		equ	$ - LABEL_GDT	; GDT长度$/;"	d
 GdtPtr	loader.asm	/^	GdtPtr	dw	GdtLen - 1$/;"	d
@@ -210,11 +218,11 @@ GetFATEntry	loader-error.asm	/^GetFATEntry:$/;"	l
 GetFATEntry	loader.asm	/^GetFATEntry:$/;"	l
 GreaterNumber	experiment/foo.asm	/^GreaterNumber	equ	51$/;"	d
 H	include/sys/const.h	84;"	d
-HD_DEV_OPEN	include/sys/global.h	58;"	d
+HD_DEV_OPEN	include/sys/const.h	212;"	d
 HOME	include/sys/const.h	114;"	d
 I	include/sys/const.h	72;"	d
-INIT_MASTER_VEC_NO	include/sys/const.h	/^const int INIT_MASTER_VEC_NO = 0x20;$/;"	v
-INIT_SLAVE_VEC_NO	include/sys/const.h	/^const int INIT_SLAVE_VEC_NO = 0x28;$/;"	v
+INIT_MASTER_VEC_NO	include/sys/const.h	50;"	d
+INIT_SLAVE_VEC_NO	include/sys/const.h	51;"	d
 INSERT	include/sys/const.h	133;"	d
 INT_VECTOR_TICKS	syscall.asm	/^INT_VECTOR_TICKS	equ	0x90$/;"	d
 IN_REAL_MODEL	loader.asm	/^IN_REAL_MODEL:$/;"	l
@@ -261,7 +269,9 @@ LABLE_GDT_FLAT_X_162	loader.asm	/^	LABLE_GDT_FLAT_X_162: Descriptor	0,		0ffffffh
 LABLE_GDT_VIDEO	loader.asm	/^	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 0f2h$/;"	l
 LABLE_GDT_VIDEO	t2.asm	/^LABLE_GDT_VIDEO: Descriptor     0b8000h,                0ffffh,          0c9ah$/;"	l
 LD	Makefile	/^LD	=	ld$/;"	m
-LDFLAGS	Makefile	/^LDFLAGS	=	-s -Ttext 0x30400 -m elf_i386$/;"	m
+LD	experiment/header-demo/Makefile	/^LD		= ld$/;"	m
+LDFLAGS	Makefile	/^LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker \/lib\/ld-linux.so.2 -lc$/;"	m
+LDFLAGS	experiment/header-demo/Makefile	/^LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker \/lib\/ld-linux.so.2 -lc$/;"	m
 LDT_FIRST_SELECTOR	include/sys/const.h	24;"	d
 LDT_FIRST_SELECTOR_INDEX	include/sys/const.h	15;"	d
 LEFT	include/sys/const.h	121;"	d
@@ -278,7 +288,7 @@ Memcpy	loader-error.asm	/^Memcpy:$/;"	l
 Memcpy	loader.asm	/^Memcpy:$/;"	l
 Memcpy	string.asm	/^Memcpy:$/;"	l
 Memset	string.asm	/^Memset:$/;"	l
-Message	include/sys/type.h	/^}Message;$/;"	t	typeref:struct:__anon10
+Message	include/sys/type.h	/^}Message;$/;"	t	typeref:struct:__anon7
 MsgSender	include/sys/process.h	/^struct MsgSender$/;"	s
 N	include/sys/const.h	94;"	d
 NO_TASK	include/sys/const.h	180;"	d
@@ -288,7 +298,9 @@ NUM_LOCK	include/sys/const.h	111;"	d
 NoAction	loader-error.asm	/^NoAction:$/;"	l
 Node	experiment/c/struct-demo.c	/^struct Node{$/;"	s	file:
 O	include/sys/const.h	73;"	d
-OBJS	Makefile	/^OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o$/;"	m
+OBJS	Makefile	/^OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \\$/;"	m
+OBJS	experiment/header-demo/Makefile	/^OBJS		= main.o a.o b.o kernel.o$/;"	m
+ORANGESKERNEL	experiment/header-demo/Makefile	/^ORANGESKERNEL	= kernel.bin$/;"	m
 OVER	boot.asm	/^OVER:$/;"	l
 OVER	loader-error.asm	/^OVER:$/;"	l
 OVER	loader.asm	/^OVER:$/;"	l
@@ -322,7 +334,7 @@ PMMessage	pmtest2.asm	/^PMMessage:		db	"3333In Protect Mode now. ^-^", 0	; 在�
 PRINT_SCREEN	include/sys/const.h	143;"	d
 Person	experiment/c/point.c	/^struct Person{$/;"	s	file:
 Printf	main.c	/^void Printf(char *fmt, ...)$/;"	f
-Proc	include/sys/process.h	/^}Proc;$/;"	t	typeref:struct:__anon5
+Proc	include/sys/process.h	/^}Proc;$/;"	t	typeref:struct:proc
 Q	include/sys/const.h	65;"	d
 R	include/sys/const.h	68;"	d
 READ_FILE	boot.asm	/^READ_FILE:$/;"	l
@@ -341,8 +353,8 @@ ReadSector	loader.asm	/^ReadSector:$/;"	l
 ReadSector2	boot.asm	/^ReadSector2:$/;"	l
 ReadSector2	loader-error.asm	/^ReadSector2:$/;"	l
 ReadSector2	loader.asm	/^ReadSector2:$/;"	l
-Regs	include/sys/process.h	/^}Regs;$/;"	t	typeref:struct:__anon4
-ReloadGDT	main.c	/^void ReloadGDT()$/;"	f
+Regs	include/sys/process.h	/^}Regs;$/;"	t	typeref:struct:__anon8
+ReloadGDT	protect.c	/^void ReloadGDT()$/;"	f
 S	include/sys/const.h	80;"	d
 SCREEN_SIZE	include/sys/const.h	160;"	d
 SCREEN_WIDTH	include/sys/const.h	162;"	d
@@ -402,17 +414,17 @@ TASK_HD_SIZE	include/sys/const.h	193;"	d
 TASK_PROC_NUM	include/sys/const.h	176;"	d
 TASK_SYS_SIZE	include/sys/const.h	192;"	d
 TICKS_TASK_SYS_TYPE	include/sys/const.h	39;"	d
-TSS	include/sys/protect.h	/^}TSS;$/;"	t	typeref:struct:__anon9
+TSS	include/sys/protect.h	/^}TSS;$/;"	t	typeref:struct:__anon6
 TSS_SELECTOR	include/sys/const.h	23;"	d
 TSS_SELECTOR	kernel.asm	/^TSS_SELECTOR	equ	0x40$/;"	d
 TSS_SELECTOR_INDEX	include/sys/const.h	14;"	d
 TTY	include/sys/console.h	/^}TTY;$/;"	t	typeref:struct:__anon2
 TTY_BUF_SIZE	include/sys/const.h	156;"	d
 TTY_NUM	include/sys/const.h	157;"	d
-Task	include/sys/process.h	/^}Task;$/;"	t	typeref:struct:__anon6
+Task	include/sys/process.h	/^}Task;$/;"	t	typeref:struct:__anon9
 TaskHD	hd.c	/^void TaskHD()$/;"	f
 TaskSys	main.c	/^void TaskSys()$/;"	f
-TaskTTY	main.c	/^void TaskTTY()$/;"	f
+TaskTTY	console.c	/^void TaskTTY()$/;"	f
 TaskTTY_STACK_SIZE	include/sys/const.h	191;"	d
 TestA	main.c	/^void TestA()$/;"	f
 TestB	main.c	/^void TestB()$/;"	f
@@ -442,7 +454,6 @@ _NR_WRITE_DEBUG	include/sys/const.h	46;"	d
 _NR_WRITE_DEBUG	syscall.asm	/^_NR_WRITE_DEBUG	equ	2$/;"	d
 _PEGASUS_OS_CONSOLE_H	include/sys/console.h	2;"	d
 _PEGASUS_OS_CONST_H	include/sys/const.h	2;"	d
-_PEGASUS_OS_GLOBAL_H	include/sys/global.h	2;"	d
 _PEGASUS_OS_HD_H	include/sys/hd.h	2;"	d
 _PEGASUS_OS_KEYBOARD_H	include/sys/keyboard.h	2;"	d
 _PEGASUS_OS_KEYMAP_H	include/sys/keymap.h	2;"	d
@@ -454,6 +465,7 @@ _PEGASUS_OS_STRING_H	include/string.h	2;"	d
 _PEGASUS_OS_TYPE_H	include/sys/type.h	2;"	d
 _displayStr	experiment/foo.asm	/^_displayStr:$/;"	l
 _start	experiment/foo.asm	/^_start:$/;"	l
+_start	experiment/header-demo/start.asm	/^_start:$/;"	l
 _start	experiment/nasm_in_linux.asm	/^_start:$/;"	l
 _start	kernel.asm	/^_start:$/;"	l
 age	experiment/c/point.c	/^	int age;$/;"	m	struct:Person	file:
@@ -486,18 +498,18 @@ coprocessor_not_available_fault	kernel.asm	/^coprocessor_not_available_fault:$/;
 coprocessor_segment_overrun	kernel.asm	/^coprocessor_segment_overrun:$/;"	l
 counter	generate_constant.php	/^$counter = 1;$/;"	v
 counter	include/sys/console.h	/^	unsigned int counter;$/;"	m	struct:__anon2
-counter	include/sys/global.h	/^unsigned int counter;$/;"	v
+counter	include/sys/global.h	/^EXTERN unsigned int counter;$/;"	v
 counter	include/sys/keyboard.h	/^	int counter;$/;"	m	struct:__anon3
-cr3	include/sys/protect.h	/^        unsigned int cr3;$/;"	m	struct:__anon9
-cs	include/sys/process.h	/^        unsigned int cs;$/;"	m	struct:__anon4
-cs	include/sys/protect.h	/^        unsigned int cs;$/;"	m	struct:__anon9
+cr3	include/sys/protect.h	/^        unsigned int cr3;$/;"	m	struct:__anon6
+cs	include/sys/process.h	/^        unsigned int cs;$/;"	m	struct:__anon8
+cs	include/sys/protect.h	/^        unsigned int cs;$/;"	m	struct:__anon6
 csinit	kernel.asm	/^csinit:$/;"	l
 current_tty	include/sys/console.h	/^TTY *current_tty;$/;"	v
 cursor	include/sys/console.h	/^	unsigned int cursor;$/;"	m	struct:__anon1
 dead_lock	main.c	/^int dead_lock(int src, int dest)$/;"	f
 delay	main.c	/^void delay(int time)$/;"	f
 dis_pos	experiment/disp_str_colour/test.c	/^int dis_pos;$/;"	v
-dis_pos	include/sys/global.h	/^int dis_pos;$/;"	v
+dis_pos	include/sys/global.h	/^EXTERN int dis_pos;$/;"	v
 disable_8259A_casecade_irq	kernel.asm	/^disable_8259A_casecade_irq:$/;"	l
 disable_8259A_slave_winchester_irq	kernel.asm	/^disable_8259A_slave_winchester_irq:$/;"	l
 disable_int	kernel.asm	/^disable_int:$/;"	l
@@ -508,45 +520,46 @@ disp_str_colour	kernel.asm	/^disp_str_colour:$/;"	l
 disp_str_colour3	main.c	/^void disp_str_colour3(char *str, int colour)$/;"	f
 divide_zero_fault	kernel.asm	/^divide_zero_fault:$/;"	l
 double_fault_exception_abort	kernel.asm	/^double_fault_exception_abort:$/;"	l
-ds	include/sys/process.h	/^        unsigned int ds;$/;"	m	struct:__anon4
-ds	include/sys/protect.h	/^        unsigned int ds;$/;"	m	struct:__anon9
+ds	include/sys/process.h	/^        unsigned int ds;$/;"	m	struct:__anon8
+ds	include/sys/protect.h	/^        unsigned int ds;$/;"	m	struct:__anon6
 dump_node	experiment/c/struct-demo.c	/^void dump_node(struct Node *node)$/;"	f
 dw	boot.asm	/^dw	0xAA55$/;"	l
 dw	experiment/boot.asm	/^dw	0xaa55				;$/;"	l
 dw	test/boot.asm	/^dw	0xAA55$/;"	l
 dw	test/experiment/boot.asm	/^dw	0xaa55				;$/;"	l
-eax	include/sys/process.h	/^        unsigned int eax;$/;"	m	struct:__anon4
-eax	include/sys/protect.h	/^        unsigned int eax;$/;"	m	struct:__anon9
-ebp	include/sys/process.h	/^        unsigned int ebp;$/;"	m	struct:__anon4
-ebp	include/sys/protect.h	/^        unsigned int ebp;$/;"	m	struct:__anon9
-ebx	include/sys/process.h	/^        unsigned int ebx;$/;"	m	struct:__anon4
-ebx	include/sys/protect.h	/^        unsigned int ebx;$/;"	m	struct:__anon9
-ecx	include/sys/process.h	/^        unsigned int ecx;$/;"	m	struct:__anon4
-ecx	include/sys/protect.h	/^        unsigned int ecx;$/;"	m	struct:__anon9
-edi	include/sys/process.h	/^        unsigned int edi;$/;"	m	struct:__anon4
-edi	include/sys/protect.h	/^        unsigned int edi;$/;"	m	struct:__anon9
-edx	include/sys/process.h	/^        unsigned int edx;$/;"	m	struct:__anon4
-edx	include/sys/protect.h	/^        unsigned int edx;$/;"	m	struct:__anon9
-eflags	include/sys/process.h	/^        unsigned int eflags;$/;"	m	struct:__anon4
-eflags	include/sys/protect.h	/^        unsigned int eflags;$/;"	m	struct:__anon9
-eip	include/sys/process.h	/^        unsigned int eip;$/;"	m	struct:__anon4
-eip	include/sys/protect.h	/^        unsigned int eip;$/;"	m	struct:__anon9
+eax	include/sys/process.h	/^        unsigned int eax;$/;"	m	struct:__anon8
+eax	include/sys/protect.h	/^        unsigned int eax;$/;"	m	struct:__anon6
+ebp	include/sys/process.h	/^        unsigned int ebp;$/;"	m	struct:__anon8
+ebp	include/sys/protect.h	/^        unsigned int ebp;$/;"	m	struct:__anon6
+ebx	include/sys/process.h	/^        unsigned int ebx;$/;"	m	struct:__anon8
+ebx	include/sys/protect.h	/^        unsigned int ebx;$/;"	m	struct:__anon6
+ecx	include/sys/process.h	/^        unsigned int ecx;$/;"	m	struct:__anon8
+ecx	include/sys/protect.h	/^        unsigned int ecx;$/;"	m	struct:__anon6
+edi	include/sys/process.h	/^        unsigned int edi;$/;"	m	struct:__anon8
+edi	include/sys/protect.h	/^        unsigned int edi;$/;"	m	struct:__anon6
+edx	include/sys/process.h	/^        unsigned int edx;$/;"	m	struct:__anon8
+edx	include/sys/protect.h	/^        unsigned int edx;$/;"	m	struct:__anon6
+eflags	include/sys/process.h	/^        unsigned int eflags;$/;"	m	struct:__anon8
+eflags	include/sys/protect.h	/^        unsigned int eflags;$/;"	m	struct:__anon6
+eip	include/sys/process.h	/^        unsigned int eip;$/;"	m	struct:__anon8
+eip	include/sys/protect.h	/^        unsigned int eip;$/;"	m	struct:__anon6
 enable_8259A_casecade_irq	kernel.asm	/^enable_8259A_casecade_irq:$/;"	l
 enable_8259A_slave_winchester_irq	kernel.asm	/^enable_8259A_slave_winchester_irq:$/;"	l
 enable_int	kernel.asm	/^enable_int:$/;"	l
-es	include/sys/process.h	/^        unsigned int es;$/;"	m	struct:__anon4
-es	include/sys/protect.h	/^        unsigned int es;$/;"	m	struct:__anon9
-esi	include/sys/process.h	/^        unsigned int esi;$/;"	m	struct:__anon4
-esi	include/sys/protect.h	/^        unsigned int esi;$/;"	m	struct:__anon9
-esp	include/sys/process.h	/^        unsigned int esp;       \/\/ 漏掉了这个。iretd会出栈更新esp。$/;"	m	struct:__anon4
-esp	include/sys/protect.h	/^        unsigned int esp;$/;"	m	struct:__anon9
-esp0	include/sys/protect.h	/^        unsigned int esp0;$/;"	m	struct:__anon9
-esp1	include/sys/protect.h	/^        unsigned int esp1;$/;"	m	struct:__anon9
-esp2	include/sys/protect.h	/^        unsigned int esp2;$/;"	m	struct:__anon9
+es	include/sys/process.h	/^        unsigned int es;$/;"	m	struct:__anon8
+es	include/sys/protect.h	/^        unsigned int es;$/;"	m	struct:__anon6
+esi	include/sys/process.h	/^        unsigned int esi;$/;"	m	struct:__anon8
+esi	include/sys/protect.h	/^        unsigned int esi;$/;"	m	struct:__anon6
+esp	include/sys/process.h	/^        unsigned int esp;       \/\/ 漏掉了这个。iretd会出栈更新esp。$/;"	m	struct:__anon8
+esp	include/sys/protect.h	/^        unsigned int esp;$/;"	m	struct:__anon6
+esp0	include/sys/protect.h	/^        unsigned int esp0;$/;"	m	struct:__anon6
+esp1	include/sys/protect.h	/^        unsigned int esp1;$/;"	m	struct:__anon6
+esp2	include/sys/protect.h	/^        unsigned int esp2;$/;"	m	struct:__anon6
 exception	kernel.asm	/^exception:$/;"	l
 exception_handler	main.c	/^void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags)$/;"	f
 extern	experiment/disp_str_colour/disp_str.asm	/^extern dis_pos$/;"	l
 extern	experiment/foo.asm	/^extern choose$/;"	l
+extern	experiment/header-demo/start.asm	/^extern main$/;"	l
 extern	kernel.asm	/^extern ReloadGDT$/;"	l
 extern	kernel.asm	/^extern clock_handler$/;"	l
 extern	kernel.asm	/^extern dis_pos$/;"	l
@@ -567,13 +580,13 @@ extern	kernel.asm	/^extern ticks$/;"	l
 extern	kernel.asm	/^extern tss$/;"	l
 f	test/Makefile	/^	dd if=boot.bin of=a.img count=1 conv=notrunc$/;"	m
 flush	console.c	/^void flush(TTY *tty)$/;"	f
-fs	include/sys/process.h	/^        unsigned int fs;$/;"	m	struct:__anon4
-fs	include/sys/protect.h	/^        unsigned int fs;$/;"	m	struct:__anon9
+fs	include/sys/process.h	/^        unsigned int fs;$/;"	m	struct:__anon8
+fs	include/sys/protect.h	/^        unsigned int fs;$/;"	m	struct:__anon6
 func	experiment/c/arr.c	/^void func()$/;"	f
 func	experiment/c/arr.s	/^func:$/;"	l
-func_name	include/sys/process.h	/^        Func func_name;$/;"	m	struct:__anon6
-gdt	include/sys/global.h	/^Descriptor gdt[128];$/;"	v
-gdt_ptr	include/sys/global.h	/^unsigned char gdt_ptr[6];$/;"	v
+func_name	include/sys/process.h	/^        Func func_name;$/;"	m	struct:__anon9
+gdt	include/sys/global.h	/^EXTERN Descriptor gdt[128];$/;"	v
+gdt_ptr	include/sys/global.h	/^EXTERN unsigned char gdt_ptr[6];$/;"	v
 gdt_ptr2	t.c	/^char gdt_ptr2[6];$/;"	v
 general_protection_exception_fault	kernel.asm	/^general_protection_exception_fault:$/;"	l
 get_ticks	syscall.asm	/^get_ticks:$/;"	l
@@ -581,6 +594,7 @@ get_ticks_ipc	main.c	/^int get_ticks_ipc()$/;"	f
 global	experiment/disp_str_colour/disp_str.asm	/^global disp_str_colour$/;"	l
 global	experiment/foo.asm	/^global _displayStr$/;"	l
 global	experiment/foo.asm	/^global _start$/;"	l
+global	experiment/header-demo/start.asm	/^global _start$/;"	l
 global	experiment/nasm_in_linux.asm	/^global _start$/;"	l
 global	kernel.asm	/^global InterruptTest$/;"	l
 global	kernel.asm	/^global _start$/;"	l
@@ -626,18 +640,18 @@ global	syscall.asm	/^global receive_msg$/;"	l
 global	syscall.asm	/^global send_msg$/;"	l
 global	syscall.asm	/^global write$/;"	l
 global	syscall.asm	/^global write_debug$/;"	l
-gs	include/sys/process.h	/^        unsigned int gs;$/;"	m	struct:__anon4
-gs	include/sys/protect.h	/^        unsigned int gs;$/;"	m	struct:__anon9
+gs	include/sys/process.h	/^        unsigned int gs;$/;"	m	struct:__anon8
+gs	include/sys/protect.h	/^        unsigned int gs;$/;"	m	struct:__anon6
 hd_handle	hd.c	/^void hd_handle()$/;"	f
 head	include/sys/console.h	/^	unsigned int *head;$/;"	m	struct:__anon2
 head	include/sys/keyboard.h	/^	unsigned char *head;$/;"	m	struct:__anon3
-header	include/sys/process.h	/^        struct MsgSender *header;       \/\/ 要给本进程发送消息的进程的队列的头指针$/;"	m	struct:__anon5	typeref:struct:__anon5::MsgSender
+header	include/sys/process.h	/^        struct MsgSender *header;       \/\/ 要给本进程发送消息的进程的队列的头指针$/;"	m	struct:proc	typeref:struct:proc::MsgSender
 hwint0	kernel.asm	/^hwint0:$/;"	l
 hwint1	kernel.asm	/^hwint1:$/;"	l
 hwint14	kernel.asm	/^hwint14:$/;"	l
 i2a	main.c	/^char* i2a(int val, int base, char ** ps)$/;"	f
-idt	include/sys/global.h	/^Gate idt[256];$/;"	v
-idt_ptr	include/sys/global.h	/^unsigned char idt_ptr[6];$/;"	v
+idt	include/sys/global.h	/^EXTERN Gate idt[256];$/;"	v
+idt_ptr	include/sys/global.h	/^EXTERN unsigned char idt_ptr[6];$/;"	v
 in_byte	kernel.asm	/^in_byte:$/;"	l
 in_byte2	kernel.asm	/^in_byte2:$/;"	l
 in_process	keyboard.c	/^void in_process(TTY *tty, unsigned int key)$/;"	f
@@ -657,7 +671,7 @@ int_handle	include/sys/type.h	/^typedef void (*int_handle) ();$/;"	t
 invalid_opcode_fault	kernel.asm	/^invalid_opcode_fault:$/;"	l
 invalid_task_state_segment_fault	kernel.asm	/^invalid_task_state_segment_fault:$/;"	l
 io_delay	loader.asm	/^io_delay:$/;"	l
-iobase	include/sys/protect.h	/^        unsigned int iobase;$/;"	m	struct:__anon9
+iobase	include/sys/protect.h	/^        unsigned int iobase;$/;"	m	struct:__anon6
 is_disp	include/sys/keyboard.h	/^unsigned char is_disp;$/;"	v
 is_e0	include/sys/keyboard.h	/^unsigned char is_e0;$/;"	v
 is_shift	include/sys/keyboard.h	/^unsigned char is_shift;$/;"	v
@@ -665,17 +679,17 @@ itoa	main.c	/^char *itoa(int value, char **str, int base)$/;"	f
 jmp	bits-demo-16.asm	/^jmp \$$/;"	l
 jmp	bits-demo.asm	/^jmp \$$/;"	l
 jmp	t2.asm	/^jmp \$$/;"	l
-k_reenter	include/sys/global.h	/^unsigned int k_reenter;$/;"	v
-kernel_esp	include/sys/process.h	/^        unsigned int kernel_esp;$/;"	m	struct:__anon4
+k_reenter	include/sys/global.h	/^EXTERN unsigned int k_reenter;$/;"	v
+kernel_esp	include/sys/process.h	/^        unsigned int kernel_esp;$/;"	m	struct:__anon8
 kernel_main	main.c	/^void kernel_main()$/;"	f
 keyboard_buffer	include/sys/keyboard.h	/^KeyboardBuffer keyboard_buffer;$/;"	v
 keyboard_handler	keyboard.c	/^void keyboard_handler()$/;"	f
 keyboard_read	keyboard.c	/^void keyboard_read(TTY *tty)$/;"	f
 keymap	include/sys/keymap.h	/^unsigned int keymap[NR_SCAN_CODES * MAP_COLS] = {$/;"	v
-last_tss_ptr	include/sys/protect.h	/^        unsigned int last_tss_ptr;$/;"	m	struct:__anon9
-ldt	include/sys/protect.h	/^        unsigned int ldt;$/;"	m	struct:__anon9
-ldt_selector	include/sys/process.h	/^        unsigned short ldt_selector;$/;"	m	struct:__anon5
-ldts	include/sys/process.h	/^        Descriptor ldts[2];$/;"	m	struct:__anon5
+last_tss_ptr	include/sys/protect.h	/^        unsigned int last_tss_ptr;$/;"	m	struct:__anon6
+ldt	include/sys/protect.h	/^        unsigned int ldt;$/;"	m	struct:__anon6
+ldt_selector	include/sys/process.h	/^        unsigned short ldt_selector;$/;"	m	struct:proc
+ldts	include/sys/process.h	/^        Descriptor ldts[2];$/;"	m	struct:proc
 main	experiment/c/array.c	/^int main(int argc, char **argv)$/;"	f
 main	experiment/c/assert-demo.c	/^int main(int argc, char **argv)$/;"	f
 main	experiment/c/bool-condition.c	/^int main(int argc, char **argv)$/;"	f
@@ -688,6 +702,7 @@ main	experiment/c/struct-demo.c	/^int main(int argc, char **argv)$/;"	f
 main	experiment/c/var.c	/^int main(int argc, char **argv)$/;"	f
 main	experiment/c/var_list.c	/^int main(int argc, char **argv)$/;"	f
 main	experiment/disp_str_colour/test.c	/^int main(void)$/;"	f
+main	experiment/header-demo/main.c	/^int main(int argc, char *argv[])$/;"	f
 main	t.c	/^int main(void)$/;"	f
 milli_delay	main.c	/^void milli_delay(unsigned int milli_sec)$/;"	f
 mov	bits-demo-16.asm	/^mov ax, 3$/;"	l
@@ -714,13 +729,13 @@ mov	test/boot.asm	/^mov si, BootMessage$/;"	l
 msg1	kernel.asm	/^msg1	db	"esp:", "$"$/;"	d
 msg2	kernel.asm	/^msg2	db	"tss.esp0:", "$"$/;"	d
 name	experiment/c/struct-demo.c	/^	char name[20];$/;"	m	struct:Node	file:
-name	include/sys/process.h	/^        char name[20];$/;"	m	struct:__anon5
+name	include/sys/process.h	/^        char name[20];$/;"	m	struct:proc
 next	experiment/c/point.c	/^	struct Person *next;$/;"	m	struct:Person	typeref:struct:Person::Person	file:
 next	experiment/c/struct-demo.c	/^	struct Node *next;$/;"	m	struct:Node	typeref:struct:Node::Node	file:
 next	include/sys/process.h	/^        struct MsgSender *next;$/;"	m	struct:MsgSender	typeref:struct:MsgSender::MsgSender
 non_maskable_interrupt	kernel.asm	/^non_maskable_interrupt:$/;"	l
-offset_below	include/sys/protect.h	/^        unsigned short offset_below;$/;"	m	struct:__anon8
-offset_high	include/sys/protect.h	/^        unsigned short offset_high;$/;"	m	struct:__anon8
+offset_below	include/sys/protect.h	/^        unsigned short offset_below;$/;"	m	struct:__anon5
+offset_high	include/sys/protect.h	/^        unsigned short offset_high;$/;"	m	struct:__anon5
 org	boot.asm	/^org 0x7c00$/;"	l
 org	kernel2.asm	/^org	0100h$/;"	l
 org	loader-error.asm	/^org	0100h$/;"	l
@@ -732,15 +747,15 @@ original_addr	include/sys/console.h	/^	unsigned int original_addr;$/;"	m	struct:
 out_byte	kernel.asm	/^out_byte:$/;"	l
 out_char	console.c	/^void out_char(TTY *tty, unsigned char key)$/;"	f
 overflow_trap	kernel.asm	/^overflow_trap:$/;"	l
-p_flag	include/sys/process.h	/^        unsigned char p_flag;           \/\/ 进程的状态：RUNNING等$/;"	m	struct:__anon5
-p_msg	include/sys/process.h	/^        Message *p_msg; \/\/ 指向消息体$/;"	m	struct:__anon5
-p_receive_from	include/sys/process.h	/^        int p_receive_from;     \/\/ 要从哪个进程接收消息，目标进程ID$/;"	m	struct:__anon5
-p_send_to	include/sys/process.h	/^        int p_send_to;  \/\/ 要向哪个进程发送消息，目标进程ID$/;"	m	struct:__anon5
+p_flag	include/sys/process.h	/^        unsigned char p_flag;           \/\/ 进程的状态：RUNNING等$/;"	m	struct:proc
+p_msg	include/sys/process.h	/^        Message *p_msg; \/\/ 指向消息体$/;"	m	struct:proc
+p_receive_from	include/sys/process.h	/^        int p_receive_from;     \/\/ 要从哪个进程接收消息，目标进程ID$/;"	m	struct:proc
+p_send_to	include/sys/process.h	/^        int p_send_to;  \/\/ 要向哪个进程发送消息，目标进程ID$/;"	m	struct:proc
 page_fault	kernel.asm	/^page_fault:$/;"	l
 panic	main.c	/^void panic(char *error_msg)$/;"	f
-paramCount	include/sys/protect.h	/^        unsigned char paramCount;$/;"	m	struct:__anon8
+paramCount	include/sys/protect.h	/^        unsigned char paramCount;$/;"	m	struct:__anon5
 phycopy	include/string.h	10;"	d
-pid	include/sys/process.h	/^        unsigned int pid;$/;"	m	struct:__anon5
+pid	include/sys/process.h	/^        unsigned int pid;$/;"	m	struct:proc
 pid2proc	process.c	/^Proc *pid2proc(int pid)$/;"	f
 pop	boot.asm	/^	pop ds	$/;"	d
 pop	boot.asm	/^	pop dx$/;"	d
@@ -751,11 +766,12 @@ pop	loader-error.asm	/^	pop dx$/;"	d
 pop	loader.asm	/^	pop ds	$/;"	d
 pop	loader.asm	/^	pop dx$/;"	d
 printx	main.c	/^void printx(char *fmt, ...)$/;"	f
-priority	include/sys/process.h	/^        unsigned int priority;$/;"	m	struct:__anon5
+priority	include/sys/process.h	/^        unsigned int priority;$/;"	m	struct:proc
+proc	include/sys/process.h	/^typedef struct proc{$/;"	s
 proc2pid	process.c	/^int proc2pid(Proc *proc)$/;"	f
-proc_ready_table	include/sys/global.h	/^Proc *proc_ready_table;$/;"	v
-proc_stack	include/sys/global.h	/^int proc_stack[STACK_SIZE];$/;"	v
-proc_table	include/sys/global.h	/^Proc proc_table[TASK_PROC_NUM + USER_PROC_NUM];$/;"	v
+proc_ready_table	include/sys/global.h	/^EXTERN Proc *proc_ready_table;$/;"	v
+proc_stack	global.c	/^int proc_stack[STACK_SIZE];$/;"	v
+proc_table	global.c	/^Proc proc_table[TASK_PROC_NUM + USER_PROC_NUM];$/;"	v
 push	boot.asm	/^	push ds$/;"	d
 push	boot.asm	/^	push dx$/;"	d
 push	kernel.asm	/^	push ds$/;"	d
@@ -770,19 +786,23 @@ receive_msg	syscall.asm	/^receive_msg:$/;"	l
 reenter_restore	kernel.asm	/^reenter_restore:$/;"	l
 restart	kernel.asm	/^restart:$/;"	l
 restore	kernel.asm	/^restore:$/;"	l
-s_reg	include/sys/process.h	/^        Regs s_reg;$/;"	m	struct:__anon5
+s_reg	include/sys/process.h	/^        Regs s_reg;$/;"	m	struct:proc
+say1	experiment/header-demo/main.c	/^void say1()$/;"	f
+say2	experiment/header-demo/a.c	/^void say2()$/;"	f
+say3	experiment/header-demo/b.c	/^void say3()$/;"	f
+say5	experiment/header-demo/main.c	/^void say5()$/;"	f
 schedule_process	process.c	/^void schedule_process()$/;"	f
 scroll_down	console.c	/^void scroll_down(TTY *tty)$/;"	f
 scroll_up	console.c	/^void scroll_up(TTY *tty)$/;"	f
-seg_attr1	include/sys/protect.h	/^        unsigned char seg_attr1;$/;"	m	struct:__anon7
-seg_base_below	include/sys/protect.h	/^        unsigned short seg_base_below;$/;"	m	struct:__anon7
-seg_base_high	include/sys/protect.h	/^        unsigned char seg_base_high;$/;"	m	struct:__anon7
-seg_base_middle	include/sys/protect.h	/^        unsigned char  seg_base_middle;$/;"	m	struct:__anon7
-seg_limit_below	include/sys/protect.h	/^        unsigned short seg_limit_below;$/;"	m	struct:__anon7
-seg_limit_high_and_attr2	include/sys/protect.h	/^        unsigned char seg_limit_high_and_attr2;$/;"	m	struct:__anon7
+seg_attr1	include/sys/protect.h	/^        unsigned char seg_attr1;$/;"	m	struct:__anon4
+seg_base_below	include/sys/protect.h	/^        unsigned short seg_base_below;$/;"	m	struct:__anon4
+seg_base_high	include/sys/protect.h	/^        unsigned char seg_base_high;$/;"	m	struct:__anon4
+seg_base_middle	include/sys/protect.h	/^        unsigned char  seg_base_middle;$/;"	m	struct:__anon4
+seg_limit_below	include/sys/protect.h	/^        unsigned short seg_limit_below;$/;"	m	struct:__anon4
+seg_limit_high_and_attr2	include/sys/protect.h	/^        unsigned char seg_limit_high_and_attr2;$/;"	m	struct:__anon4
 segment_not_present_fault	kernel.asm	/^segment_not_present_fault:$/;"	l
 select_console	console.c	/^void select_console(unsigned char tty_index)$/;"	f
-selector	include/sys/protect.h	/^        unsigned short selector;$/;"	m	struct:__anon8
+selector	include/sys/protect.h	/^        unsigned short selector;$/;"	m	struct:__anon5
 send_msg	syscall.asm	/^send_msg:$/;"	l
 send_rec	main.c	/^int send_rec(int function, Message *msg, int pid)$/;"	f
 sender_pid	include/sys/process.h	/^        unsigned int sender_pid;$/;"	m	struct:MsgSender
@@ -790,24 +810,24 @@ set_console_start_video_addr	console.c	/^void set_console_start_video_addr(unsig
 set_cursor	console.c	/^void set_cursor(unsigned int cursor)$/;"	f
 simd_float_exception_fault	kernel.asm	/^simd_float_exception_fault:$/;"	l
 single_step_fault	kernel.asm	/^single_step_fault:$/;"	l
-source	include/sys/type.h	/^        int source;             \/\/ 谁发送的消息$/;"	m	struct:__anon10
+source	include/sys/type.h	/^        int source;             \/\/ 谁发送的消息$/;"	m	struct:__anon7
 spin	main.c	/^void spin(char *error_msg)$/;"	f
 spurious_irq	main.c	/^void spurious_irq(int irq)$/;"	f
-ss	include/sys/process.h	/^        unsigned int ss;$/;"	m	struct:__anon4
-ss	include/sys/protect.h	/^        unsigned int ss;$/;"	m	struct:__anon9
-ss0	include/sys/protect.h	/^        unsigned int ss0;$/;"	m	struct:__anon9
-ss1	include/sys/protect.h	/^        unsigned int ss1;$/;"	m	struct:__anon9
-ss2	include/sys/protect.h	/^        unsigned int ss2;$/;"	m	struct:__anon9
+ss	include/sys/process.h	/^        unsigned int ss;$/;"	m	struct:__anon8
+ss	include/sys/protect.h	/^        unsigned int ss;$/;"	m	struct:__anon6
+ss0	include/sys/protect.h	/^        unsigned int ss0;$/;"	m	struct:__anon6
+ss1	include/sys/protect.h	/^        unsigned int ss1;$/;"	m	struct:__anon6
+ss2	include/sys/protect.h	/^        unsigned int ss2;$/;"	m	struct:__anon6
 stack_exception_fault	kernel.asm	/^stack_exception_fault:$/;"	l
-stack_size	include/sys/process.h	/^        unsigned short stack_size;$/;"	m	struct:__anon6
+stack_size	include/sys/process.h	/^        unsigned short stack_size;$/;"	m	struct:__anon9
 start_video_addr	include/sys/console.h	/^	unsigned int start_video_addr;$/;"	m	struct:__anon1
 sys_call	kernel.asm	/^sys_call:$/;"	l
-sys_call_table	include/sys/global.h	/^int_handle sys_call_table[SYS_CALL_FUNCTION_NUM] = {$/;"	v
+sys_call_table	global.c	/^int_handle sys_call_table[SYS_CALL_FUNCTION_NUM] = {$/;"	v
 sys_get_ticks	main.c	/^int sys_get_ticks()$/;"	f
 sys_printx	main.c	/^void sys_printx(char *error_msg, int len, Proc *proc)$/;"	f
 sys_receive_msg	main.c	/^int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)$/;"	f
 sys_send_msg	main.c	/^int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)$/;"	f
-sys_task_table	include/sys/global.h	/^Task sys_task_table[TASK_PROC_NUM] = {$/;"	v
+sys_task_table	global.c	/^Task sys_task_table[TASK_PROC_NUM] = {$/;"	v
 sys_write	main.c	/^void sys_write(char *buf, int len, Proc *proc)$/;"	f
 system_call	include/sys/type.h	/^typedef void *system_call;$/;"	t
 tail	include/sys/console.h	/^	unsigned int *tail;$/;"	m	struct:__anon2
@@ -816,25 +836,25 @@ task_fs	fs/fs_main.c	/^void task_fs()$/;"	f
 test	experiment/c/var_list.c	/^void test(char *fmt, ...)$/;"	f
 test	main.c	/^void test()$/;"	f
 test2	experiment/c/var_list.c	/^void test2(const char *fmt, char *var_list)$/;"	f
-ticks	include/sys/global.h	/^unsigned int ticks;$/;"	v
-ticks	include/sys/process.h	/^        unsigned int ticks;$/;"	m	struct:__anon5
+ticks	include/sys/global.h	/^EXTERN unsigned int ticks;$/;"	v
+ticks	include/sys/process.h	/^        unsigned int ticks;$/;"	m	struct:proc
 times	boot.asm	/^times	510 - ($ - $$)	db	0$/;"	l
 times	experiment/boot.asm	/^times	510-($-$$)	db	0	;$/;"	l
 times	test/boot.asm	/^times	510 - ($ - $$)	db	0$/;"	l
 times	test/experiment/boot.asm	/^times	510-($-$$)	db	0	;$/;"	l
-trace	include/sys/protect.h	/^        unsigned int trace;$/;"	m	struct:__anon9
+trace	include/sys/protect.h	/^        unsigned int trace;$/;"	m	struct:__anon6
 traverse	experiment/c/struct-demo.c	/^void traverse(struct Node *node)$/;"	f
-tss	include/sys/global.h	/^TSS tss;$/;"	v
+tss	include/sys/global.h	/^EXTERN TSS tss;$/;"	v
 tty_do_read	console.c	/^void tty_do_read(TTY *tty)$/;"	f
 tty_do_write	console.c	/^void tty_do_write(TTY *tty)$/;"	f
-tty_index	include/sys/process.h	/^        unsigned int tty_index;$/;"	m	struct:__anon5
+tty_index	include/sys/process.h	/^        unsigned int tty_index;$/;"	m	struct:proc
 tty_table	include/sys/console.h	/^TTY tty_table[TTY_NUM];$/;"	v
-type	include/sys/type.h	/^        int type;               \/\/ 这条消息要求接收者做什么。例如，获取时钟中断次数。$/;"	m	struct:__anon10
-type_other_attribute	include/sys/protect.h	/^        unsigned char type_other_attribute;$/;"	m	struct:__anon8
+type	include/sys/type.h	/^        int type;               \/\/ 这条消息要求接收者做什么。例如，获取时钟中断次数。$/;"	m	struct:__anon7
+type_other_attribute	include/sys/protect.h	/^        unsigned char type_other_attribute;$/;"	m	struct:__anon5
 unblock	main.c	/^int unblock(Proc *proc)$/;"	f
-user_task_table	include/sys/global.h	/^Task user_task_table[USER_PROC_NUM] = {$/;"	v
+user_task_table	global.c	/^Task user_task_table[USER_PROC_NUM] = {$/;"	v
 val	experiment/c/struct-demo.c	/^	int val;$/;"	m	struct:Node	file:
-val	include/sys/type.h	/^        int val;                \/\/ 消息中的数据。$/;"	m	struct:__anon10
+val	include/sys/type.h	/^        int val;                \/\/ 消息中的数据。$/;"	m	struct:__anon7
 vm_limit	include/sys/console.h	/^	unsigned int vm_limit;$/;"	m	struct:__anon1
 vsprintf	main.c	/^int vsprintf(char *buf, char *fmt, char *var_list)$/;"	f
 write	syscall.asm	/^write:$/;"	l

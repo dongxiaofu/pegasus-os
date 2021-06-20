@@ -8,6 +8,9 @@
 #include "console.h"
 #include "proto.h"
 #include "global.h"
+
+void init_hd();
+
 // 硬盘驱动
 void TaskHD()
 {

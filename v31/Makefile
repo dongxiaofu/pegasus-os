@@ -31,9 +31,12 @@ clean:
 #	${LD} ${LDFLAGS} -o $@ $<
 
 ${KERNEL}:${OBJS}
-	# 行不通
-	# ${LD} ${LDFLAGS} -o $@ $<
-	${LD} ${LDFLAGS} -o ${KERNEL} ${OBJS}
+	# 1. $^ 非常有用。
+	# 2. 它解决了错误：
+	# 3. keyboard.o:/home/cg/os/pegasus-os/v31/include/sys/keymap.h:4: 
+	# 	multiple definition of `keymap'
+	${LD} ${LDFLAGS} -o $@ $^
+	#${LD} ${LDFLAGS} -o ${KERNEL} ${OBJS}
 
 boot.bin:boot.asm
 	nasm $< -o $@ 
