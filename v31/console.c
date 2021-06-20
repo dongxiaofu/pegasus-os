@@ -1,4 +1,7 @@
 #include "const.h"
+#include "stdio.h"
+#include "process.h"
+#include "protect.h"
 #include "proto.h"
 #include "string.h"
 #include "keyboard.h"
