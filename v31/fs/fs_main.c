@@ -4,6 +4,7 @@
 #include "type.h"
 #include "protect.h"
 #include "process.h"
+#include "console.h"
 #include "proto.h"
 #include "global.h"
 

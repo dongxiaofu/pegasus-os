@@ -1,7 +1,7 @@
-#ifdef  GLOBAL_VARIABLES_HERE
-#undef  EXTERN
+//#ifdef  GLOBAL_VARIABLES_HERE
+//#undef  EXTERN
 #define EXTERN
-#endif
+//#endif
 
 
 // 全局相关 start
