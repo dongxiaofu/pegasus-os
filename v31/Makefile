@@ -10,7 +10,7 @@ LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker /lib/ld-linu
 
 BOOT = loader.bin boot.bin
 KERNEL	=	kernel.bin
-OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o
+OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o
 
 image:clean everything buildimg
 
@@ -57,6 +57,9 @@ kernel_main.o:main.c
 	${CC} ${CFLAGS} -o $@ $<
 
 process.o:process.c
+	${CC} ${CFLAGS} -o $@ $<
+
+global.o:global.c
 	${CC} ${CFLAGS} -o $@ $<
 
 protect.o:protect.c

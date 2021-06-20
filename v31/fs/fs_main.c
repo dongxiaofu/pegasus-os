@@ -4,9 +4,6 @@
 #include "type.h"
 #include "protect.h"
 #include "process.h"
-#include "keymap.h"
-#include "keyboard.h"
-#include "console.h"
 #include "proto.h"
 #include "global.h"
 

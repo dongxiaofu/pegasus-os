@@ -47,8 +47,8 @@
 #define _NR_SEND_MSG	3
 #define _NR_RECEIVE_MSG	4
 
-const int INIT_MASTER_VEC_NO = 0x20;
-const int INIT_SLAVE_VEC_NO = 0x28;
+#define INIT_MASTER_VEC_NO 0x20
+#define INIT_SLAVE_VEC_NO 0x28
 
 
 // 键盘相关 start
@@ -205,5 +205,10 @@ const int INIT_SLAVE_VEC_NO = 0x28;
         + TASK_HD_SIZE  \
         + TASK_FS_SIZE)
 // 进程相关 end
+
+
+
+
+#define HD_DEV_OPEN 1001        // 打开硬盘
 
 #endif
