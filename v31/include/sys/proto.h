@@ -67,22 +67,9 @@ int proc2pid(Proc *proc);
 // process end
 
 // console.c  start
-// 设置console的start_video_addr
-void set_cursor(unsigned int cursor);
-void set_console_start_video_addr(unsigned int start_video_addr);
-void flush(TTY *tty);
-void select_console(unsigned char tty_index);
-void put_key(TTY *tty, unsigned char key);
-void scroll_up(TTY *tty);
-void scroll_down(TTY *tty);
 void out_char(TTY *tty, unsigned char key);
 void sys_write(char *buf, int len, Proc *proc);
 void sys_printx(char *error_msg, int len, Proc *proc);
-//void out_char(CONSOLE *console, unsigned char key);
-void tty_do_read(TTY *tty);
-void tty_do_write(TTY *tty);
-void init_screen(TTY *tty);
-void init_tty();
 // console.c end
 
 // protect.c start

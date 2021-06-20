@@ -10,6 +10,23 @@
 #include "proto.h"
 #include "global.h"
 
+
+// console.c  start
+// 设置console的start_video_addr
+void set_cursor(unsigned int cursor);
+void set_console_start_video_addr(unsigned int start_video_addr);
+void flush(TTY *tty);
+void select_console(unsigned char tty_index);
+void put_key(TTY *tty, unsigned char key);
+void scroll_up(TTY *tty);
+void scroll_down(TTY *tty);
+//void out_char(CONSOLE *console, unsigned char key);
+void tty_do_read(TTY *tty);
+void tty_do_write(TTY *tty);
+void init_screen(TTY *tty);
+void init_tty();
+// console.c end
+
 void select_console(unsigned char tty_index)
 {
 	if(tty_index <0 || tty_index > TTY_NUM - 1){
