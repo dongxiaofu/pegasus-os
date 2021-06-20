@@ -126,3 +126,40 @@ void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type)
 	// gate->type_other_attribute = 0x08E;
 	gate->type_other_attribute = (privilege << 4) | type;
 }
+
+void ReloadGDT()
+{
+	Memcpy(&gdt,
+		(void *)(*((int *)(&gdt_ptr[2]))),
+		*((short *)(&gdt_ptr[0]))
+	);
+	short *pm_gdt_limit = (short *)(&gdt_ptr[0]);
+	int *pm_gdt_base = (int *)(&gdt_ptr[2]);
+	
+	//*pm_gdt_limit = 128 * sizeof(Descriptor) * 64 - 1;
+	*pm_gdt_limit = 128 * sizeof(Descriptor) - 1;
+	*pm_gdt_base = (int)&gdt;
+	
+	// 修改idt_ptr
+	short *pm_idt_limit = (short *)(&idt_ptr[0]);
+	int *pm_idt_base = (int *)(&idt_ptr[2]);
+	*pm_idt_limit = 256 * sizeof(Gate) - 1;
+	*pm_idt_base = (int)&idt;
+
+	//for(int i = 0; i < 10; i++){
+	//	for(int j = 0; j < 160; j++){
+	//		disp_str(" ");
+	//	}
+
+	//}
+	//for(int i = 0; i < 80 * 2 * 5; i++){
+	//dis_pos = 0;
+	for(int i = 0; i < 80 * 2 * 25; i++){
+		//disp_str(" ");
+	}	
+	// 内部中断
+	init_internal_interrupt();
+	// 外部中断
+	init_propt();	
+	return;
+}

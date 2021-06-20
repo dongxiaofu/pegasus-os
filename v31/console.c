@@ -274,3 +274,36 @@ void init_tty()
 		}
 	}
 }
+
+void TaskTTY()
+{
+	//keyboard_buffer.buf[0] = 0x1E;	
+	//keyboard_buffer.buf[1] = 0x30;	
+	//keyboard_buffer.buf[2] = 0x2E;	
+	//keyboard_buffer.buf[3] = 0x20;	
+	//keyboard_buffer.buf[4] = 0x12;	
+	//keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
+	//keyboard_buffer.counter = 5;
+
+	// // 设置光标位置
+		 // Cursor Location High Register
+		 //out_byte(0x3D4, 0x0E);
+		 ////out_byte(0x3D5, ((VM_BASE_ADDR + dis_pos)/2) >> 8);
+		 //out_byte(0x3D5, (VM_BASE_ADDR) >> 8);
+		 //// Cursor Location Low Register
+		 //out_byte(0x3D4, 0xF);
+		 ////out_byte(0x3D5, (VM_BASE_ADDR + dis_pos)/2);
+		 //out_byte(0x3D5, VM_BASE_ADDR);
+
+
+	init_tty();
+	select_console(0);
+	//Printf("T:%x", 3);
+	while(1){
+		for(TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++){
+			tty_do_read(tty);
+			//tty->counter = 5;
+			tty_do_write(tty);
+		}
+	}
+}
