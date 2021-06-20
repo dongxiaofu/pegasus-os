@@ -28,11 +28,7 @@ void simd_float_exception_fault();
 // 内部中断 end
 
 
-// 外部中断 start
-void hwint0();
-void hwint1();
-void hwint14();
-// 外部中断 end
+
 
 // 从汇编中导入的函数
 void disable_int();
@@ -182,5 +178,11 @@ void task_fs();
 void ReloadGDT();
 // 内核的入口函数
 void kernel_main();
+
+// 外部中断 start
+void hwint0();
+void hwint1();
+void hwint14();
+// 外部中断 end
 
 #endif
