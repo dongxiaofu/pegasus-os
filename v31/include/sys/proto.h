@@ -34,6 +34,10 @@ void hwint1();
 void hwint14();
 // 外部中断 end
 
+// 从汇编中导入的函数
+void disable_int();
+void enable_int();
+
 
 void InterruptTest();
 void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags);
@@ -53,77 +57,10 @@ void TestC();
 void TaskTTY();
 // 系统任务进程
 void TaskSys();
-// 硬盘驱动
-void TaskHD();
-// 文件系统
-void task_fs();
+
 // 启动进程
 void restart();
 void delay(int time);
-
-
-// ipc start
-// 死锁检测
-int dead_lock(int src, int dest);
-// send_msg 通过sys_call调用
-int sys_send_msg(Message *msg, int receiver_pid, Proc *sender);
-// receive_msg 通过sys_call调用
-int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver);
-// ipc end
-
-
-// 从汇编中导入的函数
-void disable_int();
-void enable_int();
-int get_ticks();
-int get_ticks_ipc();
-// 系统调用 end
-// 延迟函数 start
-void milli_delay(unsigned milli_sec);
-// 延迟函数 end
-
-// 系统调用
-int send_msg(Message *msg, int receiver_pid);
-// 系统调用
-int receive_msg(Message *msg, int sender_pid);
-// send_rec封装send_msg和receive_msg，直接被外部使用
-// function：选择发送还是接收还是其他;pid，sender或receiver的进程id
-int send_rec(int function, Message *msg, int pid);
-// 阻塞进程
-int block(Proc *proc);
-// 解决阻塞
-int unblock(Proc *proc);
-
-
-// keyboard.c start
-// 从端口读取一个字节，汇编函数
-unsigned char in_byte(unsigned short port);
-void out_byte(unsigned int port, unsigned short value);
-void keyboard_handler();
-// 从中断例程的缓冲区读取数据
-void keyboard_read(TTY *tty);
-
-// 从中断例程的缓冲区读取一个字符，供keyboard_read调用
-unsigned char read_from_keyboard_buf();
-// 初始化键盘中断例程
-void init_keyboard_handler();
-
-
-// 打印扫描码等功能
-void in_process(TTY *tty, unsigned int key);
-// keyboard.c end
-
-// hd.c start
-// 打开8258A的从片级联
-void enable_8259A_casecade_irq();
-// 打开8259A的从片硬盘中断
-void enable_8259A_slave_winchester_irq();
-
-// 初始硬盘
-void init_hd();
-// 硬盘驱动
-void hd_handle();
-// hd.c end
 
 
 // console.c  start
@@ -179,5 +116,70 @@ unsigned int Seg2PhyAddrLDT(unsigned int selector, Proc *proc);
 // unsigned int VirAddr2PhyAddr(unsigned int base, unsigned int offset);
 unsigned int VirAddr2PhyAddr(unsigned int base, void *offset);
 // process end
+
+
+int get_ticks();
+int get_ticks_ipc();
+// 系统调用 end
+// 延迟函数 start
+void milli_delay(unsigned milli_sec);
+// 延迟函数 end
+
+// 系统调用
+int send_msg(Message *msg, int receiver_pid);
+// 系统调用
+int receive_msg(Message *msg, int sender_pid);
+// send_rec封装send_msg和receive_msg，直接被外部使用
+// function：选择发送还是接收还是其他;pid，sender或receiver的进程id
+int send_rec(int function, Message *msg, int pid);
+// 阻塞进程
+int block(Proc *proc);
+// 解决阻塞
+int unblock(Proc *proc);
+
+// ipc start
+// 死锁检测
+int dead_lock(int src, int dest);
+// send_msg 通过sys_call调用
+int sys_send_msg(Message *msg, int receiver_pid, Proc *sender);
+// receive_msg 通过sys_call调用
+int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver);
+// ipc end
+
+
+// keyboard.c start
+// 从端口读取一个字节，汇编函数
+unsigned char in_byte(unsigned short port);
+void out_byte(unsigned int port, unsigned short value);
+void keyboard_handler();
+// 从中断例程的缓冲区读取数据
+void keyboard_read(TTY *tty);
+
+// 从中断例程的缓冲区读取一个字符，供keyboard_read调用
+unsigned char read_from_keyboard_buf();
+// 初始化键盘中断例程
+void init_keyboard_handler();
+
+
+// 打印扫描码等功能
+void in_process(TTY *tty, unsigned int key);
+// keyboard.c end
+
+// hd.c start
+// 打开8258A的从片级联
+void enable_8259A_casecade_irq();
+// 打开8259A的从片硬盘中断
+void enable_8259A_slave_winchester_irq();
+
+// 初始化硬盘
+void init_hd();
+// 硬盘驱动
+void hd_handle();
+// hd.c end
+
+// 硬盘驱动
+void TaskHD();
+// 文件系统
+void task_fs();
 
 #endif
