@@ -6,8 +6,8 @@
 #include "process.h"
 #include "keyboard.h"
 #include "console.h"
-#include "proto.h"
 #include "global.h"
+#include "proto.h"
 
 // 初始化描述符。又花了很多时间才写出来。还参照了我之前写的汇编代码。
 // Descriptor
@@ -65,7 +65,8 @@ void init_propt()
 	// 硬盘中断
 	InitInterruptDesc(INIT_SLAVE_VEC_NO + 6, hwint14 ,0x08,0x0E);	
 
-	Memset(proc_table, 0, sizeof(proc_table));
+	// Memset(proc_table, 0, sizeof(proc_table));
+	Memset(proc_table, 0, sizeof(Proc)*(TASK_PROC_NUM + USER_PROC_NUM));
 
 
 	// 初始化tss

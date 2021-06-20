@@ -16,7 +16,7 @@ EXTERN unsigned int counter;
 // 即将或正在执行的进程的进程表
 EXTERN Proc *proc_ready_table;
 // 系统任何和用户进程的进程表都存储在这个数组中
-extern Proc proc_table[];
+extern struct proc proc_table[];
 // 用户进程元数据
 extern Task user_task_table[];
 

@@ -1,12 +1,13 @@
 #include "const.h"
 #include "stdio.h"
-#include "process.h"
+#include "type.h"
 #include "protect.h"
+#include "console.h"
+#include "process.h"
 #include "proto.h"
 #include "string.h"
 #include "keymap.h"
 #include "keyboard.h"
-#include "console.h"
 
 
 // 键盘 start
