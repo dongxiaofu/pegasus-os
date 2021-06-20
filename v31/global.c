@@ -9,8 +9,8 @@
 #include "process.h"
 #include "keyboard.h"
 #include "console.h"
-#include "proto.h"
 #include "global.h"
+#include "proto.h"
 
 
 

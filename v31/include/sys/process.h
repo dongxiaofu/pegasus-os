@@ -42,7 +42,7 @@ struct MsgSender
 };
 
 // 进程表
-typedef struct{
+typedef struct proc{
         Regs s_reg;
         // ldt选择子
         unsigned short ldt_selector;

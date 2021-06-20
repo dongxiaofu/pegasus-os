@@ -1,5 +1,4 @@
-PYTHON:everything
-
+PYTHON:everything 
 ASM	=	nasm
 CC	=	gcc
 LD	=	ld
@@ -10,7 +9,8 @@ LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker /lib/ld-linu
 
 BOOT = loader.bin boot.bin
 KERNEL	=	kernel.bin
-OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o
+OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
+		hd.o process.o protect.o console.o keyboard.o
 
 image:clean everything buildimg
 
