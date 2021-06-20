@@ -1,3 +1,4 @@
+#include "const.h"
 #include "proto.h"
 #include "string.h"
 #include "keyboard.h"

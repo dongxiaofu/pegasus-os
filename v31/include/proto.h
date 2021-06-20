@@ -65,8 +65,6 @@ void restart();
 void delay(int time);
 
 
-
-
 // ipc start
 // 死锁检测
 int dead_lock(int src, int dest);

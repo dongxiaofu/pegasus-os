@@ -1,6 +1,8 @@
-#include "global.h"
-#include "main.h"
+#include "const.h"
+#include "proto.h"
 #include "string.h"
+#include "keyboard.h"
+#include "console.h"
 #include "hd.h"
 
 // 硬盘驱动
