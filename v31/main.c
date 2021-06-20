@@ -9,67 +9,6 @@
 #include "proto.h"
 #include "global.h"
 
-
-
-//
-void ReloadGDT()
-{
-	//disp_str_colour("AAAA", 0x0C);
-	//disp_str_colour("AAAA", 0x0A);
-	//disp_str_colour("bbbb", 0x0D);
-	//disp_int(0x3);
-	//disp_str_colour("Hello,World\n", 0x0C);
-	//return;
-	//Memset(&gdt, 0, sizeof(Descriptor) * 128);
-	Memcpy(&gdt,
-		(void *)(*((int *)(&gdt_ptr[2]))),
-		*((short *)(&gdt_ptr[0]))
-	);
-	short *pm_gdt_limit = (short *)(&gdt_ptr[0]);
-	int *pm_gdt_base = (int *)(&gdt_ptr[2]);
-	
-	//*pm_gdt_limit = 128 * sizeof(Descriptor) * 64 - 1;
-	*pm_gdt_limit = 128 * sizeof(Descriptor) - 1;
-	*pm_gdt_base = (int)&gdt;
-	
-	// 修改idt_ptr
-	short *pm_idt_limit = (short *)(&idt_ptr[0]);
-	int *pm_idt_base = (int *)(&idt_ptr[2]);
-	*pm_idt_limit = 256 * sizeof(Gate) - 1;
-	*pm_idt_base = (int)&idt;
-
-	//for(int i = 0; i < 10; i++){
-	//	for(int j = 0; j < 160; j++){
-	//		disp_str(" ");
-	//	}
-
-	//}
-	//for(int i = 0; i < 80 * 2 * 5; i++){
-	//dis_pos = 0;
-	for(int i = 0; i < 80 * 2 * 25; i++){
-		//disp_str(" ");
-	}
-	//dis_pos = 0;
-	// disp_int(0x8);
-	// return;
-	//disp_str_colour("Hello, World!", 0x74);
-	//disp_str_colour("Hello, World!===========I am successful!", 0x0B);
-	//disp_str("\n=================\n");
-	//disp_str("Hello, World!\n");
-	//disp_int(23);
-	//disp_int(0x020A);
-	//disp_str("\n");
-	//return;
-	// 向idt中添加中断门 InterruptTest
-	 // InitInterruptDesc(1, InterruptTest);	
-	 //InitInterruptDesc(0x0, InterruptTest);	
-	// 内部中断
-	init_internal_interrupt();
-	// 外部中断
-	init_propt();	
-	return;
-}
-
 void atoi(char *str, int num)
 {
 	char *p = str;
@@ -250,10 +189,6 @@ void spurious_irq(int irq)
 	disp_str("]");
 	disp_str_colour("\n------------irq end---------------\n", 0x0C);
 }
-
-
-
-
 
 void kernel_main()
 {
@@ -536,39 +471,6 @@ void milli_delay(unsigned int milli_sec)
 	int t = get_ticks_ipc();
 
 	while(((get_ticks_ipc() - t) / 100 * 1000)  < milli_sec){}
-}
-
-void TaskTTY()
-{
-	//keyboard_buffer.buf[0] = 0x1E;	
-	//keyboard_buffer.buf[1] = 0x30;	
-	//keyboard_buffer.buf[2] = 0x2E;	
-	//keyboard_buffer.buf[3] = 0x20;	
-	//keyboard_buffer.buf[4] = 0x12;	
-	//keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
-	//keyboard_buffer.counter = 5;
-
-	// // 设置光标位置
-		 // Cursor Location High Register
-		 //out_byte(0x3D4, 0x0E);
-		 ////out_byte(0x3D5, ((VM_BASE_ADDR + dis_pos)/2) >> 8);
-		 //out_byte(0x3D5, (VM_BASE_ADDR) >> 8);
-		 //// Cursor Location Low Register
-		 //out_byte(0x3D4, 0xF);
-		 ////out_byte(0x3D5, (VM_BASE_ADDR + dis_pos)/2);
-		 //out_byte(0x3D5, VM_BASE_ADDR);
-
-
-	init_tty();
-	select_console(0);
-	//Printf("T:%x", 3);
-	while(1){
-		for(TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++){
-			tty_do_read(tty);
-			//tty->counter = 5;
-			tty_do_write(tty);
-		}
-	}
 }
 
 void TaskSys()
