@@ -67,6 +67,11 @@ int proc2pid(Proc *proc);
 // process end
 
 // console.c  start
+void select_console(unsigned char tty_index);
+void put_key(TTY *tty, unsigned char key);
+void scroll_up(TTY *tty);
+void scroll_down(TTY *tty);
+
 void out_char(TTY *tty, unsigned char key);
 void sys_write(char *buf, int len, Proc *proc);
 void sys_printx(char *error_msg, int len, Proc *proc);
