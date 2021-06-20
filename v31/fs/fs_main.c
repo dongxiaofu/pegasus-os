@@ -1,6 +1,13 @@
-#include "global.h"
-#include "main.h"
+#include "const.h"
+#include "stdio.h"
+#include "process.h"
+#include "protect.h"
+#include "proto.h"
 #include "string.h"
+#include "keymap.h"
+#include "keyboard.h"
+#include "console.h"
+
 
 void task_fs()
 {
