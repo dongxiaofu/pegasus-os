@@ -3,6 +3,7 @@
 
 typedef void (*Func)();
 typedef void *system_call;
+typedef void (*int_handle) ();
 
 // todo 根据目前的需求，下面的成员都是必需的。
 typedef struct{
