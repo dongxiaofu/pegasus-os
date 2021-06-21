@@ -59,6 +59,7 @@ void hd_handle()
 			hd_identify(0);
 			break;
 		default:
+			// hd_identify(0);
 			Printf("%s\n", "Unknown Operation");
 			break;
 	}
@@ -80,14 +81,22 @@ void hd_cmd_out(struct hd_cmd *cmd)
 		Printf("t:%d\n", t);
 	// 向Control Block Register写入数据
 	out_byte(PRIMARY_DEVICE_CONTROL, 0);	
+		Printf("tt:%d\n", 23);
 	// 向Command Block Registers写入数据
 	out_byte(PRIMARY_CMD_FEATURES_REGISTER, cmd->feature);
+		//Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_SECTOR_COUNT_REGISTER, cmd->sector_count);
+		//Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_LBA_LOW_REGISTER, cmd->lba_low);
+		//Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_LBA_MID_REGISTER, cmd->lba_mid);
+		Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_LBA_HIGH_REGISTER, cmd->lba_high);
+		Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_DEVICE_REGISTER, cmd->device);
+		Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_COMMAND_REGISTER, cmd->command);	
+		Printf("tt:%d\n", 23);
 }
 
 void hd_identify(int driver_number)
@@ -111,7 +120,7 @@ void hd_identify(int driver_number)
 	// 延迟一会。必须延迟一会。
 	// 频繁使用IPC，所以不能使用。
 	// milli_delay(5000);
-	delay(250); //导致invalid opcode
+	delay(500); //导致invalid opcode
 	Printf("%s\n", "delay over");
 	//delay(10);
 	// 从Command Block Registers的data寄存器读取数据
@@ -150,6 +159,22 @@ void print_hdinfo(unsigned short *hdinfo)
 		Printf("%s:%s\n", header[i].name, s);
 	}
 	// 49，是否支持LBA
+	unsigned short capabilities = hdinfo[49];	
+	unsigned char support_lba = (capabilities >> 8) && (0x01);
+	//char capabilitie_lba[4] = (support_lba == 1 ? "Yes": "No");
+	char capabilitie_lba[4];
+	char yes_str[4] = "Yes";
+	char no_str[3] = "No";
+	if(support_lba == 1){
+		Strcpy(capabilitie_lba, yes_str);
+	}else{
+		Strcpy(capabilitie_lba, no_str);
+	}
+	Printf("Support LBA:%s\n", capabilitie_lba);
+	// 用户可用最大扇区数
+	int sector_count = hdinfo[61] << 16 + hdinfo[60];
+	Printf("Sector counter:%d\n", sector_count);
+	Printf("Size(MB):%d\n", sector_count * 512 / 1024 * 1024);
 	// 83，是否支持LBA48
 }
 
