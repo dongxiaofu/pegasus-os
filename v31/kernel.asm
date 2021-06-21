@@ -676,6 +676,8 @@ out_byte:
 
 	nop
 	nop
+	nop
+	nop
 
 	ret
 
