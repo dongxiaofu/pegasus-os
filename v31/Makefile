@@ -4,13 +4,14 @@ CC	=	gcc
 LD	=	ld
 ASKFLAGS=	-I include/ -f elf
 CFLAGS	=	-I include/ -I include/sys  -g -c -fno-builtin -m32	
-LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker /lib/ld-linux.so.2 -lc
+# LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker /lib/ld-linux.so.2 -lc
+LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386
 #LDFLAGS	=	-s -Ttext 0x30400 -m elf_i386
 
 BOOT = loader.bin boot.bin
 KERNEL	=	kernel.bin
 OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
-		hd.o process.o protect.o console.o keyboard.o
+		hd.o hd_rdwt.o process.o protect.o console.o keyboard.o
 
 image:clean everything buildimg
 
@@ -56,6 +57,9 @@ string.o:string.asm
 syscall.o:syscall.asm
 	${ASM} ${ASKFLAGS} -o $@ $<
 
+hd_rdwt.o:hd/hd_rdwt.asm
+	${ASM} ${ASKFLAGS} -o $@ $<
+
 kernel_main.o:main.c
 	${CC} ${CFLAGS} -o $@ $<
 
@@ -68,7 +72,7 @@ global.o:global.c
 protect.o:protect.c
 	${CC} ${CFLAGS} -o $@ $<
 
-hd.o:hd.c
+hd.o:hd/hd.c
 	${CC} ${CFLAGS} -o $@ $<
 
 console.o:console.c
