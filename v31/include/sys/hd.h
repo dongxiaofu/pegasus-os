@@ -29,7 +29,12 @@ struct hd_cmd{
 	unsigned char device;
 	unsigned char command;
 };
-
+// 打印硬盘参数需要用到的辅助元素，不知道用什么名称才好。
+struct hdinfo_meta{
+	unsigned short idx;
+	unsigned short len;
+	unsigned char name[20];
+};
 
 // 生成Device Register
 // 1. lba的最高四位作为本寄存器的低四位。
