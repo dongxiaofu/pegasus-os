@@ -610,12 +610,14 @@ Init_8259A:
 	; OCW1
 	;mov al, 11111110b
 	;mov al, 11111101b
-	mov al, 11111100b
+	;mov al, 11111100b	; 正确的
+	mov al, 11111000b	; 测试硬盘,打开级联
 	;mov al, 11111101b
 	out 0x21, al
 	call io_delay
 
-	mov al, 11111111b
+	;mov al, 11111111b	; 正确的
+	mov al, 10111111b	; 测试硬盘，打开硬盘中断
 	out 0xA1, al
 	call io_delay
 	;OCW2
