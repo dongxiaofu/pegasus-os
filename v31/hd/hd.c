@@ -21,6 +21,15 @@ void hd_cmd_out(struct hd_cmd *cmd);
 void print_hdinfo(unsigned short *hdinfo);
 // 获取硬盘参数
 void hd_identify(int driver_number);
+// 打印分区表项
+void print_dpt_entry(struct partition_table_entry *entry);
+// 获取分区表数据
+// 纠结这个函数的参数。暂时无法确定，边写边看吧。
+void get_partition_table(int lba,  struct partition_table_entry *partition_table);
+// 把分区表按照主分区和逻辑分区分类然后存储到对应的硬盘中
+void partition(int lba, unsigned char part_type);
+// 打开硬盘
+void hd_open();
 // 硬盘驱动
 void TaskHD()
 {
@@ -55,11 +64,10 @@ void hd_handle()
 
 	switch(type){
 		case HD_DEV_OPEN:
+			hd_open();
 			Printf("%s:%d\n", "Open HD", source);
-			hd_identify(0);
 			break;
 		default:
-			// hd_identify(0);
 			Printf("%s\n", "Unknown Operation");
 			break;
 	}
@@ -77,26 +85,26 @@ void hd_cmd_out(struct hd_cmd *cmd)
 		int t = in_byte(0x1F7);
 		Printf("ticks:%d\n", t);
 	}
-		int t = in_byte(0x1F7);
-		Printf("t:%d\n", t);
+	int t = in_byte(0x1F7);
+	Printf("t:%d\n", t);
 	// 向Control Block Register写入数据
 	out_byte(PRIMARY_DEVICE_CONTROL, 0);	
-		Printf("tt:%d\n", 23);
+	Printf("tt:%d\n", 23);
 	// 向Command Block Registers写入数据
 	out_byte(PRIMARY_CMD_FEATURES_REGISTER, cmd->feature);
-		//Printf("tt:%d\n", 23);
+	//Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_SECTOR_COUNT_REGISTER, cmd->sector_count);
-		//Printf("tt:%d\n", 23);
+	//Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_LBA_LOW_REGISTER, cmd->lba_low);
-		//Printf("tt:%d\n", 23);
+	//Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_LBA_MID_REGISTER, cmd->lba_mid);
-		Printf("tt:%d\n", 23);
+	Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_LBA_HIGH_REGISTER, cmd->lba_high);
-		Printf("tt:%d\n", 23);
+	Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_DEVICE_REGISTER, cmd->device);
-		Printf("tt:%d\n", 23);
+	Printf("tt:%d\n", 23);
 	out_byte(PRIMARY_CMD_COMMAND_REGISTER, cmd->command);	
-		Printf("tt:%d\n", 23);
+	Printf("tt:%d\n", 23);
 }
 
 void hd_identify(int driver_number)
@@ -108,12 +116,12 @@ void hd_identify(int driver_number)
 	cmd.lba_mid = 0;//22;
 	cmd.lba_high = 0;//18;
 	cmd.device = MAKE_DEVICE_REGISTER(0, driver_number);
-//	cmd.feature = 64;
-//	cmd.sector_count = 0;
-//	cmd.lba_low = 99;
-//	cmd.lba_mid = 22;
-//	cmd.lba_high = 18;
-//	cmd.device = 160;
+	//	cmd.feature = 64;
+	//	cmd.sector_count = 0;
+	//	cmd.lba_low = 99;
+	//	cmd.lba_mid = 22;
+	//	cmd.lba_high = 18;
+	//	cmd.device = 160;
 	cmd.command = ATA_IDENTIFY;
 	hd_cmd_out(&cmd);
 
@@ -128,7 +136,7 @@ void hd_identify(int driver_number)
 	Memset(buf, 0, 1024);
 	// size应该如何确定？
 	read_port(PRIMARY_CMD_DATA_REGISTER, buf,512); 	
-	
+
 	// 这句会导致invalid opcode，为什么？实在太令人费解了！
 	//unsigned short *hdinfo = (unsigned short *)buf;	
 	print_hdinfo((unsigned short *)buf);
@@ -140,7 +148,7 @@ void hd_identify(int driver_number)
 void print_hdinfo(unsigned short *hdinfo)
 {
 	// 把short类型的硬盘参数转换为char类型的参数
-	
+
 	// 用一个循环读取硬盘参数中两个区间的数据。这两个区间分别是：10~19和27~46。单位是字。
 	struct hdinfo_meta header[2] = {
 		{10, 20, "Serial Number"},
@@ -176,5 +184,84 @@ void print_hdinfo(unsigned short *hdinfo)
 	Printf("Sector counter:%d\n", sector_count);
 	Printf("Size(MB):%d\n", sector_count * 512 / 1024 * 1024);
 	// 83，是否支持LBA48
+}
+
+void print_dpt_entry(struct partition_table_entry *entry){
+	// Printf("\n%s\n", "========================Start=================");
+	//Printf("LBA:%d\n", entry->start_sector_lba);
+	//Printf("Sector Count:%d\n", entry->nr_sector);
+	Printf("System ID:%d\n", entry->system_id);
+	//Printf("Status:%d\n", entry->status);
+	//Printf("\n%s\n", "========================end=================");
+}
+
+// 1. 之前不知道本函数的参数是什么，写着写着，自然就知道了。
+// 2. 先想后写是为了写得更顺畅。想不下去的时候，可以边写边想。
+// 3. 有的人，要求在写之前想好所有细节。
+// 4. 那其实是要求先写一次再想。
+void get_partition_table(int lba,  struct partition_table_entry *partition_table){
+	struct hd_cmd cmd;
+	cmd.feature = 0;
+	cmd.sector_count = 1;
+	cmd.lba_low = lba & 0xFF;
+	cmd.lba_mid = (lba >> 8) & 0xFF;
+	cmd.lba_high = (lba >> 16) & 0xFF;
+	cmd.device = MAKE_DEVICE_REGISTER(0, lba);
+	cmd.command = ATA_READ;
+	hd_cmd_out(&cmd);
+
+	delay(500);
+	char buf[1024];
+	Memset(buf, 0, 1024);
+	read_port(PRIMARY_CMD_DATA_REGISTER, buf,512);
+
+	// 获取分区表
+	// char partition_table[64];
+	Memcpy(partition_table, buf + PARTITION_TABLE_OFFSET, 64);
+	// Strcpy(partition_table, buf + PARTITION_TABLE_OFFSET);
+}
+
+void partition(int lba, unsigned char part_type){
+	
+	if(part_type == PART_PRIMARY){
+		// 获取分区表
+		struct partition_table_entry partition_table[4];
+		// int lba = 0;	// 硬盘的MBR的初始地址的lba是0
+		Memset(partition_table, 0, 4 * sizeof(struct partition_table_entry));
+		get_partition_table(lba, partition_table);
+		// 遍历分区表
+		for(int i = 0; i < NR_MBR_DPT_ENTRY; i++){
+			// 打印分区表项
+			print_dpt_entry(&partition_table[i]);
+			
+			if(partition_table[i].system_id == PARTITION_SYSTEM_ID_EXTENDED){
+				int lba = partition_table[i].start_sector_lba;
+				partition(lba, PART_EXTENDED);
+			}
+		}
+
+	}else if(part_type == PART_EXTENDED){
+		for(int i = 0; i < NR_HD_EXTEND_PARTITION; i++){
+			struct partition_table_entry partition_table[4];
+			Memset(partition_table, 0, 4 * sizeof(struct partition_table_entry));
+			get_partition_table(lba, partition_table);
+			print_dpt_entry(&partition_table[0]);
+			// 在什么情况下终止循环？
+			// 没有下一个子扩展分区？
+			if(partition_table[1].system_id = PARTITION_SYSTEM_ID_NO_PART){
+				break;
+			}
+			lba += partition_table[1].start_sector_lba; 
+		}
+	}else{
+		Printf("%s\n", "Do nothing");
+	}
+
+}
+
+void hd_open()
+{
+	//hd_identify(0);
+	partition(0, PART_PRIMARY);
 }
 
