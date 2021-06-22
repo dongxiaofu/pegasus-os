@@ -16,6 +16,7 @@ ASM	./experiment/header-demo/Makefile	/^ASM		= nasm$/;"	m
 ASSERT	./experiment/c/assert-demo.c	3;"	d	file:
 ASSERT_MAGIC	./include/stdio.h	8;"	d
 ATA_IDENTIFY	./include/sys/hd.h	19;"	d
+ATA_READ	./include/sys/hd.h	21;"	d
 A_PRINT_NUM	./main.c	325;"	d	file:
 A_SIZE	./experiment/header-demo/include/a.h	2;"	d
 A_STACK_SIZE	./include/sys/const.h	187;"	d
@@ -271,7 +272,7 @@ LABLE_GDT_VIDEO	./loader.asm	/^	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 
 LABLE_GDT_VIDEO	./t2.asm	/^LABLE_GDT_VIDEO: Descriptor     0b8000h,                0ffffh,          0c9ah$/;"	l
 LD	./Makefile	/^LD	=	ld$/;"	m
 LD	./experiment/header-demo/Makefile	/^LD		= ld$/;"	m
-LDFLAGS	./Makefile	/^LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker \/lib\/ld-linux.so.2 -lc$/;"	m
+LDFLAGS	./Makefile	/^LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386$/;"	m
 LDFLAGS	./experiment/header-demo/Makefile	/^LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker \/lib\/ld-linux.so.2 -lc$/;"	m
 LDT_FIRST_SELECTOR	./include/sys/const.h	24;"	d
 LDT_FIRST_SELECTOR_INDEX	./include/sys/const.h	15;"	d
@@ -284,7 +285,7 @@ LoaderBinFileNameLength	./boot.asm	/^LoaderBinFileNameLength	equ	$ - LoaderBinFi
 LoaderBinFileNameLength	./loader-error.asm	/^LoaderBinFileNameLength	equ	$ - LoaderBinFileName	; 中间两个空格$/;"	d
 LoaderBinFileNameLength	./loader.asm	/^LoaderBinFileNameLength	equ	$ - LoaderBinFileName	; 中间两个空格$/;"	d
 M	./include/sys/const.h	95;"	d
-MAKE_DEVICE_REGISTER	./include/sys/hd.h	40;"	d
+MAKE_DEVICE_REGISTER	./include/sys/hd.h	84;"	d
 MAP_COLS	./include/sys/const.h	56;"	d
 Memcpy	./loader-error.asm	/^Memcpy:$/;"	l
 Memcpy	./loader.asm	/^Memcpy:$/;"	l
@@ -294,7 +295,11 @@ Message	./include/sys/type.h	/^}Message;$/;"	t	typeref:struct:__anon7
 MsgSender	./include/sys/process.h	/^struct MsgSender$/;"	s
 N	./include/sys/const.h	94;"	d
 NO_TASK	./include/sys/const.h	180;"	d
+NR_EBR_DPT_ENTRY	./include/sys/hd.h	30;"	d
 NR_GET_TICKS	./include/sys/const.h	44;"	d
+NR_HD_EXTEND_PARTITION	./include/sys/hd.h	34;"	d
+NR_HD_PRIMARY_PARTITION	./include/sys/hd.h	32;"	d
+NR_MBR_DPT_ENTRY	./include/sys/hd.h	28;"	d
 NR_SCAN_CODES	./include/sys/const.h	55;"	d
 NUM_LOCK	./include/sys/const.h	111;"	d
 NoAction	./loader-error.asm	/^NoAction:$/;"	l
@@ -331,6 +336,11 @@ PAD_UP	./include/sys/const.h	115;"	d
 PAGEDOWN	./include/sys/const.h	131;"	d
 PAGEUP	./include/sys/const.h	118;"	d
 PANIC_MAGIC	./include/stdio.h	6;"	d
+PARTITION_SYSTEM_ID_EXTENDED	./include/sys/hd.h	38;"	d
+PARTITION_SYSTEM_ID_PRIMARY	./include/sys/hd.h	37;"	d
+PARTITION_TABLE_OFFSET	./include/sys/hd.h	25;"	d
+PART_EXTENDED	./include/sys/hd.h	44;"	d
+PART_PRIMARY	./include/sys/hd.h	42;"	d
 PAUSE	./include/sys/const.h	142;"	d
 PMMessage	./pmtest2.asm	/^PMMessage:		db	"3333In Protect Mode now. ^-^", 0	; 在保护模式中显示$/;"	d
 PRIMARY_CMD_COMMAND_REGISTER	./include/sys/hd.h	13;"	d
@@ -559,6 +569,9 @@ eip	./include/sys/protect.h	/^        unsigned int eip;$/;"	m	struct:__anon6
 enable_8259A_casecade_irq	./kernel.asm	/^enable_8259A_casecade_irq:$/;"	l
 enable_8259A_slave_winchester_irq	./kernel.asm	/^enable_8259A_slave_winchester_irq:$/;"	l
 enable_int	./kernel.asm	/^enable_int:$/;"	l
+end_cylinder	./include/sys/hd.h	/^	unsigned char end_cylinder;$/;"	m	struct:partition_table_entry
+end_head	./include/sys/hd.h	/^	unsigned char end_head;$/;"	m	struct:partition_table_entry
+end_sector	./include/sys/hd.h	/^	unsigned char end_sector;$/;"	m	struct:partition_table_entry
 es	./include/sys/process.h	/^        unsigned int es;$/;"	m	struct:__anon8
 es	./include/sys/protect.h	/^        unsigned int es;$/;"	m	struct:__anon6
 esi	./include/sys/process.h	/^        unsigned int esi;$/;"	m	struct:__anon8
@@ -603,6 +616,7 @@ gdt	./include/sys/global.h	/^EXTERN Descriptor gdt[128];$/;"	v
 gdt_ptr	./include/sys/global.h	/^EXTERN unsigned char gdt_ptr[6];$/;"	v
 gdt_ptr2	./t.c	/^char gdt_ptr2[6];$/;"	v
 general_protection_exception_fault	./kernel.asm	/^general_protection_exception_fault:$/;"	l
+get_partition_table	./hd/hd.c	/^void get_partition_table(int lba,  struct partition_table_entry *partition_table){$/;"	f
 get_ticks	./syscall.asm	/^get_ticks:$/;"	l
 get_ticks_ipc	./main.c	/^int get_ticks_ipc()$/;"	f
 global	./experiment/disp_str_colour/disp_str.asm	/^global disp_str_colour$/;"	l
@@ -662,6 +676,8 @@ hd_cmd	./include/sys/hd.h	/^struct hd_cmd{$/;"	s
 hd_cmd_out	./hd/hd.c	/^void hd_cmd_out(struct hd_cmd *cmd)$/;"	f
 hd_handle	./hd/hd.c	/^void hd_handle()$/;"	f
 hd_identify	./hd/hd.c	/^void hd_identify(int driver_number)$/;"	f
+hd_open	./hd/hd.c	/^void hd_open()$/;"	f
+hdinfo_meta	./include/sys/hd.h	/^struct hdinfo_meta{$/;"	s
 head	./include/sys/console.h	/^	unsigned int *head;$/;"	m	struct:__anon2
 head	./include/sys/keyboard.h	/^	unsigned char *head;$/;"	m	struct:__anon3
 header	./include/sys/process.h	/^        struct MsgSender *header;       \/\/ 要给本进程发送消息的进程的队列的头指针$/;"	m	struct:proc	typeref:struct:proc::MsgSender
@@ -671,6 +687,7 @@ hwint14	./kernel.asm	/^hwint14:$/;"	l
 i2a	./main.c	/^char* i2a(int val, int base, char ** ps)$/;"	f
 idt	./include/sys/global.h	/^EXTERN Gate idt[256];$/;"	v
 idt_ptr	./include/sys/global.h	/^EXTERN unsigned char idt_ptr[6];$/;"	v
+idx	./include/sys/hd.h	/^	unsigned short idx;$/;"	m	struct:hdinfo_meta
 in_byte	./kernel.asm	/^in_byte:$/;"	l
 in_byte2	./kernel.asm	/^in_byte2:$/;"	l
 in_process	./keyboard.c	/^void in_process(TTY *tty, unsigned int key)$/;"	f
@@ -712,6 +729,7 @@ lba_mid	./include/sys/hd.h	/^	unsigned char lba_mid;$/;"	m	struct:hd_cmd
 ldt	./include/sys/protect.h	/^        unsigned int ldt;$/;"	m	struct:__anon6
 ldt_selector	./include/sys/process.h	/^        unsigned short ldt_selector;$/;"	m	struct:proc
 ldts	./include/sys/process.h	/^        Descriptor ldts[2];$/;"	m	struct:proc
+len	./include/sys/hd.h	/^	unsigned short len;$/;"	m	struct:hdinfo_meta
 main	./experiment/c/array.c	/^int main(int argc, char **argv)$/;"	f
 main	./experiment/c/assert-demo.c	/^int main(int argc, char **argv)$/;"	f
 main	./experiment/c/bool-condition.c	/^int main(int argc, char **argv)$/;"	f
@@ -721,6 +739,7 @@ main	./experiment/c/point.c	/^int main(int argc, char **argv)$/;"	f
 main	./experiment/c/ptr-str.c	/^int main(int argc, char **argv)$/;"	f
 main	./experiment/c/ptr-str2.c	/^int main(int argc, char **argv)$/;"	f
 main	./experiment/c/struct-demo.c	/^int main(int argc, char **argv)$/;"	f
+main	./experiment/c/type-convert.c	/^int main(int agc, char *argc[])$/;"	f
 main	./experiment/c/var.c	/^int main(int argc, char **argv)$/;"	f
 main	./experiment/c/var_list.c	/^int main(int argc, char **argv)$/;"	f
 main	./experiment/disp_str_colour/test.c	/^int main(void)$/;"	f
@@ -751,11 +770,13 @@ mov	./test/boot.asm	/^mov si, BootMessage$/;"	l
 msg1	./kernel.asm	/^msg1	db	"esp:", "$"$/;"	d
 msg2	./kernel.asm	/^msg2	db	"tss.esp0:", "$"$/;"	d
 name	./experiment/c/struct-demo.c	/^	char name[20];$/;"	m	struct:Node	file:
+name	./include/sys/hd.h	/^	unsigned char name[20];$/;"	m	struct:hdinfo_meta
 name	./include/sys/process.h	/^        char name[20];$/;"	m	struct:proc
 next	./experiment/c/point.c	/^	struct Person *next;$/;"	m	struct:Person	typeref:struct:Person::Person	file:
 next	./experiment/c/struct-demo.c	/^	struct Node *next;$/;"	m	struct:Node	typeref:struct:Node::Node	file:
 next	./include/sys/process.h	/^        struct MsgSender *next;$/;"	m	struct:MsgSender	typeref:struct:MsgSender::MsgSender
 non_maskable_interrupt	./kernel.asm	/^non_maskable_interrupt:$/;"	l
+nr_sector	./include/sys/hd.h	/^	unsigned int nr_sector;	$/;"	m	struct:partition_table_entry
 offset_below	./include/sys/protect.h	/^        unsigned short offset_below;$/;"	m	struct:__anon5
 offset_high	./include/sys/protect.h	/^        unsigned short offset_high;$/;"	m	struct:__anon5
 org	./boot.asm	/^org 0x7c00$/;"	l
@@ -776,6 +797,8 @@ p_send_to	./include/sys/process.h	/^        int p_send_to;  \/\/ 要向哪个进
 page_fault	./kernel.asm	/^page_fault:$/;"	l
 panic	./main.c	/^void panic(char *error_msg)$/;"	f
 paramCount	./include/sys/protect.h	/^        unsigned char paramCount;$/;"	m	struct:__anon5
+partition	./hd/hd.c	/^void partition(unsigned char part_type){$/;"	f
+partition_table_entry	./include/sys/hd.h	/^struct partition_table_entry{$/;"	s
 phycopy	./include/string.h	10;"	d
 pid	./include/sys/process.h	/^        unsigned int pid;$/;"	m	struct:proc
 pid2proc	./process.c	/^Proc *pid2proc(int pid)$/;"	f
@@ -787,6 +810,8 @@ pop	./loader-error.asm	/^	pop ds	$/;"	d
 pop	./loader-error.asm	/^	pop dx$/;"	d
 pop	./loader.asm	/^	pop ds	$/;"	d
 pop	./loader.asm	/^	pop dx$/;"	d
+print_dpt_entry	./hd/hd.c	/^void print_dpt_entry(struct partition_table_entry *entry){$/;"	f
+print_hdinfo	./hd/hd.c	/^void print_hdinfo(unsigned short *hdinfo)$/;"	f
 printx	./main.c	/^void printx(char *fmt, ...)$/;"	f
 priority	./include/sys/process.h	/^        unsigned int priority;$/;"	m	struct:proc
 proc	./include/sys/process.h	/^typedef struct proc{$/;"	s
@@ -844,7 +869,12 @@ ss1	./include/sys/protect.h	/^        unsigned int ss1;$/;"	m	struct:__anon6
 ss2	./include/sys/protect.h	/^        unsigned int ss2;$/;"	m	struct:__anon6
 stack_exception_fault	./kernel.asm	/^stack_exception_fault:$/;"	l
 stack_size	./include/sys/process.h	/^        unsigned short stack_size;$/;"	m	struct:__anon9
+start_cylinder	./include/sys/hd.h	/^	unsigned char start_cylinder;$/;"	m	struct:partition_table_entry
+start_head	./include/sys/hd.h	/^	unsigned char start_head;$/;"	m	struct:partition_table_entry
+start_sector	./include/sys/hd.h	/^	unsigned char start_sector;$/;"	m	struct:partition_table_entry
+start_sector_lba	./include/sys/hd.h	/^	unsigned int start_sector_lba;$/;"	m	struct:partition_table_entry
 start_video_addr	./include/sys/console.h	/^	unsigned int start_video_addr;$/;"	m	struct:__anon1
+status	./include/sys/hd.h	/^	unsigned char status;$/;"	m	struct:partition_table_entry
 sys_call	./kernel.asm	/^sys_call:$/;"	l
 sys_call_table	./global.c	/^int_handle sys_call_table[SYS_CALL_FUNCTION_NUM] = {$/;"	v
 sys_get_ticks	./main.c	/^int sys_get_ticks()$/;"	f
@@ -854,6 +884,7 @@ sys_send_msg	./main.c	/^int sys_send_msg(Message *msg, int receiver_pid, Proc *s
 sys_task_table	./global.c	/^Task sys_task_table[TASK_PROC_NUM] = {$/;"	v
 sys_write	./main.c	/^void sys_write(char *buf, int len, Proc *proc)$/;"	f
 system_call	./include/sys/type.h	/^typedef void *system_call;$/;"	t
+system_id	./include/sys/hd.h	/^	unsigned char system_id;$/;"	m	struct:partition_table_entry
 tail	./include/sys/console.h	/^	unsigned int *tail;$/;"	m	struct:__anon2
 tail	./include/sys/keyboard.h	/^	unsigned char *tail;$/;"	m	struct:__anon3
 task_fs	./fs/fs_main.c	/^void task_fs()$/;"	f

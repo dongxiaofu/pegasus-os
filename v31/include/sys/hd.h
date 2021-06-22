@@ -17,7 +17,33 @@
 
 // 获取硬盘参数
 #define ATA_IDENTIFY 0xEC
+// 从硬盘读取数据
+#define ATA_READ 0x20
 
+
+// 分区表在MBR或EBR中的偏移量
+#define PARTITION_TABLE_OFFSET	0x1BE
+
+// MBR中的分区表中的分区表项的数量
+#define NR_MBR_DPT_ENTRY 4
+// EBR中的分区表中的分区表项的数量
+#define NR_EBR_DPT_ENTRY 2
+// 硬盘的主分区数量
+#define NR_HD_PRIMARY_PARTITION 4
+// 主扩展分区包含的扩展分区数量
+#define NR_HD_EXTEND_PARTITION 16
+
+// 硬盘分区ystem_id
+#define PARTITION_SYSTEM_ID_PRIMARY	0x83
+#define PARTITION_SYSTEM_ID_EXTENDED	0x5
+// 不是可用分区
+#define PARTITION_SYSTEM_ID_NO_PART	0x0
+
+
+// 主分区
+#define PART_PRIMARY	0
+// 扩展分区
+#define PART_EXTENDED	1
 
 // 操作硬盘的命令
 struct hd_cmd{
@@ -34,6 +60,21 @@ struct hdinfo_meta{
 	unsigned short idx;
 	unsigned short len;
 	unsigned char name[20];
+};
+
+// 分区表项
+// 对照《一个操作系统的实现》表9.3写出这个结构。
+struct partition_table_entry{
+	unsigned char status;
+	unsigned char start_head;
+	unsigned char start_sector;
+	unsigned char start_cylinder;
+	unsigned char system_id;
+	unsigned char end_head;
+	unsigned char end_sector;
+	unsigned char end_cylinder;
+	unsigned int start_sector_lba;
+	unsigned int nr_sector;	
 };
 
 // 生成Device Register
