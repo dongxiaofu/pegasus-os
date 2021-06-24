@@ -77,6 +77,19 @@ struct partition_table_entry{
 	unsigned int nr_sector;	
 };
 
+// 硬盘分区
+struct hd_part{
+	unsigned int base;
+	unsigned int size;
+};
+
+// 分区信息
+struct hdinfo{
+	unsigned int open_cnt;
+	struct hd_part primary_part[NR_HD_PRIMARY_PARTITION];
+	struct hd_part logical_part[NR_HD_EXTEND_PARTITION];
+};
+
 // 生成Device Register
 // 1. lba的最高四位作为本寄存器的低四位。
 // 2. 硬盘号作为本寄存器的第5位。

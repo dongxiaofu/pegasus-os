@@ -112,6 +112,7 @@ void scroll_down(TTY *tty)
 {
 	if(tty->console->start_video_addr + 2 * SCREEN_SIZE < tty->console->original_addr + tty->console->vm_limit){
 		set_console_start_video_addr(tty->console->start_video_addr + SCREEN_SIZE);
+		tty->console->start_video_addr += SCREEN_SIZE;
 	}
 }
 
@@ -180,9 +181,9 @@ void out_char(TTY *tty, unsigned char key)
 	// 向下滚屏
 	// 什么时候需要滚屏？我又不记得了。独立分析出来！
 	// 超过一屏数据时，需要滚屏。
-	//while(tty->console->cursor - tty->console->start_video_addr > SCREEN_SIZE){
-	//	scroll_down(tty);
-	//}
+	while(tty->console->cursor - tty->console->start_video_addr > SCREEN_SIZE){
+		scroll_down(tty);
+	}
 
 	flush(tty);
 }
