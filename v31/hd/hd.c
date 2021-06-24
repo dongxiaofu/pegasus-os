@@ -10,6 +10,8 @@
 #include "global.h"
 #include "hd.h"
 
+struct hdinfo hd_info;
+
 void init_hd();
 // 向硬盘发送命令
 // 纠结，本函数的参数怎么设置？
@@ -128,7 +130,7 @@ void hd_identify(int driver_number)
 	// 延迟一会。必须延迟一会。
 	// 频繁使用IPC，所以不能使用。
 	// milli_delay(5000);
-	delay(500); //导致invalid opcode
+	delay(1); //导致invalid opcode
 	Printf("%s\n", "delay over");
 	//delay(10);
 	// 从Command Block Registers的data寄存器读取数据
@@ -232,7 +234,10 @@ void partition(int lba, unsigned char part_type){
 		// 遍历分区表
 		for(int i = 0; i < NR_MBR_DPT_ENTRY; i++){
 			// 打印分区表项
-			print_dpt_entry(&partition_table[i]);
+			// print_dpt_entry(&partition_table[i]);
+			hd_info.primary_part[i].base = partition_table[i].start_sector_lba;
+			hd_info.primary_part[i].size = partition_table[i].nr_sector;
+			
 			
 			if(partition_table[i].system_id == PARTITION_SYSTEM_ID_EXTENDED){
 				int lba = partition_table[i].start_sector_lba;
@@ -241,17 +246,22 @@ void partition(int lba, unsigned char part_type){
 		}
 
 	}else if(part_type == PART_EXTENDED){
+		int lba_base = lba;
 		for(int i = 0; i < NR_HD_EXTEND_PARTITION; i++){
 			struct partition_table_entry partition_table[4];
 			Memset(partition_table, 0, 4 * sizeof(struct partition_table_entry));
 			get_partition_table(lba, partition_table);
 			print_dpt_entry(&partition_table[0]);
+
+			
+			hd_info.logical_part[i].base = lba + partition_table[0].start_sector_lba;
+			hd_info.logical_part[i].size = partition_table[0].nr_sector;
 			// 在什么情况下终止循环？
 			// 没有下一个子扩展分区？
-			if(partition_table[1].system_id = PARTITION_SYSTEM_ID_NO_PART){
+			if(partition_table[1].system_id == PARTITION_SYSTEM_ID_NO_PART){
 				break;
 			}
-			lba += partition_table[1].start_sector_lba; 
+			lba = lba_base + partition_table[1].start_sector_lba; 
 		}
 	}else{
 		Printf("%s\n", "Do nothing");
@@ -261,7 +271,10 @@ void partition(int lba, unsigned char part_type){
 
 void hd_open()
 {
+	//struct hdinfo hd_info;
+	hd_info.open_cnt++;
 	//hd_identify(0);
 	partition(0, PART_PRIMARY);
+	Printf("%s\n", "Over");
 }
 

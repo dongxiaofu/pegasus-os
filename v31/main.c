@@ -376,7 +376,7 @@ void delay(int time)
 {
 	for(int i = 0; i < time; i++){
 		for(int j = 0; j < 10; j++){
-			for(int k = 0; k < 10000; k++){
+			for(int k = 0; k < 1000; k++){
 			}
 		}
 	}
