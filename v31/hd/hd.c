@@ -254,8 +254,8 @@ void partition(int lba, unsigned char part_type){
 			print_dpt_entry(&partition_table[0]);
 
 			
-			hd_info.logical_part[i].base = lba + partition_table[0].start_sector_lba;
-			hd_info.logical_part[i].size = partition_table[0].nr_sector;
+			hd_info.logical_part[i+16].base = lba + partition_table[0].start_sector_lba;
+			hd_info.logical_part[i+16].size = partition_table[0].nr_sector;
 			// 在什么情况下终止循环？
 			// 没有下一个子扩展分区？
 			if(partition_table[1].system_id == PARTITION_SYSTEM_ID_NO_PART){

@@ -84,10 +84,10 @@ struct hd_part{
 };
 
 // 分区信息
-struct hdinfo{
+struct hd_info{
 	unsigned int open_cnt;
 	struct hd_part primary_part[NR_HD_PRIMARY_PARTITION];
-	struct hd_part logical_part[NR_HD_EXTEND_PARTITION];
+	struct hd_part logical_part[NR_HD_EXTEND_PARTITION * 4];
 };
 
 // 生成Device Register
@@ -98,7 +98,33 @@ struct hdinfo{
 // 5. 宏比函数执行快；作为内联代码插入到代码中。
 #define MAKE_DEVICE_REGISTER(driver_num,lba)	\
 	(lba >> 24) | (driver_num << 4) | (7 << 5)		
+// 如果不是每个宏都被使用，我认为，不应该弄出这么多只在宏中使用的宏。
+// 第0块硬盘的第1个主分区的第1个逻辑分区的次设备号
+#define hd1a	0x10
+// 第1块硬盘的第1个主分区的第1个逻辑分区的次设备号
+#define hd2a	0x20
+// 最大的主分区号
+#define NR_PRIM_MAX	9
+// 每个硬盘有四个主分区
+#define NR_PRIM_PART_PER_HD	4
+// 每个硬盘有五个设备号，硬盘本身的设备号是0
+// #define NR_DEV_PER_HD	NR_PRIM_PART_PER_HD + 1
+// #define NR_DEV_PER_HD	5
+// 一定应该是(NR_PRIM_PART_PER_HD + 1)，而不是NR_PRIM_PART_PER_HD + 1
+#define NR_DEV_PER_HD	(NR_PRIM_PART_PER_HD + 1)
+// 每个主分区能划分出16个逻辑分区
+#define NR_SUB_PART_PER_PRIM	16
+// 根据次设备号计算硬盘号
+// 难点是用什么理由写出NR_SUB_PART_PER_PRIM * NR_PRIM_PART_PER_HD这个等式，我想直接写64。
+//#define DR_OF_DEV(device) device < NR_PRIM_MAX ? \
+//	device / NR_DEV_PER_HD:\
+//	(device-hd1a) / (NR_SUB_PART_PER_PRIM * NR_PRIM_PART_PER_HD) 
 
+#define DR_OF_DEV2(device) (device <= NR_PRIM_MAX ? 0 : 0)
+
+#define DR_OF_DEV(device) (device <= NR_PRIM_MAX ? \
+	device / NR_DEV_PER_HD:\
+	(device-hd1a) / (NR_SUB_PART_PER_PRIM * NR_PRIM_PART_PER_HD)) 
 
 void read_port(int port, char *fsbuf, int size);
 void write_port(int port, char *fsbuf, int size);
