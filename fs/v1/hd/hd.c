@@ -10,7 +10,7 @@
 #include "global.h"
 #include "hd.h"
 
-struct hdinfo hd_info;
+struct hd_info hd_info[1];
 
 void init_hd();
 // 向硬盘发送命令
@@ -27,9 +27,9 @@ void hd_identify(int driver_number);
 void print_dpt_entry(struct partition_table_entry *entry);
 // 获取分区表数据
 // 纠结这个函数的参数。暂时无法确定，边写边看吧。
-void get_partition_table(int lba,  struct partition_table_entry *partition_table);
+void get_partition_table(int device,  int lba, struct partition_table_entry *partition_table);
 // 把分区表按照主分区和逻辑分区分类然后存储到对应的硬盘中
-void partition(int lba, unsigned char part_type);
+void partition(int device, unsigned char part_type);
 // 打开硬盘
 void hd_open();
 // 硬盘驱动
@@ -201,14 +201,14 @@ void print_dpt_entry(struct partition_table_entry *entry){
 // 2. 先想后写是为了写得更顺畅。想不下去的时候，可以边写边想。
 // 3. 有的人，要求在写之前想好所有细节。
 // 4. 那其实是要求先写一次再想。
-void get_partition_table(int lba,  struct partition_table_entry *partition_table){
+void get_partition_table(int driver, int lba,  struct partition_table_entry *partition_table){
 	struct hd_cmd cmd;
 	cmd.feature = 0;
 	cmd.sector_count = 1;
 	cmd.lba_low = lba & 0xFF;
 	cmd.lba_mid = (lba >> 8) & 0xFF;
 	cmd.lba_high = (lba >> 16) & 0xFF;
-	cmd.device = MAKE_DEVICE_REGISTER(0, lba);
+	cmd.device = MAKE_DEVICE_REGISTER(driver, lba);
 	cmd.command = ATA_READ;
 	hd_cmd_out(&cmd);
 
@@ -223,39 +223,47 @@ void get_partition_table(int lba,  struct partition_table_entry *partition_table
 	// Strcpy(partition_table, buf + PARTITION_TABLE_OFFSET);
 }
 
-void partition(int lba, unsigned char part_type){
-	
+void partition(int device, unsigned char part_type){
+	int driver = DR_OF_DEV(device);	
+
+	//struct partition_table_entry partition_table[64];
+	struct partition_table_entry partition_table[5];
 	if(part_type == PART_PRIMARY){
 		// 获取分区表
-		struct partition_table_entry partition_table[4];
+		//struct partition_table_entry partition_table[4];
+		// struct partition_table_entry partition_table[64];
 		// int lba = 0;	// 硬盘的MBR的初始地址的lba是0
-		Memset(partition_table, 0, 4 * sizeof(struct partition_table_entry));
-		get_partition_table(lba, partition_table);
+		Memset(partition_table, 0, 5 * sizeof(struct partition_table_entry));
+		get_partition_table(driver, 0, partition_table);
 		// 遍历分区表
 		for(int i = 0; i < NR_MBR_DPT_ENTRY; i++){
 			// 打印分区表项
 			// print_dpt_entry(&partition_table[i]);
-			hd_info.primary_part[i].base = partition_table[i].start_sector_lba;
-			hd_info.primary_part[i].size = partition_table[i].nr_sector;
-			
+			// 想不出更好的名称。
+			int nr_part = 1 + i;
+			hd_info[driver].primary_part[nr_part].base = partition_table[i].start_sector_lba;
+			hd_info[driver].primary_part[nr_part].size = partition_table[i].nr_sector;
 			
 			if(partition_table[i].system_id == PARTITION_SYSTEM_ID_EXTENDED){
-				int lba = partition_table[i].start_sector_lba;
-				partition(lba, PART_EXTENDED);
+				partition(device + nr_part, PART_EXTENDED);
 			}
 		}
 
 	}else if(part_type == PART_EXTENDED){
-		int lba_base = lba;
+		int j = device % 5;
+		int lba_base = hd_info[driver].primary_part[j].base;
+		int lba = lba_base;
+		// 取值分别是：0，16，32，48
+		int nr_1st = (j - 1) * 16;
 		for(int i = 0; i < NR_HD_EXTEND_PARTITION; i++){
-			struct partition_table_entry partition_table[4];
-			Memset(partition_table, 0, 4 * sizeof(struct partition_table_entry));
-			get_partition_table(lba, partition_table);
+			//struct partition_table_entry partition_table[4];
+			Memset(partition_table, 0, 5 * sizeof(struct partition_table_entry));
+			get_partition_table(driver, lba, partition_table);
 			print_dpt_entry(&partition_table[0]);
 
-			
-			hd_info.logical_part[i].base = lba + partition_table[0].start_sector_lba;
-			hd_info.logical_part[i].size = partition_table[0].nr_sector;
+			int index = nr_1st + i;
+			hd_info[driver].logical_part[index].base = lba + partition_table[0].start_sector_lba;
+			hd_info[driver].logical_part[index].size = partition_table[0].nr_sector;
 			// 在什么情况下终止循环？
 			// 没有下一个子扩展分区？
 			if(partition_table[1].system_id == PARTITION_SYSTEM_ID_NO_PART){
@@ -266,13 +274,13 @@ void partition(int lba, unsigned char part_type){
 	}else{
 		Printf("%s\n", "Do nothing");
 	}
-
 }
 
 void hd_open()
 {
+	int driver = DR_OF_DEV(0);
 	//struct hdinfo hd_info;
-	hd_info.open_cnt++;
+	hd_info[driver].open_cnt++;
 	//hd_identify(0);
 	partition(0, PART_PRIMARY);
 	Printf("%s\n", "Over");
