@@ -16,7 +16,7 @@ read_port:
 	mov ecx, [ebp + 16]	; size
 	shr ecx, 1		; 把字节换算成字
 	cld
-	rep insw		; 从port端口把ecx个字的数据复制到ds:esi处
+	rep insw		; 从port端口把ecx个字的数据复制到es:edi处
 
 	pop ebp
 	ret
