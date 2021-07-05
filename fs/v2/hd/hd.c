@@ -32,6 +32,8 @@ void get_partition_table(int device,  int lba, struct partition_table_entry *par
 void partition(int device, unsigned char part_type);
 // 打开硬盘
 void hd_open();
+// 获取分区的扇区数量
+int get_hd_ioctl(int device);
 // 硬盘驱动
 void TaskHD()
 {
@@ -69,6 +71,10 @@ void hd_handle()
 			hd_open();
 			Printf("%s:%d\n", "Open HD", source);
 			break;
+		case GET_HD_IOCTL:
+			get_hd_ioctl(0);
+			Printf("%s:%d\n", "GET_HD_IOCTL", source);
+			break;
 		default:
 			Printf("%s\n", "Unknown Operation");
 			break;
@@ -76,7 +82,7 @@ void hd_handle()
 
 	msg.source = 2;
 	// ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
-	//send_rec(SEND, &msg, source);
+	send_rec(SEND, &msg, source);
 }
 
 
@@ -283,6 +289,14 @@ void hd_open()
 	hd_info[driver].open_cnt++;
 	//hd_identify(0);
 	partition(0, PART_PRIMARY);
+	get_hd_ioctl(2);
 	Printf("%s\n", "Over");
 }
 
+int get_hd_ioctl(int device)
+{
+	int driver = DR_OF_DEV(device);
+	int geometry = hd_info[driver].primary_part[device].size;
+	Printf("geometry:%d\n", geometry);
+	return geometry;
+}

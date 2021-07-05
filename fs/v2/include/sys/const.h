@@ -210,5 +210,6 @@
 
 
 #define HD_DEV_OPEN 1001        // 打开硬盘
+#define GET_HD_IOCTL 1002	// 获取文件系统所在分区的扇区数量
 
 #endif
