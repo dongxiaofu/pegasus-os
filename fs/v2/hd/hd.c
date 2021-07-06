@@ -12,6 +12,13 @@
 
 struct hd_info hd_info[1];
 
+
+// 等待硬盘准备好传输数据
+void wait_for();
+// 等待硬盘中断发生
+void interrupt_wait();
+// 读写硬盘
+void hd_rdwt(Message *msg);
 void init_hd();
 // 向硬盘发送命令
 // 纠结，本函数的参数怎么设置？
@@ -71,6 +78,11 @@ void hd_handle()
 			hd_open();
 			Printf("%s:%d\n", "Open HD", source);
 			break;
+		case HD_DEV_READ:
+		case HD_DEV_WRITE:
+			hd_rdwt(&msg);
+			Printf("%s:%d\n", "RD/WT HD", source);
+			break;
 		case GET_HD_IOCTL:
 			get_hd_ioctl(0);
 			Printf("%s:%d\n", "GET_HD_IOCTL", source);
@@ -123,7 +135,7 @@ void hd_identify(int driver_number)
 	cmd.lba_low = 0;//99;
 	cmd.lba_mid = 0;//22;
 	cmd.lba_high = 0;//18;
-	cmd.device = MAKE_DEVICE_REGISTER(0, driver_number);
+	cmd.device = MAKE_DEVICE_REGISTER(driver_number, 0);
 	//	cmd.feature = 64;
 	//	cmd.sector_count = 0;
 	//	cmd.lba_low = 99;
@@ -249,7 +261,7 @@ void partition(int device, unsigned char part_type){
 			int nr_part = 1 + i;
 			hd_info[driver].primary_part[nr_part].base = partition_table[i].start_sector_lba;
 			hd_info[driver].primary_part[nr_part].size = partition_table[i].nr_sector;
-			
+
 			if(partition_table[i].system_id == PARTITION_SYSTEM_ID_EXTENDED){
 				partition(device + nr_part, PART_EXTENDED);
 			}
@@ -299,4 +311,71 @@ int get_hd_ioctl(int device)
 	int geometry = hd_info[driver].primary_part[device].size;
 	Printf("geometry:%d\n", geometry);
 	return geometry;
+}
+
+
+void wait_for()
+{
+	delay(4);
+}
+
+void interrupt_wait()
+{
+	delay(4); 
+}
+
+
+void hd_rdwt(Message *msg)
+{
+	// 从msg中获取硬盘操作的位置pos
+	unsigned long long pos = msg->POSITION;	
+	// 计算pos在安装文件系统的分区的LBA地址
+	int device = msg->DEVICE;
+	int driver = DR_OF_DEV(device);
+	// 用次设备号计算出硬盘分区数组中对应的索引
+	int logical_idx = IDX_OF_LOGICAL(device); 
+	int nr_sects = pos >> SECTOR_SIZE_SHIFT;
+	nr_sects += device < NR_PRIM_MAX ?\
+		    hd_info[driver].primary_part[device].base:\
+		    hd_info[driver].logical_part[logical_idx].base;	
+	// 读写硬盘
+	int len = msg->LEN;
+	int bytes_left = len;
+	// 从msg中获取内存地址。
+	// 这个内存地址存储了要写入硬盘的数据，	或用来存储从硬盘中读取到的数据。
+	char *hdbuf = msg->BUF;
+	int source = msg->source;
+	// 计算出hdbuf的物理地址。
+	char *phy_hdbuf = v2l(source, hdbuf);
+
+	int type = msg->type;
+	assert(type == HD_DEV_READ || type == HD_DEV_WRITE);
+	// 执行hd_cmd_out，指挥硬盘
+	struct hd_cmd cmd;
+	cmd.feature = 0;
+	cmd.sector_count = 1;
+	cmd.lba_low = nr_sects & 0xFF;
+	cmd.lba_mid = (nr_sects >> 8) & 0xFF;
+	cmd.lba_high = (nr_sects >> 16) & 0xFF;
+	cmd.device = MAKE_DEVICE_REGISTER(nr_sects, driver);
+	cmd.command = type == HD_DEV_READ ? ATA_READ : ATA_WRITE;
+	hd_cmd_out(&cmd);
+
+	while(bytes_left){
+		int bytes = MIN(SECTOR_SIZE, len);
+		if(type == HD_DEV_READ){
+			// 读
+			interrupt_wait();
+			// 从REG_DATA端口读取数据存储到phy_hdbuf中
+			read_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf,SECTOR_SIZE); 	
+		}else if(type == HD_DEV_WRITE){
+			// 写
+			wait_for();
+			// 把数据从phy_hdbuf写入到REG_DATA端口
+			write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf,SECTOR_SIZE); 	
+			interrupt_wait();
+		}
+		bytes_left -= SECTOR_SIZE;
+		phy_hdbuf += SECTOR_SIZE;
+	}
 }
