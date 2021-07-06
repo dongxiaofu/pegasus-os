@@ -63,7 +63,8 @@ unsigned int VirAddr2PhyAddr(unsigned int base, void *offset);
 Proc *pid2proc(int pid);
 // 根据进程表的指针计算进程ID。
 int proc2pid(Proc *proc);
-
+// 计算线性地址
+unsigned int v2l(int pid, void *offset);
 // process end
 
 // console.c  start

@@ -56,6 +56,15 @@ unsigned int VirAddr2PhyAddr(unsigned int base, void *offset)
 	return addr;
 }
 
+unsigned int v2l(int pid, void *offset)
+{
+	Proc *proc = pid2proc(pid);
+	int ds = proc->s_reg.ds;
+	int base = Seg2PhyAddrLDT(ds, proc);
+	int line_addr = base + offset;
+	return line_addr;
+}
+
 void init_propt()
 {
 	// 时钟中断

@@ -40,5 +40,7 @@ EXTERN TSS tss;
 
 // 保护模式相关 end
 
+#define MIN(a, b) (a > b ? b : a)
+#define MAX(a, b) (a > b ? a : b)
 
 

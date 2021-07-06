@@ -19,6 +19,8 @@
 #define ATA_IDENTIFY 0xEC
 // 从硬盘读取数据
 #define ATA_READ 0x20
+// 向硬盘写入数据
+#define ATA_WRITE 0x30
 
 
 // 分区表在MBR或EBR中的偏移量
@@ -47,12 +49,15 @@
 
 // 操作硬盘的命令
 struct hd_cmd{
+	// 作用是什么？
 	unsigned char feature;
+	// 要操作的扇区数量
 	unsigned char sector_count;
 	unsigned char lba_low;
 	unsigned char lba_mid;
 	unsigned char lba_high;
 	unsigned char device;
+	// 读硬盘、写硬盘、识别硬盘
 	unsigned char command;
 };
 // 打印硬盘参数需要用到的辅助元素，不知道用什么名称才好。
@@ -121,11 +126,14 @@ struct hd_info{
 //	(device-hd1a) / (NR_SUB_PART_PER_PRIM * NR_PRIM_PART_PER_HD) 
 
 #define DR_OF_DEV2(device) (device <= NR_PRIM_MAX ? 0 : 0)
-
+// 根据次设备号计算硬盘编号
 #define DR_OF_DEV(device) (device <= NR_PRIM_MAX ? \
 	device / NR_DEV_PER_HD:\
 	(device-hd1a) / (NR_SUB_PART_PER_PRIM * NR_PRIM_PART_PER_HD)) 
-
+// 根据次设备号计算逻辑分区数组索引
+#define IDX_OF_LOGICAL(device) ((device - hd1a) % (NR_SUB_PART_PER_PRIM * NR_PRIM_PART_PER_HD))
+// 位移运算---字节与扇区的换算需要移动的位数
+#define SECTOR_SIZE_SHIFT 9
 void read_port(int port, char *fsbuf, int size);
 void write_port(int port, char *fsbuf, int size);
 

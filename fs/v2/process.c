@@ -69,3 +69,12 @@ int proc2pid(Proc *proc)
 	int pid = proc - proc_table;
 	return pid;
 }
+
+//unsigned int v2l(int pid, void *offset)
+//{
+//	Proc *proc = pid2proc(pid);
+//	int ds = proc->s_reg.ds;
+//	int base = Seg2PhyAddrLDT(ds, proc);
+//	int line_addr = base + offset;
+//	return line_addr;
+//}
