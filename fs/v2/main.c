@@ -950,6 +950,8 @@ int send_rec(int function, Message *msg, int pid)
 			break;
 		case BOTH:
 			// 两个函数都使用pid，正确吗？
+			// 很费解。在send_msg中，pid是本进程投递消息的目标。
+			// 在receive_msg中，pid是本进程要从哪个进程接收消息。
 			ret = send_msg(msg, pid);	// pid是receiver
 			//while(proc_table[1].p_flag != RUNNING){
 
