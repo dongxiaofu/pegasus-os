@@ -56,6 +56,8 @@ Memcpy:
 
 	ret
 
+; 依次入栈的数据是：size、character、dest、eip、ebp
+; 因为是同一个特权级，因此，没有入栈cs。这叫“短跳转”。
 ; Memset(void *dest, char character, int size)
 Memset:
 	;;;;;;;;;;xhcg bx, bx
@@ -73,6 +75,7 @@ Memset:
 .1:
 	cmp ecx, 0
 	jz .2
+	; al 是一个字节，即8个bit。
 	mov [esi], al
 	dec ecx
 	inc esi		

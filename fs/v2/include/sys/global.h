@@ -43,4 +43,9 @@ EXTERN TSS tss;
 #define MIN(a, b) (a > b ? b : a)
 #define MAX(a, b) (a > b ? a : b)
 
-
+// 系统进程的PID
+// 顺序和初始值由kernel_main决定
+#define TASK_TTY 0
+#define TASK_SYS 1
+#define TASK_HD  2
+#define TASK_FS  3
