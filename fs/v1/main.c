@@ -572,6 +572,22 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 				break;
 			case 's':
 				//char *str = *(char **)next_arg;
+				//又耗费了非常非常非常非常多时间。
+				//1. next_arg的值是什么？
+				//2. 是一个内存地址。
+				//3. 是什么内存地址？
+				//4. 是Printf的第一个参数后面的参数地址。
+				//5. Strcpy需要的是什么？
+				//6. 需要的是第一个参数后面的那个参数地址指向的内存中的数据。
+				//7. 是的。next_arg是一个指向指针的指针。
+				//8. 所以，才需要把内存地址强制转换成(char **)类型。
+				//9. 获取指针指向的那个指针的值，方法是：*(char **)。
+				//数据		内存地址
+				//param2	0xC
+				//param1	0x8
+				//eip		0x4
+				//ebp		0x0
+				//next_arg是上面的0xC，Strcpy需要的是0xC中的数据param2。
 				Strcpy(p, *(char **)next_arg);
 				len2 = Strlen(*(char **)next_arg);
 				next_arg += 4;
