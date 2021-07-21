@@ -31,11 +31,13 @@ int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc);
 // 新建inode
 struct inode *new_inode(int nr_inode, int nr_start_sect);
 // 创建目录项
-struct root_dir_entry *new_dir_entry(struct inode *dir_root, char *filename, int nr_inode)
+struct root_dir_entry *new_dir_entry(struct inode *dir_root, char *filename, int nr_inode);
 // 创建文件
 struct inode *create_file(char *pathname);
 // 打开文件
 int open(char *pathname, int oflag);
+// 删除文件
+void do_unlink(struct inode *inode, char *filename)
 
 void task_fs()
 {
@@ -85,8 +87,9 @@ void mkfs()
 	// 4.3. 是安装文件系统的分区的第一个扇区？不是这个。没必要记录超级块占用的扇区的使用情况。
 	// 5. 一共有多少个文件？
 	// 6. 每个文件占用多少个扇区？
-	// 7. cnt_of_sector_map_sect = 512 * 文件数量 * 8。 
-	sp.cnt_of_sector_map_sect = CNT_OF_FILE_SECT * CNT_OF_FILE * SECTOR_SIZE * 8;
+	// 7. cnt_of_sector_map_sect = 每个文件占用的扇区数量 * 文件数量 / (512字节 * 8)。 
+	sp.cnt_of_sector_map_sect = CNT_OF_FILE_SECT * CNT_OF_FILE / SECTOR_SIZE;
+	// todo 应该写错了。先不管。
 	sp.cnt_of_inode_sect = (1*512*8*16) / 512;
 	// 1. 数据区的第一个扇区 = 引导扇区 + 超级块 + inode-map + sector-map + inodes。
 	// 2. 上面的公式中的每个元素都是简写，完整表述应该是："XX占用的扇区数量”,例如，超级块占用的扇区
@@ -401,7 +404,7 @@ int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc)
 	// 6. 写硬盘的单位是扇区。只有在找到B的情况下才写硬盘。
 
 	assert(nr_sect_to_alloc > 0);
-	
+
 	// todo 获取超级块
 	// 每个文件占用smap的多少个bit。
 	// int nr_sect_to_alloc = sb->nr_sect;
@@ -444,7 +447,7 @@ int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc)
 			break;
 		}
 	}
-	
+
 	return nr_free_smap_bit;
 }
 
@@ -454,11 +457,11 @@ struct inode *new_inode(int nr_inode, int nr_start_sect)
 	if(new_inode == 0){
 		return 0;
 	}	
-	
+
 	new_inode->start_sect = nr_start_sect;
 	new_inode->nr_sect = CNT_OF_FILE_SECT;
 	new_inode->size = 0;
-	
+
 	// 同步到硬盘
 	// todo sync_inode函数还没有实现。
 	sync_inode(new_inode);
@@ -493,7 +496,7 @@ struct root_dir_entry *new_dir_entry(struct inode *dir_root, char *filename, int
 			if(++m > nr_entry){
 				break;
 			}
-			
+
 			if(pde->nr_inode == 0){
 				new_pde = pde;
 				break;
@@ -525,4 +528,140 @@ struct root_dir_entry *new_dir_entry(struct inode *dir_root, char *filename, int
 
 	// 写入硬盘
 	WT_SECTOR(dev, nr_dir_entry_blk0 + i);
+}
+
+// 函数也不好确定。我不了解所有情况，所以不好确定函数。
+// todo 处理dev、dev_root、sync_inode、put_inode等。
+void do_unlink(struct inode *inode, char *filename)
+{
+	// 简略思路：
+	// 1. 检查是否能够删除目标文件
+	// 2. 清除imap
+	// 3. 清除smap
+	// 4. 清除inode
+	// 5. 清除目录项
+	// 实说实说，我写这个函数，不轻松，比较费劲。 
+	//
+	// 根目录不能删除
+	if(strcmp("/", filename) == 0){
+		panic("Can not delete the root dir");
+	}
+
+	// 被其他进程使用的文件不能删除
+	if(inode->cnt > 0){
+		panic("Can not delete the file that is using by other process.");		
+	}
+
+	// 不能删除终端文件。
+	// todo 暂不实现。	
+
+	// 清除imap
+	// 主要思路：找到目标bit所在扇区、所在字节、目标bit，然后用位运算设置值。
+	int imap_bit_idx = inode->nr_inode;	
+	int imap_byte_idx = imap_bit_idx / 8;
+	// 目前，imap只占用一个扇区，本不需要计算。但imap不会总是被设计成一个扇区，还是不写固定值了。
+	int imap_sector_idx = imap_byte_idx / SECTOR_SIZE;
+	// bit在目标字节中的偏移量。
+	int imap_offset = imap_bit_idx % 8;
+	// 读取目标扇区
+	// 引导扇区 + super block + 目标扇区
+	RD_SECTOR(dev, 1 + 1 + imap_sector_idx);
+	fsbuf[imap_byte_idx] &= ~(1 << imap_offset);
+	WT_SECTOR(dev, 1 + 1 + imap_sector_idx);
+
+	// 清除smap
+	// 主要思路：
+	// 1. 本文件的smap分为三段处理。这三段分别是：第一个字节、最后一个字节、中间字节。
+	// 2. 中间字节用字节为单位，把每个字节的值设置成0，按扇区为单位写入硬盘。
+	int smap_bit_idx = inode->start_sect - sb->data_1st_sect + 1;
+	int smap_byte_idx = smap_bit_idx / 8;
+	int smap_sect_idx = smap_byte_idx / SECTOR_SIZE;
+	int smap_bit_offset = smap_bit_idx % 8;
+	int smap_bit_left = smap_bit_idx - (8 - smap_bit_offset);
+	int smap_byte_left = smap_bit_left / 8;
+	// 处理第一个字节。第一个字节中只有(8- smap_bit_offset)个bit属于本文件的bit。
+	RD_SECT(dev, 1 + 1 + sb->cnt_of_inode_map_sect + smap_sect_idx);
+	fsbuf[smap_byte_idx] &= ~((~0) << smap_bit_offset); 
+
+	// 处理中间字节
+	int i = 1;
+	int s = smap_sect_idx;
+
+	for(; i < smap_byte_left; i++, smap_bit_left -= 8){
+		if(i == SECTOR_SIZE){
+			i = 0;
+			WT_SECTOR(dev, s);
+			RD_SECTOR(dev, s++);
+		}
+		fsbuf[i] = 0;
+	}
+
+	if(i == SECTOR_SIZE){
+		i = 0;
+		WT_SECTOR(dev, s);
+		RD_SECTOR(dev, s++);
+	}	
+
+	// 处理最后一个字节
+	fsbuf[i] &= (~0) << smap_bit_left; 
+	WT_SECTOR(dev, s);
+
+	// 清除inode，最简单
+	inode->start_sect = 0;
+	inode->size = 0;
+	inode->nr_sect = 0;
+	sync_inode(inode);
+	put_inode(inode);
+
+	// 清除目录项。又是个让我费解的问题。繁琐。
+	// 主要思路：
+	// 1. 和新增目录项很相似。遍历算法相似。
+	// 2. 删除的目录项是最后一个时改变根目录的大小，否则，不改变。
+	// 根目录的第一个扇区
+	int root_dir_sect_blk0 = sb->data_1st_sect;
+	// 根目录的大小
+	int root_dir_size = dev_root->size;
+	// 根目录占用的扇区
+	int root_dir_nr_sect = dev_root->nr_sect;	
+	// 根目录中的目录项的数量
+	int nr_dir_entry = root_dir_size / sizeof(struct dir_entry);
+	int i = 0;
+	int flag = 0;
+	// 纠结m的值。m是对遍历过的目录项的数量的统计。
+	int m = 0;
+	int new_root_dir_size = 0;
+	int j;
+
+	for(; i < root_dir_nr_sect; i++){
+		RD_SECT(dev, root_dir_sect_blk0 + i);
+		struct dir_entry *pde = (struct dir_entry *)fsbuf;
+		// for(int j = 0; j < root_dir_nr_sect; j++, pde++){
+		for(j = 0; j < root_dir_nr_sect; j++, pde++){
+			if(++m > nr_dir_entry){
+				break;
+			}
+
+			new_root_dir += sizeof(struct dir_entry);
+
+			if(strcmp(pde->filename, filename) == 0){
+				flag = 1;
+				Memset(pde, 0, sizeof(struct dir_entry));
+				break;
+			}
+		}
+
+		if(m > nr_dir_entry || flag){
+			break;
+		}
+	}
+
+	if(m == nr_dir_entry){
+		dev_root->size = new_root_dir_size;
+		sync_inode(dev_root);
+	}
+
+	// 修改了根目录才写硬盘。
+	if(flag){
+		WT_SECT(dev, root_dir_sect_blk0 + i);
+	}
 }
