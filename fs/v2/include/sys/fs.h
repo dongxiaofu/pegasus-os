@@ -86,6 +86,7 @@ struct inode inode_table[INODE_TABLE_SIZE];
 // fsbuf这个缓存区的内存地址设置成什么？
 // 我不知道，随便设置了一个值。
 #define fsbuf	0x1000000
+#define FSBUF_SIZE	1024 * 1024
 
 // 读写硬盘，单位是扇区
 #define RD_SECT(device, pos)	rd_wt(pos, device, fsbuf, SECTOR_SIZE, HD_DEV_READ)
