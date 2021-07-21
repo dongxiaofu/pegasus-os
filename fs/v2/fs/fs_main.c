@@ -638,7 +638,6 @@ void do_unlink(struct inode *inode, char *filename)
 	for(; i < root_dir_nr_sect; i++){
 		RD_SECT(dev, root_dir_sect_blk0 + i);
 		struct dir_entry *pde = (struct dir_entry *)fsbuf;
-		// for(int j = 0; j < root_dir_nr_sect; j++, pde++){
 		for(j = 0; j < root_dir_nr_sect; j++, pde++){
 			if(++m > nr_dir_entry){
 				break;
@@ -667,8 +666,8 @@ void do_unlink(struct inode *inode, char *filename)
 	if(flag){
 		WT_SECT(dev, root_dir_sect_blk0 + i);
 	}
-	}
 }
+
 void do_rdwt()
 {
 	// 这个函数的主要思路：
