@@ -37,7 +37,10 @@ struct inode *create_file(char *pathname);
 // 打开文件
 int open(char *pathname, int oflag);
 // 删除文件
-void do_unlink(struct inode *inode, char *filename)
+void do_unlink(struct inode *inode, char *filename);
+// 读写文件。
+// 不知道返回值，不知道需要哪些参数。边写边想吧。
+void do_rdwt();
 
 void task_fs()
 {
@@ -663,5 +666,71 @@ void do_unlink(struct inode *inode, char *filename)
 	// 修改了根目录才写硬盘。
 	if(flag){
 		WT_SECT(dev, root_dir_sect_blk0 + i);
+	}
+	}
+}
+void do_rdwt()
+{
+	// 这个函数的主要思路：
+	// 1. 先读取N个扇区。
+	// 2. 读，从N个扇区中把数据复制到buf中。
+	// 3. 写，从buf把数据复制到N个扇区中；然后，把N个扇区写入硬盘。
+	// 上面的表述并不完全正确。
+	// 有哪些难点？
+	// 1. 一次读取多少个扇区？
+	// 2. 每次复制多少数据？ 
+	// 从文件描述符中获取操作文件时的位置。 int pos = 0;
+	// 文件大小
+	int file_size = inode->size;
+	// 操作类型
+	// todo 从Message中获取
+	int hd_operate_type = HD_DEV_READ;
+	// 文件操作的结束位置
+	// pos的参照坐标是0，是相对于文件的初始位置的字节偏移量。
+	if(hd_operate_type == HD_DEV_READ){
+
+		pos_end = min(pos + len, file_size);
+
+	}else{
+
+		pos_end = min(pos + len, inode->nr_sect * SECTOR_SIZE);
+	}
+
+	int start_sect = inode->start_sect + pos / SECTOR_SIZE;
+	int start_end = inode->start_sect + pos_end / SECTOR_SIZE;
+
+	int chunk = min(start_end - start_sect + 1, FSBUF_SIZE);
+
+	// 获取buf的物理地址
+	int byte_left = len;
+	// 计算buf的线性地址
+	// todo 怎么确定sender？
+	int ds = sender->s_reg.ds;
+	int base = Seg2PhyAddrLDT(ds, sender);
+	int buf_line_addr = base + buf;
+
+	for(int i = start_sect; i <= start_end && byte_left; i += chunk){
+		int byte = min(byte_left, chunk * SECTOR_SIZE - offset);
+		// todo device 怎么确定？
+		rd_wt(i, device, fsbuf, SECTOR_SIZE * chunk, HD_DEV_READ);		
+
+		if(hd_operate_type == HD_DEV_READ){
+			// 把数据从fsbuf中复制到buf中
+			phycopy(buf_line_addr, fsbuf + offset,  byte);
+			// 文件的大小不会改变
+		}else{
+			// 把数据从buf中复制到fsbuf中
+			phycopy(fsbuf + offset, buf_line_addr, byte);
+			// 把fsbuf中的数据写入硬盘
+			rd_wt(i, device, fsbuf, SECTOR_SIZE * chunk, HD_DEV_WRITE);		
+			// 文件的大小会改变
+		}
+		byte_left -= byte;
+	}
+
+	// 呵呵，这个常识，还让费解。悲伤！
+	if(pos + len > inode->size){
+		inode->size = pos + len;
+		sync_inode(inode);
 	}
 }
