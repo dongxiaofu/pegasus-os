@@ -30,6 +30,10 @@ int alloc_imap_bit();
 int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc);
 // 新建inode
 struct inode *new_inode(int nr_inode, int nr_start_sect);
+// 同步indoe到硬盘
+void sync_inode(struct inode *inode);
+// 将inode的cnt减去1
+void put_inode(struct inode *inode)
 // 创建目录项
 struct root_dir_entry *new_dir_entry(struct inode *dir_root, char *filename, int nr_inode);
 // 创建文件
@@ -756,4 +760,32 @@ void do_rdwt(Message *msg)
 		inode->size = pos + len;
 		sync_inode(inode);
 	}
+}
+
+
+void sync_inode(struct inode *inode)
+{
+	// 本函数不负责处理目标inode是否存在于硬盘上，只复制更新数据到硬盘上。
+	// 主要思路：从硬盘中读取包含目标inode的扇区，更新fsbuf的inode后，把fsbuf写入硬盘。
+	int inode_size = sizeof(struct inode_size);
+	int nr_inode = inode->nr_inode;
+	// inode的数量的偏移量
+	int inode_idx = (nr_inode - 1) % (SECTOR_SIZE / inode_size); 
+	// 扇区偏移量
+	int sect_idx = (nr_inode - 1) / (SECTOR_SIZE / inode_size); 
+	// 读取一个扇区
+	int dev = inode->dev;
+	int pos = 1 + 1 + sb->cnt_of_inode_map_sect + sb->cnt_of_sector_map_sect + sect_idx;
+	RD_SECT(dev, pos);
+	
+	struct inode *new_inode = (struct inode *)fsbuf;
+	Memcpy(new_inode, inode, inode_size);
+
+	WT_SECT(dev, pos);	
+}
+
+void put_inode(struct inode *inode)
+{
+	assert(inode->cnt > 0);
+	inode->cnt--;
 }
