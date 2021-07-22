@@ -40,7 +40,7 @@ int open(char *pathname, int oflag);
 void do_unlink(struct inode *inode, char *filename);
 // 读写文件。
 // 不知道返回值，不知道需要哪些参数。边写边想吧。
-void do_rdwt();
+void do_rdwt(Message *msg);
 
 void task_fs()
 {
@@ -668,7 +668,7 @@ void do_unlink(struct inode *inode, char *filename)
 	}
 }
 
-void do_rdwt()
+void do_rdwt(Message *msg)
 {
 	// 这个函数的主要思路：
 	// 1. 先读取N个扇区。
@@ -679,6 +679,22 @@ void do_rdwt()
 	// 1. 一次读取多少个扇区？
 	// 2. 每次复制多少数据？ 
 	// 从文件描述符中获取操作文件时的位置。 int pos = 0;
+	//
+	// 所有需要的数据都从消息中获取，把函数的参数确定为只需要一个消息。
+
+	// msg的成员定义在 ./include/sys/type.h
+	// 操作类型
+	int hd_operate_type = msg.u0.u2.m20;
+	int inode = u0.u2.m21;
+	// 要操作的数据的长度：读len字节；写入len字节。
+	int len = u0.u1.m10; 
+	// 设备号
+	int dev = u0.u1.m12;
+	// 调用文件系统的进程PID。
+	int sender = u0.u2.m22;
+	// 把数据读取到buf中；把buf中的数据写入硬盘。
+	int buf = u0.u1.m11;
+	//
 	// 文件大小
 	int file_size = inode->size;
 	// 操作类型
@@ -695,6 +711,10 @@ void do_rdwt()
 		pos_end = min(pos + len, inode->nr_sect * SECTOR_SIZE);
 	}
 
+	// 字节偏移量
+	// 为什么没有位偏移量？因为，读取数据的单位是字节。
+	int offset = pos % SECTOR_SIZE;
+
 	int start_sect = inode->start_sect + pos / SECTOR_SIZE;
 	int start_end = inode->start_sect + pos_end / SECTOR_SIZE;
 
@@ -702,6 +722,7 @@ void do_rdwt()
 
 	// 获取buf的物理地址
 	int byte_left = len;
+	int byte_wt = 0;
 	// 计算buf的线性地址
 	// todo 怎么确定sender？
 	int ds = sender->s_reg.ds;
@@ -715,16 +736,19 @@ void do_rdwt()
 
 		if(hd_operate_type == HD_DEV_READ){
 			// 把数据从fsbuf中复制到buf中
-			phycopy(buf_line_addr, fsbuf + offset,  byte);
+			phycopy(buf_line_addr + byte_wt, fsbuf + offset,  byte);
 			// 文件的大小不会改变
 		}else{
 			// 把数据从buf中复制到fsbuf中
-			phycopy(fsbuf + offset, buf_line_addr, byte);
+			phycopy(fsbuf + offset, buf_line_addr + byte_wt, byte);
 			// 把fsbuf中的数据写入硬盘
 			rd_wt(i, device, fsbuf, SECTOR_SIZE * chunk, HD_DEV_WRITE);		
 			// 文件的大小会改变
 		}
 		byte_left -= byte;
+		byte_wt += byte;
+		// offset的处理很费劲。
+		offset = 0;
 	}
 
 	// 呵呵，这个常识，还让费解。悲伤！
