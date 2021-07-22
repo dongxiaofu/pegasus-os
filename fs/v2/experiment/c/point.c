@@ -10,6 +10,9 @@ int main(int argc, char **argv)
 	// 会导致段错误
 	//char *str2 = "";// = "hello";
 	//*str2 = 'A';
+	char str7[20] = "hello";
+	char *ptr = str7;
+
 	
 	//int *a;
 	int *k;

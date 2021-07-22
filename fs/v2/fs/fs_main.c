@@ -33,7 +33,7 @@ struct inode *new_inode(int nr_inode, int nr_start_sect);
 // 同步indoe到硬盘
 void sync_inode(struct inode *inode);
 // 将inode的cnt减去1
-void put_inode(struct inode *inode)
+void put_inode(struct inode *inode);
 // 创建目录项
 struct root_dir_entry *new_dir_entry(struct inode *dir_root, char *filename, int nr_inode);
 // 创建文件
@@ -49,19 +49,32 @@ void do_rdwt(Message *msg);
 void task_fs()
 {
 	Printf("%s\n", "FS is running");
+	while(1){
+		Message msg;
+		send_rec(RECEIVE, &msg, ANY);
+		int type = msg.type;
+		int source = msg.source;
 
-	Message msg;
-	msg.type = HD_DEV_OPEN;
-	msg.source = 3;
-	send_rec(BOTH, &msg, 2);
+		switch(type){
+			case OPEN:
+				open(msg);
+				break;
+			case READ:
+			case WRITE:
+				do_rdwt(msg);
+				break;
+			case CLOSE:
+				// todo 未实现。
+				// do_close();
+				break;
+			default:
+				panic("Unknown message");
+				break;
 
-	msg.type = GET_HD_IOCTL;
-	msg.source = 3;
-	send_rec(BOTH, &msg, 2);
+		}
 
-	Printf("FS : %d\n", msg.source);
-
-	spin("Stopping\n");
+		send_rec(SEND, &msg, source);
+	}
 }
 
 
@@ -703,10 +716,10 @@ void do_rdwt(Message *msg)
 	int file_size = inode->size;
 	// 操作类型
 	// todo 从Message中获取
-	int hd_operate_type = HD_DEV_READ;
+	int hd_operate_type = READ;
 	// 文件操作的结束位置
 	// pos的参照坐标是0，是相对于文件的初始位置的字节偏移量。
-	if(hd_operate_type == HD_DEV_READ){
+	if(hd_operate_type == READ){
 
 		pos_end = min(pos + len, file_size);
 
@@ -736,9 +749,9 @@ void do_rdwt(Message *msg)
 	for(int i = start_sect; i <= start_end && byte_left; i += chunk){
 		int byte = min(byte_left, chunk * SECTOR_SIZE - offset);
 		// todo device 怎么确定？
-		rd_wt(i, device, fsbuf, SECTOR_SIZE * chunk, HD_DEV_READ);		
+		rd_wt(i, device, fsbuf, SECTOR_SIZE * chunk, READ);		
 
-		if(hd_operate_type == HD_DEV_READ){
+		if(hd_operate_type == READ){
 			// 把数据从fsbuf中复制到buf中
 			phycopy(buf_line_addr + byte_wt, fsbuf + offset,  byte);
 			// 文件的大小不会改变
@@ -746,7 +759,7 @@ void do_rdwt(Message *msg)
 			// 把数据从buf中复制到fsbuf中
 			phycopy(fsbuf + offset, buf_line_addr + byte_wt, byte);
 			// 把fsbuf中的数据写入硬盘
-			rd_wt(i, device, fsbuf, SECTOR_SIZE * chunk, HD_DEV_WRITE);		
+			rd_wt(i, device, fsbuf, SECTOR_SIZE * chunk, WRITE);		
 			// 文件的大小会改变
 		}
 		byte_left -= byte;
@@ -777,7 +790,7 @@ void sync_inode(struct inode *inode)
 	int dev = inode->dev;
 	int pos = 1 + 1 + sb->cnt_of_inode_map_sect + sb->cnt_of_sector_map_sect + sect_idx;
 	RD_SECT(dev, pos);
-	
+
 	struct inode *new_inode = (struct inode *)fsbuf;
 	Memcpy(new_inode, inode, inode_size);
 
