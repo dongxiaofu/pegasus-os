@@ -74,12 +74,12 @@ void hd_handle()
 	unsigned int source = msg.source;
 
 	switch(type){
-		case HD_DEV_OPEN:
+		case OPEN:
 			hd_open();
 			Printf("%s:%d\n", "Open HD", source);
 			break;
-		case HD_DEV_READ:
-		case HD_DEV_WRITE:
+		case READ:
+		case WRITE:
 			hd_rdwt(&msg);
 			Printf("%s:%d\n", "RD/WT HD", source);
 			break;
@@ -349,7 +349,7 @@ void hd_rdwt(Message *msg)
 	char *phy_hdbuf = v2l(source, hdbuf);
 
 	int type = msg->type;
-	assert(type == HD_DEV_READ || type == HD_DEV_WRITE);
+	assert(type == READ || type == WRITE);
 	// 执行hd_cmd_out，指挥硬盘
 	struct hd_cmd cmd;
 	cmd.feature = 0;
@@ -358,17 +358,17 @@ void hd_rdwt(Message *msg)
 	cmd.lba_mid = (nr_sects >> 8) & 0xFF;
 	cmd.lba_high = (nr_sects >> 16) & 0xFF;
 	cmd.device = MAKE_DEVICE_REGISTER(nr_sects, driver);
-	cmd.command = type == HD_DEV_READ ? ATA_READ : ATA_WRITE;
+	cmd.command = type == READ ? ATA_READ : ATA_WRITE;
 	hd_cmd_out(&cmd);
 
 	while(bytes_left){
 		int bytes = MIN(SECTOR_SIZE, len);
-		if(type == HD_DEV_READ){
+		if(type == READ){
 			// 读
 			interrupt_wait();
 			// 从REG_DATA端口读取数据存储到phy_hdbuf中
 			read_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf,SECTOR_SIZE); 	
-		}else if(type == HD_DEV_WRITE){
+		}else if(type == WRITE){
 			// 写
 			wait_for();
 			// 把数据从phy_hdbuf写入到REG_DATA端口

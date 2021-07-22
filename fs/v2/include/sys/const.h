@@ -207,10 +207,10 @@
 // 进程相关 end
 
 
-#define HD_DEV_OPEN 1001        // 打开硬盘
-#define HD_DEV_READ 1002        // 读硬盘
-#define HD_DEV_WRITE 1003       // 写硬盘
-#define HD_DEV_CLOSE 1004       //关闭硬盘
+#define OPEN 1001        // 打开硬盘
+#define READ 1002        // 读硬盘
+#define WRITE 1003       // 写硬盘
+#define CLOSE 1004       //关闭硬盘
 #define GET_HD_IOCTL 1005	// 获取文件系统所在分区的扇区数量
 
 #endif
