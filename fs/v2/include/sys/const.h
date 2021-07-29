@@ -174,6 +174,8 @@
 #define USER_PROC_NUM 3
 // 系统任务的数量
 #define TASK_PROC_NUM 4
+// 用fork创建的用户进程的数量
+#define FORKED_USER_PROC_NUM 32
 // 消息收发对象是任意进程时，目标进程的pid是这个值
 #define ANY (USER_PROC_NUM + TASK_PROC_NUM + 10)
 // 消息收发对象是无对象时，目标进程的pid是这个值
@@ -212,5 +214,10 @@
 #define WRITE 1003       // 写硬盘
 #define CLOSE 1004       //关闭硬盘
 #define GET_HD_IOCTL 1005	// 获取文件系统所在分区的扇区数量
+
+
+// 进程表的p_flag
+#define FREE_SLOT 0	// 空闲进程表
+
 
 #endif

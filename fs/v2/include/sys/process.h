@@ -65,6 +65,9 @@ typedef struct proc{
         char name[20];
 	// 进程打开的文件相关
 	struct filp filp_table[FILE_TABLE_SIZE];	
+	
+	// 例如，空闲进程表。
+	int p_flag;
 
         // ipc start
         unsigned char p_flag;           // 进程的状态：RUNNING等
