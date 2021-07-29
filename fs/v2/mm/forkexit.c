@@ -152,3 +152,16 @@ void do_wait(Message msg, int *data)
 		send_rec(SEND, &m, pid);
 	}
 }
+
+
+void cleanup(Proc *proc)
+{
+	// 解除父进程的阻塞
+	Message msg2parent;
+	msg2parent.type = SYSCALL_RET;
+	msg2parent.RET_VAL = 0;
+	msg2parent.PID = proc->parent_pid;
+	send_rec(SEND, &msg2parent, proc->parent_pid);
+	// 回收子进程的进程表
+	proc->p_flag = FREE_SLOT;
+}
