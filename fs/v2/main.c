@@ -9,6 +9,76 @@
 #include "proto.h"
 #include "global.h"
 
+// 解包tar文件
+struct tar_header{
+	char name[100];
+	char mode[8];
+	char uid[8];
+	char gid[8];
+	char size[12];
+	char mtime[12];
+	char chksum[8];
+	char typeflag;
+	char linkname[100];
+	char magic[6];
+	char version[2];
+	char uname[32];
+	char gname[32];
+	char devmajor[8];
+	char devminor[8];
+	char prefix[155];
+	char padding[12];
+};
+
+void untar(const char *filename)
+{
+	// 思路：
+	// 1. 读取filename文件。
+	// 2. 先读取一个扇区，再读取一个文件，并把这个文件的数据写入新文件。
+	// 3. 读取文件时，读取单位一定是N个扇区。
+	// todo 后续再完善open。
+	int fd = open(filename);
+
+	// 获取文件的长度
+	// todo 
+	int file_size = 0;	
+
+	char buf[SECTOR_SIZE * 16];
+	int chunk = sizeof(buf);
+
+	while(1){
+		read(fd, buf, SECTOR_SIZE);
+		if(strlen(buf) == 0){
+			break;
+		}
+
+		struct tar_header * tar_header = (struct tar_header *)buf;
+		// todo 不确定能不能用指针接收一个字符串。
+		char *name = tar_header->name;
+		int fdout = open(name);
+		// 计算文件大小
+		int len = 0;
+		char *size_str = tar_header->size;
+		char *p = size_str;
+		while(*p){
+			len = len * 8 + (*p - '0');
+			p++;
+		}
+
+		int bytes_left = len;
+		while(bytes_left){
+			int iobytes = min(chunk, bytes_left);
+			read(fd, buf, ((iobytes - 1)/SECTOR_SIZE + 1)*SECTOR_SIZE);
+			write(fdout, buf, iobytes);
+			bytes_left -= iobytes;
+		}
+		// todo close函数待实现
+		close(fdout);
+	}	
+
+	close(fd);
+}
+
 void atoi(char *str, int num)
 {
 	char *p = str;
@@ -31,7 +101,7 @@ void atoi(char *str, int num)
 			*p++ = ch;
 		}
 	}	
-	
+
 	*p = 0;
 
 	return;
@@ -89,11 +159,11 @@ void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags)
 	disp_str_colour("vec_no:", colour);
 	disp_int(vec_no);
 	disp_str("\n\n");
-	
+
 	if(error_no != 0xFFFFFFFF){
 		disp_str_colour("error_no:", colour);
-        	disp_int(error_no);
-        	disp_str("\n\n");
+		disp_int(error_no);
+		disp_str("\n\n");
 	}
 
 	disp_str_colour("cs:", colour);
@@ -101,12 +171,12 @@ void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags)
 	disp_str("\n\n");
 
 	disp_str_colour("eip:", colour);
-        disp_int(eip);
-        disp_str("\n\n");
+	disp_int(eip);
+	disp_str("\n\n");
 
 	disp_str_colour("eflags:", colour);
-        disp_int(eflags);
-        disp_str("\n\n");	
+	disp_int(eflags);
+	disp_str("\n\n");	
 
 	return;
 }
@@ -153,24 +223,24 @@ void test()
 	//disp_str_colour2(0x9988, 0x74);
 	dis_pos = 0;
 	for(int i = 0; i < 80 * 25 * 2; i++){
-                disp_str(" ");
-        }
-        dis_pos = 0;
+		disp_str(" ");
+	}
+	dis_pos = 0;
 	//return;
-        disp_str_colour("Hello, World!", 0x0F);
+	disp_str_colour("Hello, World!", 0x0F);
 	disp_str("\n");
-        disp_int(0x89);
+	disp_int(0x89);
 	disp_str("\n");
-        disp_str_colour("Hello, World!", 0x0F);
-        disp_str_colour("Hello, World!", 0x74);
+	disp_str_colour("Hello, World!", 0x0F);
+	disp_str_colour("Hello, World!", 0x74);
 	disp_str("\n");
-        disp_str_colour("Hello, World!===========I am successful!", 0x0F);
-        disp_str("\n=================\n");
-        disp_str("Hello, World!\n");
-        disp_int(23);
+	disp_str_colour("Hello, World!===========I am successful!", 0x0F);
+	disp_str("\n=================\n");
+	disp_str("Hello, World!\n");
+	disp_int(23);
 	disp_str("\n");
-        disp_int(0x020A);
-        disp_str("\n");
+	disp_int(0x020A);
+	disp_str("\n");
 }
 
 
@@ -384,7 +454,7 @@ void delay(int time)
 
 void TestB()
 {
-		//Printf("<b ticks:%x\n>", get_ticks());
+	//Printf("<b ticks:%x\n>", get_ticks());
 	// select_console(1);
 	unsigned int i = 0;
 	while(1){
@@ -415,7 +485,7 @@ void TestB()
 
 void TestC()
 {
-		//Printf("<c ticks:%x\n>", get_ticks());
+	//Printf("<c ticks:%x\n>", get_ticks());
 	// select_console(2);
 	unsigned int i = 0;
 	while(1){
@@ -449,7 +519,7 @@ void TestC()
 int sys_get_ticks()
 {
 	//disp_str("@@");
-	
+
 	return ticks;
 }
 
@@ -477,11 +547,11 @@ void TaskSys()
 {
 	while(1){
 		//Message *msg;
-			//Printf("%c--", 'S');
-			//Printf("flag:%x--,", proc_table[1].p_flag);
-			//Printf("send_to:%x--,", proc_table[1].p_send_to);
-			//Printf("receive_from:%x--,", proc_table[1].p_receive_from);
-			//Printf("%c", '\n');
+		//Printf("%c--", 'S');
+		//Printf("flag:%x--,", proc_table[1].p_flag);
+		//Printf("send_to:%x--,", proc_table[1].p_send_to);
+		//Printf("receive_from:%x--,", proc_table[1].p_receive_from);
+		//Printf("%c", '\n');
 		//return;
 		Message msg;
 		Memset(&msg, 0, sizeof(Message));
@@ -497,7 +567,7 @@ void TaskSys()
 				ret = send_msg(&msg, source);
 				break;
 			default:
-				
+
 				break;
 		}
 	}
@@ -528,7 +598,7 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 	// Memset(inner_buf, 0, DEFAULT_STR_SIZE);
 	char inner_buf[DEFAULT_STR_SIZE];
 	char *str = inner_buf;
-	 // 转换数字使用
+	// 转换数字使用
 	// 使用256会导致gdt中的数据被擦除，从而导致各种奇怪的问题，比如，proc_ready_table中的数据被修改。
 	// 耗费了八个小时左右才发现这个问题。
 	//char tmp[256];	
@@ -551,42 +621,42 @@ int vsprintf(char *buf, char *fmt, char *var_list)
 		switch(*fmt){
 			//case 'd':;
 			case 'd':{
-				int m = *(int *)next_arg;
-				itoa(m, &str, 10);
-				//i2a(m, 10, &str);
-				//Strcpy(p, str);
-				Strcpy(p, inner_buf);
-			      	next_arg += 4;
-				// len2 = Strlen(str);
-				len2 = Strlen(inner_buf);
-				p += len2;
-				break;
-			}
+					 int m = *(int *)next_arg;
+					 itoa(m, &str, 10);
+					 //i2a(m, 10, &str);
+					 //Strcpy(p, str);
+					 Strcpy(p, inner_buf);
+					 next_arg += 4;
+					 // len2 = Strlen(str);
+					 len2 = Strlen(inner_buf);
+					 p += len2;
+					 break;
+				 }
 			case 'x':
-				atoi(tmp, *(int *)next_arg);
-				//Strcpy(buf, tmp);
-				Strcpy(p, tmp);
-				next_arg += 4;
-				len2 = Strlen(tmp);
-				p += len2;//Strlen(tmp);	
-				break;
+				 atoi(tmp, *(int *)next_arg);
+				 //Strcpy(buf, tmp);
+				 Strcpy(p, tmp);
+				 next_arg += 4;
+				 len2 = Strlen(tmp);
+				 p += len2;//Strlen(tmp);	
+				 break;
 			case 's':
-				//char *str = *(char **)next_arg;
-				Strcpy(p, *(char **)next_arg);
-				len2 = Strlen(*(char **)next_arg);
-				next_arg += 4;
-				//len2 = 6;//Strlen(*(char **)next_arg);
-				p += len2;//Strlen(tmp);
-				break;
+				 //char *str = *(char **)next_arg;
+				 Strcpy(p, *(char **)next_arg);
+				 len2 = Strlen(*(char **)next_arg);
+				 next_arg += 4;
+				 //len2 = 6;//Strlen(*(char **)next_arg);
+				 p += len2;//Strlen(tmp);
+				 break;
 			case 'c':
-				//char c = *(char *)next_arg;
-				*p = *(char *)next_arg;
-				next_arg += 4;
-				len2 = 1;
-				p += len2;//Strlen(tmp);
-				break;
+				 //char c = *(char *)next_arg;
+				 *p = *(char *)next_arg;
+				 next_arg += 4;
+				 len2 = 1;
+				 p += len2;//Strlen(tmp);
+				 break;
 			default:
-				break;
+				 break;
 		}
 	}
 
@@ -608,7 +678,7 @@ void printx(char *fmt, ...)
 // 系统调用，使用汇编代码实现
 // void write_debug(char *buf, int len);
 void sys_printx(char *error_msg, int len, Proc *proc)
-//void sys_printx(char *error_msg, int caller_pid)
+	//void sys_printx(char *error_msg, int caller_pid)
 {
 	int line_addr;
 	int base;
@@ -679,25 +749,25 @@ void panic(char *error_msg)
 void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line)
 {
 	printx("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
-	//Printf("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
-	ASSERT_MAGIC, exp, filename, base_filename, 8456);
-	spin("Stop Here!\n");
-	return;
-}
+			//Printf("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
+			ASSERT_MAGIC, exp, filename, base_filename, 8456);
+			spin("Stop Here!\n");
+			return;
+			}
 
 
-// debug end
+			// debug end
 
 
-// ipc start
-int dead_lock(int src, int dest)
-{
-	Proc *src_proc = pid2proc(src);
-	Proc *dest_proc = pid2proc(dest);
-	while(1){
-		// Proc *src_proc = pid2proc(src);
-		// Proc *dest_proc = pid2proc(dest);
-		if (dest_proc->p_flag == SENDING){
+			// ipc start
+			int dead_lock(int src, int dest)
+			{
+			Proc *src_proc = pid2proc(src);
+			Proc *dest_proc = pid2proc(dest);
+			while(1){
+			// Proc *src_proc = pid2proc(src);
+			// Proc *dest_proc = pid2proc(dest);
+			if (dest_proc->p_flag == SENDING){
 			if(dest_proc->p_send_to == src){
 				// panic("dead lock!\n");
 				//Printf("%x---->%x---->", src, dest);
@@ -712,13 +782,13 @@ int dead_lock(int src, int dest)
 				return 1;
 			}
 			dest_proc = pid2proc(dest_proc->p_send_to);	
-		}else{
-			break;
-		}
-	}
+			}else{
+				break;
+			}
+			}
 
-	return 0;
-}
+			return 0;
+			}
 // send_msg 通过sys_call调用
 int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 {
@@ -737,7 +807,7 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 	}
 
 	if(receiver->p_flag == RECEIVING && (receiver->p_receive_from == sender_pid
-		|| receiver->p_receive_from == ANY)){
+				|| receiver->p_receive_from == ANY)){
 		// 计算msg的线性地址
 		int ds = sender->s_reg.ds;
 		int base = Seg2PhyAddrLDT(ds, sender);
@@ -805,7 +875,7 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 			pre->next->sender_pid = sender_pid;
 			pre->next->next = 0;
 		}
-		
+
 		// 调试函数
 		assert(sender->p_flag == SENDING);
 		assert(sender->p_send_to == receiver_pid);
@@ -814,219 +884,219 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 		assert(receiver->header != 0x0);
 		// 阻塞sender
 		block(sender);
-	}
-
-	return 0;
-}
-
-// receive_msg 通过sys_call调用
-int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
-{
-	int copy_ok = 0;
-	int p_from;
-	
-	Proc *sender = pid2proc(sender_pid);
-	int receiver_pid = proc2pid(receiver);
-	if(DEBUG == 1){	
-		Printf("sender = %x, receiver = %x\n", sender_pid, receiver_pid);
-
-		assert((sender_pid == 1) || (sender_pid == 2) || (sender_pid == 3) || (sender_pid == 15));
-		assert((receiver_pid == 1) || (receiver_pid == 2) || (receiver_pid == 3) || (receiver_pid == 15));
-}
-	if(sender_pid == ANY){
-		//if(receiver->header->next->sender_pid != 0x0){
-		if(receiver->header != 0x0){
-			// p_from = receiver->header->next->sender_pid;
-			p_from = receiver->header->sender_pid;
-			// header是头指针；把第一个进程从队列中移除
-			// receiver->header->next = receiver->header->next->next;
-			receiver->header = receiver->header->next;
-			copy_ok = 1;
 		}
-	}else if(0 <= sender_pid && sender_pid < USER_PROC_NUM + TASK_PROC_NUM){
-		if(sender->p_flag == SENDING && (sender->p_send_to == ANY 
-					|| sender->p_send_to == receiver_pid)){
-			// 遍历receiver的发送消息的进程队列，从中移除sender
-			// 本质是，从发送消息的进程队列中移除sender
-			struct MsgSender *current = receiver->header;
-			struct MsgSender *pre = receiver->header;
-			// struct MsgSender current = receiver->header;
-			// struct MsgSender pre = receiver->header;
-			//while(*current != 0x0){
-			// while(current->sender_pid != 0x0){
-			while(current != 0x0){
-				if(current->sender_pid == sender_pid){
+
+		return 0;
+		}
+
+		// receive_msg 通过sys_call调用
+		int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
+		{
+			int copy_ok = 0;
+			int p_from;
+
+			Proc *sender = pid2proc(sender_pid);
+			int receiver_pid = proc2pid(receiver);
+			if(DEBUG == 1){	
+				Printf("sender = %x, receiver = %x\n", sender_pid, receiver_pid);
+
+				assert((sender_pid == 1) || (sender_pid == 2) || (sender_pid == 3) || (sender_pid == 15));
+				assert((receiver_pid == 1) || (receiver_pid == 2) || (receiver_pid == 3) || (receiver_pid == 15));
+			}
+			if(sender_pid == ANY){
+				//if(receiver->header->next->sender_pid != 0x0){
+				if(receiver->header != 0x0){
+					// p_from = receiver->header->next->sender_pid;
+					p_from = receiver->header->sender_pid;
+					// header是头指针；把第一个进程从队列中移除
+					// receiver->header->next = receiver->header->next->next;
+					receiver->header = receiver->header->next;
 					copy_ok = 1;
-					break;
 				}
-				// 难点：下面这句，应该在break语句的上面还是下面？
-				// 心算能力强，心算就能计算出结果。可我的心算能力不强。
-				// 在我的设计中，在上面还是下面，结果一样。可能和我的
-				// 队列设置了头结点指针有关。
-				pre = current;
-				current = current->next;
-			}
-			if(copy_ok == 1){
-				// 移除sender
-				pre->next = current->next;
-				p_from = sender_pid;
-			}
-		}
-	}
+			}else if(0 <= sender_pid && sender_pid < USER_PROC_NUM + TASK_PROC_NUM){
+				if(sender->p_flag == SENDING && (sender->p_send_to == ANY 
+							|| sender->p_send_to == receiver_pid)){
+					// 遍历receiver的发送消息的进程队列，从中移除sender
+					// 本质是，从发送消息的进程队列中移除sender
+					struct MsgSender *current = receiver->header;
+					struct MsgSender *pre = receiver->header;
+					// struct MsgSender current = receiver->header;
+					// struct MsgSender pre = receiver->header;
+					//while(*current != 0x0){
+					// while(current->sender_pid != 0x0){
+					while(current != 0x0){
+						if(current->sender_pid == sender_pid){
+							copy_ok = 1;
+							break;
+						}
+						// 难点：下面这句，应该在break语句的上面还是下面？
+						// 心算能力强，心算就能计算出结果。可我的心算能力不强。
+						// 在我的设计中，在上面还是下面，结果一样。可能和我的
+						// 队列设置了头结点指针有关。
+						pre = current;
+						current = current->next;
+					}
+					if(copy_ok == 1){
+						// 移除sender
+						pre->next = current->next;
+						p_from = sender_pid;
+					}
+				}
+				}
 
 
-	if(copy_ok == 1){
-		Proc *p_from_proc = pid2proc(p_from);
-		// 计算msg的线性地址
-		int ds = receiver->s_reg.ds;
-                int base = Seg2PhyAddrLDT(ds, receiver);
-                int msg_line_addr = base + msg;
-                int msg_size = sizeof(Message);
-                // 从receiver中把消息复制到sender
-                phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);		
+				if(copy_ok == 1){
+					Proc *p_from_proc = pid2proc(p_from);
+					// 计算msg的线性地址
+					int ds = receiver->s_reg.ds;
+					int base = Seg2PhyAddrLDT(ds, receiver);
+					int msg_line_addr = base + msg;
+					int msg_size = sizeof(Message);
+					// 从receiver中把消息复制到sender
+					phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);		
 
-		// 重置sender
-                p_from_proc->p_msg = 0;
-                p_from_proc->p_flag = RUNNING;
-                p_from_proc->p_send_to = 0;
-                // 重置receiver
-                receiver->p_msg = 0;
-                receiver->p_receive_from = 0;
-		// 解除sender的阻塞
-		// unblock(sender);
-		unblock(p_from_proc);
+					// 重置sender
+					p_from_proc->p_msg = 0;
+					p_from_proc->p_flag = RUNNING;
+					p_from_proc->p_send_to = 0;
+					// 重置receiver
+					receiver->p_msg = 0;
+					receiver->p_receive_from = 0;
+					// 解除sender的阻塞
+					// unblock(sender);
+					unblock(p_from_proc);
 
-		// 调试函数
-		assert(p_from_proc->p_msg == 0);
-		assert(p_from_proc->p_flag == RUNNING);
-		assert(p_from_proc->p_send_to == 0);
+					// 调试函数
+					assert(p_from_proc->p_msg == 0);
+					assert(p_from_proc->p_flag == RUNNING);
+					assert(p_from_proc->p_send_to == 0);
 
-		assert(receiver->p_msg == 0);
-		assert(receiver->p_receive_from == 0);
+					assert(receiver->p_msg == 0);
+					assert(receiver->p_receive_from == 0);
 
-	}else{
-		receiver->p_flag = RECEIVING;
-		receiver->p_msg = msg;
-		
-		if(sender_pid == ANY){
-			receiver->p_receive_from = ANY;
-		}else{
-			receiver->p_receive_from = sender_pid;
-		}
+				}else{
+					receiver->p_flag = RECEIVING;
+					receiver->p_msg = msg;
 
-		// 调试函数
-		assert(receiver->p_flag == RECEIVING);
-		assert(receiver->p_msg == msg);
+					if(sender_pid == ANY){
+						receiver->p_receive_from = ANY;
+					}else{
+						receiver->p_receive_from = sender_pid;
+					}
 
-		block(receiver);
-	}
+					// 调试函数
+					assert(receiver->p_flag == RECEIVING);
+					assert(receiver->p_msg == msg);
 
-	return 0;
-}
+					block(receiver);
+				}
 
-// 系统调用--用汇编实现
-// int send_msg(Message *msg, int receiver_pid)
-// {
+				return 0;
+				}
 
-// }
+				// 系统调用--用汇编实现
+				// int send_msg(Message *msg, int receiver_pid)
+				// {
 
-// 系统调用--用汇编实现
-// int receive_msg(Message *msg, int sender_pid)
-// {
+				// }
 
-// }
+				// 系统调用--用汇编实现
+				// int receive_msg(Message *msg, int sender_pid)
+				// {
 
-// send_rec封装send_msg和receive_msg，直接被外部使用
-// function：选择发送还是接收还是其他;pid，sender或receiver的进程id
-int send_rec(int function, Message *msg, int pid)
-{
-	int ret;
-	switch(function){
-		case SEND:
-			ret = send_msg(msg, pid);
-			break;
-		case RECEIVE:
-			ret = receive_msg(msg, pid);
-			break;
-		case BOTH:
-			// 两个函数都使用pid，正确吗？
-			// 很费解。在send_msg中，pid是本进程投递消息的目标。
-			// 在receive_msg中，pid是本进程要从哪个进程接收消息。
-			ret = send_msg(msg, pid);	// pid是receiver
-			//while(proc_table[1].p_flag != RUNNING){
+				// }
 
-			//}
-			//assert(proc_table[1].p_flag == RUNNING);
-			if(ret == 0){
-				ret = receive_msg(msg, pid);	// pid是sender
-				assert(msg->val != 0);
-			}
-			break;
-		default:
-			panic("function is invalid\n");
-			break;
-	}
-	return 0;
-}
-// 阻塞进程
-int block(Proc *proc)
-{
-	// 判断，调试函数
-	//k_reenter--;
-	schedule_process();
-	return 0;
-}
-// 解除阻塞
-int unblock(Proc *proc)
-{
-	// do nothing
-	return 0;
-}
+				// send_rec封装send_msg和receive_msg，直接被外部使用
+				// function：选择发送还是接收还是其他;pid，sender或receiver的进程id
+				int send_rec(int function, Message *msg, int pid)
+				{
+					int ret;
+					switch(function){
+						case SEND:
+							ret = send_msg(msg, pid);
+							break;
+						case RECEIVE:
+							ret = receive_msg(msg, pid);
+							break;
+						case BOTH:
+							// 两个函数都使用pid，正确吗？
+							// 很费解。在send_msg中，pid是本进程投递消息的目标。
+							// 在receive_msg中，pid是本进程要从哪个进程接收消息。
+							ret = send_msg(msg, pid);	// pid是receiver
+							//while(proc_table[1].p_flag != RUNNING){
 
-int get_ticks_ipc()
-{
-	//return ticks;
-	Message msg;
-	Memset(&msg, 0, sizeof(Message));
-	//msg.source = 2;
-	msg.type = TICKS_TASK_SYS_TYPE;
-	int ret = send_rec(BOTH, &msg, 1);
-	int ticks = msg.val;
-	return ticks;
-}
+							//}
+							//assert(proc_table[1].p_flag == RUNNING);
+							if(ret == 0){
+								ret = receive_msg(msg, pid);	// pid是sender
+								assert(msg->val != 0);
+							}
+							break;
+						default:
+							panic("function is invalid\n");
+							break;
+					}
+					return 0;
+				}
+				// 阻塞进程
+				int block(Proc *proc)
+				{
+					// 判断，调试函数
+					//k_reenter--;
+					schedule_process();
+					return 0;
+				}
+				// 解除阻塞
+				int unblock(Proc *proc)
+				{
+					// do nothing
+					return 0;
+				}
 
-// 把整型数字转成指定进制的字符串
-//void itoa(int value, char *str, int base)
-char *itoa(int value, char **str, int base)
-{
-	int remainder = value % base;
-	int queotion = value / base;
-	// 这是递归啊，怎么会用while呢？
-	//while(queotion > 0){
-	//	itoa(queotion, str, base);
-	//}
-	if(queotion){
-		itoa(queotion, str, base);
-	}
-	// *str++，是这样写吗？没有把握。不是！致命的常规错误，耗费了很长时间。
-	// *str++ = remainder + '0';
+				int get_ticks_ipc()
+				{
+					//return ticks;
+					Message msg;
+					Memset(&msg, 0, sizeof(Message));
+					//msg.source = 2;
+					msg.type = TICKS_TASK_SYS_TYPE;
+					int ret = send_rec(BOTH, &msg, 1);
+					int ticks = msg.val;
+					return ticks;
+				}
 
-	*((*str)++) = remainder + '0';
-	return *str;
-}
-// ipc end
+				// 把整型数字转成指定进制的字符串
+				//void itoa(int value, char *str, int base)
+				char *itoa(int value, char **str, int base)
+				{
+					int remainder = value % base;
+					int queotion = value / base;
+					// 这是递归啊，怎么会用while呢？
+					//while(queotion > 0){
+					//	itoa(queotion, str, base);
+					//}
+					if(queotion){
+						itoa(queotion, str, base);
+					}
+					// *str++，是这样写吗？没有把握。不是！致命的常规错误，耗费了很长时间。
+					// *str++ = remainder + '0';
 
-char* i2a(int val, int base, char ** ps)
-{
-	int m = val % base;
-	int q = val / base;
-	if (q) {
-		i2a(q, base, ps);
-	}
-	*(*ps)++ = (m < 10) ? (m + '0') : (m - 10 + 'A');
-	// 等价于
-	// unsigned char c = (m < 10) ? (m + '0') : (m - 10 + 'A');
-	// *ps++ = &c;
+					*((*str)++) = remainder + '0';
+					return *str;
+				}
+				// ipc end
 
-	return *ps;
-}
+				char* i2a(int val, int base, char ** ps)
+				{
+					int m = val % base;
+					int q = val / base;
+					if (q) {
+						i2a(q, base, ps);
+					}
+					*(*ps)++ = (m < 10) ? (m + '0') : (m - 10 + 'A');
+					// 等价于
+					// unsigned char c = (m < 10) ? (m + '0') : (m - 10 + 'A');
+					// *ps++ = &c;
+
+					return *ps;
+				}
