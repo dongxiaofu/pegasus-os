@@ -120,3 +120,35 @@ void do_exit(Message msg, int exit_code)
 		}
 	}	
 }
+
+
+void do_wait(Message msg, int *data)
+{
+	// caller
+	int pid = msg.source;
+	int child_count = 0;
+
+	// 检查子进程是否处于HANGING状态
+	for(int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++){
+		if(proc_table[i].parent_pid = pid){
+			child_count++;
+			if(proc_table[i].p_flag == HANGING){
+				proc_table[pid].p_flag = ~WAITING;
+				cleanup(proc_table[i]);
+				return;
+			}
+		}
+	}
+
+	// 有子进程；无子进程。
+	if(child_count){
+		proc_table[pid].p_flag = HANGING;
+	}else{
+		// 解除caller的阻塞
+		Message m;
+		m.type = SYSCALL_RET;
+		m.RET_VAL = 0;
+		m.PID = 0;
+		send_rec(SEND, &m, pid);
+	}
+}
