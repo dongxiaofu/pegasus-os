@@ -153,7 +153,6 @@ void do_wait(Message msg, int *data)
 	}
 }
 
-
 void cleanup(Proc *proc)
 {
 	// 解除父进程的阻塞
