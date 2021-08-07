@@ -77,6 +77,9 @@ int do_fork(Message *msg)
 	msg2fs.PID = pid;
 	send_rec(BOTH, &msg2fs, pid); 
 
+	// 把子进程的pid返回给父进程
+	msg->PID = pid;
+
 	// 解除子进程的阻塞
 	Message m;
 	m.type = SYSCALL_RET;
