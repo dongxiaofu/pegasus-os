@@ -39,12 +39,14 @@ struct root_dir_entry *new_dir_entry(struct inode *dir_root, char *filename, int
 // 创建文件
 struct inode *create_file(char *pathname);
 // 打开文件
-int open(char *pathname, int oflag);
+int do_open(char *pathname, int oflag);
 // 删除文件
 void do_unlink(struct inode *inode, char *filename);
 // 读写文件。
 // 不知道返回值，不知道需要哪些参数。边写边想吧。
 void do_rdwt(Message *msg);
+// 关闭文件
+int do_close(int fd);
 
 void task_fs()
 {
@@ -54,18 +56,22 @@ void task_fs()
 		send_rec(RECEIVE, &msg, ANY);
 		int type = msg.type;
 		int source = msg.source;
+		int fd = msg.FD;
+
+		pcaller = &proc_table[source];
+
+		Message fs_msg;
 
 		switch(type){
 			case OPEN:
-				open(msg);
+				fs_msg.FD = do_open(msg);
 				break;
 			case READ:
 			case WRITE:
 				do_rdwt(msg);
 				break;
 			case CLOSE:
-				// todo 未实现。
-				// do_close();
+				do_close(fd);
 				break;
 			default:
 				panic("Unknown message");
@@ -73,10 +79,10 @@ void task_fs()
 
 		}
 
-		send_rec(SEND, &msg, source);
+		fs_msg.type = SYSCALL_RET;
+		send_rec(SEND, &fs_msg, source);
 	}
 }
-
 
 void rd_wt(int pos, int device, int buf, int len, int type)
 {
@@ -154,13 +160,35 @@ void mkfs()
 	Memset(fsbuf, 0, SECTOR_SIZE);
 	struct inode inode;
 	inode.type = FILE_TYPE_TEXT;
-	inode.size = 0;
+	inode.size = sizeof(struct dir_entry);
 	inode.start_sect = sp.data_1st_sect;
 	inode.nr_sect = CNT_OF_FILE_SECT;	
 	// 只存在于内存中的inode成员，不能在此时赋值。
 	Memcpy(fsbuf, &inode, INODE_SIZE);
 	// 很想用一个变量存储1 + 1 + 1 + sp.cnt_of_sector_map_sect，可想不出好名字。
 	WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp.cnt_of_sector_map_sect);
+
+	// 创建默认文件：根目录、终端。
+	RD_SECT(ROOT_DEV, 1 + 1 + 1 + sp.cnt_of_sector_map_sect);	
+	// 创建根目录
+	struct inode *pinode = (struct inode *)fsbuf;
+	pinode->type = FILE_TYPE_TEXT;
+	pinode->size = sizeof(struct dir_entry);
+	pinode->start_sect = sp.data_1st_sect;
+	pinode->nr_sect = CNT_OF_FILE_SECT;	
+	// 创建终端
+	for(int i = 0; i < 3; i++){
+		pinode = (struct inode *)(fsbuf + sizeof(struct inode) * (i+1));
+		pinode->type = IS_SPECIAL_CHAR;
+		pinode->size = 0;
+		pinode->nr_sect = 0;
+		// todo 待确定。
+		int task_tty = 4;
+		pinode->start_sect = MAKE_DEV(task_tty, i);		
+	}
+	WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp.cnt_of_sector_map_sect);
+
+
 	// 写入根目录
 	struct dir_entry dir_entry;
 	dir_entry.nr_inode = 1;
@@ -178,13 +206,13 @@ void init_fs()
 	mkfs();
 }
 
-int open(char *pathname, int oflag)
+int do_open(char *pathname, int oflag)
 {
 	// pcaller是调用open的进程
 	// 从pcaller的filp_table中找出空闲的元素
 	int i = -1;
 	for(int j = 0; j < FILE_TABLE_SIZE; j++){
-		if(pcaller->filp_table[j]->file_desc == 0){
+		if(pcaller->filp_table[j] == 0){
 			i = j;
 			break;
 		}
@@ -214,8 +242,10 @@ int open(char *pathname, int oflag)
 		pinode = get_inode(nr_inode);
 	}	
 
+	panic("open file failure\n");
+
 	// 把flip、pinode、file_desc联系起来。
-	pcaller->filp_table[i]->file_desc = &file_desc_table[j];	
+	pcaller->filp_table[i] = &file_desc_table[j];	
 	file_desc_table[j]->inode = pinode;
 	// 刚打开文件，pos应该是0
 	file_desc_table[j]->pos = 0;
@@ -717,6 +747,16 @@ void do_rdwt(Message *msg)
 	// 操作类型
 	// todo 从Message中获取
 	int hd_operate_type = READ;
+
+	// 文件是IS_CHAR_SPECIAL
+	if(inode->type == IS_CHAR_SPECIAL){
+		// 请求TTY
+		
+		return;
+	}
+
+
+	// 文件是普通文件，即非终端文件
 	// 文件操作的结束位置
 	// pos的参照坐标是0，是相对于文件的初始位置的字节偏移量。
 	if(hd_operate_type == READ){
@@ -801,4 +841,21 @@ void put_inode(struct inode *inode)
 {
 	assert(inode->cnt > 0);
 	inode->cnt--;
+}
+
+
+int do_close(int fd)
+{
+	// 主要思路：
+	// 1. 关闭文件，实质是：减少inode的引用数、减少文件描述符的引用数、
+	// 	把进程表中对应的flip[i]设置成0。
+	// 2. 详细说明“减少文件描述符的引用数”。当一个文件描述符的引用数是0时，把这个文件描述符
+	// 	设置成不指向任何inode。
+	put_inode(pcaller->filp[fd]->inode);
+	if(--pcaller->filp[fd]->fd_cnt == 0){
+		pcaller->filp[fd]->inode = 0;
+	}
+	pcaller->filp[fd] = 0;
+	
+	return 0;
 }

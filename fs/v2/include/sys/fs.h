@@ -45,6 +45,8 @@ struct inode{
 	// 只存在于内存中
 	// 次设备号
 	int dev;
+	// 引用数
+	int cnt;
 	// 想不起来了。说明我还不需要这些成员。
 };
 
@@ -67,7 +69,8 @@ struct file_desc{
 	int pos;
 	// 文件描述符关联的inode。应该使用inode的索引还是指向inode的指针？
 	struct inode *inode;	
-
+	// 文件描述符引用数
+	int fd_cnt;
 	//想不起来了 
 
 };
@@ -96,5 +99,8 @@ struct inode inode_table[INODE_TABLE_SIZE];
 // 次设备号应该是多少？
 // hda1是hd.h中定义的常量，所以，要把hd.h放入fs_main.c中。
 #define ROOT_DEV (hda1 + 16)
+
+// 生成设备号
+#define MAKE_DEV(a, b)  (a << 8 | b)
 
 #endif

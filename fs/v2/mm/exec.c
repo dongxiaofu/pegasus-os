@@ -26,8 +26,8 @@ int do_exec(Message *msg)
 	// 从caller把arg_stack复制过来
 	int caller_pid = msg->source;
 	// 这样使用指针，正确吗？
-	char *buf = msg->STACK_BUF;
-	int buf_len = msg->STACK_BUF_LEN;
+	char *buf = msg->BUF;
+	int buf_len = msg->BUF_LEN;
 
 	// 把caller的数据空间复制到当前进程，即TASK_MM。
 	// 复制函数太难用了。
@@ -60,7 +60,7 @@ int do_exec(Message *msg)
 	char filename[20];
 	// todo FILENAME 等都不是Message的成员，需要补充。
 	// FILENAME的长度包含末尾的'0'吗？
-	phycopy(v2l(TASK_MM, filename), v2l(caller_pid, msg->FILENAME),  msg->FILENAME_LEN);
+	phycopy(v2l(TASK_MM, filename), v2l(caller_pid, msg->PATHNAME),  msg->NAME_LEN);
 	int fd = open(filename);
 	read(fd, mmbuf, MAX_FILE_SIZE);
 
