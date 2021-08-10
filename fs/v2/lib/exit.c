@@ -10,13 +10,12 @@
 #include "global.h"
 
 
-void exit(int status)
-{
-	Message msg;
+void exit(int status) {
+    Message msg;
 
-	msg.type = EXIT;
-	msg.STATUS = status;
-	send_rec(BOTH, &msg, TASK_MM);
+    msg.type = EXIT;
+    msg.STATUS = status;
+    send_rec(BOTH, &msg, TASK_MM);
 
-	assert(msg.type == SYSCALL_RET);
+    assert(msg.type == SYSCALL_RET);
 }

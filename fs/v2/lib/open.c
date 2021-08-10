@@ -9,18 +9,17 @@
 #include "proto.h"
 #include "global.h"
 
-int open(const char *pathname, int flags)
-{
-	Message msg;
+int open(const char *pathname, int flags) {
+    Message msg;
 
-	msg.type = OPEN;
-	msg.PATHNAME = (void *)pathname;
-	msg.FLAGS = flags;
-	msg.NAME_LEN = Strlen(pathname);
-	
-	send_rec(BOTH, &msg, TASK_FS);
+    msg.type = OPEN;
+    msg.PATHNAME = (void *) pathname;
+    msg.FLAGS = flags;
+    msg.NAME_LEN = Strlen(pathname);
 
-	assert(msg.type == SYSCALL_RET);
+    send_rec(BOTH, &msg, TASK_FS);
 
-	return msg.FD;
+    assert(msg.type == SYSCALL_RET);
+
+    return msg.FD;
 }

@@ -9,16 +9,15 @@
 #include "proto.h"
 #include "global.h"
 
-int read(int fd, void *buf, int count)
-{
-	Message msg;
+int read(int fd, void *buf, int count) {
+    Message msg;
 
-	msg.type = READ;
-	msg.FD = fd;
-	msg.BUF = buf;
-	msg.CNT = count;
-	
-	send_rec(BOTH, &msg, TASK_FS);
+    msg.type = READ;
+    msg.FD = fd;
+    msg.BUF = buf;
+    msg.CNT = count;
 
-	return msg.CNT;
+    send_rec(BOTH, &msg, TASK_FS);
+
+    return msg.CNT;
 }
