@@ -13,7 +13,6 @@
 #include "proto.h"
 
 
-
 // 系统任何和用户进程的进程表都存储在这个数组中
 Proc proc_table[TASK_PROC_NUM + USER_PROC_NUM];
 // 用户进程元数据
@@ -26,7 +25,7 @@ Task user_task_table[USER_PROC_NUM] = {
 Task sys_task_table[TASK_PROC_NUM] = {
         {TaskTTY, TaskTTY_STACK_SIZE},
         {TaskSys, TASK_SYS_SIZE},
-        {TaskHD, TASK_HD_SIZE},
+        {TaskHD,  TASK_HD_SIZE},
         {task_fs, TASK_FS_SIZE}
 };
 

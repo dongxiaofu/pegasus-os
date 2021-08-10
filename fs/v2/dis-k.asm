@@ -1758,11 +1758,11 @@ Disassembly of section .text:
    31785:	eb 23                	jmp    317aa <TaskTTY+0x44>
    31787:	83 ec 0c             	sub    $0xc,%esp
    3178a:	ff 75 f4             	pushl  -0xc(%ebp)
-   3178d:	e8 db 05 00 00       	call   31d6d <tty_do_read>
+   3178d:	e8 db 05 00 00       	call   31d6d <tty_dev_read>
    31792:	83 c4 10             	add    $0x10,%esp
    31795:	83 ec 0c             	sub    $0xc,%esp
    31798:	ff 75 f4             	pushl  -0xc(%ebp)
-   3179b:	e8 f7 05 00 00       	call   31d97 <tty_do_write>
+   3179b:	e8 f7 05 00 00       	call   31d97 <tty_dev_write>
    317a0:	83 c4 10             	add    $0x10,%esp
    317a3:	81 45 f4 90 0c 00 00 	addl   $0xc90,-0xc(%ebp)
    317aa:	b8 90 db 03 00       	mov    $0x3db90,%eax
@@ -2256,16 +2256,16 @@ Disassembly of section .text:
    31d6b:	c9                   	leave  
    31d6c:	c3                   	ret    
 
-00031d6d <tty_do_read>:
+00031d6d <tty_dev_read>:
    31d6d:	55                   	push   %ebp
    31d6e:	89 e5                	mov    %esp,%ebp
    31d70:	83 ec 08             	sub    $0x8,%esp
    31d73:	a1 60 5e 03 00       	mov    0x35e60,%eax
    31d78:	39 45 08             	cmp    %eax,0x8(%ebp)
-   31d7b:	75 17                	jne    31d94 <tty_do_read+0x27>
+   31d7b:	75 17                	jne    31d94 <tty_dev_read+0x27>
    31d7d:	a1 a8 b2 03 00       	mov    0x3b2a8,%eax
    31d82:	85 c0                	test   %eax,%eax
-   31d84:	7e 0e                	jle    31d94 <tty_do_read+0x27>
+   31d84:	7e 0e                	jle    31d94 <tty_dev_read+0x27>
    31d86:	83 ec 0c             	sub    $0xc,%esp
    31d89:	ff 75 08             	pushl  0x8(%ebp)
    31d8c:	e8 56 f8 ff ff       	call   315e7 <keyboard_read>
@@ -2274,11 +2274,11 @@ Disassembly of section .text:
    31d95:	c9                   	leave  
    31d96:	c3                   	ret    
 
-00031d97 <tty_do_write>:
+00031d97 <tty_dev_write>:
    31d97:	55                   	push   %ebp
    31d98:	89 e5                	mov    %esp,%ebp
    31d9a:	83 ec 18             	sub    $0x18,%esp
-   31d9d:	eb 64                	jmp    31e03 <tty_do_write+0x6c>
+   31d9d:	eb 64                	jmp    31e03 <tty_dev_write+0x6c>
    31d9f:	8b 45 08             	mov    0x8(%ebp),%eax
    31da2:	8b 40 04             	mov    0x4(%eax),%eax
    31da5:	8b 00                	mov    (%eax),%eax
@@ -2299,7 +2299,7 @@ Disassembly of section .text:
    31dd7:	83 c2 08             	add    $0x8,%edx
    31dda:	81 c2 80 0c 00 00    	add    $0xc80,%edx
    31de0:	39 d0                	cmp    %edx,%eax
-   31de2:	75 0c                	jne    31df0 <tty_do_write+0x59>
+   31de2:	75 0c                	jne    31df0 <tty_dev_write+0x59>
    31de4:	8b 45 08             	mov    0x8(%ebp),%eax
    31de7:	8d 50 08             	lea    0x8(%eax),%edx
    31dea:	8b 45 08             	mov    0x8(%ebp),%eax
@@ -2313,7 +2313,7 @@ Disassembly of section .text:
    31e03:	8b 45 08             	mov    0x8(%ebp),%eax
    31e06:	8b 80 88 0c 00 00    	mov    0xc88(%eax),%eax
    31e0c:	85 c0                	test   %eax,%eax
-   31e0e:	75 8f                	jne    31d9f <tty_do_write+0x8>
+   31e0e:	75 8f                	jne    31d9f <tty_dev_write+0x8>
    31e10:	90                   	nop
    31e11:	c9                   	leave  
    31e12:	c3                   	ret    

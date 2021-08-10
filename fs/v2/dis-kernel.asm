@@ -3885,16 +3885,16 @@ Disassembly of section .text:
    330ea:	c9                   	leave  
    330eb:	c3                   	ret    
 
-000330ec <tty_do_read>:
+000330ec <tty_dev_read>:
    330ec:	55                   	push   %ebp
    330ed:	89 e5                	mov    %esp,%ebp
    330ef:	83 ec 08             	sub    $0x8,%esp
    330f2:	a1 80 6e 03 00       	mov    0x36e80,%eax
    330f7:	39 45 08             	cmp    %eax,0x8(%ebp)
-   330fa:	75 17                	jne    33113 <tty_do_read+0x27>
+   330fa:	75 17                	jne    33113 <tty_dev_read+0x27>
    330fc:	a1 c8 72 03 00       	mov    0x372c8,%eax
    33101:	85 c0                	test   %eax,%eax
-   33103:	7e 0e                	jle    33113 <tty_do_read+0x27>
+   33103:	7e 0e                	jle    33113 <tty_dev_read+0x27>
    33105:	83 ec 0c             	sub    $0xc,%esp
    33108:	ff 75 08             	pushl  0x8(%ebp)
    3310b:	e8 d8 02 00 00       	call   333e8 <keyboard_read>
@@ -3903,11 +3903,11 @@ Disassembly of section .text:
    33114:	c9                   	leave  
    33115:	c3                   	ret    
 
-00033116 <tty_do_write>:
+00033116 <tty_dev_write>:
    33116:	55                   	push   %ebp
    33117:	89 e5                	mov    %esp,%ebp
    33119:	83 ec 18             	sub    $0x18,%esp
-   3311c:	eb 64                	jmp    33182 <tty_do_write+0x6c>
+   3311c:	eb 64                	jmp    33182 <tty_dev_write+0x6c>
    3311e:	8b 45 08             	mov    0x8(%ebp),%eax
    33121:	8b 40 04             	mov    0x4(%eax),%eax
    33124:	8b 00                	mov    (%eax),%eax
@@ -3928,7 +3928,7 @@ Disassembly of section .text:
    33156:	83 c2 08             	add    $0x8,%edx
    33159:	81 c2 80 0c 00 00    	add    $0xc80,%edx
    3315f:	39 d0                	cmp    %edx,%eax
-   33161:	75 0c                	jne    3316f <tty_do_write+0x59>
+   33161:	75 0c                	jne    3316f <tty_dev_write+0x59>
    33163:	8b 45 08             	mov    0x8(%ebp),%eax
    33166:	8d 50 08             	lea    0x8(%eax),%edx
    33169:	8b 45 08             	mov    0x8(%ebp),%eax
@@ -3942,7 +3942,7 @@ Disassembly of section .text:
    33182:	8b 45 08             	mov    0x8(%ebp),%eax
    33185:	8b 80 88 0c 00 00    	mov    0xc88(%eax),%eax
    3318b:	85 c0                	test   %eax,%eax
-   3318d:	75 8f                	jne    3311e <tty_do_write+0x8>
+   3318d:	75 8f                	jne    3311e <tty_dev_write+0x8>
    3318f:	90                   	nop
    33190:	c9                   	leave  
    33191:	c3                   	ret    
@@ -4052,11 +4052,11 @@ Disassembly of section .text:
    332df:	eb 23                	jmp    33304 <TaskTTY+0x44>
    332e1:	83 ec 0c             	sub    $0xc,%esp
    332e4:	ff 75 f4             	pushl  -0xc(%ebp)
-   332e7:	e8 00 fe ff ff       	call   330ec <tty_do_read>
+   332e7:	e8 00 fe ff ff       	call   330ec <tty_dev_read>
    332ec:	83 c4 10             	add    $0x10,%esp
    332ef:	83 ec 0c             	sub    $0xc,%esp
    332f2:	ff 75 f4             	pushl  -0xc(%ebp)
-   332f5:	e8 1c fe ff ff       	call   33116 <tty_do_write>
+   332f5:	e8 1c fe ff ff       	call   33116 <tty_dev_write>
    332fa:	83 c4 10             	add    $0x10,%esp
    332fd:	81 45 f4 90 0c 00 00 	addl   $0xc90,-0xc(%ebp)
    33304:	b8 b0 9b 03 00       	mov    $0x39bb0,%eax

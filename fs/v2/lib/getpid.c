@@ -10,12 +10,11 @@
 #include "global.h"
 
 
-int getpid()
-{
-	Message msg;
+int getpid() {
+    Message msg;
 
-	msg.type = GET_PID;
-	send_rec(BOTH, &msg, TASK_SYS);
+    msg.type = GET_PID;
+    send_rec(BOTH, &msg, TASK_SYS);
 
-	return msg.PID;
+    return msg.PID;
 }

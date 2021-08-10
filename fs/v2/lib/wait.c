@@ -10,14 +10,13 @@
 #include "global.h"
 
 
-int wait(int *status)
-{
-	Message msg;
+int wait(int *status) {
+    Message msg;
 
-	msg.type = WAIT;
-	send_rec(BOTH, &msg, TASK_MM);
+    msg.type = WAIT;
+    send_rec(BOTH, &msg, TASK_MM);
 
-	*status = msg.STATUS; 
+    *status = msg.STATUS;
 
-	return (msg.PID == NO_TASK ? -1: msg.PID);
+    return (msg.PID == NO_TASK ? -1 : msg.PID);
 }

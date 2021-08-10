@@ -9,15 +9,14 @@
 #include "proto.h"
 #include "global.h"
 
-int unlink(const char *pathname)
-{
-	Message msg;
+int unlink(const char *pathname) {
+    Message msg;
 
-	msg.type = UNLINK;
-	msg.PATHNAME = pathname;
-	msg.NAME_LEN = Strlen(pathname);
-	
-	send_rec(BOTH, &msg, TASK_FS);
+    msg.type = UNLINK;
+    msg.PATHNAME = pathname;
+    msg.NAME_LEN = Strlen(pathname);
 
-	return msg.RETVAL;
+    send_rec(BOTH, &msg, TASK_FS);
+
+    return msg.RETVAL;
 }

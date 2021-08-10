@@ -9,16 +9,15 @@
 #include "proto.h"
 #include "global.h"
 
-int close(int fd)
-{
-	Message msg;
+int close(int fd) {
+    Message msg;
 
-	msg.type = CLOSE;
-	msg.FD = fd;
-	
-	send_rec(BOTH, &msg, TASK_FS);
+    msg.type = CLOSE;
+    msg.FD = fd;
 
-	assert(msg.type == SYSCALL_RET);
+    send_rec(BOTH, &msg, TASK_FS);
 
-	return msg.RET_VAL;
+    assert(msg.type == SYSCALL_RET);
+
+    return msg.RET_VAL;
 }
