@@ -43,10 +43,6 @@ struct MsgSender
 
 #define FILP_TABLE_SIZE 64
 
-struct filp{
-	struct file_desc *file_desc;
-};
-
 // 进程表
 typedef struct proc{
         Regs s_reg;
@@ -64,7 +60,8 @@ typedef struct proc{
         // 进程名称
         char name[20];
 	// 进程打开的文件相关
-	struct filp filp_table[FILE_TABLE_SIZE];	
+	// struct filp filp_table[FILE_TABLE_SIZE];	
+	struct file_desc filp_table[FILE_TABLE_SIZE];	
 	
 	// 例如，空闲进程表。
 	int p_flag;
