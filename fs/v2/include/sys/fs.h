@@ -5,7 +5,7 @@
 #define MAX_FILENAME_LEN	14
 // 最大文件数量
 #define CNT_OF_FILE	4096	// 512*8 = 4096。
-#define SECTOR_SIZE	512
+// #define SECTOR_SIZE	512
 // 一个文件占用的扇区数量
 #define CNT_OF_FILE_SECT  2048
 // 一个inode占用多少空间
@@ -82,7 +82,16 @@ struct file_desc{
 // 文件描述符数组
 struct file_desc file_desc_table[FILE_DESC_SIZE];
 // open的oflag参数
-#define O_CREAT	1
+#define O_RDONLY	0
+#define O_WRONLY	1
+#define O_RDWR		2
+
+#define O_EXEC		3
+#define O_SEARCH	4
+#define O_APPEND	5
+#define O_CLOEXEC	6
+
+#define O_CREAT		7
 
 // inode缓存
 #define INODE_TABLE_SIZE FILE_DESC_SIZE
