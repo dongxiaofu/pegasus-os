@@ -1,5 +1,5 @@
 global get_ticks
-global write
+global write2
 global write_debug
 global send_msg
 global receive_msg
@@ -22,8 +22,8 @@ get_ticks:
 	ret
 
 
-; int write(char *buf, int len)
-write:
+; int write2(char *buf, int len)
+write2:
 	;;;;xhcg bx, bx
 	mov eax, _NR_WRITE
 	; 第2个参数

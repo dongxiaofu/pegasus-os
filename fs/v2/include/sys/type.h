@@ -14,6 +14,7 @@ typedef struct {
     unsigned int m43;
     unsigned int m44;
     unsigned int m45;
+    unsigned int m46;
 } u4;
 
 typedef struct {
@@ -75,19 +76,19 @@ typedef struct {
 #define SENDER u0.u20.m22
 
 // exec中使用
-#define NAME_LEN u0.u3.m30
-#define PATHNAME  u0.u3.m31
+#define NAME_LEN u0.u30.m30
+#define PATHNAME  u0.u30.m31
 
 // 杂项
-#define FD u0.u4.m40
-#define STATUS u0.u4.m41
-#define RETVAL u0.u4.m42
-#define PID u0.u4.m43
+#define FD u0.u40.m40
+#define STATUS u0.u40.m41
+#define RETVAL u0.u40.m42
+#define PID u0.u40.m43
 
 
-#define CNT u0.u4.m42
-#define PID u0.u4.m43
-
+#define CNT u0.u40.m44
+#define PID u0.u40.m45
+#define PROCNR u0.u40.m46
 
 
 // elf start
@@ -96,6 +97,8 @@ typedef unsigned short Elf32_Half;
 typedef unsigned int Elf32_Off;
 typedef int Elf32_Sword;
 typedef unsigned int Elf32_Word;
+
+#define EI_NIDENT 16
 
 typedef struct {
     unsigned char e_ident[EI_NIDENT];     /* Magic number and other info */
@@ -127,20 +130,5 @@ typedef struct {
 
 // elf end
 
-// todo 不会用enum，用常量代替。
-#define CLOSE   1
-#define EXEC    2
-#define EXIT    3
-#define FORK    4
-#define GET_PID 5
-#define OPEN    6
-#define READ    7
-#define UNLINK  8
-#define WAIT    9
-#define WRITE 10
-
-#define NO_TASK -1
-
-#define SYSCALL_RET 101
 
 #endif

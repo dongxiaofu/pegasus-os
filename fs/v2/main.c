@@ -3,6 +3,7 @@
 #include "const.h"
 #include "type.h"
 #include "protect.h"
+#include "fs.h"
 #include "process.h"
 #include "keyboard.h"
 #include "console.h"
@@ -36,7 +37,7 @@ void untar(const char *filename) {
     // 2. 先读取一个扇区，再读取一个文件，并把这个文件的数据写入新文件。
     // 3. 读取文件时，读取单位一定是N个扇区。
     // todo 后续再完善open。
-    int fd = open(filename);
+    int fd = open(filename, O_RDONLY);
 
     // 获取文件的长度
     // todo 怎么获取文件的长度？
@@ -47,14 +48,14 @@ void untar(const char *filename) {
 
     while (1) {
         read(fd, buf, SECTOR_SIZE);
-        if (strlen(buf) == 0) {
+        if (Strlen(buf) == 0) {
             break;
         }
 
         struct tar_header *tar_header = (struct tar_header *) buf;
         // 不确定能不能用指针接收一个字符串。能。
         char *name = tar_header->name;
-        int fdout = open(name);
+        int fdout = open(name, O_WRONLY);
         // 计算文件大小
         int len = 0;
         char *size_str = tar_header->size;
@@ -66,7 +67,7 @@ void untar(const char *filename) {
 
         int bytes_left = len;
         while (bytes_left) {
-            int iobytes = min(chunk, bytes_left);
+            int iobytes = MIN(chunk, bytes_left);
             read(fd, buf, ((iobytes - 1) / SECTOR_SIZE + 1) * SECTOR_SIZE);
             write(fdout, buf, iobytes);
             bytes_left -= iobytes;
@@ -566,7 +567,7 @@ void Printf(char *fmt, ...) {
     int len = vsprintf(buf, fmt, var_list);
     //char str[2] = {'A', 0};
     //len = 2;
-    write(buf, len);
+    write2(buf, len);
     return;
 }
 

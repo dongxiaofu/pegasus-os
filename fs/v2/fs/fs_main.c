@@ -77,17 +77,21 @@ void task_fs() {
         int source = msg.source;
         int fd = msg.FD;
 
+	// open
+	char *pathname = msg.PATHNAME;
+	int oflags = msg.FLAGS;
+
         pcaller = &proc_table[source];
 
         Message fs_msg;
 
         switch (type) {
             case OPEN:
-                fs_msg.FD = do_open(msg);
+                fs_msg.FD = do_open(pathname, oflags);
                 break;
             case READ:
             case WRITE:
-                do_rdwt(msg);
+                do_rdwt(&msg);
                 break;
             case CLOSE:
                 do_close(fd);
@@ -140,7 +144,8 @@ void mkfs() {
     // 写入硬盘
     // 先把数据写入fsbuf，再写入硬盘。
     // Memcpy(fsbuf + SECTOR_SIZE, sp, SECTOR_SIZE);
-    Memcpy(fsbuf, sp + SECTOR_SIZE, SECTOR_SIZE);
+    Memcpy(fsbuf, sp, SECTOR_SIZE);
+    // Memcpy(fsbuf, sp + SECTOR_SIZE, SECTOR_SIZE);
     // ROOT_DEV 是安装文件系统的分区的次设备号。
     // 参数1是写入超级的位置
     // Memcpy(fsbuf + 512, sp, 512);
@@ -757,7 +762,8 @@ void do_rdwt(Message *msg) {
     int buf = msg->BUF;
     // todo 下面获取inode的方法正确吗？
     int fd = msg->FD;
-    struct inode *inode = &proc_table[msg->source]->filp_table[fd]->inode;
+    int pos = msg->POS;
+    struct inode *inode = proc_table[sender].filp[fd]->inode;
     // 文件大小
     int file_size = inode->size;
 
@@ -772,13 +778,13 @@ void do_rdwt(Message *msg) {
             type = DEV_WRITE;
         }
 
-        msg.type = type;
-        msg.PROCNR = msg.source;
+        msg->type = type;
+        msg->PROCNR = msg->source;
         // todo 假设 BUF、BUF_LEN 已经在用户进程传递给本进程的消息体中了。
         // 怎么确定TTY的pid？在sys_task_table中查看，TASK_TTY是第0个元素。
         // todo 此处使用硬编码，后面再改成常量。
         int tty_pid = 0;
-        send_recv(BOTH, msg, tty_pid);
+        send_rec(BOTH, msg, tty_pid);
 
         return;
     }
@@ -786,13 +792,14 @@ void do_rdwt(Message *msg) {
     // 文件是普通文件，即非终端文件
     // 文件操作的结束位置
     // pos的参照坐标是0，是相对于文件的初始位置的字节偏移量。
+    int pos_end;
     if (hd_operate_type == READ) {
 
-        pos_end = min(pos + len, file_size);
+        pos_end = MIN(pos + len, file_size);
 
     } else {
 
-        pos_end = min(pos + len, inode->nr_sect * SECTOR_SIZE);
+        pos_end = MIN(pos + len, inode->nr_sect * SECTOR_SIZE);
     }
 
     // 字节偏移量
@@ -809,7 +816,6 @@ void do_rdwt(Message *msg) {
     int byte_wt = 0;
     // 计算buf的线性地址
     // 怎么确定sender？
-    int sender = msg->source;
     int ds = sender->s_reg.ds;
     int base = Seg2PhyAddrLDT(ds, sender);
     int buf_line_addr = base + buf;
@@ -859,6 +865,7 @@ void sync_inode(struct inode *inode) {
     int sect_idx = (nr_inode - 1) / (SECTOR_SIZE / inode_size);
     // 读取一个扇区
     int dev = inode->dev;
+    struct super_block *sb = get_super_block();
     int pos = 1 + 1 + sb->cnt_of_inode_map_sect + sb->cnt_of_sector_map_sect + sect_idx;
     RD_SECT(dev, pos);
 
@@ -880,6 +887,7 @@ int do_close(int fd) {
     // 	把进程表中对应的flip[i]设置成0。
     // 2. 详细说明“减少文件描述符的引用数”。当一个文件描述符的引用数是0时，把这个文件描述符
     // 	设置成不指向任何inode。
+
     put_inode(pcaller->filp[fd]->inode);
     if (--pcaller->filp[fd]->fd_cnt == 0) {
         pcaller->filp[fd]->inode = 0;
