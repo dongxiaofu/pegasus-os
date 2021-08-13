@@ -247,4 +247,7 @@
 #define HD_DEV_READ 1
 #define HD_DEV_WRITE 2
 
+#define RESUME_PROC 1
+#define SUPEND_PROC 2
+
 #endif

@@ -7,69 +7,11 @@
 #include "console.h"
 #include "proto.h"
 #include "global.h"
-#include "hd.h"
-#include "fs.h"
 
-// 读写硬盘
-void rd_wt(int pos, int device, char *buf, int len, int type);
+void task_mm();
 
-// 建立文件系统
-void mkfs();
-
-// 初始文件系统
-void init_fs();
-
-// 比较str1和str2这两个字符串的大小。
-int strcmp(char *str1, char *str2);
-
-// 去掉完整文件路径中的路径，只留下文件名
-int strip_path(char *filename, char *pathname, struct inode *dev_root);
-
-// 查找文件
-int search_file(char *pathname);
-
-// 获取inode
-struct inode *get_inode(int nr_inode);
-
-// 获取super_block
-struct super_block *get_super_block();
-
-// 分配inode-map
-int alloc_imap_bit();
-
-// 分配sector-map
-int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc);
-
-// 新建inode
-struct inode *new_inode(int nr_inode, int nr_start_sect);
-
-// 同步indoe到硬盘
-void sync_inode(struct inode *inode);
-
-// 将inode的cnt减去1
-void put_inode(struct inode *inode);
-
-// 创建目录项
-struct dir_entry *new_dir_entry(struct inode *dir_root, char *filename, int nr_inode);
-
-// 创建文件
-struct inode *create_file(char *pathname);
-
-// 打开文件
-int do_open(char *pathname, int oflag);
-
-// 删除文件
-void do_unlink(char *filename);
-
-// 读写文件。
-// 不知道返回值，不知道需要哪些参数。边写边想吧。
-void do_rdwt(Message *msg);
-
-// 关闭文件
-int do_close(int fd);
-
-void task_fs() {
-    Printf("%s\n", "FS is running");
+void task_mm() {
+    Printf("%s\n", "MM is running");
     while (1) {
         Message msg;
         send_rec(RECEIVE, &msg, ANY);
