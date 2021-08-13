@@ -80,7 +80,7 @@ struct file_desc{
 // 文件描述符数组长度
 #define FILE_DESC_SIZE 64
 // 文件描述符数组
-struct file_desc file_desc_table[FILE_DESC_SIZE];
+struct file_desc *file_desc_table[FILE_DESC_SIZE];
 // open的oflag参数
 #define O_RDONLY	0
 #define O_WRONLY	1
@@ -97,14 +97,14 @@ struct file_desc file_desc_table[FILE_DESC_SIZE];
 #define INODE_TABLE_SIZE FILE_DESC_SIZE
 struct inode inode_table[INODE_TABLE_SIZE];
 
-// fsbuf这个缓存区的内存地址设置成什么？
+// todo fsbuf这个缓存区的内存地址设置成什么？
 // 我不知道，随便设置了一个值。
 #define fsbuf	0x1000000
 #define FSBUF_SIZE	1024 * 1024
 
 // 读写硬盘，单位是扇区
-#define RD_SECT(device, pos)	rd_wt(pos, device, fsbuf, SECTOR_SIZE, HD_DEV_READ)
-#define WT_SECT(device, pos)	rd_wt(pos, device, fsbuf, SECTOR_SIZE, HD_DEV_WRITE)
+#define RD_SECT(device, pos)	rd_wt(pos, device, (char *)fsbuf, SECTOR_SIZE, HD_DEV_READ)
+#define WT_SECT(device, pos)	rd_wt(pos, device, (char *)fsbuf, SECTOR_SIZE, HD_DEV_WRITE)
 
 // 安装文件系统的分区的次设备号。
 // 次设备号应该是多少？

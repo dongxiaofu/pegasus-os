@@ -15,6 +15,9 @@ typedef struct {
     unsigned int m44;
     unsigned int m45;
     unsigned int m46;
+    unsigned int m47;
+    unsigned int m48;
+    unsigned int m49;
 } u4;
 
 typedef struct {
@@ -89,6 +92,9 @@ typedef struct {
 #define CNT u0.u40.m44
 #define PID u0.u40.m45
 #define PROCNR u0.u40.m46
+#define DEV u0.u40.m47
+#define POS u0.u40.m48
+#define FLAGS u0.u40.m49
 
 
 // elf start
