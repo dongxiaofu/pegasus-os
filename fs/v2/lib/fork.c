@@ -18,6 +18,5 @@ int fork() {
 
     assert(msg.type = SYSCALL_RET);
     assert(msg.RETVAL == 0);
-
     return msg.PID;
 }

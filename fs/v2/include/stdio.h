@@ -15,8 +15,7 @@ void spin(char *error_msg);
 void panic(char *error_msg);
 void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line);
 
-// todo __BASE_FILE__ 正确性未知
-//#define assert if(exp) ; 
+//#define assert if(exp) ;
 #define assert(exp)  if(exp) ; \
 	else assertion_failure(#exp, __FILE__, __BASE_FILE__, __LINE__)
 

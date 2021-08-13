@@ -50,3 +50,14 @@ EXTERN TSS tss;
 #define TASK_SYS 1
 #define TASK_HD  2
 #define TASK_FS  3
+
+#define reassembly(val1, offset1, val2, offset2, val3) \
+        (val1 << offset1 + val2 << offset2 + val3)
+
+
+#define alloc_mem(pid, size, base)  \
+        (base + pid * size)
+
+
+// 根目录的inode
+struct inode *root;

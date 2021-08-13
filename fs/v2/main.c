@@ -39,7 +39,7 @@ void untar(const char *filename) {
     int fd = open(filename);
 
     // 获取文件的长度
-    // todo
+    // todo 怎么获取文件的长度？
     int file_size = 0;
 
     char buf[SECTOR_SIZE * 16];
@@ -52,7 +52,7 @@ void untar(const char *filename) {
         }
 
         struct tar_header *tar_header = (struct tar_header *) buf;
-        // todo 不确定能不能用指针接收一个字符串。
+        // 不确定能不能用指针接收一个字符串。能。
         char *name = tar_header->name;
         int fdout = open(name);
         // 计算文件大小
@@ -71,7 +71,7 @@ void untar(const char *filename) {
             write(fdout, buf, iobytes);
             bytes_left -= iobytes;
         }
-        // todo close函数待实现
+
         close(fdout);
     }
 

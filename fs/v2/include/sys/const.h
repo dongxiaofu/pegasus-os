@@ -208,16 +208,31 @@
         + TASK_FS_SIZE)
 // 进程相关 end
 
-
 #define OPEN 1001        // 打开硬盘
 #define READ 1002        // 读硬盘
 #define WRITE 1003       // 写硬盘
 #define CLOSE 1004       //关闭硬盘
 #define GET_HD_IOCTL 1005	// 获取文件系统所在分区的扇区数量
 
+// TTY使用
+#define DEV_OPEN 2001
+#define DEV_READ 2002
+#define DEV_WRITE 2003
+#define DEV_CLOSE 2004
+
+// 终端文件
+#define IS_CHAR_SPECIAL 0
+
 
 // 进程表的p_flag
 #define FREE_SLOT 0	// 空闲进程表
+
+
+// 最大文件长度。随便确定了一个值。
+#define MAX_FILE_SIZE 1024*1024
+
+// todo 应该设置多大？512是我随便设置的值。
+#define PROC_STACK_SIZE 512
 
 
 #endif
