@@ -95,7 +95,6 @@ _start:
 	;jmp $
 	;jmp $
 	;jmp $
-	;;;;;;;;;xhcg; bx, bx
 	xchg bx, bx	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
@@ -105,6 +104,7 @@ _start:
 	
 	mov esp, StackTop
 	mov word [dis_pos], 0
+	xchg bx, bx
 	sgdt [gdt_ptr]
 	call ReloadGDT
 	lgdt [gdt_ptr]
@@ -121,7 +121,7 @@ csinit:
 	xor eax, eax
 	mov ax, TSS_SELECTOR
 	ltr ax
-	;xchg bx, bx
+	xchg bx, bx
 	jmp kernel_main
 	jmp $	
 	sti
