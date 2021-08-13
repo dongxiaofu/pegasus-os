@@ -344,10 +344,10 @@ void hd_rdwt(Message *msg) {
     int bytes_left = len;
     // 从msg中获取内存地址。
     // 这个内存地址存储了要写入硬盘的数据，	或用来存储从硬盘中读取到的数据。
-    char *hdbuf = msg->BUF;
+    char *hdbuf = (char *)msg->BUF;
     int source = msg->source;
     // 计算出hdbuf的物理地址。
-    char *phy_hdbuf = v2l(source, hdbuf);
+    char *phy_hdbuf = (char *)v2l(source, hdbuf);
 
     int type = msg->type;
     assert(type == READ || type == WRITE);

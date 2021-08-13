@@ -208,11 +208,20 @@
         + TASK_FS_SIZE)
 // 进程相关 end
 
-#define OPEN 1001        // 打开硬盘
-#define READ 1002        // 读硬盘
-#define WRITE 1003       // 写硬盘
-#define CLOSE 1004       //关闭硬盘
-#define GET_HD_IOCTL 1005	// 获取文件系统所在分区的扇区数量
+// todo 不会用enum，用常量代替。
+#define CLOSE   1
+#define EXEC    2
+#define EXIT    3
+#define FORK    4
+#define GET_PID 5
+#define OPEN    6
+#define READ    7
+#define UNLINK  8
+#define WAIT    9
+#define WRITE 10
+#define GET_HD_IOCTL 11	// 获取文件系统所在分区的扇区数量
+
+#define SYSCALL_RET 101
 
 // TTY使用
 #define DEV_OPEN 2001
@@ -233,6 +242,9 @@
 
 // todo 应该设置多大？512是我随便设置的值。
 #define PROC_STACK_SIZE 512
+#define SECTOR_SIZE	512
 
+#define HD_DEV_READ 1
+#define HD_DEV_WRITE 2
 
 #endif
