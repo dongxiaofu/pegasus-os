@@ -41,6 +41,8 @@ struct inode{
 	int start_sect;
 	// 一个文件分配多少个扇区。放在inode中，能随时获取这个值。
 	int nr_sect;
+	// 在imap中的索引
+	int nr_inode;
 
 	// 只存在于内存中
 	// 次设备号
