@@ -61,3 +61,20 @@ EXTERN TSS tss;
 
 // 根目录的inode
 struct inode *root;
+
+// 文件描述符数组长度
+#define FILE_DESC_SIZE 64
+// 文件描述符数组
+// struct file_desc file_desc_table[FILE_DESC_SIZE];
+// struct file_desc *file_desc_table[FILE_DESC_SIZE];
+// open的oflag参数
+#define O_RDONLY        0
+#define O_WRONLY        1
+#define O_RDWR          2
+
+#define O_EXEC          3
+#define O_SEARCH        4
+#define O_APPEND        5
+#define O_CLOEXEC       6
+
+#define O_CREAT         7
