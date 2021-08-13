@@ -14,6 +14,7 @@ int open(const char *pathname, int flags) {
 
     msg.type = OPEN;
     msg.PATHNAME = (void *) pathname;
+    // FLAGS FD定义了吗？
     msg.FLAGS = flags;
     msg.NAME_LEN = Strlen(pathname);
 

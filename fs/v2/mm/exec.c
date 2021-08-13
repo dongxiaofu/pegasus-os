@@ -54,17 +54,15 @@ int do_exec(Message *msg) {
     // 把文件读取到mmbuf中。文件的最大长度是有限制的，因此，可以把mmbuf的长度设置为
     // 大于等于文件的最大长度。
     // 我们常用的文件的最大长度似乎没限制，后期，我想想怎么实现这个特性。
-    // todo MAX_FILE_SIZE 的值，待确定。
     char mmbuf[MAX_FILE_SIZE];
     char filename[20];
-    // todo FILENAME 等都不是Message的成员，需要补充。
     // FILENAME的长度包含末尾的'0'吗？
     phycopy(v2l(TASK_MM, filename), v2l(caller_pid, msg->PATHNAME), msg->NAME_LEN);
     int fd = open(filename);
     read(fd, mmbuf, MAX_FILE_SIZE);
 
     // 开始解析ELF文件了
-    // todo Elf32_Ehdr、Elf32_Phdr 需要在我的操作系统中定义吗？
+    // Elf32_Ehdr、Elf32_Phdr 需要在我的操作系统中定义吗？需要。我的操作系统不使用其他操作系统的库文件。
     Elf32_Ehdr *elf_header = (Elf32_Ehdr *) mmbuf;
     for (int i = 0; i < elf_header->e_phnum; i++) {
         Elf32_Phdr *program_header = (Elf32_Phdr * )(mmbuf + elf_header->e_ehsize +

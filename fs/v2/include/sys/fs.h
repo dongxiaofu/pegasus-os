@@ -98,7 +98,7 @@ struct inode inode_table[INODE_TABLE_SIZE];
 // 安装文件系统的分区的次设备号。
 // 次设备号应该是多少？
 // hda1是hd.h中定义的常量，所以，要把hd.h放入fs_main.c中。
-#define ROOT_DEV (hda1 + 16)
+#define ROOT_DEV (hd1a + 16)
 
 // 生成设备号
 #define MAKE_DEV(a, b)  (a << 8 | b)

@@ -23,7 +23,6 @@ int do_fork(Message *msg) {
     Proc *proc = proc_table;
     int pid = 0;
     for (int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++) {
-        // todo 定义FREE_SLOT；修改进程表
         if (proc->p_flag == FREE_SLOT) {
             pid = i;
             break;
@@ -41,7 +40,7 @@ int do_fork(Message *msg) {
 
     // 复制父进程的内存空间
     Descriptor cs_descriptor = proc_table[parent_pid].ldt[0];
-    // todo 实现reassembly
+    // 该在哪个文件实现reassembly？满足两点：本文件对应的头文件；能被本文件引用。
     int caller_cs_base = reassembly(
             cs_descriptor->seg_base_high, 24
     cs_descriptor->seg_base_mid, 16
@@ -59,8 +58,7 @@ int do_fork(Message *msg) {
     int caller_cs_size = (caller_cs_limit + 1) * 4096;
 
     // 计算子进程的内存空间的基地址
-    // todo alloc_mem还没有实现
-    int child_base = alloc_mem(pid, caller_cs_size);
+    int child_base = alloc_mem(pid, caller_cs_size, caller_cs_base);
 
     // 复制父进程的物理空间
     // phycopy(buf_line_addr + byte_wt, fsbuf + offset,  byte);
@@ -92,7 +90,7 @@ int do_fork(Message *msg) {
     return 0;
 }
 
-// todo exit_code没用到。
+// todo exit_code没用到。不知道怎么处理。
 void do_exit(Message msg, int exit_code) {
     // 获取caller
     int pid = msg.source;

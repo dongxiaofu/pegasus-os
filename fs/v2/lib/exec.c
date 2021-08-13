@@ -74,7 +74,6 @@ int execv(const char *pathname, char **argv) {
     len += sizeof(char);
 
     // 复制数据
-    // todo PROC_STACK_SIZE 如何引用进来？
     // char arg_stack[PROC_STACK_SIZE];
     char *ptr = arg_stack;
     char **q = argv;

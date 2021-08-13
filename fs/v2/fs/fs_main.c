@@ -31,6 +31,9 @@ int search_file(char *pathname);
 // 获取inode
 struct inode *get_inode(int nr_inode);
 
+// 获取super_block
+struct super_block *get_super_block();
+
 // 分配inode-map
 int alloc_imap_bit();
 
@@ -56,7 +59,7 @@ struct inode *create_file(char *pathname);
 int do_open(char *pathname, int oflag);
 
 // 删除文件
-void do_unlink(struct inode *inode, char *filename);
+void do_unlink(char *filename);
 
 // 读写文件。
 // 不知道返回值，不知道需要哪些参数。边写边想吧。
@@ -129,7 +132,6 @@ void mkfs() {
     // 6. 每个文件占用多少个扇区？
     // 7. cnt_of_sector_map_sect = 每个文件占用的扇区数量 * 文件数量 / (512字节 * 8)。
     sp.cnt_of_sector_map_sect = CNT_OF_FILE_SECT * CNT_OF_FILE / SECTOR_SIZE;
-    // todo 应该写错了。先不管。
     sp.cnt_of_inode_sect = (1 * 512 * 8 * 16) / 512;
     // 1. 数据区的第一个扇区 = 引导扇区 + 超级块 + inode-map + sector-map + inodes。
     // 2. 上面的公式中的每个元素都是简写，完整表述应该是："XX占用的扇区数量”,例如，超级块占用的扇区
@@ -196,7 +198,7 @@ void mkfs() {
         pinode->size = 0;
         pinode->nr_sect = 0;
         // todo 待确定。
-        int task_tty = 4;
+        int task_tty = 0;
         pinode->start_sect = MAKE_DEV(task_tty, i);
     }
     WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp.cnt_of_sector_map_sect);
@@ -282,8 +284,8 @@ int search_file(char *pathname) {
     int dir_entry_num = dev_root->size / DIR_ENTRY_SIZE;
 
     // 数据区的第一个扇区地址
-    // todo 需要从super block中获取
-    int nr_1st_data_sect = N;
+    struct super_block *sb = get_super_block()
+    int nr_1st_data_sect = sb->data_1st_sect;
 
     for (int i = 0; i < dev_root_dir_sect; i++) {
         RD_SECT(dev, nr_1st_data_sect + i);
@@ -326,7 +328,7 @@ int strip_path(char *filename, char *pathname, struct inode *dev_root) {
         s++;
     }
     *t = 0;
-    // todo 根目录的inode是一个全局变量，在哪里设置？
+    // 根目录的inode是一个全局变量，在哪里设置？就设置在global.h中吧。
     dev_root = root;
 
     return 0;
@@ -370,18 +372,24 @@ struct inode *get_inode(int nr_inode) {
     }
 
     // 在缓存中没有找到目标inode，从硬盘中读取。
-    // todo 需要获取超级块。
+    struct super_block *sb = get_super_block();
     int inode_size = sizeof(struct inode);
     int pos = 1 + 1 + sb->nr_imap_sect + sb->nr_smap_sect + (nr_inode - 1) / (SECTOR_SIZE / inode_size);
+    int dev = ROOT_DEV;
     RD_SECT(dev, pos);
     int offset = (nr_inode - 1) % (SECTOR_SIZE / inode_size);
     struct inode *inode = (struct inode *) (fsbuf + inode_size * offset);
 
     // 把数据放到缓存中
     p->nr_inode = nr_inode;
-    // todo 不记得inode的成员了。
-    p->nr_inode = inode->size;
+    p->size = inode->size;
     p->start_sect = inode->start_sect;
+    p->type = inode->type;
+    p->nr_sect = inode->nr_sect;
+
+    // inode的成员dev、cnt也需要放到缓存中吗？不放。理由是，理由不明，我不知道把dev、cnt
+    // 放进去有什么用。
+    p->dev = dev;
 
     return p;
 }
@@ -401,8 +409,8 @@ struct inode *create_file(char *pathname) {
     }
 
     // 获取文件的第一个扇区
-    // todo nr_sect_to_alloc 应该从哪里获取？
-    int nr_sect_to_alloc = 1024;
+    struct super_block *sb = get_super_block();
+    int nr_sect_to_alloc = sb->nr_sect;
     int nr_start_sect = alloc_smap_bit(nr_inode, nr_sect_to_alloc);
     if (nr_start_sect == 0) {
         return 0;
@@ -415,7 +423,6 @@ struct inode *create_file(char *pathname) {
     }
 
     // 创建根目录中的目录项
-    // todo dev_root 处理
     struct entry *entry = new_dir_entry(dev_root, filename, nr_inode);
     if (entry == 0) {
         return 0;
@@ -427,7 +434,8 @@ struct inode *create_file(char *pathname) {
 int alloc_imap_bit() {
     // 分区内的扇区分布:引导扇区(1) + 超级块(1) + inode-map(1) + sector-map(多少？)
     int pos = 1 + 1;
-    // todo dev的值从何处获得？
+    //  dev的值从何处获得？
+    struct inode *dev = root;
     RD_SECT(dev, pos);
 
     int nr_inode = 0;
@@ -459,7 +467,7 @@ int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc) {
 
     assert(nr_sect_to_alloc > 0);
 
-    // todo 获取超级块
+    struct super_block *sb = get_super_block();
     // 每个文件占用smap的多少个bit。
     // int nr_sect_to_alloc = sb->nr_sect;
     int nr_smap_sect = sb->cnt_of_sector_map_sect;
@@ -514,7 +522,6 @@ struct inode *new_inode(int nr_inode, int nr_start_sect) {
     new_inode->size = 0;
 
     // 同步到硬盘
-    // todo sync_inode函数还没有实现。
     sync_inode(new_inode);
 
     return new_inode;
@@ -568,7 +575,6 @@ struct root_dir_entry *new_dir_entry(struct inode *dir_root, char *filename, int
     if (new_pde == 0) {
         new_pde = pde;
         dir_root->size += dir_entry_size;
-        // todo 实现sync_inode函数
         sync_inode(dir_root);
     }
 
@@ -581,8 +587,7 @@ struct root_dir_entry *new_dir_entry(struct inode *dir_root, char *filename, int
 }
 
 // 函数也不好确定。我不了解所有情况，所以不好确定函数。
-// todo 处理dev、dev_root、sync_inode、put_inode等。
-void do_unlink(struct inode *inode, char *filename) {
+void do_unlink(char *filename) {
     // 简略思路：
     // 1. 检查是否能够删除目标文件
     // 2. 清除imap
@@ -594,6 +599,15 @@ void do_unlink(struct inode *inode, char *filename) {
     // 根目录不能删除
     if (strcmp("/", filename) == 0) {
         panic("Can not delete the root dir");
+    }
+
+    int nr_inode = search_file(filename);
+    if(nr_inode == -1){
+        panic("The file does not exist\n");
+    }
+    struct inode *inode = get_inode(nr_inode);
+    if(inode == 0){
+        panic("The file does not exist\n");
     }
 
     // 被其他进程使用的文件不能删除
@@ -614,6 +628,7 @@ void do_unlink(struct inode *inode, char *filename) {
     int imap_offset = imap_bit_idx % 8;
     // 读取目标扇区
     // 引导扇区 + super block + 目标扇区
+    int dev = ROOT_DEV;
     RD_SECTOR(dev, 1 + 1 + imap_sector_idx);
     fsbuf[imap_byte_idx] &= ~(1 << imap_offset);
     WT_SECTOR(dev, 1 + 1 + imap_sector_idx);
@@ -668,6 +683,7 @@ void do_unlink(struct inode *inode, char *filename) {
     // 2. 删除的目录项是最后一个时改变根目录的大小，否则，不改变。
     // 根目录的第一个扇区
     int root_dir_sect_blk0 = sb->data_1st_sect;
+    struct inode *dev_root = root;
     // 根目录的大小
     int root_dir_size = dev_root->size;
     // 根目录占用的扇区
@@ -745,7 +761,6 @@ void do_rdwt(Message *msg) {
     // 文件大小
     int file_size = inode->size;
 
-    // todo IS_CHAR_SPECIAL、DEV_READ等一系列常量未定义。
     // 文件是IS_CHAR_SPECIAL
     if (inode->type == IS_CHAR_SPECIAL) {
         // 请求TTY
@@ -760,7 +775,8 @@ void do_rdwt(Message *msg) {
         msg.type = type;
         msg.PROCNR = msg.source;
         // todo 假设 BUF、BUF_LEN 已经在用户进程传递给本进程的消息体中了。
-        // todo 怎么确定TTY的pid？
+        // 怎么确定TTY的pid？在sys_task_table中查看，TASK_TTY是第0个元素。
+        // todo 此处使用硬编码，后面再改成常量。
         int tty_pid = 0;
         send_recv(BOTH, msg, tty_pid);
 
@@ -792,14 +808,19 @@ void do_rdwt(Message *msg) {
     int byte_left = len;
     int byte_wt = 0;
     // 计算buf的线性地址
-    // todo 怎么确定sender？
+    // 怎么确定sender？
+    int sender = msg->source;
     int ds = sender->s_reg.ds;
     int base = Seg2PhyAddrLDT(ds, sender);
     int buf_line_addr = base + buf;
 
     for (int i = start_sect; i <= start_end && byte_left; i += chunk) {
         int byte = min(byte_left, chunk * SECTOR_SIZE - offset);
-        // todo device 怎么确定？
+        // device是什么？是分区号。
+        // 是安装了文件系统的那个分区的分区号吗？是的。
+        // 耗费了非常多时间才想明白这个device的值是多少。
+        // todo hd2a 定义在 hd.c中，如何才能在这个文件中使用hd.h中的数据呢？
+        int device = ROOT_DEV;
         rd_wt(i, device, fsbuf, SECTOR_SIZE * chunk, READ);
 
         if (hd_operate_type == READ) {
@@ -866,4 +887,10 @@ int do_close(int fd) {
     pcaller->filp[fd] = 0;
 
     return 0;
+}
+
+struct super_block *get_super_block() {
+    RD_SECT(ROOT_DEV, 1);
+    struct super_block *sp = (struct super_block *) fsbuf;
+    return sp;
 }
