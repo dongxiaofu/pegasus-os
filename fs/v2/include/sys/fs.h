@@ -99,12 +99,16 @@ struct inode inode_table[INODE_TABLE_SIZE];
 
 // todo fsbuf这个缓存区的内存地址设置成什么？
 // 我不知道，随便设置了一个值。
-#define fsbuf	0x1000000
-#define FSBUF_SIZE	1024 * 1024
+//#define fsbuf	0x1000000
+//#define FSBUF_SIZE	1024 * 1024
+// 从上面改写下面，浪费了很多时间。我看了于上神的代码才修改正确。
+// 我本想按照上面的定义来修改，因为需要修改的地方太多太多，放弃了。
+char *fsbuf = (char *)0x1000000;
+const int FSBUF_SIZE = 1024 * 1024;
 
 // 读写硬盘，单位是扇区
-#define RD_SECT(device, pos)	rd_wt(pos, device, (char *)fsbuf, SECTOR_SIZE, HD_DEV_READ)
-#define WT_SECT(device, pos)	rd_wt(pos, device, (char *)fsbuf, SECTOR_SIZE, HD_DEV_WRITE)
+#define RD_SECT(device, pos)	rd_wt(pos, device, fsbuf, SECTOR_SIZE, HD_DEV_READ)
+#define WT_SECT(device, pos)	rd_wt(pos, device, fsbuf, SECTOR_SIZE, HD_DEV_WRITE)
 
 // 安装文件系统的分区的次设备号。
 // 次设备号应该是多少？

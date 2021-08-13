@@ -35,7 +35,7 @@ struct inode *get_inode(int nr_inode);
 struct super_block *get_super_block();
 
 // 分配inode-map
-int alloc_imap_bit(char *fsbuf);
+int alloc_imap_bit();
 
 // 分配sector-map
 int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc);
@@ -410,7 +410,7 @@ struct inode *create_file(char *pathname) {
     }
 
     // 获取nr_inode
-    int nr_inode = alloc_imap_bit((char *)fsbuf);
+    int nr_inode = alloc_imap_bit();
     if (nr_inode == 0) {
         return 0;
     }
@@ -438,7 +438,7 @@ struct inode *create_file(char *pathname) {
     return inode;
 }
 
-int alloc_imap_bit(char *fsbuf) {
+int alloc_imap_bit() {
     // 分区内的扇区分布:引导扇区(1) + 超级块(1) + inode-map(1) + sector-map(多少？)
     int pos = 1 + 1;
     //  dev的值从何处获得？
