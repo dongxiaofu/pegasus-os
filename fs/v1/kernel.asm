@@ -105,6 +105,7 @@ _start:
 	
 	mov esp, StackTop
 	mov word [dis_pos], 0
+	xchg bx, bx
 	sgdt [gdt_ptr]
 	call ReloadGDT
 	lgdt [gdt_ptr]
