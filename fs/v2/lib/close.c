@@ -19,5 +19,5 @@ int close(int fd) {
 
     assert(msg.type == SYSCALL_RET);
 
-    return msg.RET_VAL;
+    return msg.RETVAL;
 }

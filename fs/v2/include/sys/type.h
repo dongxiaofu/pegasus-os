@@ -90,7 +90,7 @@ typedef struct {
 
 
 #define CNT u0.u40.m44
-#define PID u0.u40.m45
+//#define PID u0.u40.m45
 #define PROCNR u0.u40.m46
 #define DEV u0.u40.m47
 #define POS u0.u40.m48

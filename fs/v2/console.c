@@ -34,7 +34,7 @@ void tty_dev_write(TTY *tty);
 
 void tty_do_read(TTY *tty, Message *msg);
 
-void tty_do_write(TTY *tty);
+void tty_do_write(TTY *tty, Message *msg);
 
 void init_screen(TTY *tty);
 
@@ -255,7 +255,7 @@ void tty_dev_write(TTY *tty) {
                 // 能用msg.RETVAL = tty->tran_cnt 吗?
                 msg.CNT = tty->tran_cnt;
                 msg.PROCNR = tty->procnr;
-                send_recv(SEND, &msg, tty->pcaller);
+                send_rec(SEND, &msg, tty->pcaller);
             }
         }
     }
@@ -271,9 +271,8 @@ void tty_do_read(TTY *tty, Message *msg) {
     tty->req_buf = v2l(tty->procnr, msg->BUF);
 
     // IPC返回
-    Message msg;
-    msg.type = SUPEND_PROC;
-    send_recv(SEND, &msg, tty->pcaller);
+    msg->type = SUPEND_PROC;
+    send_rec(SEND, msg, tty->pcaller);
 }
 
 /*====================================================
@@ -290,13 +289,15 @@ void tty_do_write(TTY *tty, Message *msg) {
 
     // 把用户进程的数据复制到TTY进程，然后输出。
     while (cnt) {
-        int bytes = min(cnt, TTY_WRITE_BUF_SIZE);
-        phycopy(buf, v2l(msg->PROCNR, BUF) + tty->tran_cnt, bytes);
+        int bytes = MIN(cnt, TTY_WRITE_BUF_SIZE);
+	// in expansion of macro 'BUF'
+        // phycopy(buf, v2l(msg->PROCNR, msg->BUF) + tty->tran_cnt, bytes);
+        phycopy(buf, v2l(msg->PROCNR, (char *)msg->BUF) + tty->tran_cnt, bytes);
         cnt -= bytes;
         tty->tran_cnt += bytes;
         int i = 0;
         while (bytes) {
-            out_char(buf[i]);
+            out_char(tty, buf[i]);
             i++;
             bytes--;
         }
@@ -306,7 +307,7 @@ void tty_do_write(TTY *tty, Message *msg) {
     Message msg2FS;
     msg2FS.type = SYSCALL_RET;
     msg2FS.RETVAL = tty->tran_cnt;
-    send_recv(SEND, msg2FS, msg->source);
+    send_rec(SEND, &msg2FS, msg->source);
 }
 
 /*====================================================
@@ -387,11 +388,11 @@ void TaskTTY() {
             do {
                 tty_dev_read(tty);
                 tty_dev_write(tty);
-            } while (tty->count);
+            } while (tty->counter);
         }
 
         Message msg;
-        send_recv(RECEIVE, &msg, ANY);
+        send_rec(RECEIVE, &msg, ANY);
 
         int type = msg.type;
 
@@ -400,10 +401,10 @@ void TaskTTY() {
                 // 我以为，没必要实现。
                 break;
             case DEV_READ:
-                tty_do_read(current_tty, msg);
+                tty_do_read(current_tty, &msg);
                 break;
             case DEV_WRITE:
-                tty_do_write(current_tty);
+                tty_do_write(current_tty, &msg);
                 break;
             default:
                 panic("Unknown message type");

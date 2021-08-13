@@ -1,4 +1,6 @@
 //#ifdef  GLOBAL_VARIABLES_HERE
+#ifndef _PEGASUS_OS_GLOBAL_H
+#define _PEGASUS_OS_GLOBAL_H
 //#undef  EXTERN
 #define EXTERN
 //#endif
@@ -78,3 +80,5 @@ struct inode *root;
 #define O_CLOEXEC       6
 
 #define O_CREAT         7
+
+#endif
