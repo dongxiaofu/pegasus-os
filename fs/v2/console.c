@@ -224,6 +224,7 @@ void tty_dev_write(TTY *tty) {
         if (tty->tail == tty->buf + KEYBOARD_BUF_SIZE) {
             tty->tail = tty->buf;
         }
+        out_char(tty, key);
 
         // 把数据从终端缓冲区读取到用户进程
         if (tty->left_cnt) {
@@ -392,7 +393,7 @@ void TaskTTY() {
         }
 
         Message msg;
-        send_rec(RECEIVE, &msg, ANY);
+        //send_rec(RECEIVE, &msg, ANY);
 
         int type = msg.type;
 
@@ -407,7 +408,7 @@ void TaskTTY() {
                 tty_do_write(current_tty, &msg);
                 break;
             default:
-                panic("Unknown message type");
+                //panic("Unknown message type");
                 break;
         }
     }

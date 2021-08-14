@@ -107,8 +107,8 @@ char *fsbuf = (char *)0x1000000;
 const int FSBUF_SIZE = 1024 * 1024;
 
 // 读写硬盘，单位是扇区
-#define RD_SECT(device, pos)	rd_wt(pos, device, fsbuf, SECTOR_SIZE, HD_DEV_READ)
-#define WT_SECT(device, pos)	rd_wt(pos, device, fsbuf, SECTOR_SIZE, HD_DEV_WRITE)
+#define RD_SECT(device, pos)	rd_wt(pos * SECTOR_SIZE, device, fsbuf, SECTOR_SIZE, READ)
+#define WT_SECT(device, pos)	rd_wt(pos * SECTOR_SIZE, device, fsbuf, SECTOR_SIZE, WRITE)
 
 // 安装文件系统的分区的次设备号。
 // 次设备号应该是多少？

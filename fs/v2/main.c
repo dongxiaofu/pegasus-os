@@ -265,7 +265,8 @@ void kernel_main() {
     unsigned char rpl;
     unsigned char dpl;
     char *p_task_stack = proc_stack + STACK_SIZE;
-    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++) {
+    // for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++) {
+    for (int i = 0; i < TASK_PROC_NUM; i++) {
         proc = proc_table + i;
         if (i < TASK_PROC_NUM) {
             task = sys_task_table + i;
@@ -726,9 +727,10 @@ void panic(char *error_msg) {
 }
 
 void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line) {
+	// todo %d还未实现或者有问题。
     printx("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
             //Printf("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
-           ASSERT_MAGIC, exp, filename, base_filename, 8456);
+           ASSERT_MAGIC, exp, filename, base_filename, line);
     spin("Stop Here!\n");
     return;
 }
@@ -943,6 +945,7 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         unblock(p_from_proc);
 
         // 调试函数
+        // Printf("p_msg = %x\n", p_from_proc->p_msg);
         assert(p_from_proc->p_msg == 0);
         assert(p_from_proc->p_flag == RUNNING);
         assert(p_from_proc->p_send_to == 0);
@@ -1004,7 +1007,7 @@ int send_rec(int function, Message *msg, int pid) {
             //assert(proc_table[1].p_flag == RUNNING);
             if (ret == 0) {
                 ret = receive_msg(msg, pid);    // pid是sender
-                assert(msg->val != 0);
+                // assert(msg->val != 0);
             }
             break;
         default:
