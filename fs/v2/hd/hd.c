@@ -102,8 +102,10 @@ void hd_handle() {
     }
 
     msg.source = 2;
+    msg.val = 0;
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
-    send_rec(SEND, &msg, source);
+    // todo 向文件系统发送消息，暂时使用硬编码。
+    // send_rec(SEND, &msg, 3);
 }
 
 
@@ -380,3 +382,4 @@ void hd_rdwt(Message *msg) {
         phy_hdbuf += SECTOR_SIZE;
     }
 }
+

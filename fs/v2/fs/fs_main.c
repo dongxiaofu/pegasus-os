@@ -70,6 +70,7 @@ int do_close(int fd);
 
 void task_fs() {
     Printf("%s\n", "FS is running");
+    init_fs();
     while (1) {
         Message msg;
         send_rec(RECEIVE, &msg, ANY);
@@ -116,7 +117,7 @@ void rd_wt(int pos, int device, char *buf, int len, int type) {
     msg.LEN = len;
     msg.POSITION = pos;
     // 文件系统的PID
-    msg.source = TASK_FS;
+    // msg.source = TASK_FS;
     send_rec(BOTH, &msg, TASK_HD);
 }
 
@@ -228,6 +229,17 @@ void mkfs() {
 }
 
 void init_fs() {
+   
+    Message driver_msg;
+    driver_msg.type = OPEN;
+    // todo 暂时使用硬编码。
+    driver_msg.DEVICE = 32; 
+	send_rec(SEND, &driver_msg, 2);
+	int i = 0;
+	while(i < 5000){
+		i++;
+	}
+
     mkfs();
 }
 
