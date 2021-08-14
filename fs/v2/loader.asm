@@ -238,7 +238,8 @@ READ_FILE:
 	;;;;xhcg bx, bx
 	push ax
 	mov ax, es
-	add ax, 0100h
+	; add ax, 0100h
+	add ax, 1000h
 	mov es, ax
 	pop ax
 .2:
@@ -246,7 +247,7 @@ READ_FILE:
 	push bx
 	;;;;xhcg bx, bx
 	call GetFATEntry
-	;;;;xhcg bx, bx
+	;xchg	bx,	bx
 	pop bx
 	push ax
 	cmp ax, 0xFF8
@@ -270,6 +271,7 @@ FILE_NOT_FOUND:
 	jmp OVER
 
 READ_FILE_OVER:
+	xchg	bx, bx
 	;mov al, 'O'
 	;mov ah, 0Dh
 	;mov [gs:(80 * 23 + 33) * 2], ax
@@ -498,13 +500,13 @@ ReadSector2:
 ; 3>BaseOfKernel 和 0x30000 之间呢？
 ; 3>0x30000 这个数值，是 Makefile 中编译时设置的：ld -s -Ttext 0x30400  -o kernel.bin  kernel.o -m elf_i386 
 ;BaseOfKernel	equ	0x8000
-BaseOfKernel	equ	0x9000
+BaseOfKernel	equ	0x7000
 BaseOfKernel2	equ	0x6000
 BaseOfKernel3	equ	0x0
 OffSetOfLoader	equ	0x0
 BaseOfFATEntry	equ	0x1000
 ;BaseOfLoader    equ     0x9000
-BaseOfLoader    equ     0x2000
+BaseOfLoader    equ     0x9000
 
 
 BaseOfLoaderPhyAddr	equ	BaseOfLoader * 10h	; LOADER.BIN 被加载到的位置 ---- 物理地址 (= BaseOfLoader * 10h)
