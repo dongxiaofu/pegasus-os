@@ -813,54 +813,34 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
         assert(receiver->p_receive_from == 0);
 
     } else {
+	// 思路：
+	// 1. 如何目标进程没有准备好接收消息，把消息加入目标进程的消息队列。
+	// 2. 如果是目标进程的消息队列的第一个进程是空，把本进程设置成消息队列的第一个进程。
+	// 3. 如果目标进程的消息队列的第一个进程不是空，把本进程放到消息队列的末尾。	
+	Proc *pre = 0;
+	Proc *p = receiver;
+	if(receiver->q_sending == 0){
+		receiver->q_sending = sender;
+		sender->q_next = 0;
+	}else{
+		Proc *p = receiver->q_sending;
+		while(p){
+			pre = p;
+			p = p->q_next;
+		}
+		pre->q_next = sender;
+		sender->q_next = 0;
+	}
+
         sender->p_msg = msg;
         sender->p_send_to = receiver_pid;
         sender->p_flag = SENDING;
-        // 把sender中的消息放入receiver的p_send_queue把sender中的消息放入receiver的p_send_queue
-        //struct MsgSender *current = receiver->header;
-        //struct MsgSender *pre = receiver->header;
-        // 上面的写法会导致pre、current的内存地址是0。我认为，是它们导致出现死锁。
-        // 不在这个项目这样写，没有问题。
-        //struct MsgSender *current = receiver->header;
-        //struct MsgSender *pre = receiver->header;
-        ////while(*current != 0x0){
-        ////while(current != 0x0){
-        //while(current->sender_pid != -1){
-        //	pre = current;
-        //	current = current->next;
-        //}
-        //// pre->next = {sender_pid, NULL};
-        //// pre->next = &{sender_pid, 0x0};
-        //pre->next->sender_pid = sender_pid;
-        //pre->next->next = 0;
-
-        if (receiver->header == 0x0) {
-            struct MsgSender msg_sender = {sender_pid, 0};
-            //receiver->header->next = &msg_sender;
-            receiver->header = &msg_sender;
-        } else {
-            // struct MsgSender *current = receiver->header->next;
-            // struct MsgSender *current = receiver->header->next;
-            struct MsgSender *current = receiver->header;
-            struct MsgSender *pre = receiver->header;
-            //while(*current != 0x0){
-            //while(current != 0x0){
-            while (current != 0) {
-                pre = current;
-                current = current->next;
-            }
-            // pre->next = {sender_pid, NULL};
-            // pre->next = &{sender_pid, 0x0};
-            pre->next->sender_pid = sender_pid;
-            pre->next->next = 0;
-        }
 
         // 调试函数
         assert(sender->p_flag == SENDING);
         assert(sender->p_send_to == receiver_pid);
         assert(sender->p_msg == msg);
 
-        assert(receiver->header != 0x0);
         // 阻塞sender
         block(sender);
     }
@@ -871,7 +851,8 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
 // receive_msg 通过sys_call调用
 int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
     int copy_ok = 0;
-    int p_from;
+    Proc *p_from;
+    Proc *pre;
 
     Proc *sender = pid2proc(sender_pid);
     int receiver_pid = proc2pid(receiver);
@@ -881,50 +862,35 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         assert((sender_pid == 1) || (sender_pid == 2) || (sender_pid == 3) || (sender_pid == 15));
         assert((receiver_pid == 1) || (receiver_pid == 2) || (receiver_pid == 3) || (receiver_pid == 15));
     }
+
+
+    // 主要思路：
+    // 1. 如果信息来源是ANY，从本进程的消息队列中取出一个消息进行处理。
+    // 2. 如果消息来源不是ANY，进入下面的流程。
+    // 2.1. 进程pid合法 && 消息来源的状态是SENDING && 消息来源的发送对象是本进程。
     if (sender_pid == ANY) {
-        //if(receiver->header->next->sender_pid != 0x0){
-        if (receiver->header != 0x0) {
-            // p_from = receiver->header->next->sender_pid;
-            p_from = receiver->header->sender_pid;
-            // header是头指针；把第一个进程从队列中移除
-            // receiver->header->next = receiver->header->next->next;
-            receiver->header = receiver->header->next;
+        if (receiver->q_sending) {
+            p_from = receiver->q_sending;
             copy_ok = 1;
         }
     } else if (0 <= sender_pid && sender_pid < USER_PROC_NUM + TASK_PROC_NUM) {
         if (sender->p_flag == SENDING && (sender->p_send_to == ANY
                                           || sender->p_send_to == receiver_pid)) {
-            // 遍历receiver的发送消息的进程队列，从中移除sender
-            // 本质是，从发送消息的进程队列中移除sender
-            struct MsgSender *current = receiver->header;
-            struct MsgSender *pre = receiver->header;
-            // struct MsgSender current = receiver->header;
-            // struct MsgSender pre = receiver->header;
-            //while(*current != 0x0){
-            // while(current->sender_pid != 0x0){
-            while (current != 0x0) {
-                if (current->sender_pid == sender_pid) {
-                    copy_ok = 1;
-                    break;
-                }
-                // 难点：下面这句，应该在break语句的上面还是下面？
-                // 心算能力强，心算就能计算出结果。可我的心算能力不强。
-                // 在我的设计中，在上面还是下面，结果一样。可能和我的
-                // 队列设置了头结点指针有关。
-                pre = current;
-                current = current->next;
-            }
-            if (copy_ok == 1) {
-                // 移除sender
-                pre->next = current->next;
-                p_from = sender_pid;
-            }
+	  	p_from = receiver->q_sending;
+		while(p_from){
+			pre = p_from;
+			if(p_from->pid == sender_pid){
+                    		copy_ok = 1;
+				break;
+			}
+			p_from = p_from->q_next;
+		}	
         }
     }
 
 
     if (copy_ok == 1) {
-        Proc *p_from_proc = pid2proc(p_from);
+        Proc *p_from_proc = p_from;
         // 计算msg的线性地址
         int ds = receiver->s_reg.ds;
         int base = Seg2PhyAddrLDT(ds, receiver);
@@ -932,6 +898,15 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         int msg_size = sizeof(Message);
         // 从receiver中把消息复制到sender
         phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);
+
+	// 移除已经处理过的消息。
+	if(p_from == receiver->q_sending){
+		receiver->q_sending = p_from->q_next;
+		p_from->q_next = 0;
+	}else{
+		pre->q_next = p_from->q_next;
+		p_from->q_next = 0;
+	}
 
         // 重置sender
         p_from_proc->p_msg = 0;
@@ -1074,4 +1049,27 @@ char *i2a(int val, int base, char **ps) {
     // *ps++ = &c;
 
     return *ps;
+}
+
+void inform_int(int task_nr)
+{
+	Proc *current = pid2proc(task_nr);
+	// 思路：
+	// 1. 如果目标进程是RECEIVING状态。
+	// 1.1. 如果目标进程接收来自INTERUPT或ANY的消息，进入处理流程。
+	// 1.2. 解除目标进程的阻塞。
+	// 1.3. 改变目标进程的p_flag。
+	// 1.4. 改变目标进程的消息源、消息体等。 
+	// 2. 如果目标进程不是RECEIVING状态，把该进程的成员has_int_msg设置成1。 
+	if(current->p_flag & RECEIVING){
+		if(current->p_receive_from == INTERRUPT || current->p_receive_from == ANY){
+			current->has_int_msg = 0;
+			current->p_receive_from = 0;
+			current->p_msg = 0;
+			current->p_flag = RUNNING; 
+			unblock(current);
+		}
+	}else{
+		current->has_int_msg = 1;
+	}
 }

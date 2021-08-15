@@ -33,6 +33,7 @@ extern clock_handler
 extern disp_int
 extern keyboard_handler
 extern hd_handle
+extern hd_handler
 
 global disp_str
 global disp_str_colour
@@ -95,7 +96,7 @@ _start:
 	;jmp $
 	;jmp $
 	;jmp $
-	xchg bx, bx	
+	;xchg bx, bx	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
 	mov ah, 0Bh
@@ -104,7 +105,7 @@ _start:
 	
 	mov esp, StackTop
 	mov word [dis_pos], 0
-	xchg bx, bx
+	;xchg bx, bx
 	sgdt [gdt_ptr]
 	call ReloadGDT
 	lgdt [gdt_ptr]
@@ -121,7 +122,7 @@ csinit:
 	xor eax, eax
 	mov ax, TSS_SELECTOR
 	ltr ax
-	xchg bx, bx
+	;xchg bx, bx
 	jmp kernel_main
 	jmp $	
 	sti
@@ -373,7 +374,7 @@ hwint0:
 	mov es, dx
 	mov fs, dx
 	;;xhcg bx, bx	
-	mov al, 11111101b
+	mov al, 11111001b
 	out 21h, al
 	; 置EOI位 start
 	mov al, 20h
@@ -387,7 +388,7 @@ hwint0:
 .2:
 	sti
 	call clock_handler
-	mov al, 11111100b
+	mov al, 11111000b
 	out 21h, al
 	cli	
 	cmp dword [k_reenter], 0
@@ -417,7 +418,7 @@ hwint1:
 	mov es, dx
 	mov fs, dx
 
-	mov al, 11111110b
+	mov al, 11111010b
 	out 21h, al
 	mov al, 20h
 	out 20h, al
@@ -436,7 +437,7 @@ hwint1:
 	;;;;;xhcg bx, bx
 	call keyboard_handler
 	;;;;;xhcg bx, bx
-	mov al, 11111100b
+	mov al, 11111000b
 	out 21h, al
 	cli
 	;dec dword [k_reenter]
@@ -464,17 +465,23 @@ hwint14:
 	mov es, dx
 	mov fs, dx
 
+	xchg bx, bx
+
 	; 禁用硬盘中断
-	call disable_8259A_slave_winchester_irq
+	;call disable_8259A_slave_winchester_irq
+	mov al, 11111111b
+	out 0xA1, al	
 
 	; master置EOI位 start
-	mov al, 20h
-	out 20h, al	
+	;mov al, 20h
+	mov al, 0x20
+	out 0x20, al	
 	; master置EOI位 end
+	nop
 
 	; slave置EOI位 start
 	;mov al, A0h ; symbol `A0h' not defined
-	mov al, 0xA0
+	;mov al, 0xA0
 	out 0xA0, al	
 	; slave置EOI位 end
 
@@ -486,12 +493,16 @@ hwint14:
 .2:
 	sti	
 	; 调用硬盘中断
-	call hd_handle
+	;call hd_handle
+	call hd_handler
 	
-	; 打开硬盘中断
-	call enable_8259A_slave_winchester_irq
-
 	cli
+	; 打开硬盘中断
+	;call enable_8259A_slave_winchester_irq
+	mov al, 10111111b
+	out 0xA1, al	
+
+	;cli
 	cmp dword [k_reenter], 0
 	jne reenter_restore
 	jmp restore
@@ -525,7 +536,7 @@ sys_call:
 	mov es, dx	
 	mov fs, dx
 	
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	inc dword [k_reenter]
 	cmp dword [k_reenter], 0
 	jne .2
@@ -543,7 +554,7 @@ sys_call:
 	push dword [proc_ready_table]
 	push ebx
 	push ecx
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	call [sys_call_table + 4 * eax]
 	; 修改请求系统调用的进程的进程表中的堆栈
 	; 获取堆栈中的eax是个难题：
@@ -556,7 +567,7 @@ sys_call:
 	mov [esi + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
 	;pop esi
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	;cli
 	; 恢复进程。不能使用restart，因为，不能使用proc_ready_table
 	; jmp restart	
@@ -643,9 +654,9 @@ reenter_restore:
 	pop es
 	pop ds
 
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	popad
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	iretd
 
 in_byte:
@@ -670,12 +681,11 @@ out_byte:
 	xor eax, eax
 	
 	mov edx, [esp + 4]	; port
-	mov eax, [esp + 8]	; ch
+	;mov eax, [esp + 8]	; ch
+	mov al, [esp + 8]	; ch
 
 	out dx, al
 
-	nop
-	nop
 	nop
 	nop
 
@@ -824,41 +834,47 @@ check_tss_esp0:
 
 
 enable_8259A_casecade_irq:
-	push ax
-
+	;push ax
+	pushf
+	cli
 	in  al, 0x21
 	and  al, ~(1<<2)
 	out 0x21, al
 	
-	pop ax
+	;pop ax
+	popf
 	ret
 
 disable_8259A_casecade_irq:
-	push ax
-
+	;push ax
+	pushf
+	cli
 	in al, 0x21
 	or al, 1<<2
 	out 0x21, al
 	
-	pop ax
+	;pop ax
+	pushf
 	ret
 
 enable_8259A_slave_winchester_irq:
-	push ax
-
+	pushf; ax
+	cli
 	in al, 0xA1
-	or al, ~(1<<6)
+	;or al, ~(1<<6)
+	and al, ~(1<<6)
 	out 0xA1, al
 
-	pop ax
+	popf; ax
 	ret
 
 disable_8259A_slave_winchester_irq:
-	push ax	
-	
+	pushf; ax	
+	cli	
 	in al, 0xA1
 	or al, 1 << 6	
+	;and al, 1 << 6	
 	out 0xA1, al
 
-	pop ax
+	popf; ax
 	ret

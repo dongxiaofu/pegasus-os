@@ -96,7 +96,7 @@ _start:
 	;jmp $
 	;jmp $
 	;;;;;;;;;xhcg; bx, bx
-	xchg bx, bx	
+	;xchg bx, bx	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
 	mov ah, 0Bh
@@ -105,7 +105,7 @@ _start:
 	
 	mov esp, StackTop
 	mov word [dis_pos], 0
-	xchg bx, bx
+	;xchg bx, bx
 	sgdt [gdt_ptr]
 	call ReloadGDT
 	lgdt [gdt_ptr]
@@ -122,7 +122,7 @@ csinit:
 	xor eax, eax
 	mov ax, TSS_SELECTOR
 	ltr ax
-	;xchg bx, bx
+	;;xchg bx, bx
 	jmp kernel_main
 	jmp $	
 	sti
@@ -465,6 +465,7 @@ hwint14:
 	mov es, dx
 	mov fs, dx
 
+	xchg bx, bx
 	; 禁用硬盘中断
 	call disable_8259A_slave_winchester_irq
 
@@ -526,7 +527,7 @@ sys_call:
 	mov es, dx	
 	mov fs, dx
 	
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	inc dword [k_reenter]
 	cmp dword [k_reenter], 0
 	jne .2
@@ -544,7 +545,7 @@ sys_call:
 	push dword [proc_ready_table]
 	push ebx
 	push ecx
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	call [sys_call_table + 4 * eax]
 	; 修改请求系统调用的进程的进程表中的堆栈
 	; 获取堆栈中的eax是个难题：
@@ -557,7 +558,7 @@ sys_call:
 	mov [esi + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
 	;pop esi
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	;cli
 	; 恢复进程。不能使用restart，因为，不能使用proc_ready_table
 	; jmp restart	
@@ -644,9 +645,9 @@ reenter_restore:
 	pop es
 	pop ds
 
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	popad
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	iretd
 
 in_byte:

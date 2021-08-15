@@ -27,8 +27,8 @@ write_port:
 	mov ebp, esp
 	;mov dx, [ebp + 8]	; port
 	mov edx, [ebp + 8]	; port
-	;mov esi, [ebp + 12]	; fsbuf
-	mov edi, [ebp + 12]	; fsbuf
+	mov esi, [ebp + 12]	; fsbuf
+	;mov edi, [ebp + 12]	; fsbuf
 	mov ecx, [ebp + 16]	; size
 	shr ecx, 1		; 把字节换算成字
 	cld

@@ -95,6 +95,10 @@ struct hd_info{
 	struct hd_part logical_part[NR_HD_EXTEND_PARTITION * 4];
 };
 
+#define MAKE_DEVICE_REG(lba,drv,lba_highest) (((lba) << 6) |            \
+                                              ((drv) << 4) |            \
+                                              (lba_highest & 0xF) | 0xA0)
+
 // 生成Device Register
 // 1. lba的最高四位作为本寄存器的低四位。
 // 2. 硬盘号作为本寄存器的第5位。

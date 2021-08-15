@@ -250,4 +250,7 @@
 #define RESUME_PROC 1
 #define SUPEND_PROC 2
 
+// 一些进程PID
+#define INTERRUPT -10
+
 #endif

@@ -65,6 +65,7 @@ void init_propt() {
     InitInterruptDesc(INIT_MASTER_VEC_NO + 0, hwint0, 0x08, 0x0E);
     // 键盘中断
     InitInterruptDesc(INIT_MASTER_VEC_NO + 1, hwint1, 0x08, 0x0E);
+    // InitInterruptDesc(INIT_MASTER_VEC_NO + 1, hwint14, 0x08, 0x0E);
     // 硬盘中断
     InitInterruptDesc(INIT_SLAVE_VEC_NO + 6, hwint14, 0x08, 0x0E);
 
