@@ -16,6 +16,8 @@ struct hd_info hd_info[1];
 // 等待硬盘准备好传输数据
 void wait_for();
 
+int waitfor(int mask, int val, int timeout);
+
 // 等待硬盘中断发生
 void interrupt_wait();
 
@@ -78,19 +80,21 @@ void init_hd() {
 void hd_handle() {
     Printf("%s\n", "HD handle is running!");
     Message msg;
+	Memset(&msg, 0, sizeof(Message));
     send_rec(RECEIVE, &msg, ANY);
     unsigned int type = msg.type;
     unsigned int source = msg.source;
 
     switch (type) {
         case OPEN:
-            hd_open();
             Printf("%s:%d\n", "Open HD", source);
+            hd_open();
+            Printf("%s:%d\n", "Open HD END", source);
             break;
         case READ:
         case WRITE:
-            hd_rdwt(&msg);
             Printf("%s:%d\n", "RD/WT HD", source);
+            hd_rdwt(&msg);
             break;
         case GET_HD_IOCTL:
             get_hd_ioctl(0);
@@ -101,40 +105,43 @@ void hd_handle() {
             break;
     }
 
-    msg.source = 2;
     msg.val = 0;
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
     // todo 向文件系统发送消息，暂时使用硬编码。
-    // send_rec(SEND, &msg, 3);
+	Printf("%s\n", "Msg from HD start");
+    send_rec(SEND, &msg, 3);
+	Printf("%s\n", "Msg from HD");
 }
 
 
 // void hd_cmd_out(unsigned char driver_number, int command, unsigned int lba, unsigned sector_count)
 void hd_cmd_out(struct hd_cmd *cmd) {
-    while (in_byte(0x1F7) & 0x80 != 0) {
-        int t = in_byte(0x1F7);
-        Printf("ticks:%d\n", t);
-    }
-    int t = in_byte(0x1F7);
-    Printf("t:%d\n", t);
-    // 向Control Block Register写入数据
-    out_byte(PRIMARY_DEVICE_CONTROL, 0);
-    Printf("tt:%d\n", 23);
+	if (!waitfor(0x80,0,10000))
+              panic("hd error.");
+//    while (in_byte(0x1F7) & 0x80 != 0) {
+//        int t = in_byte(0x1F7);
+//        Printf("ticks:%d\n", t);
+//    }
+//   int t = in_byte(0x1F7);
+//   Printf("t:%d\n", t);
+//    // 向Control Block Register写入数据
+//    out_byte(PRIMARY_DEVICE_CONTROL, 0);
+//    Printf("tt:%d\n", 23);
     // 向Command Block Registers写入数据
+    out_byte(0x3F6, 0);
     out_byte(PRIMARY_CMD_FEATURES_REGISTER, cmd->feature);
-    //Printf("tt:%d\n", 23);
+   // Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_SECTOR_COUNT_REGISTER, cmd->sector_count);
     //Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_LBA_LOW_REGISTER, cmd->lba_low);
-    //Printf("tt:%d\n", 23);
+   // Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_LBA_MID_REGISTER, cmd->lba_mid);
-    Printf("tt:%d\n", 23);
+   // Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_LBA_HIGH_REGISTER, cmd->lba_high);
-    Printf("tt:%d\n", 23);
+   // Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_DEVICE_REGISTER, cmd->device);
-    Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_COMMAND_REGISTER, cmd->command);
-    Printf("tt:%d\n", 23);
+    //Printf("tt:%d\n", 23);
 }
 
 void hd_identify(int driver_number) {
@@ -153,13 +160,13 @@ void hd_identify(int driver_number) {
     //	cmd.device = 160;
     cmd.command = ATA_IDENTIFY;
     hd_cmd_out(&cmd);
-
+	interrupt_wait();
+	//return;
     // 延迟一会。必须延迟一会。
     // 频繁使用IPC，所以不能使用。
-    // milli_delay(5000);
-    delay(1); //导致invalid opcode
-    Printf("%s\n", "delay over");
-    //delay(10);
+    //milli_delay(5000);
+    delay(800);
+    delay(800);
     // 从Command Block Registers的data寄存器读取数据
     char buf[512 * 2];
     Memset(buf, 0, 1024);
@@ -238,7 +245,7 @@ void get_partition_table(int driver, int lba, struct partition_table_entry *part
     cmd.command = ATA_READ;
     hd_cmd_out(&cmd);
 
-    delay(500);
+    interrupt_wait();
     char buf[1024];
     Memset(buf, 0, 1024);
     read_port(PRIMARY_CMD_DATA_REGISTER, buf, 512);
@@ -306,10 +313,10 @@ void hd_open() {
     int driver = DR_OF_DEV(0);
     //struct hdinfo hd_info;
     hd_info[driver].open_cnt++;
-    //hd_identify(0);
+    hd_identify(0);
     partition(0, PART_PRIMARY);
-    get_hd_ioctl(2);
-    Printf("%s\n", "Over");
+    // get_hd_ioctl(2);
+    // Printf("%s\n", "Over");
 }
 
 int get_hd_ioctl(int device) {
@@ -321,15 +328,22 @@ int get_hd_ioctl(int device) {
 
 
 void wait_for() {
-    delay(4);
+	if (!waitfor(0x8,0x8,10000))
+              panic("hd writing error.");
 }
 
 void interrupt_wait() {
-    delay(4);
+	Message msg;
+	// todo INTERRUPT 拼写正确吗？
+	send_rec(RECEIVING, &msg, INTERRUPT);
 }
 
 
 void hd_rdwt(Message *msg) {
+	// todo IPC有问题，尽量减少IPC次数。
+	//hd_open();
+	//delay(500);
+	//hd_open();
     // 从msg中获取硬盘操作的位置pos
     unsigned long long pos = msg->POSITION;
     // 计算pos在安装文件系统的分区的LBA地址
@@ -360,26 +374,56 @@ void hd_rdwt(Message *msg) {
     cmd.lba_low = nr_sects & 0xFF;
     cmd.lba_mid = (nr_sects >> 8) & 0xFF;
     cmd.lba_high = (nr_sects >> 16) & 0xFF;
-    cmd.device = MAKE_DEVICE_REGISTER(nr_sects, driver);
+    // cmd.device = MAKE_DEVICE_REGISTER(nr_sects, driver);
+    cmd.device = MAKE_DEVICE_REG(1, 0, (nr_sects >> 24) & 0xF);
+    // cmd.device = MAKE_DEVICE_REGISTER(nr_sects, 0);
     cmd.command = type == READ ? ATA_READ : ATA_WRITE;
+	
+	cmd.feature = 0;
+	cmd.sector_count = 1;
+	cmd.lba_low = 79;
+	cmd.lba_high = 0;
+	cmd.device = 224;
+	cmd.command = 48;
     hd_cmd_out(&cmd);
 
-    while (bytes_left) {
-        int bytes = MIN(SECTOR_SIZE, len);
+	bytes_left = 512;
+   while (bytes_left) {
+        int bytes = MIN(SECTOR_SIZE, bytes_left);
         if (type == READ) {
+		//delay(500);
             // 读
             interrupt_wait();
             // 从REG_DATA端口读取数据存储到phy_hdbuf中
+            Memset(phy_hdbuf, 0, 100);
             read_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, SECTOR_SIZE);
         } else if (type == WRITE) {
             // 写
             wait_for();
             // 把数据从phy_hdbuf写入到REG_DATA端口
-            write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, SECTOR_SIZE);
+            Memset(phy_hdbuf, 0xFF, 512);
+            // write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, SECTOR_SIZE);
+            write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, bytes);
             interrupt_wait();
         }
-        bytes_left -= SECTOR_SIZE;
-        phy_hdbuf += SECTOR_SIZE;
+        bytes_left -= bytes;
+        phy_hdbuf += bytes;
     }
 }
 
+
+void hd_handler() {
+   int t = in_byte(0x1F7);
+   inform_int(2);
+}
+
+int waitfor(int mask, int val, int timeout)
+{
+        int t = get_ticks();
+
+        while(((get_ticks() - t) * 1000 / 100) < timeout)
+                if ((in_byte(0x1F7) & mask) == val)
+                        return 1;
+
+        return 0;
+}

@@ -5,7 +5,7 @@ kernel.bin:     file format elf32-i386
 Disassembly of section .text:
 
 00030400 <_start>:
-   30400:	66 87 db             	xchg   %bx,%bx
+   30400:	66 87 db             	;xchg   %bx,%bx
    30403:	c7 05 90 6e 03 00 00 	movl   $0x0,0x36e90
    3040a:	00 00 00 
    3040d:	b4 0b                	mov    $0xb,%ah
@@ -3001,12 +3001,12 @@ Disassembly of section .text:
    326e1:	90                   	nop
    326e2:	c9                   	leave  
    326e3:	c3                   	ret    
-   326e4:	66 90                	xchg   %ax,%ax
-   326e6:	66 90                	xchg   %ax,%ax
-   326e8:	66 90                	xchg   %ax,%ax
-   326ea:	66 90                	xchg   %ax,%ax
-   326ec:	66 90                	xchg   %ax,%ax
-   326ee:	66 90                	xchg   %ax,%ax
+   326e4:	66 90                	;xchg   %ax,%ax
+   326e6:	66 90                	;xchg   %ax,%ax
+   326e8:	66 90                	;xchg   %ax,%ax
+   326ea:	66 90                	;xchg   %ax,%ax
+   326ec:	66 90                	;xchg   %ax,%ax
+   326ee:	66 90                	;xchg   %ax,%ax
 
 000326f0 <get_ticks>:
    326f0:	b8 00 00 00 00       	mov    $0x0,%eax

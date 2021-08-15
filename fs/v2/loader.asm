@@ -247,7 +247,7 @@ READ_FILE:
 	push bx
 	;;;;xhcg bx, bx
 	call GetFATEntry
-	;xchg	bx,	bx
+	;;xchg	bx,	bx
 	pop bx
 	push ax
 	cmp ax, 0xFF8
@@ -271,7 +271,7 @@ FILE_NOT_FOUND:
 	jmp OVER
 
 READ_FILE_OVER:
-	xchg	bx, bx
+	;xchg	bx, bx
 	;mov al, 'O'
 	;mov ah, 0Dh
 	;mov [gs:(80 * 23 + 33) * 2], ax
@@ -500,7 +500,7 @@ ReadSector2:
 ; 3>BaseOfKernel 和 0x30000 之间呢？
 ; 3>0x30000 这个数值，是 Makefile 中编译时设置的：ld -s -Ttext 0x30400  -o kernel.bin  kernel.o -m elf_i386 
 ;BaseOfKernel	equ	0x8000
-BaseOfKernel	equ	0x7000
+BaseOfKernel	equ	0x6000
 BaseOfKernel2	equ	0x6000
 BaseOfKernel3	equ	0x0
 OffSetOfLoader	equ	0x0
@@ -567,8 +567,9 @@ LABEL_PM_START:
 	; 测试读写5M之上的内存读写 end
 
 
-	;;xhcg bx, bx
-	jmp SelectFlatX:0x30400
+	xchg bx, bx
+	;jmp SelectFlatX:0x30400
+	jmp SelectFlatX:0x1000
 	jmp $
 	jmp $
 	jmp $
@@ -610,19 +611,18 @@ Init_8259A:
 	call io_delay
 	 
 	; OCW1
-	;mov al, 11111110b
 	;mov al, 11111101b
-	;mov al, 11111100b	; 正确的
-	mov al, 11111000b	; 测试硬盘,打开级联
+	mov al, 11111100b	; 正确的
+	;mov al, 11111000b	; 测试硬盘,打开级联
 	;mov al, 11111101b
 	out 0x21, al
 	call io_delay
 
-	;mov al, 11111111b	; 正确的
-	mov al, 10111111b	; 测试硬盘，打开硬盘中断
+	mov al, 11111111b	; 正确的
+	;mov al, 10111111b	; 测试硬盘，打开硬盘中断
 	out 0xA1, al
 	call io_delay
-	;OCW2
+;       ;OCW2
 ;	mov al, 11111110b
 ;	out 0x21, al
 ;	call io_delay
@@ -650,8 +650,6 @@ Init8253:
 
 
 io_delay:
-	nop
-	nop
 	nop
 	nop
 	ret

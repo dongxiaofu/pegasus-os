@@ -148,8 +148,11 @@ void enable_8259A_casecade_irq();
 // 打开8259A的从片硬盘中断
 void enable_8259A_slave_winchester_irq();
 
+void inform_int(int task_nr);
+
 // 硬盘驱动
 void hd_handle();
+void hd_handler();
 // hd.c end
 
 // 进程A的进程体
