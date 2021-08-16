@@ -80,14 +80,14 @@ void init_hd() {
 void hd_handle() {
 //    Printf("%s\n", "HD handle is running!");
     Message msg;
-	Memset(&msg, 0, sizeof(Message));
+    Memset(&msg, 0, sizeof(Message));
     send_rec(RECEIVE, &msg, ANY);
     unsigned int type = msg.type;
     unsigned int source = msg.source;
 
     switch (type) {
         case OPEN:
- //           Printf("%s:%d\n", "Open HD", source);
+            //           Printf("%s:%d\n", "Open HD", source);
             hd_open();
             Printf("%s:%d\n", "Open HD END", source);
             break;
@@ -109,14 +109,14 @@ void hd_handle() {
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
     // todo 向文件系统发送消息，暂时使用硬编码。
     send_rec(SEND, &msg, 3);
-	Printf("%s\n", "Msg from HD");
+    Printf("%s\n", "Msg from HD");
 }
 
 
 // void hd_cmd_out(unsigned char driver_number, int command, unsigned int lba, unsigned sector_count)
 void hd_cmd_out(struct hd_cmd *cmd) {
-	if (!waitfor(0x80,0,10000))
-              panic("hd error.");
+    if (!waitfor(0x80, 0, 10000))
+        panic("hd error.");
 //    while (in_byte(0x1F7) & 0x80 != 0) {
 //        int t = in_byte(0x1F7);
 //        Printf("ticks:%d\n", t);
@@ -124,19 +124,19 @@ void hd_cmd_out(struct hd_cmd *cmd) {
 //   int t = in_byte(0x1F7);
 //   Printf("t:%d\n", t);
 //    // 向Control Block Register写入数据
-  out_byte(PRIMARY_DEVICE_CONTROL, 0);
+    out_byte(PRIMARY_DEVICE_CONTROL, 0);
 //    Printf("tt:%d\n", 23);
     // 向Command Block Registers写入数据
     out_byte(PRIMARY_CMD_FEATURES_REGISTER, cmd->feature);
-   // Printf("tt:%d\n", 23);
+    // Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_SECTOR_COUNT_REGISTER, cmd->sector_count);
     //Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_LBA_LOW_REGISTER, cmd->lba_low);
-   // Printf("tt:%d\n", 23);
+    // Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_LBA_MID_REGISTER, cmd->lba_mid);
-   // Printf("tt:%d\n", 23);
+    // Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_LBA_HIGH_REGISTER, cmd->lba_high);
-   // Printf("tt:%d\n", 23);
+    // Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_DEVICE_REGISTER, cmd->device);
     out_byte(PRIMARY_CMD_COMMAND_REGISTER, cmd->command);
     //Printf("tt:%d\n", 23);
@@ -158,14 +158,14 @@ void hd_identify(int driver_number) {
     //	cmd.device = 160;
     cmd.command = ATA_IDENTIFY;
     hd_cmd_out(&cmd);
-	interrupt_wait();
-	//return;
+    interrupt_wait();
+    //return;
     // 延迟一会。必须延迟一会。
     // 频繁使用IPC，所以不能使用。
     //milli_delay(5000);
     // 从Command Block Registers的data寄存器读取数据
-  //  char buf[512 * 2];
-  //  Memset(buf, 0, 1024);
+    //  char buf[512 * 2];
+    //  Memset(buf, 0, 1024);
     char buf[512];
     Memset(buf, 0, 512);
     // size应该如何确定？
@@ -330,22 +330,22 @@ int get_hd_ioctl(int device) {
 
 
 void wait_for() {
-	if (!waitfor(0x8,0x8,10000))
-              panic("hd writing error.");
+    if (!waitfor(0x8, 0x8, 10000))
+        panic("hd writing error.");
 }
 
 void interrupt_wait() {
-	Message msg;
-	// todo INTERRUPT 拼写正确吗？
-	send_rec(RECEIVING, &msg, INTERRUPT);
+    Message msg;
+    // todo INTERRUPT 拼写正确吗？
+    send_rec(RECEIVING, &msg, INTERRUPT);
 }
 
 
 void hd_rdwt(Message *msg) {
-	// todo IPC有问题，尽量减少IPC次数。
-	//hd_open();
-	//delay(500);
-	//hd_open();
+    // todo IPC有问题，尽量减少IPC次数。
+    //hd_open();
+    //delay(500);
+    //hd_open();
     // 从msg中获取硬盘操作的位置pos
     unsigned long long pos = msg->POSITION;
     // 计算pos在安装文件系统的分区的LBA地址
@@ -362,10 +362,10 @@ void hd_rdwt(Message *msg) {
     int bytes_left = len;
     // 从msg中获取内存地址。
     // 这个内存地址存储了要写入硬盘的数据，	或用来存储从硬盘中读取到的数据。
-    char *hdbuf = (char *)msg->BUF;
+    char *hdbuf = (char *) msg->BUF;
     int source = msg->source;
     // 计算出hdbuf的物理地址。
-    char *phy_hdbuf = (char *)v2l(source, hdbuf);
+    char *phy_hdbuf = (char *) v2l(source, hdbuf);
 
     int type = msg->type;
     assert(type == READ || type == WRITE);
@@ -380,7 +380,7 @@ void hd_rdwt(Message *msg) {
     cmd.device = MAKE_DEVICE_REG(1, 0, (nr_sects >> 24) & 0xF);
     // cmd.device = MAKE_DEVICE_REGISTER(nr_sects, 0);
     cmd.command = type == READ ? ATA_READ : ATA_WRITE;
-	
+
 //	cmd.feature = 0;
 //	//	cmd.sector_count = 1;
 //	cmd.lba_low = 0;
@@ -391,10 +391,10 @@ void hd_rdwt(Message *msg) {
     hd_cmd_out(&cmd);
 
 //	bytes_left = 512;
-   while (bytes_left) {
+    while (bytes_left) {
         int bytes = MIN(SECTOR_SIZE, bytes_left);
         if (type == READ) {
-		//delay(500);
+            //delay(500);
             // 读
             interrupt_wait();
             // 从REG_DATA端口读取数据存储到phy_hdbuf中
@@ -404,7 +404,7 @@ void hd_rdwt(Message *msg) {
             // 写
             wait_for();
             // 把数据从phy_hdbuf写入到REG_DATA端口
-           // Memset(phy_hdbuf, 0x0, 512);
+            // Memset(phy_hdbuf, 0x0, 512);
             // write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, SECTOR_SIZE);
             write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, bytes);
             interrupt_wait();
@@ -416,19 +416,18 @@ void hd_rdwt(Message *msg) {
 
 
 void hd_handler() {
-   int t = in_byte(0x1F7);
-   inform_int(2);
+    int t = in_byte(0x1F7);
+    inform_int(2);
 }
 
-int waitfor(int mask, int val, int timeout)
-{
+int waitfor(int mask, int val, int timeout) {
 //	delay(500);
-       // int t = get_ticks();
-	int t = get_ticks_ipc();
+    // int t = get_ticks();
+    int t = get_ticks_ipc();
 
-        while(((get_ticks_ipc() - t) * 1000 / 100) < timeout)
-               if ((in_byte(0x1F7) & mask) == val)
-                        return 1;
+    while (((get_ticks_ipc() - t) * 1000 / 100) < timeout)
+        if ((in_byte(0x1F7) & mask) == val)
+            return 1;
 
-        return 1;
+    return 1;
 }

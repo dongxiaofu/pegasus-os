@@ -161,8 +161,8 @@ void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags) {
     if (error_no != 0xFFFFFFFF) {
         disp_str_colour("error_no:", colour);
         disp_str_colour("error_no:", colour);
-       disp_int(error_no);
-       // Printf("error_no:%x\n", error_no);
+        disp_int(error_no);
+        // Printf("error_no:%x\n", error_no);
         disp_str("\n\n");
     }
 
@@ -270,6 +270,7 @@ void kernel_main() {
     unsigned char rpl;
     unsigned char dpl;
     char *p_task_stack = proc_stack + STACK_SIZE;
+    // todo 测试需要，去掉用户进程USER_PROC_NUM。
     // for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++) {
     for (int i = 0; i < TASK_PROC_NUM; i++) {
         proc = proc_table + i;
@@ -732,7 +733,7 @@ void panic(char *error_msg) {
 }
 
 void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line) {
-	// todo %d还未实现或者有问题。
+    // todo %d还未实现或者有问题。
     printx("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
             //Printf("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
            ASSERT_MAGIC, exp, filename, base_filename, line);
@@ -818,24 +819,24 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
         assert(receiver->p_receive_from == 0);
 
     } else {
-	// 思路：
-	// 1. 如何目标进程没有准备好接收消息，把消息加入目标进程的消息队列。
-	// 2. 如果是目标进程的消息队列的第一个进程是空，把本进程设置成消息队列的第一个进程。
-	// 3. 如果目标进程的消息队列的第一个进程不是空，把本进程放到消息队列的末尾。	
-	Proc *pre = 0;
-	Proc *p = receiver;
-	if(receiver->q_sending == 0){
-		receiver->q_sending = sender;
-		sender->q_next = 0;
-	}else{
-		Proc *p = receiver->q_sending;
-		while(p){
-			pre = p;
-			p = p->q_next;
-		}
-		pre->q_next = sender;
-		sender->q_next = 0;
-	}
+        // 思路：
+        // 1. 如何目标进程没有准备好接收消息，把消息加入目标进程的消息队列。
+        // 2. 如果是目标进程的消息队列的第一个进程是空，把本进程设置成消息队列的第一个进程。
+        // 3. 如果目标进程的消息队列的第一个进程不是空，把本进程放到消息队列的末尾。
+        Proc *pre = 0;
+        Proc *p = receiver;
+        if (receiver->q_sending == 0) {
+            receiver->q_sending = sender;
+            sender->q_next = 0;
+        } else {
+            Proc *p = receiver->q_sending;
+            while (p) {
+                pre = p;
+                p = p->q_next;
+            }
+            pre->q_next = sender;
+            sender->q_next = 0;
+        }
 
         sender->p_msg = msg;
         sender->p_send_to = receiver_pid;
@@ -868,25 +869,25 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         assert((receiver_pid == 1) || (receiver_pid == 2) || (receiver_pid == 3) || (receiver_pid == 15));
     }
 
-	if(receiver->has_int_msg && (sender_pid == ANY || sender_pid == INTERRUPT)){
-		
-		 Message m;
-		Memset(&m, 0, sizeof(Message));
-                m.source = INTERRUPT;
-                m.type = 1;
+    if (receiver->has_int_msg && (sender_pid == ANY || sender_pid == INTERRUPT)) {
 
-                assert(msg);
+        Message m;
+        Memset(&m, 0, sizeof(Message));
+        m.source = INTERRUPT;
+        m.type = 1;
 
-                phycopy(v2l(receiver_pid, msg), &m,
-                          sizeof(Message));
+        assert(msg);
 
-		receiver->has_int_msg = 0;
-		receiver->p_receive_from = 0;
-		receiver->p_send_to = 0;
-		receiver->p_flag = RUNNING;
-		
-		return 0;
-	}
+        phycopy(v2l(receiver_pid, msg), &m,
+                sizeof(Message));
+
+        receiver->has_int_msg = 0;
+        receiver->p_receive_from = 0;
+        receiver->p_send_to = 0;
+        receiver->p_flag = RUNNING;
+
+        return 0;
+    }
 
 
     // 主要思路：
@@ -901,15 +902,15 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
     } else if (0 <= sender_pid && sender_pid < USER_PROC_NUM + TASK_PROC_NUM) {
         if (sender->p_flag == SENDING && (sender->p_send_to == ANY
                                           || sender->p_send_to == receiver_pid)) {
-	  	p_from = receiver->q_sending;
-		while(p_from){
-			pre = p_from;
-			if(p_from->pid == sender_pid){
-                    		copy_ok = 1;
-				break;
-			}
-			p_from = p_from->q_next;
-		}	
+            p_from = receiver->q_sending;
+            while (p_from) {
+                pre = p_from;
+                if (p_from->pid == sender_pid) {
+                    copy_ok = 1;
+                    break;
+                }
+                p_from = p_from->q_next;
+            }
         }
     }
 
@@ -924,14 +925,14 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         // 从receiver中把消息复制到sender
         phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);
 
-	// 移除已经处理过的消息。
-	if(p_from == receiver->q_sending){
-		receiver->q_sending = p_from->q_next;
-		p_from->q_next = 0;
-	}else{
-		pre->q_next = p_from->q_next;
-		p_from->q_next = 0;
-	}
+        // 移除已经处理过的消息。
+        if (p_from == receiver->q_sending) {
+            receiver->q_sending = p_from->q_next;
+            p_from->q_next = 0;
+        } else {
+            pre->q_next = p_from->q_next;
+            p_from->q_next = 0;
+        }
 
         // 重置sender
         p_from_proc->p_msg = 0;
@@ -1076,25 +1077,24 @@ char *i2a(int val, int base, char **ps) {
     return *ps;
 }
 
-void inform_int(int task_nr)
-{
-	Proc *current = pid2proc(task_nr);
-	// 思路：
-	// 1. 如果目标进程是RECEIVING状态。
-	// 1.1. 如果目标进程接收来自INTERUPT或ANY的消息，进入处理流程。
-	// 1.2. 解除目标进程的阻塞。
-	// 1.3. 改变目标进程的p_flag。
-	// 1.4. 改变目标进程的消息源、消息体等。 
-	// 2. 如果目标进程不是RECEIVING状态，把该进程的成员has_int_msg设置成1。 
-	if(current->p_flag & RECEIVING){
-		if(current->p_receive_from == INTERRUPT || current->p_receive_from == ANY){
-			current->has_int_msg = 0;
-			current->p_receive_from = 0;
-			current->p_msg = 0;
-			current->p_flag = RUNNING; 
-			unblock(current);
-		}
-	}else{
-		current->has_int_msg = 1;
-	}
+void inform_int(int task_nr) {
+    Proc *current = pid2proc(task_nr);
+    // 思路：
+    // 1. 如果目标进程是RECEIVING状态。
+    // 1.1. 如果目标进程接收来自INTERUPT或ANY的消息，进入处理流程。
+    // 1.2. 解除目标进程的阻塞。
+    // 1.3. 改变目标进程的p_flag。
+    // 1.4. 改变目标进程的消息源、消息体等。
+    // 2. 如果目标进程不是RECEIVING状态，把该进程的成员has_int_msg设置成1。
+    if (current->p_flag & RECEIVING) {
+        if (current->p_receive_from == INTERRUPT || current->p_receive_from == ANY) {
+            current->has_int_msg = 0;
+            current->p_receive_from = 0;
+            current->p_msg = 0;
+            current->p_flag = RUNNING;
+            unblock(current);
+        }
+    } else {
+        current->has_int_msg = 1;
+    }
 }

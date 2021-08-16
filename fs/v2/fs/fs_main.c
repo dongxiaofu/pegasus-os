@@ -78,9 +78,9 @@ void task_fs() {
         int source = msg.source;
         int fd = msg.FD;
 
-	// open
-	char *pathname = msg.PATHNAME;
-	int oflags = msg.FLAGS;
+        // open
+        char *pathname = msg.PATHNAME;
+        int oflags = msg.FLAGS;
 
         pcaller = &proc_table[source];
 
@@ -122,17 +122,17 @@ void rd_wt(int pos, int device, char *buf, int len, int type) {
 }
 
 void mkfs() {
-	// fsbuf未定义。神奇！
-	//Memset(fsbuf, 0, 512);
+    // fsbuf未定义。神奇！
+    //Memset(fsbuf, 0, 512);
     RD_SECT(ROOT_DEV, 1);
-	Printf("read over\n");
-	Memset(fsbuf, 0x0, 512);
+    Printf("read over\n");
+    Memset(fsbuf, 0x0, 512);
     WT_SECT(ROOT_DEV, 1);
-	Memset(fsbuf, 0xFF, 512);
+    Memset(fsbuf, 0xFF, 512);
     RD_SECT(ROOT_DEV, 1);
-	Printf("fsbuf = %s\n", fsbuf);
-	return;
-	// 写入超级块
+    Printf("fsbuf = %s\n", fsbuf);
+    return;
+    // 写入超级块
     struct super_block sp2;
     Memset(&sp2, 0, SECTOR_SIZE);
     sp2.cnt_of_inode_map_sect = 1;
@@ -163,12 +163,12 @@ void mkfs() {
     Memset(fsbuf, 0xFF, 512);
     Memset(fsbuf, 0, 512);
     WT_SECT(ROOT_DEV, 1);
-	
-	return;
+
+    return;
 
     // 写入超级块
     RD_SECT(ROOT_DEV, 1);
-    struct super_block *sp = (struct super_block *)fsbuf;
+    struct super_block *sp = (struct super_block *) fsbuf;
     sp->cnt_of_inode_map_sect = 7;
     // 1. 是多少？无头绪。
     // 2. 有条理地思考。
@@ -196,7 +196,7 @@ void mkfs() {
     // Memcpy(fsbuf + 512, sp, 512);
     Memset(fsbuf, 1, 512);
     WT_SECT(ROOT_DEV, 1);
-	return;
+    return;
 
     // 写入inode-map
     // todo 又看不懂这块的逻辑了。先让语法错误消失吧。
@@ -275,12 +275,12 @@ void mkfs() {
 }
 
 void init_fs() {
-   
+
     Message driver_msg;
     driver_msg.type = OPEN;
     // todo 暂时使用硬编码。
-    driver_msg.DEVICE = 32; 
-	send_rec(BOTH, &driver_msg, 2);
+    driver_msg.DEVICE = 32;
+    send_rec(BOTH, &driver_msg, 2);
 
     mkfs();
 }
@@ -441,7 +441,8 @@ struct inode *get_inode(int nr_inode) {
     // 在缓存中没有找到目标inode，从硬盘中读取。
     struct super_block *sb = get_super_block();
     int inode_size = sizeof(struct inode);
-    int pos = 1 + 1 + sb->cnt_of_inode_map_sect + sb->cnt_of_sector_map_sect + (nr_inode - 1) / (SECTOR_SIZE / inode_size);
+    int pos = 1 + 1 + sb->cnt_of_inode_map_sect + sb->cnt_of_sector_map_sect +
+              (nr_inode - 1) / (SECTOR_SIZE / inode_size);
     int dev = ROOT_DEV;
     RD_SECT(dev, pos);
     int offset = (nr_inode - 1) % (SECTOR_SIZE / inode_size);
@@ -615,7 +616,7 @@ struct dir_entry *new_dir_entry(struct inode *dir_root, char *filename, int nr_i
     int i;
 
     // todo 暂时这样处理dev。
-    int dev = ROOT_DEV; 
+    int dev = ROOT_DEV;
     for (i = 0; i < nr_sector_max; i++) {
         RD_SECT(dev, nr_dir_entry_blk0 + i);
         // 在已经使用过的目录项中寻找空闲目录项
@@ -673,11 +674,11 @@ void do_unlink(char *filename) {
     }
 
     int nr_inode = search_file(filename);
-    if(nr_inode == -1){
+    if (nr_inode == -1) {
         panic("The file does not exist\n");
     }
     struct inode *inode = get_inode(nr_inode);
-    if(inode == 0){
+    if (inode == 0) {
         panic("The file does not exist\n");
     }
 

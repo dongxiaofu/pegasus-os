@@ -14,6 +14,7 @@ void schedule_process() {
     Proc *p;
     unsigned int greatest_ticks = 0;
     while (!greatest_ticks) {
+        // todo 测试需要，去掉用户进程USER_PROC_NUM。
         //for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
         // for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++) {
         for (p = proc_table; p < proc_table + TASK_PROC_NUM; p++) {
@@ -27,7 +28,8 @@ void schedule_process() {
         //while(!greatest_ticks){
         if (!greatest_ticks) {
             for (p = proc_table; p < proc_table + TASK_PROC_NUM; p++) {
-            //for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++) {
+                // todo 测试需要，去掉用户进程USER_PROC_NUM。
+                //for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++) {
                 if (p->p_flag == RUNNING) {
                     p->ticks = p->priority;
                 }
@@ -38,16 +40,16 @@ void schedule_process() {
 }
 
 void clock_handler() {
-	if(++ticks >= MAX_TICKS ){
-		ticks = 0;
-	}
+    if (++ticks >= MAX_TICKS) {
+        ticks = 0;
+    }
     if (proc_ready_table->ticks > 0) {
         proc_ready_table->ticks--;
     }
 
-	if(key_pressed){
-		inform_int(0);
-	}
+    if (key_pressed) {
+        inform_int(0);
+    }
 
     if (k_reenter != 0) {
         //return proc_ready_tab
