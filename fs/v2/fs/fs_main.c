@@ -275,7 +275,6 @@ void init_fs() {
     driver_msg.DEVICE = 32; 
 	send_rec(BOTH, &driver_msg, 2);
 
-	return;
     mkfs();
 }
 
