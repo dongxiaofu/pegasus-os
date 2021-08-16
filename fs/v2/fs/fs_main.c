@@ -71,6 +71,7 @@ int do_close(int fd);
 void task_fs() {
     Printf("%s\n", "FS is running");
     init_fs();
+	return;
     while (1) {
         Message msg;
         send_rec(RECEIVE, &msg, ANY);
@@ -115,61 +116,30 @@ void rd_wt(int pos, int device, char *buf, int len, int type) {
     msg.DEVICE = device;
     msg.BUF = buf;
     msg.LEN = len;
-    msg.POSITION = pos;
+    msg.POSITION = pos * SECTOR_SIZE;
+ //   msg.POSITION = pos;// * SECTOR_SIZE;
     // 文件系统的PID
     // msg.source = TASK_FS;
     send_rec(BOTH, &msg, TASK_HD);
 }
 
 void mkfs() {
-    // fsbuf未定义。神奇！
-    //Memset(fsbuf, 0, 512);
-    RD_SECT(ROOT_DEV, 1);
-    Printf("read over\n");
-    Memset(fsbuf, 0x0, 512);
-    WT_SECT(ROOT_DEV, 1);
-    Memset(fsbuf, 0xFF, 512);
-    RD_SECT(ROOT_DEV, 1);
-    Printf("fsbuf = %s\n", fsbuf);
-    return;
+//    // fsbuf未定义。神奇！
+//    //Memset(fsbuf, 0, 512);
+//    RD_SECT(ROOT_DEV, 1);
+//    Printf("read over\n");
+//    Memset(fsbuf, 0x0, 512);
+//    WT_SECT(ROOT_DEV, 1);
+//    Memset(fsbuf, 0xFF, 512);
+//    RD_SECT(ROOT_DEV, 1);
+//    Printf("fsbuf = %s\n", fsbuf);
+//    return;
     // 写入超级块
-    struct super_block sp2;
-    Memset(&sp2, 0, SECTOR_SIZE);
-    sp2.cnt_of_inode_map_sect = 1;
-    // 1. 是多少？无头绪。
-    // 2. 有条理地思考。
-    // 3. 需要记录的扇区有多少个？
-    // 4. 需要记录的扇区中的第一个扇区的扇区号是多少？
-    // 4.1. 第一个扇区，可以人为设定。
-    // 4.2. 是数据区的第一个扇区？是这个。
-    // 4.3. 是安装文件系统的分区的第一个扇区？不是这个。没必要记录超级块占用的扇区的使用情况。
-    // 5. 一共有多少个文件？
-    // 6. 每个文件占用多少个扇区？
-    // 7. cnt_of_sector_map_sect = 每个文件占用的扇区数量 * 文件数量 / (512字节 * 8)。
-    sp2.cnt_of_sector_map_sect = CNT_OF_FILE_SECT * CNT_OF_FILE / SECTOR_SIZE;
-    sp2.cnt_of_inode_sect = (1 * 512 * 8 * 16) / 512;
-    // 1. 数据区的第一个扇区 = 引导扇区 + 超级块 + inode-map + sector-map + inodes。
-    // 2. 上面的公式中的每个元素都是简写，完整表述应该是："XX占用的扇区数量”,例如，超级块占用的扇区
-    // 	数量。
-    sp2.data_1st_sect = 1 + 1 + sp2.cnt_of_inode_map_sect + sp2.cnt_of_sector_map_sect + sp2.cnt_of_inode_sect;
-    // 写入硬盘
-    // 先把数据写入fsbuf，再写入硬盘。
-    // Memcpy(fsbuf + SECTOR_SIZE, sp2, SECTOR_SIZE);
-    Memcpy(fsbuf, &sp2, SECTOR_SIZE);
-    // Memcpy(fsbuf, sp2 + SECTOR_SIZE, SECTOR_SIZE);
-    // ROOT_DEV 是安装文件系统的分区的次设备号。
-    // 参数1是写入超级的位置
-    // Memcpy(fsbuf + 512, sp2, 512);
-    Memset(fsbuf, 0xFF, 512);
-    Memset(fsbuf, 0, 512);
-    WT_SECT(ROOT_DEV, 1);
-
-    return;
 
     // 写入超级块
     RD_SECT(ROOT_DEV, 1);
     struct super_block *sp = (struct super_block *) fsbuf;
-    sp->cnt_of_inode_map_sect = 7;
+    sp->cnt_of_inode_map_sect = 1;
     // 1. 是多少？无头绪。
     // 2. 有条理地思考。
     // 3. 需要记录的扇区有多少个？
@@ -180,7 +150,7 @@ void mkfs() {
     // 5. 一共有多少个文件？
     // 6. 每个文件占用多少个扇区？
     // 7. cnt_of_sector_map_sect = 每个文件占用的扇区数量 * 文件数量 / (512字节 * 8)。
-    sp->cnt_of_sector_map_sect = CNT_OF_FILE_SECT * CNT_OF_FILE / SECTOR_SIZE;
+    sp->cnt_of_sector_map_sect = CNT_OF_FILE_SECT * CNT_OF_FILE / SECTOR_SIZE / 8;
     sp->cnt_of_inode_sect = (1 * 512 * 8 * 16) / 512;
     // 1. 数据区的第一个扇区 = 引导扇区 + 超级块 + inode-map + sector-map + inodes。
     // 2. 上面的公式中的每个元素都是简写，完整表述应该是："XX占用的扇区数量”,例如，超级块占用的扇区
@@ -193,84 +163,87 @@ void mkfs() {
     // Memcpy(fsbuf, sp + SECTOR_SIZE, SECTOR_SIZE);
     // ROOT_DEV 是安装文件系统的分区的次设备号。
     // 参数1是写入超级的位置
-    // Memcpy(fsbuf + 512, sp, 512);
-    Memset(fsbuf, 1, 512);
+    int sp_size = sizeof(struct super_block);
+    Memcpy(fsbuf, sp, sp_size);
+	Memset(fsbuf + sp_size, 0x90, 512 - sp_size);
     WT_SECT(ROOT_DEV, 1);
-    return;
 
     // 写入inode-map
     // todo 又看不懂这块的逻辑了。先让语法错误消失吧。
-//    char first_bit = 0x3;    // 0x3 的二进制形式：0000 0011。
-//    // todo 如此写入first_bit，好像不妥。
-//    Memcpy(fsbuf, first_bit, 1);
-//    Memcpy(fsbuf + 1, 0, SECTOR_SIZE - 1);
-//    WT_SECT(ROOT_DEV, 1 + 1);
-//    // 写入sector-map
-//    // pos的值 = 1（引导扇区）+ 1（超级块）+ 1(inode-map)。
-//    int pos = 1 + 1 + 1;
-//    // 写入第一个扇区。这个扇区的前256个字节的所有bit都是1，后256个字节的所有bit都是0。
-//    Memset(fsbuf, 0xFF, SECTOR_SIZE >> 1);
-//    // 前面256*8 + 1个bit都是1，后面所有的字节的bit都是0。
-//    // 这里，费解！三四个小时前写的，现在看，又花了点时间才理解。
-//    // 1个字节：0000 0001。多出来的1，是sector-map的第0个bti是保留位造成的。
-//    // error: invalid operands to binary >> (have 'char *' and 'int')
-//    // Memset(fsbuf + SECTOR_SIZE >> 1, 1, 1);
-//    Memset(fsbuf + (SECTOR_SIZE >> 1), 1, 1);
-//    // 256 * 8 + 1，256*8个扇区，这是一个文件能占用的最大扇区数量。
-//    // 256 + 1 个字节，前256个字节的每个bit都是1，第257个字节的8个bit中的第0个bit是1。
-//    // error: invalid operands to binary >> (have 'char *' and 'int')
-//    // Memset(fsbuf + SECTOR_SIZE >> 1 + 1, 0, SECTOR_SIZE >> 1 - 1);
-//    Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0, SECTOR_SIZE >> 1 - 1);
-//    WT_SECT(ROOT_DEV, pos);
-//    // 写入sector-map的剩余扇区
-//    int rest_sects = sp->cnt_of_sector_map_sect - 1;
-//    for (int i = 1; i <= rest_sects; i++) {
-//        Memset(fsbuf, 0, SECTOR_SIZE);
-//        WT_SECT(ROOT_DEV, pos + i);
-//    }
-//    // 写入inode-array
-//    // 先找出第一个空闲的inode。初始化时不必寻找。
-//    Memset(fsbuf, 0, SECTOR_SIZE);
-//    struct inode inode;
-//    inode.type = FILE_TYPE_TEXT;
-//    inode.size = sizeof(struct dir_entry);
-//    inode.start_sect = sp->data_1st_sect;
-//    inode.nr_sect = CNT_OF_FILE_SECT;
-//    // 只存在于内存中的inode成员，不能在此时赋值。
-//    Memcpy(fsbuf, &inode, INODE_SIZE);
-//    // 很想用一个变量存储1 + 1 + 1 + sp.cnt_of_sector_map_sect，可想不出好名字。
-//    WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp.cnt_of_sector_map_sect);
-//
-//    // 创建默认文件：根目录、终端。
-//    RD_SECT(ROOT_DEV, 1 + 1 + 1 + sp.cnt_of_sector_map_sect);
-//    // 创建根目录
-//    struct inode *pinode = (struct inode *) fsbuf;
-//    pinode->type = FILE_TYPE_TEXT;
-//    pinode->size = sizeof(struct dir_entry);
-//    pinode->start_sect = sp.data_1st_sect;
-//    pinode->nr_sect = CNT_OF_FILE_SECT;
-//    // 创建终端
-//    for (int i = 0; i < 3; i++) {
-//        pinode = (struct inode *) (fsbuf + sizeof(struct inode) * (i + 1));
-//        pinode->type = FILE_TYPE_SPECIAL_CHAR;
-//        pinode->size = 0;
-//        pinode->nr_sect = 0;
-//        // todo 待确定。
-//        int task_tty = 0;
-//        pinode->start_sect = MAKE_DEV(task_tty, i);
-//    }
-//    WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp.cnt_of_sector_map_sect);
-//
-//
-//    // 写入根目录
-//    struct dir_entry dir_entry;
-//    dir_entry.nr_inode = 1;
-//    char filename[2];
-//    filename[0] = '.';
-//    filename[1] = '0';
-//    Memcpy(dir_entry.filename, filename, sizeof(filename));
-//    Memcpy(fsbuf, &dir_entry, sizeof(dir_entry));
-//    WT_SECT(ROOT_DEV, sp.data_1st_sect);
+    char first_bit = 0x3;    // 0x3 的二进制形式：0000 0011。
+    // todo 如此写入first_bit，好像不妥。
+    Memset(fsbuf, first_bit, 1);
+    Memset(fsbuf + 1, 0x80, SECTOR_SIZE - 1);
+    WT_SECT(ROOT_DEV, 1 + 1);
+    // 写入sector-map
+    // pos的值 = 1（引导扇区）+ 1（超级块）+ 1(inode-map)。
+    int pos = 1 + 1 + 1;
+    // 写入第一个扇区。这个扇区的前256个字节的所有bit都是1，后256个字节的所有bit都是0。
+    // 一个文件最多占用256 * 8 = 2048个扇区，2048*512/1024/1024个字节 = 1M个字节。
+    Memset(fsbuf, 0xFF, SECTOR_SIZE >> 1);
+    // 前面256*8 + 1个bit都是1，后面所有的字节的bit都是0。
+    // 这里，费解！三四个小时前写的，现在看，又花了点时间才理解。
+    // 1个字节：0000 0001。多出来的1，是sector-map的第0个bti是保留位造成的。
+    // error: invalid operands to binary >> (have 'char *' and 'int')
+    // Memset(fsbuf + SECTOR_SIZE >> 1, 1, 1);
+    // Memset(fsbuf + (SECTOR_SIZE >> 1), 1, 1);
+    // 256 * 8 + 1，256*8个扇区，这是一个文件能占用的最大扇区数量。
+    // 256 + 1 个字节，前256个字节的每个bit都是1，第257个字节的8个bit中的第0个bit是1。
+    // error: invalid operands to binary >> (have 'char *' and 'int')
+    // Memset(fsbuf + SECTOR_SIZE >> 1 + 1, 0, SECTOR_SIZE >> 1 - 1);
+    //Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x01, SECTOR_SIZE >> 1 - 1);
+    Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x01, 1);
+    WT_SECT(ROOT_DEV, pos);
+    // 写入sector-map的剩余扇区
+    int rest_sects = sp->cnt_of_sector_map_sect - 1;
+    for (int i = 1; i <= rest_sects; i++) {
+        Memset(fsbuf, 0x70, SECTOR_SIZE);
+        WT_SECT(ROOT_DEV, pos + i);
+    }
+	return;
+    // 写入inode-array
+    // 先找出第一个空闲的inode。初始化时不必寻找。
+    Memset(fsbuf, 0, SECTOR_SIZE);
+    struct inode inode;
+    inode.type = FILE_TYPE_TEXT;
+    inode.size = sizeof(struct dir_entry);
+    inode.start_sect = sp->data_1st_sect;
+    inode.nr_sect = CNT_OF_FILE_SECT;
+    // 只存在于内存中的inode成员，不能在此时赋值。
+    Memcpy(fsbuf, &inode, INODE_SIZE);
+    // 很想用一个变量存储1 + 1 + 1 + sp.cnt_of_sector_map_sect，可想不出好名字。
+    WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp->cnt_of_sector_map_sect);
+
+    // 创建默认文件：根目录、终端。
+    RD_SECT(ROOT_DEV, 1 + 1 + 1 + sp->cnt_of_sector_map_sect);
+    // 创建根目录
+    struct inode *pinode = (struct inode *) fsbuf;
+    pinode->type = FILE_TYPE_TEXT;
+    pinode->size = sizeof(struct dir_entry);
+    pinode->start_sect = sp->data_1st_sect;
+    pinode->nr_sect = CNT_OF_FILE_SECT;
+    // 创建终端
+    for (int i = 0; i < 3; i++) {
+        pinode = (struct inode *) (fsbuf + sizeof(struct inode) * (i + 1));
+        pinode->type = FILE_TYPE_SPECIAL_CHAR;
+        pinode->size = 0;
+        pinode->nr_sect = 0;
+        // todo 待确定。
+        int task_tty = 0;
+        pinode->start_sect = MAKE_DEV(task_tty, i);
+    }
+    WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp->cnt_of_sector_map_sect);
+
+
+    // 写入根目录
+    struct dir_entry dir_entry;
+    dir_entry.nr_inode = 1;
+    char filename[2];
+    filename[0] = '.';
+    filename[1] = '0';
+    Memcpy(dir_entry.filename, filename, sizeof(filename));
+    Memcpy(fsbuf, &dir_entry, sizeof(dir_entry));
+    WT_SECT(ROOT_DEV, sp->data_1st_sect);
     //
 }
 
