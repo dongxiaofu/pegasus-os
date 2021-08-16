@@ -11,6 +11,7 @@ EXTERN int dis_pos;
 EXTERN unsigned int ticks;
 EXTERN unsigned int k_reenter;
 EXTERN unsigned int counter;
+EXTERN unsigned int key_pressed;
 
 // 全局相关 end
 

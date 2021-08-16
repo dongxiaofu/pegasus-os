@@ -7,12 +7,14 @@
 #include "proto.h"
 #include "string.h"
 #include "keymap.h"
+#include "global.h"
 #include "keyboard.h"
 
 
 // 键盘 start
 void keyboard_handler()
 {
+	key_pressed = 1;
 	//char scan_code = in_byte(0x60);
 	//disp_int(scan_code);
 	int port = 0x60;
@@ -257,6 +259,7 @@ void in_process(TTY *tty, unsigned int key)
 			}
 		}	
 	}	
+	key_pressed = 0;
 }
 
 // 键盘 end

@@ -57,7 +57,7 @@ int get_hd_ioctl(int device);
 
 // 硬盘驱动
 void TaskHD() {
-    Printf("%s\n", "HD driver is running!");
+//    Printf("%s\n", "HD driver is running!");
     // 初始硬盘
     init_hd();
 
@@ -70,7 +70,7 @@ void TaskHD() {
 void init_hd() {
     // 获取硬盘数量
     char *buf = (char *) (0x475);
-    Printf("Num:%d\n", *buf);
+//    Printf("Num:%d\n", *buf);
     // 打开8259A的从片级联设置
     enable_8259A_casecade_irq();
     // 打开硬盘中断
@@ -78,7 +78,7 @@ void init_hd() {
 }
 
 void hd_handle() {
-    Printf("%s\n", "HD handle is running!");
+//    Printf("%s\n", "HD handle is running!");
     Message msg;
 	Memset(&msg, 0, sizeof(Message));
     send_rec(RECEIVE, &msg, ANY);
@@ -87,7 +87,7 @@ void hd_handle() {
 
     switch (type) {
         case OPEN:
-            Printf("%s:%d\n", "Open HD", source);
+ //           Printf("%s:%d\n", "Open HD", source);
             hd_open();
             Printf("%s:%d\n", "Open HD END", source);
             break;
@@ -108,7 +108,6 @@ void hd_handle() {
     msg.val = 0;
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
     // todo 向文件系统发送消息，暂时使用硬编码。
-	Printf("%s\n", "Msg from HD start");
     send_rec(SEND, &msg, 3);
 	Printf("%s\n", "Msg from HD");
 }
@@ -125,10 +124,9 @@ void hd_cmd_out(struct hd_cmd *cmd) {
 //   int t = in_byte(0x1F7);
 //   Printf("t:%d\n", t);
 //    // 向Control Block Register写入数据
-//    out_byte(PRIMARY_DEVICE_CONTROL, 0);
+  out_byte(PRIMARY_DEVICE_CONTROL, 0);
 //    Printf("tt:%d\n", 23);
     // 向Command Block Registers写入数据
-    out_byte(0x3F6, 0);
     out_byte(PRIMARY_CMD_FEATURES_REGISTER, cmd->feature);
    // Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_SECTOR_COUNT_REGISTER, cmd->sector_count);
@@ -166,8 +164,10 @@ void hd_identify(int driver_number) {
     // 频繁使用IPC，所以不能使用。
     //milli_delay(5000);
     // 从Command Block Registers的data寄存器读取数据
-    char buf[512 * 2];
-    Memset(buf, 0, 1024);
+  //  char buf[512 * 2];
+  //  Memset(buf, 0, 1024);
+    char buf[512];
+    Memset(buf, 0, 512);
     // size应该如何确定？
     read_port(PRIMARY_CMD_DATA_REGISTER, buf, 512);
 
@@ -223,7 +223,7 @@ void print_dpt_entry(struct partition_table_entry *entry) {
     // Printf("\n%s\n", "========================Start=================");
     //Printf("LBA:%d\n", entry->start_sector_lba);
     //Printf("Sector Count:%d\n", entry->nr_sector);
-    Printf("System ID:%d\n", entry->system_id);
+//    Printf("System ID:%d\n", entry->system_id);
     //Printf("Status:%d\n", entry->status);
     //Printf("\n%s\n", "========================end=================");
 }
@@ -246,8 +246,10 @@ void get_partition_table(int driver, int lba, struct partition_table_entry *part
     hd_cmd_out(&cmd);
 
     interrupt_wait();
-    char buf[1024];
-    Memset(buf, 0, 1024);
+//    char buf[1024];
+//    Memset(buf, 0, 1024);
+    char buf[512];
+    Memset(buf, 0, 512);
     read_port(PRIMARY_CMD_DATA_REGISTER, buf, 512);
 
     // 获取分区表
@@ -379,15 +381,16 @@ void hd_rdwt(Message *msg) {
     // cmd.device = MAKE_DEVICE_REGISTER(nr_sects, 0);
     cmd.command = type == READ ? ATA_READ : ATA_WRITE;
 	
-	cmd.feature = 0;
-	cmd.sector_count = 1;
-	cmd.lba_low = 79;
-	cmd.lba_high = 0;
-	cmd.device = 224;
-	cmd.command = 48;
+//	cmd.feature = 0;
+//	//	cmd.sector_count = 1;
+//	cmd.lba_low = 0;
+//	cmd.lba_mid = 79;
+//	cmd.lba_high = 0;
+//	cmd.device = 224;
+//	cmd.command = 48;
     hd_cmd_out(&cmd);
 
-	bytes_left = 512;
+//	bytes_left = 512;
    while (bytes_left) {
         int bytes = MIN(SECTOR_SIZE, bytes_left);
         if (type == READ) {
@@ -395,13 +398,13 @@ void hd_rdwt(Message *msg) {
             // 读
             interrupt_wait();
             // 从REG_DATA端口读取数据存储到phy_hdbuf中
-            Memset(phy_hdbuf, 0, 100);
-            read_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, SECTOR_SIZE);
+            Memset(phy_hdbuf, 0, bytes);
+            read_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, bytes);
         } else if (type == WRITE) {
             // 写
             wait_for();
             // 把数据从phy_hdbuf写入到REG_DATA端口
-            Memset(phy_hdbuf, 0xFF, 512);
+           // Memset(phy_hdbuf, 0x0, 512);
             // write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, SECTOR_SIZE);
             write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, bytes);
             interrupt_wait();
@@ -413,19 +416,19 @@ void hd_rdwt(Message *msg) {
 
 
 void hd_handler() {
-   //int t = in_byte(0x1F7);
+   int t = in_byte(0x1F7);
    inform_int(2);
 }
 
 int waitfor(int mask, int val, int timeout)
 {
-	delay(500);
+//	delay(500);
        // int t = get_ticks();
 	int t = get_ticks_ipc();
 
-    //    while(((get_ticks_ipc() - t) * 1000 / 100) < timeout)
-   //             if ((in_byte(0x1F7) & mask) == val)
-     //                   return 1;
+        while(((get_ticks_ipc() - t) * 1000 / 100) < timeout)
+               if ((in_byte(0x1F7) & mask) == val)
+                        return 1;
 
         return 1;
 }

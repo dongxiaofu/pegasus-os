@@ -124,6 +124,7 @@ csinit:
 	ltr ax
 	;xchg bx, bx
 	jmp kernel_main
+	hlt
 	jmp $	
 	sti
 	mov ah, 0Bh
@@ -465,7 +466,6 @@ hwint14:
 	mov es, dx
 	mov fs, dx
 
-	xchg bx, bx
 
 	; 禁用硬盘中断
 	;call disable_8259A_slave_winchester_irq
@@ -496,13 +496,13 @@ hwint14:
 	;call hd_handle
 	call hd_handler
 	
-	cli
+	;cli
 	; 打开硬盘中断
 	;call enable_8259A_slave_winchester_irq
 	mov al, 10111111b
 	out 0xA1, al	
 
-	;cli
+	cli
 	cmp dword [k_reenter], 0
 	jne reenter_restore
 	jmp restore

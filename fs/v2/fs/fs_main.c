@@ -122,8 +122,15 @@ void rd_wt(int pos, int device, char *buf, int len, int type) {
 }
 
 void mkfs() {
-	
+	// fsbuf未定义。神奇！
+	//Memset(fsbuf, 0, 512);
     RD_SECT(ROOT_DEV, 1);
+	Printf("read over\n");
+	Memset(fsbuf, 0x0, 512);
+    WT_SECT(ROOT_DEV, 1);
+	Memset(fsbuf, 0xFF, 512);
+    RD_SECT(ROOT_DEV, 1);
+	Printf("fsbuf = %s\n", fsbuf);
 	return;
 	// 写入超级块
     struct super_block sp2;

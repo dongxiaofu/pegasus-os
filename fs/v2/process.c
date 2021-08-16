@@ -38,10 +38,16 @@ void schedule_process() {
 }
 
 void clock_handler() {
+	if(++ticks >= MAX_TICKS ){
+		ticks = 0;
+	}
     if (proc_ready_table->ticks > 0) {
         proc_ready_table->ticks--;
     }
-    ticks++;
+
+	if(key_pressed){
+		inform_int(0);
+	}
 
     if (k_reenter != 0) {
         //return proc_ready_tab

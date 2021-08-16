@@ -151,6 +151,7 @@ void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags) {
     // int colour = 0x74;
     int colour = 0x0A;
     char *error_msg = msg[vec_no];
+//	Printf("error:%s\n", error_msg);
     disp_str_colour(error_msg, colour);
     disp_str("\n\n");
     disp_str_colour("vec_no:", colour);
@@ -159,16 +160,20 @@ void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags) {
 
     if (error_no != 0xFFFFFFFF) {
         disp_str_colour("error_no:", colour);
-        disp_int(error_no);
+        disp_str_colour("error_no:", colour);
+       disp_int(error_no);
+       // Printf("error_no:%x\n", error_no);
         disp_str("\n\n");
     }
 
     disp_str_colour("cs:", colour);
     disp_int(cs);
+    //Printf("cs:%x\n", cs);
     disp_str("\n\n");
 
     disp_str_colour("eip:", colour);
     disp_int(eip);
+    //Printf("eip:%x\n", eip);
     disp_str("\n\n");
 
     disp_str_colour("eflags:", colour);
