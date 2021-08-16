@@ -165,8 +165,6 @@ void hd_identify(int driver_number) {
     // 延迟一会。必须延迟一会。
     // 频繁使用IPC，所以不能使用。
     //milli_delay(5000);
-    delay(800);
-    delay(800);
     // 从Command Block Registers的data寄存器读取数据
     char buf[512 * 2];
     Memset(buf, 0, 1024);
@@ -243,6 +241,8 @@ void get_partition_table(int driver, int lba, struct partition_table_entry *part
     cmd.lba_high = (lba >> 16) & 0xFF;
     cmd.device = MAKE_DEVICE_REGISTER(driver, lba);
     cmd.command = ATA_READ;
+    //hd_cmd_out(&cmd);
+    //hd_cmd_out(&cmd);
     hd_cmd_out(&cmd);
 
     interrupt_wait();
@@ -413,17 +413,19 @@ void hd_rdwt(Message *msg) {
 
 
 void hd_handler() {
-   int t = in_byte(0x1F7);
+   //int t = in_byte(0x1F7);
    inform_int(2);
 }
 
 int waitfor(int mask, int val, int timeout)
 {
-        int t = get_ticks();
+	delay(500);
+       // int t = get_ticks();
+	int t = get_ticks_ipc();
 
-        while(((get_ticks() - t) * 1000 / 100) < timeout)
-                if ((in_byte(0x1F7) & mask) == val)
-                        return 1;
+    //    while(((get_ticks_ipc() - t) * 1000 / 100) < timeout)
+   //             if ((in_byte(0x1F7) & mask) == val)
+     //                   return 1;
 
-        return 0;
+        return 1;
 }

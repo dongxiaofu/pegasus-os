@@ -863,6 +863,26 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         assert((receiver_pid == 1) || (receiver_pid == 2) || (receiver_pid == 3) || (receiver_pid == 15));
     }
 
+	if(receiver->has_int_msg && (sender_pid == ANY || sender_pid == INTERRUPT)){
+		
+		 Message m;
+		Memset(&m, 0, sizeof(Message));
+                m.source = INTERRUPT;
+                m.type = 1;
+
+                assert(msg);
+
+                phycopy(v2l(receiver_pid, msg), &m,
+                          sizeof(Message));
+
+		receiver->has_int_msg = 0;
+		receiver->p_receive_from = 0;
+		receiver->p_send_to = 0;
+		receiver->p_flag = RUNNING;
+		
+		return 0;
+	}
+
 
     // 主要思路：
     // 1. 如果信息来源是ANY，从本进程的消息队列中取出一个消息进行处理。
