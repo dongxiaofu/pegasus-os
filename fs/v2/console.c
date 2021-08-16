@@ -291,9 +291,9 @@ void tty_do_write(TTY *tty, Message *msg) {
     // 把用户进程的数据复制到TTY进程，然后输出。
     while (cnt) {
         int bytes = MIN(cnt, TTY_WRITE_BUF_SIZE);
-	// in expansion of macro 'BUF'
+        // in expansion of macro 'BUF'
         // phycopy(buf, v2l(msg->PROCNR, msg->BUF) + tty->tran_cnt, bytes);
-        phycopy(buf, v2l(msg->PROCNR, (char *)msg->BUF) + tty->tran_cnt, bytes);
+        phycopy(buf, v2l(msg->PROCNR, (char *) msg->BUF) + tty->tran_cnt, bytes);
         cnt -= bytes;
         tty->tran_cnt += bytes;
         int i = 0;
