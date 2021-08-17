@@ -71,7 +71,7 @@ int do_close(int fd);
 void task_fs() {
     Printf("%s\n", "FS is running");
     init_fs();
-	return;
+//	return;
     while (1) {
         Message msg;
         send_rec(RECEIVE, &msg, ANY);
@@ -140,6 +140,7 @@ void mkfs() {
     RD_SECT(ROOT_DEV, 1);
     struct super_block *sp = (struct super_block *) fsbuf;
     sp->cnt_of_inode_map_sect = 1;
+	sp->nr_sect = CNT_OF_FILE_SECT;
     // 1. 是多少？无头绪。
     // 2. 有条理地思考。
     // 3. 需要记录的扇区有多少个？
@@ -164,16 +165,18 @@ void mkfs() {
     // ROOT_DEV 是安装文件系统的分区的次设备号。
     // 参数1是写入超级的位置
     int sp_size = sizeof(struct super_block);
-    Memcpy(fsbuf, sp, sp_size);
+//    Memcpy(fsbuf, sp, sp_size);
 	Memset(fsbuf + sp_size, 0x90, 512 - sp_size);
     WT_SECT(ROOT_DEV, 1);
+
+	struct super_block sp2 = *sp;
 
     // 写入inode-map
     // todo 又看不懂这块的逻辑了。先让语法错误消失吧。
     char first_bit = 0x3;    // 0x3 的二进制形式：0000 0011。
     // todo 如此写入first_bit，好像不妥。
     Memset(fsbuf, first_bit, 1);
-    Memset(fsbuf + 1, 0x80, SECTOR_SIZE - 1);
+    Memset(fsbuf + 1, 0x50, SECTOR_SIZE - 1);
     WT_SECT(ROOT_DEV, 1 + 1);
     // 写入sector-map
     // pos的值 = 1（引导扇区）+ 1（超级块）+ 1(inode-map)。
@@ -194,13 +197,17 @@ void mkfs() {
     //Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x01, SECTOR_SIZE >> 1 - 1);
     Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x01, 1);
     WT_SECT(ROOT_DEV, pos);
+//        Memset(fsbuf, 0x40, SECTOR_SIZE);
+//        WT_SECT(ROOT_DEV, pos + 1);
     // 写入sector-map的剩余扇区
-    int rest_sects = sp->cnt_of_sector_map_sect - 1;
+    int rest_sects = sp2.cnt_of_sector_map_sect - 1;
     for (int i = 1; i <= rest_sects; i++) {
-        Memset(fsbuf, 0x70, SECTOR_SIZE);
+        Memset(fsbuf, 0xCC, SECTOR_SIZE);
         WT_SECT(ROOT_DEV, pos + i);
     }
-	return;
+Memset(fsbuf, 0x60, SECTOR_SIZE);
+	Printf("mkfs over\n");
+	//return;
     // 写入inode-array
     // 先找出第一个空闲的inode。初始化时不必寻找。
     Memset(fsbuf, 0, SECTOR_SIZE);

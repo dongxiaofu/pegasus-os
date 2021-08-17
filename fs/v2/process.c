@@ -9,6 +9,23 @@
 #include "proto.h"
 #include "global.h"
 
+void check();
+
+void check(){
+
+    Proc *p;
+        for (p = proc_table; p < proc_table + TASK_PROC_NUM; p++) {
+           // if (p->p_flag != RUNNING  && p->p_flag != SENDING && p->p_flag != RECEIVING) {
+           if(p->has_int_msg != 0 && p->has_int_msg != 1){
+			dis_pos = 10 * 1024 + 2;
+			disp_str_colour("error", 0xA);
+			disp_int(p->p_flag);
+			while(1){}
+            }
+	}
+
+}
+
 // 进程调度次数
 void schedule_process() {
     Proc *p;
@@ -40,6 +57,7 @@ void schedule_process() {
 }
 
 void clock_handler() {
+//	check();
     if (++ticks >= MAX_TICKS) {
         ticks = 0;
     }

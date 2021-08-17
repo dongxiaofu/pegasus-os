@@ -144,7 +144,8 @@
 // 映射数组中的常量 end
 
 // #define KEYBOARD_BUF_SIZE 10; // 不能有逗号
-#define KEYBOARD_BUF_SIZE 800
+//#define KEYBOARD_BUF_SIZE 800
+#define KEYBOARD_BUF_SIZE 512
 // shift_r、shift_l等特权常量，值是它们的Make Code
 // 和keymap.h中的定义重复了，故在后面加了1
 #define SHIFT_R1 0x36
@@ -153,7 +154,8 @@
 // 键盘相关 end
 
 // console相关 start
-#define TTY_BUF_SIZE 800
+//#define TTY_BUF_SIZE 800
+#define TTY_BUF_SIZE 512
 #define TTY_NUM 3
 // 一屏占用的显存空间。
 // todo 我不确定是不是整个值。
@@ -171,7 +173,7 @@
 
 // 进程相关 start
 // 用户进程的数量
-#define USER_PROC_NUM 3
+#define USER_PROC_NUM 0
 // 系统任务的数量
 #define TASK_PROC_NUM 4
 // 用fork创建的用户进程的数量

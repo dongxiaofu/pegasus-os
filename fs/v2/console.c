@@ -382,7 +382,7 @@ void TaskTTY() {
 
 
     init_tty();
-    select_console(0);
+    select_console(1);
     //Printf("T:%x", 3);
     while (1) {
         for (TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++) {

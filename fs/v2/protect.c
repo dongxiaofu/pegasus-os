@@ -101,6 +101,7 @@ void init_propt() {
         // int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[0].ldts);
         //int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table.ldts);
         int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[i].ldts);
+	// todo 尝试把任务进程放到内核内存之外。
         InitDescriptor(&gdt[LDT_FIRST_SELECTOR_INDEX + i], ldt_base, ldt_size - 1, ldt_attribute);
     }
     // gs
