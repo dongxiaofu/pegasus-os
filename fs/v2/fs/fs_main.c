@@ -152,7 +152,10 @@ void mkfs() {
     // 6. 每个文件占用多少个扇区？
     // 7. cnt_of_sector_map_sect = 每个文件占用的扇区数量 * 文件数量 / (512字节 * 8)。
     sp->cnt_of_sector_map_sect = CNT_OF_FILE_SECT * CNT_OF_FILE / SECTOR_SIZE / 8;
-    sp->cnt_of_inode_sect = (1 * 512 * 8 * 16) / 512;
+   // sp->cnt_of_inode_sect = (1 * 512 * 8 * 16) / 512;
+// todo 文件数 * 16 / 512    
+sp->cnt_of_inode_sect = (CNT_OF_FILE * INODE_SIZE) / SECTOR_SIZE;
+
     // 1. 数据区的第一个扇区 = 引导扇区 + 超级块 + inode-map + sector-map + inodes。
     // 2. 上面的公式中的每个元素都是简写，完整表述应该是："XX占用的扇区数量”,例如，超级块占用的扇区
     // 	数量。
@@ -205,8 +208,7 @@ void mkfs() {
         Memset(fsbuf, 0xCC, SECTOR_SIZE);
         WT_SECT(ROOT_DEV, pos + i);
     }
-Memset(fsbuf, 0x60, SECTOR_SIZE);
-	Printf("mkfs over\n");
+	Printf("many wt over\n");
 	//return;
     // 写入inode-array
     // 先找出第一个空闲的inode。初始化时不必寻找。
@@ -214,20 +216,20 @@ Memset(fsbuf, 0x60, SECTOR_SIZE);
     struct inode inode;
     inode.type = FILE_TYPE_TEXT;
     inode.size = sizeof(struct dir_entry);
-    inode.start_sect = sp->data_1st_sect;
+    inode.start_sect = sp2.data_1st_sect;
     inode.nr_sect = CNT_OF_FILE_SECT;
     // 只存在于内存中的inode成员，不能在此时赋值。
     Memcpy(fsbuf, &inode, INODE_SIZE);
     // 很想用一个变量存储1 + 1 + 1 + sp.cnt_of_sector_map_sect，可想不出好名字。
-    WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp->cnt_of_sector_map_sect);
+    WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp2.cnt_of_sector_map_sect);
 
     // 创建默认文件：根目录、终端。
-    RD_SECT(ROOT_DEV, 1 + 1 + 1 + sp->cnt_of_sector_map_sect);
+    RD_SECT(ROOT_DEV, 1 + 1 + 1 + sp2.cnt_of_sector_map_sect);
     // 创建根目录
     struct inode *pinode = (struct inode *) fsbuf;
     pinode->type = FILE_TYPE_TEXT;
     pinode->size = sizeof(struct dir_entry);
-    pinode->start_sect = sp->data_1st_sect;
+    pinode->start_sect = sp2.data_1st_sect;
     pinode->nr_sect = CNT_OF_FILE_SECT;
     // 创建终端
     for (int i = 0; i < 3; i++) {
@@ -239,19 +241,29 @@ Memset(fsbuf, 0x60, SECTOR_SIZE);
         int task_tty = 0;
         pinode->start_sect = MAKE_DEV(task_tty, i);
     }
-    WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp->cnt_of_sector_map_sect);
+    WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp2.cnt_of_sector_map_sect);
 
 
     // 写入根目录
-    struct dir_entry dir_entry;
-    dir_entry.nr_inode = 1;
-    char filename[2];
-    filename[0] = '.';
-    filename[1] = '0';
-    Memcpy(dir_entry.filename, filename, sizeof(filename));
-    Memcpy(fsbuf, &dir_entry, sizeof(dir_entry));
-    WT_SECT(ROOT_DEV, sp->data_1st_sect);
+    struct dir_entry dir_entry2;
+    dir_entry2.nr_inode = 0xCC;
+   // char filename[2];
+   // filename[0] = '.';
+    //filename[1] = '0';
+    char filename[3] = "AB";
+	filename[3] = 0;
+    //Memcpy(dir_entry2.filename, filename, sizeof(filename));
+    struct dir_entry *dir_entry = (struct dir_entry *)fsbuf;
+	dir_entry->nr_inode = 0x1;
+    Memcpy(dir_entry->filename, filename, 3);
+    //Memcpy(fsbuf, &dir_entry2, sizeof(struct dir_entry));
+    WT_SECT(ROOT_DEV, sp2.data_1st_sect);
     //
+
+
+
+
+Printf("mkfs over\n");
 }
 
 void init_fs() {
