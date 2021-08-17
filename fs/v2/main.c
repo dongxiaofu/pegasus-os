@@ -271,8 +271,8 @@ void kernel_main() {
     unsigned char dpl;
     char *p_task_stack = proc_stack + STACK_SIZE;
     // todo 测试需要，去掉用户进程USER_PROC_NUM。
-    // for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++) {
-    for (int i = 0; i < TASK_PROC_NUM; i++) {
+    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++) {
+    //for (int i = 0; i < TASK_PROC_NUM; i++) {
         proc = proc_table + i;
         if (i < TASK_PROC_NUM) {
             task = sys_task_table + i;
@@ -280,7 +280,6 @@ void kernel_main() {
             rpl = 1;
             dpl = 1;
             proc->ticks = proc->priority = 15;
-            //proc->ticks = proc->priority = 2;
             proc->tty_index = 1;
         } else {
             task = user_task_table + i - TASK_PROC_NUM;
@@ -302,17 +301,27 @@ void kernel_main() {
         //proc->ldts[0].seg_attr1 = 0xda;
         //proc->ldts[0].seg_attr1 = 0xba;			// 1011 1010
         proc->ldts[0].seg_attr1 = 0x9a | (dpl << 5);                // 1001	1010
+	// todo 修改任务进程的内存的起始地址
+	// int base = 0x50000;
+	//int base = 5242880;
+//	proc->ldts[0].seg_base_below = base & 0xFFFF;
+//proc->ldts[0].seg_base_middle = (base >> 16) & 0xFF;
+//proc->ldts[0].seg_base_high = (unsigned char) ((base >> 24) & 0xFF);
         Memcpy(&proc->ldts[1], &gdt[DS_SELECTOR_INDEX], sizeof(Descriptor));
         // 修改ldt描述符的属性。全局ds的属性是 0c92h
         // proc->ldts[1].seg_attr1 = 0xd2;
         // proc->ldts[1].seg_attr1 = 0xb2;			// 1011 0010
         proc->ldts[1].seg_attr1 = 0x92 | (dpl << 5);            // 1001 0010
         // proc->ldts[1].seg_attr1 = 0xb2;
+//proc->ldts[1].seg_base_below = base & 0xFFFF;
+//proc->ldts[1].seg_base_middle = (base >> 16) & 0xFF;
+//proc->ldts[1].seg_base_high = (unsigned char) ((base >> 24) & 0xFF);
 
         // 初始化进程表的段寄存器
         // 我又看不懂当初写的代码了。
         // 一定要写非常详细的注释。
         // 0101：rpl是01，TI是1，在ldt中的索引是0。
+        // 这里，是LDT的选择子，不是GDT的选择子。又耗费了很多很多时间才弄清楚。
         unsigned short cs = 0x4 | rpl;
         unsigned short ds = 0xC | rpl;
         // proc->s_reg.cs = 0x05;	// 000 0101
@@ -353,6 +362,13 @@ void kernel_main() {
         //proc->s_reg.eflags = 0x1202;	// 0001 0010 0000 0010
         proc->s_reg.eflags = eflags;
 
+
+	proc->has_int_msg = 0;
+	proc->q_sending = 0;
+	proc->q_next = 0;
+	proc->p_receive_from = 0;
+	proc->p_send_to = 0;
+	proc->p_msg = 0;
 
         // ipc start
         //proc->header = {-1, NULL};
@@ -397,47 +413,14 @@ void kernel_main() {
 
 void TestA() {
     unsigned int i = 0;
-    //Printf("i=%d\n", 98457);
     assert(i == 0);
-    while (1) {
-        //Printf("<a ticks:%x\n>", get_ticks());
-        //select_console(0);
-        //assert(i < 5);
-        if (i < A_PRINT_NUM) {
-            //get_ticks();
-            //int t_ipc = get_ticks_ipc();
-            //int t_ipc = get_ticks();
-            //Printf("a_t_ipc = %x\n", t_ipc);
-            //milli_delay(2);
-            //Printf("a_t:%x", 2);
-            //Printf("%x", 2);
-            Printf("%x", get_ticks_ipc());
-            //disp_str_colour("A", 0x0A);
-            //Printf("%c--", 'A');
-            //Printf("flag:%x--,", proc_table[2].p_flag);
-            //Printf("send_to:%x--,", proc_table[2].p_send_to);
-            //Printf("receive_from:%x--,", proc_table[2].p_receive_from);
-            //Printf("%c", '\n');
-        }
-        i++;
-        //dis_pos = 0;
-        // select_console(0);
-        // int t = get_ticks();
-        // if(t < 300){
-        // 	out_char(current_tty, 'A');
-        // }
-        //disp_int(t);
-        // out_char(current_tty, 'A');
-        //Printf("T:%x", t);
-        //milli_delay(10);
-        //disp_int(get_ticks());
-        //disp_str_colour("A", 0x0A);
-        //disp_int(1);
-        //disp_str(".");
-        //delay(1);
-        //milli_delay(10);
-        //milli_delay(1);
-    }
+ //   while (1) {
+ //       if (i < A_PRINT_NUM) {
+ //           Printf("%x", get_ticks_ipc());
+ //       	//delay(10);
+ //       }
+ //       i++;
+ //   }
 }
 
 void delay(int time) {

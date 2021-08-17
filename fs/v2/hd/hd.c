@@ -57,7 +57,7 @@ int get_hd_ioctl(int device);
 
 // 硬盘驱动
 void TaskHD() {
-//    Printf("%s\n", "HD driver is running!");
+//    //Printf("%s\n", "HD driver is running!");
     // 初始硬盘
     init_hd();
 
@@ -70,7 +70,7 @@ void TaskHD() {
 void init_hd() {
     // 获取硬盘数量
     char *buf = (char *) (0x475);
-//    Printf("Num:%d\n", *buf);
+//    //Printf("Num:%d\n", *buf);
     // 打开8259A的从片级联设置
     enable_8259A_casecade_irq();
     // 打开硬盘中断
@@ -78,7 +78,7 @@ void init_hd() {
 }
 
 void hd_handle() {
-//    Printf("%s\n", "HD handle is running!");
+//    //Printf("%s\n", "HD handle is running!");
     Message msg;
     Memset(&msg, 0, sizeof(Message));
     send_rec(RECEIVE, &msg, ANY);
@@ -87,21 +87,21 @@ void hd_handle() {
 
     switch (type) {
         case OPEN:
-            //           Printf("%s:%d\n", "Open HD", source);
+            //           //Printf("%s:%d\n", "Open HD", source);
             hd_open();
-            Printf("%s:%d\n", "Open HD END", source);
+            //Printf("%s:%d\n", "Open HD END", source);
             break;
         case READ:
         case WRITE:
-            Printf("%s:%d\n", "RD/WT HD", source);
+            //Printf("%s:%d\n", "RD/WT HD", source);
             hd_rdwt(&msg);
             break;
         case GET_HD_IOCTL:
             get_hd_ioctl(0);
-            Printf("%s:%d\n", "GET_HD_IOCTL", source);
+            //Printf("%s:%d\n", "GET_HD_IOCTL", source);
             break;
         default:
-            Printf("%s\n", "Unknown Operation");
+            //Printf("%s\n", "Unknown Operation");
             break;
     }
 
@@ -109,7 +109,7 @@ void hd_handle() {
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
     // todo 向文件系统发送消息，暂时使用硬编码。
     send_rec(SEND, &msg, 3);
-    Printf("%s\n", "Msg from HD");
+    //Printf("%s\n", "Msg from HD");
 }
 
 
@@ -119,27 +119,27 @@ void hd_cmd_out(struct hd_cmd *cmd) {
         panic("hd error.");
 //    while (in_byte(0x1F7) & 0x80 != 0) {
 //        int t = in_byte(0x1F7);
-//        Printf("ticks:%d\n", t);
+//        //Printf("ticks:%d\n", t);
 //    }
 //   int t = in_byte(0x1F7);
-//   Printf("t:%d\n", t);
+//   //Printf("t:%d\n", t);
 //    // 向Control Block Register写入数据
     out_byte(PRIMARY_DEVICE_CONTROL, 0);
-//    Printf("tt:%d\n", 23);
+//    //Printf("tt:%d\n", 23);
     // 向Command Block Registers写入数据
     out_byte(PRIMARY_CMD_FEATURES_REGISTER, cmd->feature);
-    // Printf("tt:%d\n", 23);
+    // //Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_SECTOR_COUNT_REGISTER, cmd->sector_count);
-    //Printf("tt:%d\n", 23);
+    ////Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_LBA_LOW_REGISTER, cmd->lba_low);
-    // Printf("tt:%d\n", 23);
+    // //Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_LBA_MID_REGISTER, cmd->lba_mid);
-    // Printf("tt:%d\n", 23);
+    // //Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_LBA_HIGH_REGISTER, cmd->lba_high);
-    // Printf("tt:%d\n", 23);
+    // //Printf("tt:%d\n", 23);
     out_byte(PRIMARY_CMD_DEVICE_REGISTER, cmd->device);
     out_byte(PRIMARY_CMD_COMMAND_REGISTER, cmd->command);
-    //Printf("tt:%d\n", 23);
+    ////Printf("tt:%d\n", 23);
 }
 
 void hd_identify(int driver_number) {
@@ -175,8 +175,8 @@ void hd_identify(int driver_number) {
     //unsigned short *hdinfo = (unsigned short *)buf;
     print_hdinfo((unsigned short *) buf);
 
-    Printf("%s\n", "hd identify");
-    Printf("buf:%s\n", buf);
+    //Printf("%s\n", "hd identify");
+    //Printf("buf:%s\n", buf);
 }
 
 void print_hdinfo(unsigned short *hdinfo) {
@@ -197,7 +197,7 @@ void print_hdinfo(unsigned short *hdinfo) {
             s[j] = *p++;
         }
         s[j] = 0;
-        Printf("%s:%s\n", header[i].name, s);
+        //Printf("%s:%s\n", header[i].name, s);
     }
     // 49，是否支持LBA
     unsigned short capabilities = hdinfo[49];
@@ -211,21 +211,21 @@ void print_hdinfo(unsigned short *hdinfo) {
     } else {
         Strcpy(capabilitie_lba, no_str);
     }
-    Printf("Support LBA:%s\n", capabilitie_lba);
+    //Printf("Support LBA:%s\n", capabilitie_lba);
     // 用户可用最大扇区数
     int sector_count = hdinfo[61] << 16 + hdinfo[60];
-    Printf("Sector counter:%d\n", sector_count);
-    Printf("Size(MB):%d\n", sector_count * 512 / 1024 * 1024);
+    //Printf("Sector counter:%d\n", sector_count);
+    //Printf("Size(MB):%d\n", sector_count * 512 / 1024 * 1024);
     // 83，是否支持LBA48
 }
 
 void print_dpt_entry(struct partition_table_entry *entry) {
-    // Printf("\n%s\n", "========================Start=================");
-    //Printf("LBA:%d\n", entry->start_sector_lba);
-    //Printf("Sector Count:%d\n", entry->nr_sector);
-//    Printf("System ID:%d\n", entry->system_id);
-    //Printf("Status:%d\n", entry->status);
-    //Printf("\n%s\n", "========================end=================");
+    // //Printf("\n%s\n", "========================Start=================");
+    ////Printf("LBA:%d\n", entry->start_sector_lba);
+    ////Printf("Sector Count:%d\n", entry->nr_sector);
+//    //Printf("System ID:%d\n", entry->system_id);
+    ////Printf("Status:%d\n", entry->status);
+    ////Printf("\n%s\n", "========================end=================");
 }
 
 // 1. 之前不知道本函数的参数是什么，写着写着，自然就知道了。
@@ -307,7 +307,7 @@ void partition(int device, unsigned char part_type) {
             lba = lba_base + partition_table[1].start_sector_lba;
         }
     } else {
-        Printf("%s\n", "Do nothing");
+        //Printf("%s\n", "Do nothing");
     }
 }
 
@@ -318,13 +318,13 @@ void hd_open() {
     hd_identify(0);
     partition(0, PART_PRIMARY);
     // get_hd_ioctl(2);
-    // Printf("%s\n", "Over");
+    // //Printf("%s\n", "Over");
 }
 
 int get_hd_ioctl(int device) {
     int driver = DR_OF_DEV(device);
     int geometry = hd_info[driver].primary_part[device].size;
-    Printf("geometry:%d\n", geometry);
+    //Printf("geometry:%d\n", geometry);
     return geometry;
 }
 
