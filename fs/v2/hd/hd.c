@@ -81,14 +81,21 @@ void hd_handle() {
 //    //Printf("%s\n", "HD handle is running!");
     Message msg;
     Memset(&msg, 0, sizeof(Message));
-    send_rec(RECEIVE, &msg, ANY);
-    unsigned int type = msg.type;
-    unsigned int source = msg.source;
+    //send_rec(RECEIVE, &msg, ANY);
+    //send_rec(RECEIVE, &msg, task_fs);
+    //send_rec(RECEIVE, &msg, TaskHD);
+    // 这个不起眼的小错误，耗费了几个小时才找出来！
+    send_rec(RECEIVE, &msg, TASK_FS);
+    unsigned int type = msg.TYPE;
+ unsigned int source = msg.source;
 
+	msg.val = 0;
+    send_rec(SEND, &msg, 3);
+return;
     switch (type) {
         case OPEN:
             //           //Printf("%s:%d\n", "Open HD", source);
-            hd_open();
+           hd_open();
             //Printf("%s:%d\n", "Open HD END", source);
             break;
         case READ:
@@ -101,7 +108,7 @@ void hd_handle() {
             //Printf("%s:%d\n", "GET_HD_IOCTL", source);
             break;
         default:
-            //Printf("%s\n", "Unknown Operation");
+            spin("Unknown Operation");
             break;
     }
 
@@ -248,13 +255,15 @@ void get_partition_table(int driver, int lba, struct partition_table_entry *part
     interrupt_wait();
 //    char buf[1024];
 //    Memset(buf, 0, 1024);
-    char buf[512];
-    Memset(buf, 0, 512);
-    read_port(PRIMARY_CMD_DATA_REGISTER, buf, 512);
+	int sec_size = 256;
+    char buf[sec_size];
+    //Memset(buf, 0, sec_size);
+    read_port(PRIMARY_CMD_DATA_REGISTER, buf, sec_size);
 
     // 获取分区表
     // char partition_table[64];
-    Memcpy(partition_table, buf + PARTITION_TABLE_OFFSET, 64);
+    //Memcpy(partition_table, buf + PARTITION_TABLE_OFFSET, 64);
+	partition_table = (struct partition_table_entry *)(buf + PARTITION_TABLE_OFFSET);
     // Strcpy(partition_table, buf + PARTITION_TABLE_OFFSET);
 }
 
@@ -316,7 +325,7 @@ void hd_open() {
     //struct hdinfo hd_info;
     hd_info[driver].open_cnt++;
     hd_identify(0);
-    partition(0, PART_PRIMARY);
+   partition(0, PART_PRIMARY);
     // get_hd_ioctl(2);
     // //Printf("%s\n", "Over");
 }
@@ -367,7 +376,7 @@ void hd_rdwt(Message *msg) {
     // 计算出hdbuf的物理地址。
     char *phy_hdbuf = (char *) v2l(source, hdbuf);
 
-    int type = msg->type;
+    int type = msg->TYPE;
     assert(type == READ || type == WRITE);
     // 执行hd_cmd_out，指挥硬盘
     struct hd_cmd cmd;

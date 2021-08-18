@@ -173,7 +173,7 @@
 
 // 进程相关 start
 // 用户进程的数量
-#define USER_PROC_NUM 0
+#define USER_PROC_NUM 1
 // 系统任务的数量
 #define TASK_PROC_NUM 4
 // 用fork创建的用户进程的数量
@@ -185,7 +185,7 @@
 
 // 进程栈默认大小
 // #define DEFAULT_STACK_SIZE 32768     // 这个值，导致无法加载内核
-#define DEFAULT_STACK_SIZE 1024
+#define DEFAULT_STACK_SIZE 2048
 
 // 进程A、B、C的堆栈大小
 #define A_STACK_SIZE DEFAULT_STACK_SIZE
@@ -202,8 +202,6 @@
 //#define TaskTTY_STACK_SIZE 128
 // 进程栈
 #define STACK_SIZE (A_STACK_SIZE \
-        + B_STACK_SIZE \
-        + C_STACK_SIZE \
         + TaskTTY_STACK_SIZE \
         + TASK_SYS_SIZE \
         + TASK_HD_SIZE  \

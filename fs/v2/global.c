@@ -16,8 +16,8 @@
 // 系统任何和用户进程的进程表都存储在这个数组中
 Proc proc_table[TASK_PROC_NUM + USER_PROC_NUM];
 // 用户进程元数据
-//Task user_task_table[USER_PROC_NUM] = {
-Task user_task_table[1] = {
+Task user_task_table[USER_PROC_NUM] = {
+//Task user_task_table[1] = {
         {TestA, A_STACK_SIZE}
 //        {TestB, B_STACK_SIZE},
 //        {TestC, C_STACK_SIZE}

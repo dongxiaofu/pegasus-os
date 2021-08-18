@@ -33,8 +33,8 @@ void schedule_process() {
     while (!greatest_ticks) {
         // todo 测试需要，去掉用户进程USER_PROC_NUM。
         //for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
-        // for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++) {
-        for (p = proc_table; p < proc_table + TASK_PROC_NUM; p++) {
+         for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++) {
+       // for (p = proc_table; p < proc_table + TASK_PROC_NUM; p++) {
             if (p->p_flag == RUNNING && p->ticks > greatest_ticks) {
                 greatest_ticks = p->ticks;
                 proc_ready_table = p;
@@ -44,9 +44,9 @@ void schedule_process() {
         //p_flag需要参与运算吗？目前，是否参与都行，看具体需求。
         //while(!greatest_ticks){
         if (!greatest_ticks) {
-            for (p = proc_table; p < proc_table + TASK_PROC_NUM; p++) {
+           // for (p = proc_table; p < proc_table + TASK_PROC_NUM; p++) {
                 // todo 测试需要，去掉用户进程USER_PROC_NUM。
-                //for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++) {
+                for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++) {
                 if (p->p_flag == RUNNING) {
                     p->ticks = p->priority;
                 }

@@ -80,6 +80,7 @@ void untar(const char *filename) {
 }
 
 void atoi(char *str, int num) {
+//	char str2[20];
     char *p = str;
     *p++ = '0';
     *p++ = 'x';
@@ -102,16 +103,19 @@ void atoi(char *str, int num) {
     }
 
     *p = 0;
+//	Memcpy(str, str2, Strlen(str2));
 
     return;
 }
 
 void disp_int(int num) {
     //char *str = "";
-    char str[16];
+    char str[10];
+//	Memset(str, 0, sizeof(str));
     atoi(str, num);
     //disp_str_colour("ABC", 0x0A);
     // disp_str(str);
+    //char str2[20] = "0x57";
     disp_str_colour(str, 0x0B);
     //return;
 
@@ -288,7 +292,8 @@ void kernel_main() {
             rpl = 3;
             dpl = 3;
             proc->ticks = proc->priority = 10;
-            proc->tty_index = i - TASK_PROC_NUM;
+            //proc->tty_index = i - TASK_PROC_NUM;
+            proc->tty_index = 1;//i - TASK_PROC_NUM;
         }
 
         //proc->ldt_selector = LDT_FIRST_SELECTOR + i<<3;
@@ -366,8 +371,8 @@ void kernel_main() {
 	proc->has_int_msg = 0;
 	proc->q_sending = 0;
 	proc->q_next = 0;
-	proc->p_receive_from = 0;
-	proc->p_send_to = 0;
+	proc->p_receive_from = NO_TASK;
+	proc->p_send_to = NO_TASK;
 	proc->p_msg = 0;
 
         // ipc start
@@ -412,15 +417,10 @@ void kernel_main() {
 #define C_PRINT_NUM 3
 
 void TestA() {
-    unsigned int i = 0;
-    assert(i == 0);
- //   while (1) {
- //       if (i < A_PRINT_NUM) {
- //           Printf("%x", get_ticks_ipc());
- //       	//delay(10);
- //       }
- //       i++;
- //   }
+	Printf("TestA is running\n");
+	char filename[5] = "AB";
+	int fd = open(filename, O_CREAT);
+	Printf("fd = %x\n", fd);
 }
 
 void delay(int time) {
@@ -760,6 +760,7 @@ int dead_lock(int src, int dest) {
 
 // send_msg 通过sys_call调用
 int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
+assert(receiver_pid == 0 || receiver_pid == 1 || receiver_pid == 2 || receiver_pid == 3 || receiver_pid == 4 || receiver_pid == 15 || receiver_pid == 30);
     Proc *receiver = pid2proc(receiver_pid);
     int sender_pid = proc2pid(sender);
     if (DEBUG == 1) {
@@ -773,6 +774,9 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
     if (dead_lock(sender_pid, receiver_pid) == 1) {
         panic("dead lock\n");
     }
+	if(sender_pid == 4){
+		assert(msg->TYPE == OPEN);
+	}
 
     if (receiver->p_flag == RECEIVING && (receiver->p_receive_from == sender_pid
                                           || receiver->p_receive_from == ANY)) {
@@ -783,23 +787,29 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
         int msg_size = sizeof(Message);
         // 从sender中把消息复制到receiver
         phycopy(receiver->p_msg, msg_line_addr, msg_size);
+	if(sender_pid == 4){
+		assert(receiver->p_msg->TYPE == OPEN);
+	}
         // 重置sender
-        sender->p_msg = 0;
-        sender->p_send_to = 0;
+//        sender->p_msg = 0;
+//        sender->p_send_to = 0;
         // 重置receiver
         receiver->p_msg = 0;
         receiver->p_flag = RUNNING;
-        receiver->p_receive_from = 0;
+        receiver->p_receive_from = NO_TASK;
 
         // 解除receiver的阻塞。
         unblock(receiver);
 
         // 调试函数
         assert(sender->p_msg == 0);
-        assert(sender->p_send_to == 0);
+        assert(sender->p_flag == 0);
+        assert(sender->p_send_to == NO_TASK);
+        assert(sender->p_receive_from == NO_TASK);
         assert(receiver->p_msg == 0);
         assert(receiver->p_flag == 0);
-        assert(receiver->p_receive_from == 0);
+        assert(receiver->p_receive_from == NO_TASK);
+        assert(receiver->p_send_to == NO_TASK);
 
     } else {
         // 思路：
@@ -839,12 +849,51 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
 
 // receive_msg 通过sys_call调用
 int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
+char str[10] = "sender_pid:";
+char str2[20];
+Memset(str2, 0, sizeof(str2));
+itoa(sender_pid, &str2, 10);
+char *p = str2;
+int len = Strlen(str2);
+	char *v = (char *)(0xB8000 + 1024*12 + 30);
+	//char *v = (char *)(0xB8000 + 1024*12 + 30);
+	//*v++ = *p++;
+	//*v++ = 0x0A;
+	//len--;
+//assert(sender_pid == 0 || sender_pid == 1 || sender_pid == 2 || sender_pid == 3 || sender_pid == 4 || sender_pid == 15 || sender_pid == 30);
+
+	if(sender_pid == 4){
+		assert(msg->TYPE == OPEN);
+	}
+
     int copy_ok = 0;
     Proc *p_from;
     Proc *pre;
 
     Proc *sender = pid2proc(sender_pid);
     int receiver_pid = proc2pid(receiver);
+	if(sender_pid == 4){
+		assert(sender->p_msg->TYPE == OPEN);
+	}
+
+	dis_pos = (1024*12 + 0);
+	dis_pos = (1024*12 + 0);
+	dis_pos = 12000 - 128 + 10;
+	//dis_pos += 160;
+	disp_str_colour("sender0:", 0x0C);
+	disp_int(sender_pid);
+	disp_str("#");
+	disp_str_colour("pid:", 0x0B);
+	disp_int(proc_ready_table->pid);
+	disp_str("#");
+	
+//	disp_str_colour("sender:", 0x0B);
+//	dis_pos += Strlen("sender:");
+//	disp_int(sender_pid);
+//	
+//	disp_str_colour("receiver:", 0x0B);
+//	dis_pos += Strlen("receiver:");
+//	disp_int(receiver_pid);
     if (DEBUG == 1) {
         Printf("sender = %x, receiver = %x\n", sender_pid, receiver_pid);
 
@@ -865,8 +914,8 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
                 sizeof(Message));
 
         receiver->has_int_msg = 0;
-        receiver->p_receive_from = 0;
-        receiver->p_send_to = 0;
+        receiver->p_receive_from = NO_TASK;
+        receiver->p_send_to = NO_TASK;
         receiver->p_flag = RUNNING;
 
         return 0;
@@ -899,6 +948,10 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
 
 
     if (copy_ok == 1) {
+	dis_pos += 160;
+	disp_str_colour("sender2:", 0x0C);
+	disp_int(sender_pid);
+	disp_str("#");
         Proc *p_from_proc = p_from;
         // 计算msg的线性地址
         int ds = receiver->s_reg.ds;
@@ -908,6 +961,10 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         // 从receiver中把消息复制到sender
         phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);
 
+	if(sender_pid == 4){
+		assert(msg->TYPE == OPEN);
+	}
+
         // 移除已经处理过的消息。
         if (p_from == receiver->q_sending) {
             receiver->q_sending = p_from->q_next;
@@ -916,43 +973,84 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
             pre->q_next = p_from->q_next;
             p_from->q_next = 0;
         }
+	dis_pos += 160;
+	disp_str_colour("sender33:", 0x0C);
+	disp_int(sender_pid);
+	//dis_pos -= Strlen("sender33:");
 
         // 重置sender
         p_from_proc->p_msg = 0;
         p_from_proc->p_flag = RUNNING;
-        p_from_proc->p_send_to = 0;
+        //p_from_proc->p_send_to = 0;
+        p_from_proc->p_send_to = NO_TASK;
         // 重置receiver
         receiver->p_msg = 0;
-        receiver->p_receive_from = 0;
+        receiver->p_receive_from = NO_TASK;
+        receiver->p_send_to = NO_TASK;
         // 解除sender的阻塞
         // unblock(sender);
         unblock(p_from_proc);
 
         // 调试函数
-        // Printf("p_msg = %x\n", p_from_proc->p_msg);
         assert(p_from_proc->p_msg == 0);
-        assert(p_from_proc->p_flag == RUNNING);
-        assert(p_from_proc->p_send_to == 0);
-
+        assert(p_from_proc->p_flag == 0);
+        assert(p_from_proc->p_send_to == NO_TASK);
+        assert(p_from_proc->p_receive_from == NO_TASK);
         assert(receiver->p_msg == 0);
-        assert(receiver->p_receive_from == 0);
+        assert(receiver->p_flag == 0);
+        assert(receiver->p_receive_from == NO_TASK);
+        assert(receiver->p_send_to == NO_TASK);
 
     } else {
+	dis_pos += 160;
+	disp_str_colour("sender3:", 0x0C);
+	disp_int(sender_pid);
+	disp_str("#");
         receiver->p_flag = RECEIVING;
         receiver->p_msg = msg;
+       // receiver->p_msg = 0;
 
         if (sender_pid == ANY) {
             receiver->p_receive_from = ANY;
         } else {
             receiver->p_receive_from = sender_pid;
         }
+            receiver->p_receive_from = sender_pid;
+//	sender_pid = 3;
 
+//	dis_pos = (80 * 80 + 0)*2; 
+//	dis_pos = 1024 * (10 +1) + 160;
+
+//	dis_pos = (1024*12 + 0);
+	dis_pos += 160;
+	disp_str_colour("sender4:", 0x0C);
+	disp_int(sender_pid);
+	disp_str("#");
+	disp_str_colour("type:", 0x0B);
+	disp_int(msg->TYPE);
+	disp_str("#");
+	disp_str_colour("copy_ok:", 0x0B);
+	disp_int(copy_ok);
+	disp_str("#");
+	disp_str_colour("type2:", 0x0B);
+	disp_int(msg->TYPE);
+	disp_str("#");
+	
+	dis_pos += 160;
+	disp_str_colour("receiver2:", 0x0B);
+	//dis_pos += Strlen("receiver2:");
+	disp_int(receiver_pid);
         // 调试函数
+        assert(sender_pid == 0 || sender_pid == 1 || sender_pid == 2 || sender_pid == 3 || sender_pid == 4 || sender_pid == 15 || sender_pid == 30);
         assert(receiver->p_flag == RECEIVING);
-        assert(receiver->p_msg == msg);
+        //assert(receiver->p_msg == 0);
+	assert(receiver->p_receive_from == sender_pid);
 
         block(receiver);
     }
+	if(sender_pid == 4){
+		assert(msg->TYPE == 99);
+	}
 
     return 0;
 }
@@ -1004,7 +1102,7 @@ int send_rec(int function, Message *msg, int pid) {
 // 阻塞进程
 int block(Proc *proc) {
     // 判断，调试函数
-    //k_reenter--;
+    assert(proc->p_flag != RUNNING);
     schedule_process();
     return 0;
 }
@@ -1012,6 +1110,8 @@ int block(Proc *proc) {
 // 解除阻塞
 int unblock(Proc *proc) {
     // do nothing
+    assert(proc->p_flag == RUNNING);
+
     return 0;
 }
 
