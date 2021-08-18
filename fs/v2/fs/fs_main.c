@@ -70,19 +70,21 @@ int do_close(int fd);
 
 void task_fs() {
     Printf("%s\n", "FS is running");
-    init_fs();
-//	return;
+   init_fs();
+	Printf("init_fs over\n");
     while (1) {
+    Printf("%s\n", "LOOP is running");
         Message msg;
+	Memset(&msg, 0, sizeof(Message));
         send_rec(RECEIVE, &msg, ANY);
-        int type = msg.type;
-        int source = msg.source;
-        int fd = msg.FD;
+        int type = msg.TYPE;
+ int source = msg.source;
+		int fd = msg.FD;
 
         // open
         char *pathname = msg.PATHNAME;
         int oflags = msg.FLAGS;
-
+	Printf("source = %x, type = %x\n", msg.source, msg.TYPE); 
         pcaller = &proc_table[source];
 
         Message fs_msg;
@@ -96,10 +98,11 @@ void task_fs() {
                 do_rdwt(&msg);
                 break;
             case CLOSE:
+	//	int fd = msg.FD;
                 do_close(fd);
                 break;
             default:
-                panic("Unknown message");
+                panic("FS Unknown message");
                 break;
 
         }
@@ -112,7 +115,7 @@ void task_fs() {
 void rd_wt(int pos, int device, char *buf, int len, int type) {
     Message msg;
     Memset(&msg, 0, sizeof(Message));
-    msg.type = type;
+    msg.TYPE = type;
     msg.DEVICE = device;
     msg.BUF = buf;
     msg.LEN = len;
@@ -212,14 +215,14 @@ sp->cnt_of_inode_sect = (CNT_OF_FILE * INODE_SIZE) / SECTOR_SIZE;
 	//return;
     // 写入inode-array
     // 先找出第一个空闲的inode。初始化时不必寻找。
-    Memset(fsbuf, 0, SECTOR_SIZE);
-    struct inode inode;
-    inode.type = FILE_TYPE_TEXT;
-    inode.size = sizeof(struct dir_entry);
-    inode.start_sect = sp2.data_1st_sect;
-    inode.nr_sect = CNT_OF_FILE_SECT;
+    //Memset(fsbuf, 0, SECTOR_SIZE);
+//    struct inode *inode = (struct inode *)fsbuf;;
+//    inode->type = FILE_TYPE_TEXT;
+//    inode->size = sizeof(struct dir_entry);
+//    inode->start_sect = sp2.data_1st_sect;
+//    inode->nr_sect = CNT_OF_FILE_SECT;
     // 只存在于内存中的inode成员，不能在此时赋值。
-    Memcpy(fsbuf, &inode, INODE_SIZE);
+  //  Memcpy(fsbuf, &inode, INODE_SIZE);
     // 很想用一个变量存储1 + 1 + 1 + sp.cnt_of_sector_map_sect，可想不出好名字。
     WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp2.cnt_of_sector_map_sect);
 
@@ -269,11 +272,13 @@ Printf("mkfs over\n");
 void init_fs() {
 
     Message driver_msg;
-    driver_msg.type = OPEN;
+    driver_msg.TYPE = OPEN;
     // todo 暂时使用硬编码。
     driver_msg.DEVICE = 32;
-    send_rec(BOTH, &driver_msg, 2);
+return;
+    send_rec(BOTH, &driver_msg, TASK_HD);
 
+	return;
     mkfs();
 }
 

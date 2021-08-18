@@ -11,8 +11,8 @@
 
 int open(const char *pathname, int flags) {
     Message msg;
-
-    msg.type = OPEN;
+	Memset(&msg, 0, sizeof(Message));
+    msg.TYPE = OPEN;//OPEN;
     msg.PATHNAME = (void *) pathname;
     // todo FLAGS FD定义了吗？
     msg.FLAGS = flags;
@@ -20,7 +20,7 @@ int open(const char *pathname, int flags) {
 
     send_rec(BOTH, &msg, TASK_FS);
 
-    assert(msg.type == SYSCALL_RET);
+    //assert(msg.type == SYSCALL_RET);
 
     return msg.FD;
 }

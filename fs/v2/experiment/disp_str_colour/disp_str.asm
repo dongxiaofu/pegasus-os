@@ -5,9 +5,6 @@ extern dis_pos
 [SECTION .text]
 ; 打印字符串，设置颜色
 disp_str_colour:
-	jmp $
-	jmp $
-	jmp $
 	push ebp
 	mov ebp, esp
 	;push edi

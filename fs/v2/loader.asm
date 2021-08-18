@@ -618,7 +618,7 @@ Init_8259A:
 	out 0x21, al
 	call io_delay
 
-	mov al, 11111111b	; 正确的
+	mov al, 10111111b	; 正确的
 	;mov al, 10111111b	; 测试硬盘，打开硬盘中断
 	out 0xA1, al
 	call io_delay
