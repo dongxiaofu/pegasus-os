@@ -80,7 +80,11 @@ struct file_desc{
 // 文件描述符数组长度
 #define FILE_DESC_SIZE 64
 // 文件描述符数组
-struct file_desc *file_desc_table[FILE_DESC_SIZE];
+// todo 应该声明成 struct file_desc *file_desc_table[FILE_DESC_SIZE] 吗？
+// 声明成指针，如何判断某个文件描述符有没有被使用？需要初始化文件描述符。
+// 先声明成数据吧。
+// struct file_desc *file_desc_table[FILE_DESC_SIZE];
+struct file_desc file_desc_table[FILE_DESC_SIZE];
 // open的oflag参数
 #define O_RDONLY	0
 #define O_WRONLY	1

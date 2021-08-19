@@ -49,6 +49,8 @@ void get_partition_table(int device, int lba, struct partition_table_entry *part
 // 把分区表按照主分区和逻辑分区分类然后存储到对应的硬盘中
 void partition(int device, unsigned char part_type);
 
+// 打印硬盘分区信息
+void print_hd_info();
 // 打开硬盘
 void hd_open();
 
@@ -85,13 +87,14 @@ void hd_handle() {
     //send_rec(RECEIVE, &msg, task_fs);
     //send_rec(RECEIVE, &msg, TaskHD);
     // 这个不起眼的小错误，耗费了几个小时才找出来！
-    send_rec(RECEIVE, &msg, TASK_FS);
+    //send_rec(RECEIVE, &msg, TASK_FS);
+    send_rec(RECEIVE, &msg, 3);
     unsigned int type = msg.TYPE;
  unsigned int source = msg.source;
 
-	msg.val = 0;
-    send_rec(SEND, &msg, 3);
-return;
+//	msg.val = 0;
+//    send_rec(SEND, &msg, 3);
+//return;
     switch (type) {
         case OPEN:
             //           //Printf("%s:%d\n", "Open HD", source);
@@ -173,10 +176,11 @@ void hd_identify(int driver_number) {
     // 从Command Block Registers的data寄存器读取数据
     //  char buf[512 * 2];
     //  Memset(buf, 0, 1024);
-    char buf[512];
-    Memset(buf, 0, 512);
+    int sector_size = 512;
+    char buf[sector_size];
+    Memset(buf, 0, sector_size);
     // size应该如何确定？
-    read_port(PRIMARY_CMD_DATA_REGISTER, buf, 512);
+    read_port(PRIMARY_CMD_DATA_REGISTER, buf, sector_size);
 
     // 这句会导致invalid opcode，为什么？实在太令人费解了！
     //unsigned short *hdinfo = (unsigned short *)buf;
@@ -228,10 +232,10 @@ void print_hdinfo(unsigned short *hdinfo) {
 
 void print_dpt_entry(struct partition_table_entry *entry) {
     // //Printf("\n%s\n", "========================Start=================");
-    ////Printf("LBA:%d\n", entry->start_sector_lba);
-    ////Printf("Sector Count:%d\n", entry->nr_sector);
-//    //Printf("System ID:%d\n", entry->system_id);
-    ////Printf("Status:%d\n", entry->status);
+    Printf("LBA:%d\n", entry->start_sector_lba);
+    Printf("Sector Count:%d\n", entry->nr_sector);
+    Printf("System ID:%d\n", entry->system_id);
+    Printf("Status:%d\n", entry->status);
     ////Printf("\n%s\n", "========================end=================");
 }
 
@@ -240,6 +244,11 @@ void print_dpt_entry(struct partition_table_entry *entry) {
 // 3. 有的人，要求在写之前想好所有细节。
 // 4. 那其实是要求先写一次再想。
 void get_partition_table(int driver, int lba, struct partition_table_entry *partition_table) {
+	
+//Printf("lba = %d\n", lba);
+//assert(lba >= 0 && lba <= 60479);	
+
+
     struct hd_cmd cmd;
     cmd.feature = 0;
     cmd.sector_count = 1;
@@ -255,15 +264,17 @@ void get_partition_table(int driver, int lba, struct partition_table_entry *part
     interrupt_wait();
 //    char buf[1024];
 //    Memset(buf, 0, 1024);
-	int sec_size = 256;
+	int sec_size = 512;
     char buf[sec_size];
-    //Memset(buf, 0, sec_size);
+    Memset(buf, 0, sec_size);
     read_port(PRIMARY_CMD_DATA_REGISTER, buf, sec_size);
 
     // 获取分区表
-    // char partition_table[64];
-    //Memcpy(partition_table, buf + PARTITION_TABLE_OFFSET, 64);
-	partition_table = (struct partition_table_entry *)(buf + PARTITION_TABLE_OFFSET);
+    //char partition_table[64];
+    Memcpy(partition_table, buf + PARTITION_TABLE_OFFSET, 64);
+	int i = 5;
+//	partition_table = (struct partition_table_entry *)(buf + PARTITION_TABLE_OFFSET);
+//	*partition_table = *((struct partition_table_entry *)(buf + PARTITION_TABLE_OFFSET));
     // Strcpy(partition_table, buf + PARTITION_TABLE_OFFSET);
 }
 
@@ -271,18 +282,20 @@ void partition(int device, unsigned char part_type) {
     int driver = DR_OF_DEV(device);
 
     //struct partition_table_entry partition_table[64];
-    struct partition_table_entry partition_table[5];
+    struct partition_table_entry partition_table[4];
     if (part_type == PART_PRIMARY) {
         // 获取分区表
         //struct partition_table_entry partition_table[4];
         // struct partition_table_entry partition_table[64];
         // int lba = 0;	// 硬盘的MBR的初始地址的lba是0
-        Memset(partition_table, 0, 5 * sizeof(struct partition_table_entry));
+        //Memset(partition_table, 0, 5 * sizeof(struct partition_table_entry));
+        Memset(partition_table, 0, 4 * sizeof(struct partition_table_entry));
         get_partition_table(driver, 0, partition_table);
+       // get_partition_table(driver, 63, partition_table);
         // 遍历分区表
         for (int i = 0; i < NR_MBR_DPT_ENTRY; i++) {
             // 打印分区表项
-            // print_dpt_entry(&partition_table[i]);
+//            print_dpt_entry(&partition_table[i]);
             // 想不出更好的名称。
             int nr_part = 1 + i;
             hd_info[driver].primary_part[nr_part].base = partition_table[i].start_sector_lba;
@@ -301,9 +314,9 @@ void partition(int device, unsigned char part_type) {
         int nr_1st = (j - 1) * 16;
         for (int i = 0; i < NR_HD_EXTEND_PARTITION; i++) {
             //struct partition_table_entry partition_table[4];
-            Memset(partition_table, 0, 5 * sizeof(struct partition_table_entry));
+            Memset(partition_table, 0, 4 * sizeof(struct partition_table_entry));
             get_partition_table(driver, lba, partition_table);
-            print_dpt_entry(&partition_table[0]);
+  //          print_dpt_entry(&partition_table[0]);
 
             int index = nr_1st + i;
             hd_info[driver].logical_part[index].base = lba + partition_table[0].start_sector_lba;
@@ -326,6 +339,7 @@ void hd_open() {
     hd_info[driver].open_cnt++;
     hd_identify(0);
    partition(0, PART_PRIMARY);
+print_hd_info();
     // get_hd_ioctl(2);
     // //Printf("%s\n", "Over");
 }
@@ -366,6 +380,16 @@ void hd_rdwt(Message *msg) {
     nr_sects += device < NR_PRIM_MAX ? \
             hd_info[driver].primary_part[device].base : \
             hd_info[driver].logical_part[logical_idx].base;
+	// todo 获取base失败，原因不明。	
+//	nr_sects += 20223;
+	
+// 安装文件的分区的扇区号
+	if(!(nr_sects >= 20223 && nr_sects <= 60479)){
+	//Printf("nr_sects = %d\n", nr_sects);
+}
+	//assert(nr_sects >= 20223 && nr_sects <= 60479);
+
+
     // 读写硬盘
     int len = msg->LEN;
     int bytes_left = len;
@@ -440,3 +464,28 @@ int waitfor(int mask, int val, int timeout) {
 
     return 1;
 }
+
+void print_hd_info()
+{
+	Printf("hd info primary part start:\n");
+	for(int  i = 0; i < 4; i++){
+		if(hd_info[0].primary_part[i].size == 0){
+			continue;
+		}
+		Printf("base:%x, size:%x, i:%x\n", hd_info[0].primary_part[i].base,
+			hd_info[0].primary_part[i].size, i);
+	}	
+	Printf("hd info primary part end:\n");
+
+	Printf("hd info logical part start:\n");
+	int index_base = 32;
+	for(int  i = 0; i < 64; i++){
+		if(hd_info[0].logical_part[i].size == 0){
+			continue;
+		}
+		Printf("base:%x, size:%x, i:%x\n", hd_info[0].logical_part[i].base,
+			hd_info[0].logical_part[i].size, i);
+	}	
+	Printf("hd info logical part end:\n");
+}
+
