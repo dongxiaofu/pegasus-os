@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 int main(int argc, char **argv)
 {
@@ -29,6 +30,15 @@ int main(int argc, char **argv)
 	arr2[2] = p3;	
 
 	printf("arr2[2] - arr2 = %d\n", &arr2[2] - arr2);
+
+	printf("测试数组的间隔\n");
+	char buf[5];
+	memset(buf, 0,sizeof(buf));
+	buf[2] = 'A';
+	buf[4] = 'B';
+	for(int i = 0; i < 5; i++){
+		printf("buf[%d] = %c\n", i, buf[i]);
+	}
 
 	return 0;
 }

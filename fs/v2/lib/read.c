@@ -12,10 +12,12 @@
 int read(int fd, void *buf, int count) {
     Message msg;
 
-    msg.type = READ;
+    msg.TYPE = READ;
     msg.FD = fd;
     msg.BUF = buf;
     msg.CNT = count;
+	
+	return 0;
 
     send_rec(BOTH, &msg, TASK_FS);
 

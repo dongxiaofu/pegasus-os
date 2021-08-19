@@ -12,7 +12,7 @@
 int write(int fd, const void *buf, int count) {
     Message msg;
 
-    msg.type = WRITE;
+    msg.TYPE = WRITE;
     msg.FD = fd;
     msg.BUF = buf;
     msg.CNT = count;

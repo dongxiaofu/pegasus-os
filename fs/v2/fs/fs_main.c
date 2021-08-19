@@ -72,6 +72,8 @@ void task_fs() {
     Printf("%s\n", "FS is running");
    init_fs();
 	Printf("init_fs over\n");
+	//while(1){}
+	//return;
     while (1) {
     Printf("%s\n", "LOOP is running");
         Message msg;
@@ -88,6 +90,9 @@ void task_fs() {
         pcaller = &proc_table[source];
 
         Message fs_msg;
+//        fs_msg.type = SYSCALL_RET;
+//        send_rec(SEND, &fs_msg, source);
+//	return;
 
         switch (type) {
             case OPEN:
@@ -104,8 +109,10 @@ void task_fs() {
             default:
                 panic("FS Unknown message");
                 break;
-
         }
+	
+	assert(source == TASK_TTY || source == TASK_SYS || source == TASK_HD
+		 || source == TASK_FS || source == ANY || source == INTERRUPT || source == PROC_A);
 
         fs_msg.type = SYSCALL_RET;
         send_rec(SEND, &fs_msg, source);
@@ -123,6 +130,8 @@ void rd_wt(int pos, int device, char *buf, int len, int type) {
  //   msg.POSITION = pos;// * SECTOR_SIZE;
     // 文件系统的PID
     // msg.source = TASK_FS;
+    assert(type == READ || type == WRITE);
+    assert(msg.TYPE == READ || msg.TYPE == WRITE);
     send_rec(BOTH, &msg, TASK_HD);
 }
 
@@ -275,9 +284,7 @@ void init_fs() {
     driver_msg.TYPE = OPEN;
     // todo 暂时使用硬编码。
     driver_msg.DEVICE = 32;
-return;
     send_rec(BOTH, &driver_msg, TASK_HD);
-
 	return;
     mkfs();
 }
@@ -297,7 +304,7 @@ int do_open(char *pathname, int oflag) {
     // 从文件描述符数组中找出空闲的文件描述符
     int j = -1;
     for (int i = 0; i < FILE_DESC_SIZE; i++) {
-        if (file_desc_table[i]->inode == 0) {
+        if (file_desc_table[i].inode == 0) {
             j = i;
             break;
         }
@@ -317,15 +324,15 @@ int do_open(char *pathname, int oflag) {
         pinode = get_inode(nr_inode);
     }
 
-    panic("open file failure\n");
+//    panic("open file failure\n");
 
     // 把flip、pinode、file_desc联系起来。
-    pcaller->filp[i] = file_desc_table[j];
-    file_desc_table[j]->inode = pinode;
+    pcaller->filp[i] = &file_desc_table[j];
+    file_desc_table[j].inode = pinode;
     // 刚打开文件，pos应该是0
-    file_desc_table[j]->pos = 0;
+    file_desc_table[j].pos = 0;
     // mode怎么设置？
-    file_desc_table[j]->mode = 0;
+    file_desc_table[j].mode = 0;
 
     int fd = i;
 
@@ -382,7 +389,8 @@ int strip_path(char *filename, char *pathname, struct inode *dev_root) {
         s++;
     }
 
-    while (s) {
+    //while (s) {
+    while (*s) {
         if (*s == '/') {
             return -1;
         }
@@ -815,7 +823,7 @@ void do_rdwt(Message *msg) {
 
     // msg的成员定义在 ./include/sys/type.h
     // 操作类型
-    int hd_operate_type = msg->type;
+    int hd_operate_type = msg->TYPE;
     // 要操作的数据的长度：读len字节；写入len字节。
     int len = msg->BUF_LEN;
     // 设备号
@@ -847,9 +855,7 @@ void do_rdwt(Message *msg) {
         msg->PROCNR = msg->source;
         // todo 假设 BUF、BUF_LEN 已经在用户进程传递给本进程的消息体中了。
         // 怎么确定TTY的pid？在sys_task_table中查看，TASK_TTY是第0个元素。
-        // todo 此处使用硬编码，后面再改成常量。
-        int tty_pid = 0;
-        send_rec(BOTH, msg, tty_pid);
+        send_rec(BOTH, msg, TASK_TTY);
 
         return;
     }
@@ -886,6 +892,17 @@ void do_rdwt(Message *msg) {
     int base = Seg2PhyAddrLDT(ds, sender_proc);
     int buf_line_addr = base + buf;
 
+	return 0;
+
+	Printf("read 0\n");
+
+	// todo 调试
+//	assert();
+//	assert();
+//	assert();
+//	assert();
+
+
     for (int i = start_sect; i <= start_end && byte_left; i += chunk) {
         int byte = MIN(byte_left, chunk * SECTOR_SIZE - offset);
         // device是什么？是分区号。
@@ -911,12 +928,14 @@ void do_rdwt(Message *msg) {
         // offset的处理很费劲。
         offset = 0;
     }
+	Printf("read 1\n");
 
     // 呵呵，这个常识，还让费解。悲伤！
     if (pos + len > inode->size) {
         inode->size = pos + len;
         sync_inode(inode);
     }
+	Printf("read 2\n");
 }
 
 
@@ -965,7 +984,7 @@ int do_close(int fd) {
 }
 
 struct super_block *get_super_block() {
-    RD_SECT(ROOT_DEV, 1);
+   RD_SECT(ROOT_DEV, 1);
     struct super_block *sp = (struct super_block *) fsbuf;
     return sp;
 }
