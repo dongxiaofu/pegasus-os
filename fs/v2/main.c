@@ -417,33 +417,41 @@ void kernel_main() {
 #define B_PRINT_NUM 3
 #define C_PRINT_NUM 3
 
-void TestA() {
+// 测试文件系统
+void TestFS() {
 	Printf("TestA is running\n");
-	int flag = 1;
-	while(1){
 	char filename[5] = "AC";
 	char filename2[5] = "AB";
+	int flag = 1;
+	while(1){
 	if(flag == 1){
-		int fd = open(filename, O_CREAT);
-		Printf("fd = %x\n", fd);
-		flag = 0;
-		char buf[20] = "cg:hello,world!";
-		write(fd, buf, Strlen(buf));
-		char buf2[20];
-		int k = read(fd, buf2, 18);
-		Printf("buf2 = %s\n", buf2);
-		delay(10);
-		int fd2 = open(filename2, O_CREAT);
-		Printf("fd2 = %x\n", fd2);
-		flag = 0;
-		char buf3[20] = "cg:how are you?";
-		write(fd2, buf3, Strlen(buf2));
-		char buf4[20];
-		int k2 = read(fd2, buf4, 18);
-		Printf("buf4 = %s\n", buf4);
-		delay(10);
+	int fd = open(filename, O_CREAT);
+	Printf("fd = %x\n", fd);
+	flag = 0;
+	char buf[20] = "cg:hello,world!";
+	write(fd, buf, Strlen(buf));
+	char buf2[20];
+	int k = read(fd, buf2, 18);
+	Printf("buf2 = %s\n", buf2);
+	delay(10);
+	int fd2 = open(filename2, O_CREAT);
+	Printf("fd2 = %x\n", fd2);
+	flag = 0;
+	char buf3[20] = "cg:how are you?";
+	write(fd2, buf3, Strlen(buf2));
+	char buf4[20];
+	int k2 = read(fd2, buf4, 18);
+	Printf("buf4 = %s\n", buf4);
+	delay(10);
 	}
 	}
+}
+
+
+// 行不通。并不能当进程体。
+void TestA() {
+	Printf("TestA is running\n");
+	TestFS();
 }
 
 void delay(int time) {
