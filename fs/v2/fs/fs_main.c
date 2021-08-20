@@ -372,11 +372,11 @@ int do_open(char *pathname, int oflag) {
 
 //    panic("open file failure\n");
 
-	assert(pinode.nr_inode == 5);
+//	assert(pinode.nr_inode == 5);
     // 把flip、pinode、file_desc联系起来。
     pcaller->filp[i] = &file_desc_table[j];
     file_desc_table[j].nr_inode = pinode.nr_inode;
-	assert(file_desc_table[j].nr_inode == 5);
+//	assert(file_desc_table[j].nr_inode == 5);
     // 刚打开文件，pos应该是0
     file_desc_table[j].pos = 0;
     // mode怎么设置？
@@ -952,8 +952,8 @@ void do_rdwt(Message *msg) {
     // todo 在任务进程中直接这样获取proc_table是否合适？
     int nr_inode  = proc_table[sender].filp[fd]->nr_inode;
 	assert(sender == PROC_A);
-	assert(fd == 0);
-	assert(nr_inode == 5);
+//	assert(fd == 0);
+//	assert(nr_inode == 5);
 	
 	struct inode pinode;
 	int ret = get_inode(&pinode, nr_inode);
@@ -961,13 +961,13 @@ void do_rdwt(Message *msg) {
 		panic("file doesn't\n");
 	}
 
-	assert(pinode.nr_inode == 5);
+//	assert(pinode.nr_inode == 5);
 
     // 文件大小
     int file_size = pinode.size;
 
 	//assert(len == 6);
-	assert(fd == 0);
+//	assert(fd == 0);
 	assert(sender == PROC_A);
 	assert(hd_operate_type == WRITE || hd_operate_type == READ);
 
