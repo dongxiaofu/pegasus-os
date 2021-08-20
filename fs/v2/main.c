@@ -421,18 +421,22 @@ void TestA() {
 	Printf("TestA is running\n");
 	int flag = 1;
 	while(1){
-	char filename[5] = "AB";
+	char filename[5] = "AC";
+	char filename2[5] = "AB";
 	if(flag == 1){
 		int fd = open(filename, O_CREAT);
 		Printf("fd = %x\n", fd);
+		delay(10);
+		int fd2 = open(filename2, O_CREAT);
+		Printf("fd2 = %x\n", fd2);
 		flag = 0;
 		char buf[20] = "hello";
-		write(fd, buf, Strlen(buf));
-		char buf2[20];
-		int k = read(fd, buf2, 5);
-		Printf("buf2 = %s\n", buf2);
-		//int k = 0;
-		Printf("k = %x\n", k);
+		//write(fd, buf, Strlen(buf));
+		//char buf2[20];
+		//int k = read(fd, buf2, 5);
+		//Printf("buf2 = %s\n", buf2);
+		////int k = 0;
+		//Printf("k = %x\n", k);
 	//	Printf("name = %s", file_desc_table[k].inode->nr_inode);
 	}
 		delay(10);
@@ -549,7 +553,8 @@ void TaskSys() {
         if (ret != 0) {
             return;
         }
-        int type = msg.type;
+        //int type = msg.type;
+        int type = msg.TYPE;
         int source = msg.source;
         switch (type) {
             case TICKS_TASK_SYS_TYPE:
@@ -859,7 +864,6 @@ assert(receiver_pid == 0 || receiver_pid == 1 || receiver_pid == 2 || receiver_p
 
 // receive_msg 通过sys_call调用
 int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
-
     int copy_ok = 0;
     Proc *p_from;
     Proc *pre;
@@ -943,10 +947,18 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         // 计算msg的线性地址
         int ds = receiver->s_reg.ds;
         int base = Seg2PhyAddrLDT(ds, receiver);
-        int msg_line_addr = base + msg;
+        void *msg_line_addr = (void *)(base + msg);
         int msg_size = sizeof(Message);
         // 从receiver中把消息复制到sender
         phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);
+	Message *m = (Message *)msg_line_addr;
+	dis_pos = 12000 - 128 + 10 + 320;
+	disp_str_colour("current-id:", 0x0C);
+	disp_int(proc_ready_table->pid);
+	disp_str("#");
+	disp_str_colour("from-id:", 0x0C);
+	disp_int(p_from_proc->pid);
+	assert(p_from_proc->p_msg->TYPE != 0);
 
 	if(sender_pid == 4){
 		assert(msg->TYPE == OPEN);
@@ -1128,6 +1140,7 @@ int get_ticks_ipc() {
     Memset(&msg, 0, sizeof(Message));
     //msg.source = 2;
     msg.type = TICKS_TASK_SYS_TYPE;
+    msg.TYPE = TICKS_TASK_SYS_TYPE;
     int ret = send_rec(BOTH, &msg, 1);
     int ticks = msg.val;
     return ticks;

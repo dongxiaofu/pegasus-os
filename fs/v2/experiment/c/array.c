@@ -40,5 +40,11 @@ int main(int argc, char **argv)
 		printf("buf[%d] = %c\n", i, buf[i]);
 	}
 
+	printf("测试字符串数组\n");
+	char *tty_name[10] = {"dev_tty0", "dev_tty1", "dev_tty2"};
+	for(int i = 0; i < 3; i++){
+		printf("tty_name[%d] = %s\n", i, tty_name[i]);
+	}
+
 	return 0;
 }
