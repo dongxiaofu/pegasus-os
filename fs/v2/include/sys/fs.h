@@ -9,7 +9,8 @@
 // 一个文件占用的扇区数量
 #define CNT_OF_FILE_SECT  2048
 // 一个inode占用多少空间
-#define INODE_SIZE	16
+#define INODE_SIZE	20
+#define SUPER_BLOCK_SIZE 20
 // 超级块
 struct super_block{
 	// 数据区域的第一个扇区的偏移量。
@@ -70,7 +71,8 @@ struct file_desc{
 	// 这个当前位置相对于本文件还是本分区？
 	int pos;
 	// 文件描述符关联的inode。应该使用inode的索引还是指向inode的指针？
-	struct inode *inode;	
+//	struct inode *inode;	
+	int nr_inode;
 	// 文件描述符引用数
 	int fd_cnt;
 	//想不起来了 

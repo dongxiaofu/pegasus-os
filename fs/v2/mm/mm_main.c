@@ -146,7 +146,8 @@ void mkfs() {
     pinode->nr_sect = CNT_OF_FILE_SECT;
     // 创建终端
     for (int i = 0; i < 3; i++) {
-        pinode = (struct inode *) (fsbuf + sizeof(struct inode) * (i + 1));
+        //pinode = (struct inode *) (fsbuf + sizeof(struct inode) * (i + 1));
+        pinode = (struct inode *) (fsbuf + INODE_SIZE * (i + 1));
         pinode->type = FILE_TYPE_SPECIAL_CHAR;
         pinode->size = 0;
         pinode->nr_sect = 0;
@@ -328,7 +329,8 @@ struct inode *get_inode(int nr_inode) {
 
     // 在缓存中没有找到目标inode，从硬盘中读取。
     struct super_block *sb = get_super_block();
-    int inode_size = sizeof(struct inode);
+    // int inode_size = sizeof(struct inode);
+    int inode_size = INODE_SIZE;	//sizeof(struct inode);
     int pos = 1 + 1 + sb->cnt_of_inode_map_sect + sb->cnt_of_sector_map_sect + (nr_inode - 1) / (SECTOR_SIZE / inode_size);
     int dev = ROOT_DEV;
     RD_SECT(dev, pos);

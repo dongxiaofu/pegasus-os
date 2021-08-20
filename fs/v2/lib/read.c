@@ -17,7 +17,6 @@ int read(int fd, void *buf, int count) {
     msg.BUF = buf;
     msg.CNT = count;
 	
-	return 0;
 
     send_rec(BOTH, &msg, TASK_FS);
 
