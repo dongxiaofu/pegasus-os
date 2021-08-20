@@ -115,6 +115,7 @@ void hd_handle() {
             break;
     }
 
+	msg.TYPE = 100;	// todo 调试，无实际作用。
     msg.val = 0;
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
     // todo 向文件系统发送消息，暂时使用硬编码。

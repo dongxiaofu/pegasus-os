@@ -111,6 +111,9 @@ struct inode inode_table[INODE_TABLE_SIZE];
 char *fsbuf = (char *)0x700000;
 const int FSBUF_SIZE = 1024 * 1024;
 
+//char *super_block_buf = (char *)0x900000;
+struct super_block *super_block_buf = (char *)0x900000;
+
 // 读写硬盘，单位是扇区
 //#define RD_SECT(device, pos)	rd_wt(pos * SECTOR_SIZE, device, fsbuf, SECTOR_SIZE, READ)
 //#define WT_SECT(device, pos)	rd_wt(pos * SECTOR_SIZE, device, fsbuf, SECTOR_SIZE, WRITE)

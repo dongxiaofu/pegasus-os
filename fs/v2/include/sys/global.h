@@ -65,7 +65,11 @@ EXTERN TSS tss;
 
 
 // 根目录的inode
-struct inode *root;
+// struct inode *root;
+// 使用数据而非指针更好。不是更好，是必须。若使用指针，指向fsbuf，fsbuf的数据更换后，使用
+// root不能获取到需要的数据。
+// error: storage size of 'root' isn't known
+// struct inode root;
 
 // 文件描述符数组长度
 #define FILE_DESC_SIZE 64
