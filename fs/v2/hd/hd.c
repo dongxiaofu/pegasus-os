@@ -340,7 +340,7 @@ void hd_open() {
     hd_info[driver].open_cnt++;
     hd_identify(0);
    partition(0, PART_PRIMARY);
-print_hd_info();
+//print_hd_info();
     // get_hd_ioctl(2);
     // //Printf("%s\n", "Over");
 }
@@ -455,15 +455,13 @@ void hd_handler() {
 }
 
 int waitfor(int mask, int val, int timeout) {
-//	delay(500);
-    // int t = get_ticks();
     int t = get_ticks_ipc();
 
     while (((get_ticks_ipc() - t) * 1000 / 100) < timeout)
         if ((in_byte(0x1F7) & mask) == val)
             return 1;
 
-    return 1;
+    return 0;
 }
 
 void print_hd_info()

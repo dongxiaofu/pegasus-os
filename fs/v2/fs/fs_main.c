@@ -80,18 +80,13 @@ int do_close(int fd);
 void task_fs() {
     Printf("%s\n", "FS is running");
    init_fs();
-	Printf("init_fs over\n");
-	//while(1){}
-	//return;
     while (1) {
-    Printf("%s\n", "LOOP is running");
         Message msg;
 	Memset(&msg, 0, sizeof(Message));
         send_rec(RECEIVE, &msg, ANY);
         int type = msg.TYPE;
  int source = msg.source;
 		int fd = msg.FD;
-Printf("fs type=%x, source = %x\n", type, msg.source);
 // 不知道为何会发送来source为0、type为0的消息，不处理吧。
 if(msg.source == 0){
 	continue;
@@ -101,7 +96,7 @@ assert(type == OPEN || type == READ || type == WRITE || type == CLOSE);
         // open
         char *pathname = msg.PATHNAME;
         int oflags = msg.FLAGS;
-	Printf("source = %x, type = %x\n", msg.source, msg.TYPE); 
+	//Printf("source = %x, type = %x\n", msg.source, msg.TYPE); 
         pcaller = &proc_table[source];
 
         Message fs_msg;
@@ -195,7 +190,14 @@ sp->cnt_of_inode_sect = (CNT_OF_FILE * INODE_SIZE) / SECTOR_SIZE;
     // Memcpy(fsbuf, sp + SECTOR_SIZE, SECTOR_SIZE);
     // ROOT_DEV 是安装文件系统的分区的次设备号。
     // 参数1是写入超级的位置
-    int sp_size = sizeof(struct super_block);
+    //int sp_size = sizeof(struct super_block);
+    int sp_size = SUPER_BLOCK_SIZE;
+	// 调试
+	assert(sp->data_1st_sect == 2211);
+	assert(sp->cnt_of_sector_map_sect == 2048);
+	assert(sp->cnt_of_inode_sect == 160);
+	assert(sp->cnt_of_inode_map_sect == 1);
+	assert(sp->nr_sect = CNT_OF_FILE_SECT);
 //    Memcpy(fsbuf, sp, sp_size);
 	Memset(fsbuf + sp_size, 0x90, 512 - sp_size);
     WT_SECT(ROOT_DEV, 1);
@@ -243,7 +245,6 @@ sp->cnt_of_inode_sect = (CNT_OF_FILE * INODE_SIZE) / SECTOR_SIZE;
         Memset(fsbuf, 0x0, SECTOR_SIZE);
         WT_SECT(ROOT_DEV, pos + i);
     }
-	Printf("many wt over\n");
 	//return;
     // 写入inode-array
     // 先找出第一个空闲的inode。初始化时不必寻找。
@@ -275,13 +276,15 @@ sp->cnt_of_inode_sect = (CNT_OF_FILE * INODE_SIZE) / SECTOR_SIZE;
 	
 	// todo 存储根目录的inode到root中，下面的方法是否可以？
 	//Memcpy(&root, pinode, sizeof(pinode));
-	Memcpy(&root, pinode, sizeof(struct inode));
+	//Memcpy(&root, pinode, sizeof(struct inode));
 	// todo 这种方法是否行得通？
-	// *root = *pinode;
+	 //*root = *pinode;
+	 root = *pinode;
 
     // 创建终端
     for (int i = 0; i < 3; i++) {
-        pinode = (struct inode *) (fsbuf + sizeof(struct inode) * (i + 1));
+        //pinode = (struct inode *) (fsbuf + sizeof(struct inode) * (i + 1));
+        pinode = (struct inode *) (fsbuf + INODE_SIZE * (i + 1));
         pinode->type = FILE_TYPE_SPECIAL_CHAR;
         pinode->size = 0;
         pinode->nr_sect = 0;
@@ -318,13 +321,7 @@ sp->cnt_of_inode_sect = (CNT_OF_FILE * INODE_SIZE) / SECTOR_SIZE;
 		dir_entry->nr_inode = 2 + i;
 		Memcpy(dir_entry->filename, tty_name[i], Strlen(tty_name[i]));
 	}
-	int y = 10;
     WT_SECT(ROOT_DEV, sp2.data_1st_sect);
-
-
-
-
-Printf("mkfs over\n");
 }
 
 void init_fs() {
@@ -352,7 +349,7 @@ int do_open(char *pathname, int oflag) {
     // 从文件描述符数组中找出空闲的文件描述符
     int j = -1;
     for (int i = 0; i < FILE_DESC_SIZE; i++) {
-        if (file_desc_table[i].inode == 0) {
+        if (file_desc_table[i].nr_inode == 0) {
             j = i;
             break;
         }
@@ -375,9 +372,11 @@ int do_open(char *pathname, int oflag) {
 
 //    panic("open file failure\n");
 
+	assert(pinode.nr_inode == 5);
     // 把flip、pinode、file_desc联系起来。
     pcaller->filp[i] = &file_desc_table[j];
-    file_desc_table[j].inode = &pinode;
+    file_desc_table[j].nr_inode = pinode.nr_inode;
+	assert(file_desc_table[j].nr_inode == 5);
     // 刚打开文件，pos应该是0
     file_desc_table[j].pos = 0;
     // mode怎么设置？
@@ -483,6 +482,7 @@ int get_inode(struct inode *inode, int nr_inode) {
     for (struct inode *q = &inode_table[0]; q <= &inode_table[INODE_TABLE_SIZE]; q++) {
         if (q->cnt > 0) {
             if (q->nr_inode == nr_inode) {
+		*inode = *q;
                 return q;
             }
         } else {
@@ -502,17 +502,27 @@ int get_inode(struct inode *inode, int nr_inode) {
     struct inode *new_inode = (struct inode *) (fsbuf + inode_size * offset);
 
     // 把数据放到缓存中
-    p->nr_inode = nr_inode;
-    p->size = new_inode->size;
-    p->start_sect = new_inode->start_sect;
-    p->type = new_inode->type;
-    p->nr_sect = new_inode->nr_sect;
+//    p->nr_inode = nr_inode;
+//    p->size = new_inode->size;
+//    p->start_sect = new_inode->start_sect;
+//    p->type = new_inode->type;
+//    p->nr_sect = new_inode->nr_sect;
 
+//    p->nr_inode = nr_inode;
+//    p->size = new_inode->size;
+//    p->start_sect = new_inode->start_sect;
+//    p->type = new_inode->type;
+//    p->nr_sect = new_inode->nr_sect;
+
+	*p = *new_inode;
+	p->nr_inode = nr_inode;
+	
     // inode的成员dev、cnt也需要放到缓存中吗？不放。理由是，理由不明，我不知道把dev、cnt
     // 放进去有什么用。
     p->dev = dev;
 
-	*inode = *new_inode;
+	//*inode = *new_inode;
+	*inode = *p;
 
     return inode;
 }
@@ -658,11 +668,25 @@ int new_inode(struct inode *inode, int nr_inode, int nr_start_sect) {
     new_inode.start_sect = nr_start_sect;
     new_inode.nr_sect = CNT_OF_FILE_SECT;
     new_inode.size = 0;
+    //new_inode.cnt = 1;
     new_inode.type = FILE_TYPE_TEXT;
     new_inode.nr_inode = nr_inode;
 
     // 同步到硬盘
     sync_inode(&new_inode);
+
+    new_inode.cnt = 1;
+	// 同步到缓存中
+	// todo 后期优化
+//	struct inode *p = inode_table[INODE_TABLE_SIZE];
+	int i;
+	for(i = 0; i < INODE_TABLE_SIZE; i++){
+		if(inode_table[i].nr_inode == nr_inode){
+			break;
+		}
+	}
+
+	inode_table[i] = new_inode;
 	
 	*inode = new_inode;
 }
@@ -924,12 +948,31 @@ void do_rdwt(Message *msg) {
     // todo 下面获取inode的方法正确吗？
     int fd = msg->FD;
     int pos = msg->POS;
-    struct inode *inode = proc_table[sender].filp[fd]->inode;
+    //struct inode *inode = proc_table[sender].filp[fd]->inode;
+    // todo 在任务进程中直接这样获取proc_table是否合适？
+    int nr_inode  = proc_table[sender].filp[fd]->nr_inode;
+	assert(sender == PROC_A);
+	assert(fd == 0);
+	assert(nr_inode == 5);
+	
+	struct inode pinode;
+	int ret = get_inode(&pinode, nr_inode);
+	if(ret == 0){
+		panic("file doesn't\n");
+	}
+
+	assert(pinode.nr_inode == 5);
+
     // 文件大小
-    int file_size = inode->size;
+    int file_size = pinode.size;
+
+	//assert(len == 6);
+	assert(fd == 0);
+	assert(sender == PROC_A);
+	assert(hd_operate_type == WRITE || hd_operate_type == READ);
 
     // 文件是IS_CHAR_SPECIAL
-    if (inode->type == IS_CHAR_SPECIAL) {
+    if (pinode.type == IS_CHAR_SPECIAL) {
         // 请求TTY
         // 如果type不是READ也不是WRITE，怎么处理？
         int type;
@@ -959,15 +1002,15 @@ void do_rdwt(Message *msg) {
 
     } else {
 
-        pos_end = MIN(pos + len, inode->nr_sect * SECTOR_SIZE);
+        pos_end = MIN(pos + len, pinode.nr_sect * SECTOR_SIZE);
     }
 
     // 字节偏移量
     // 为什么没有位偏移量？因为，读取数据的单位是字节。
     int offset = pos % SECTOR_SIZE;
 
-    int start_sect = inode->start_sect + pos / SECTOR_SIZE;
-    int start_end = inode->start_sect + pos_end / SECTOR_SIZE;
+    int start_sect = pinode.start_sect + pos / SECTOR_SIZE;
+    int start_end = pinode.start_sect + pos_end / SECTOR_SIZE;
 
     int chunk = MIN(start_end - start_sect + 1, FSBUF_SIZE);
 
@@ -980,9 +1023,6 @@ void do_rdwt(Message *msg) {
     int ds = sender_proc->s_reg.ds;
     int base = Seg2PhyAddrLDT(ds, sender_proc);
     int buf_line_addr = base + buf;
-
-
-	Printf("read 0\n");
 
 	// todo 调试
 //	assert();
@@ -1016,14 +1056,12 @@ void do_rdwt(Message *msg) {
         // offset的处理很费劲。
         offset = 0;
     }
-	Printf("read 1\n");
 
     // 呵呵，这个常识，还让费解。悲伤！
-    if (pos + len > inode->size) {
-        inode->size = pos + len;
-        sync_inode(inode);
+    if (pos + len > pinode.size) {
+        pinode.size = pos + len;
+        sync_inode(&pinode);
     }
-	Printf("read 2\n");
 }
 
 
@@ -1031,7 +1069,7 @@ void sync_inode(struct inode *inode) {
     // 本函数不负责处理目标inode是否存在于硬盘上，只复制更新数据到硬盘上。
     // 主要思路：从硬盘中读取包含目标inode的扇区，更新fsbuf的inode后，把fsbuf写入硬盘。
     // int inode_size = sizeof(struct inode_size);
-    int inode_size = sizeof(struct inode);
+    int inode_size = INODE_SIZE;// sizeof(struct inode);
     int nr_inode = inode->nr_inode;
     // inode的数量的偏移量
     int inode_idx = (nr_inode - 1) % (SECTOR_SIZE / inode_size);
@@ -1062,9 +1100,10 @@ int do_close(int fd) {
     // 2. 详细说明“减少文件描述符的引用数”。当一个文件描述符的引用数是0时，把这个文件描述符
     // 	设置成不指向任何inode。
 
-    put_inode(pcaller->filp[fd]->inode);
+	// todo 这里的逻辑似乎有问题，暂时不管。
+//    put_inode(pcaller->filp[fd]->inode);
     if (--pcaller->filp[fd]->fd_cnt == 0) {
-        pcaller->filp[fd]->inode = 0;
+        pcaller->filp[fd]->nr_inode = 0;
     }
     pcaller->filp[fd] = 0;
 

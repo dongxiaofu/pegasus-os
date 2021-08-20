@@ -426,17 +426,17 @@ void TestA() {
 	if(flag == 1){
 		int fd = open(filename, O_CREAT);
 		Printf("fd = %x\n", fd);
-		delay(10);
-		int fd2 = open(filename2, O_CREAT);
-		Printf("fd2 = %x\n", fd2);
+//		delay(10);
+//		int fd2 = open(filename2, O_CREAT);
+//		Printf("fd2 = %x\n", fd2);
 		flag = 0;
-		char buf[20] = "hello";
-		//write(fd, buf, Strlen(buf));
-		//char buf2[20];
-		//int k = read(fd, buf2, 5);
-		//Printf("buf2 = %s\n", buf2);
-		////int k = 0;
-		//Printf("k = %x\n", k);
+		char buf[20] = "hello,world!";
+		write(fd, buf, Strlen(buf));
+		char buf2[20];
+		int k = read(fd, buf2, 18);
+		Printf("buf2 = %s\n", buf2);
+		//int k = 0;
+		Printf("k = %x\n", k);
 	//	Printf("name = %s", file_desc_table[k].inode->nr_inode);
 	}
 		delay(10);
@@ -803,8 +803,13 @@ assert(receiver_pid == 0 || receiver_pid == 1 || receiver_pid == 2 || receiver_p
         int base = Seg2PhyAddrLDT(ds, sender);
         int msg_line_addr = base + msg;
         int msg_size = sizeof(Message);
+
+        int ds2 = receiver->s_reg.ds;
+        int base2 = Seg2PhyAddrLDT(ds2, receiver);
+        int msg_line_addr2 = base2 + receiver->p_msg;
         // 从sender中把消息复制到receiver
-        phycopy(receiver->p_msg, msg_line_addr, msg_size);
+    //    phycopy(receiver->p_msg, msg_line_addr, msg_size);
+        phycopy(msg_line_addr2, msg_line_addr, msg_size);
         // 重置sender
 //        sender->p_msg = 0;
 //        sender->p_send_to = 0;
@@ -923,7 +928,20 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
     // 2.1. 进程pid合法 && 消息来源的状态是SENDING && 消息来源的发送对象是本进程。
     if (sender_pid == ANY) {
         if (receiver->q_sending) {
+	// Printf("sending id:%x\n", receiver->q_sending->pid);
+//	dis_pos = 12000 - 128 + 10 + 160;
+//	disp_str_colour("send-id:", 0x0C);
+//	disp_int(receiver->q_sending->pid);
+//	disp_str("#");
+//	disp_str_colour("receiver-id:", 0x0C);
+//	disp_int(receiver->pid);
             p_from = receiver->q_sending;
+//	disp_str_colour("rpfrom-id:", 0x0C);
+//	disp_int(p_from->pid);
+//	disp_str("#");
+//	disp_str_colour("type:", 0x0C);
+//	disp_int(p_from->pid);
+//	disp_str("#");
             copy_ok = 1;
         }
     } else if (0 <= sender_pid && sender_pid < USER_PROC_NUM + TASK_PROC_NUM) {
@@ -949,16 +967,23 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         int base = Seg2PhyAddrLDT(ds, receiver);
         void *msg_line_addr = (void *)(base + msg);
         int msg_size = sizeof(Message);
+
+	
+        int ds2 = receiver->s_reg.ds;
+        int base2 = Seg2PhyAddrLDT(ds2, p_from_proc);
+        void *msg_line_addr2 = (void *)(base2 + p_from_proc->p_msg);
+
         // 从receiver中把消息复制到sender
-        phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);
+       // phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);
+        phycopy(msg_line_addr, msg_line_addr2, msg_size);
 	Message *m = (Message *)msg_line_addr;
-	dis_pos = 12000 - 128 + 10 + 320;
-	disp_str_colour("current-id:", 0x0C);
-	disp_int(proc_ready_table->pid);
-	disp_str("#");
-	disp_str_colour("from-id:", 0x0C);
-	disp_int(p_from_proc->pid);
-	assert(p_from_proc->p_msg->TYPE != 0);
+//	dis_pos = 12000 - 128 + 10 + 320;
+//	disp_str_colour("current-id:", 0x0C);
+//	disp_int(proc_ready_table->pid);
+//	disp_str("#");
+//	disp_str_colour("from-id:", 0x0C);
+//	disp_int(p_from_proc->pid);
+//	assert(p_from_proc->p_msg->TYPE != 0);
 
 	if(sender_pid == 4){
 		assert(msg->TYPE == OPEN);
