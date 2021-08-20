@@ -426,20 +426,23 @@ void TestA() {
 	if(flag == 1){
 		int fd = open(filename, O_CREAT);
 		Printf("fd = %x\n", fd);
-//		delay(10);
-//		int fd2 = open(filename2, O_CREAT);
-//		Printf("fd2 = %x\n", fd2);
 		flag = 0;
-		char buf[20] = "hello,world!";
+		char buf[20] = "cg:hello,world!";
 		write(fd, buf, Strlen(buf));
 		char buf2[20];
 		int k = read(fd, buf2, 18);
 		Printf("buf2 = %s\n", buf2);
-		//int k = 0;
-		Printf("k = %x\n", k);
-	//	Printf("name = %s", file_desc_table[k].inode->nr_inode);
-	}
 		delay(10);
+		int fd2 = open(filename2, O_CREAT);
+		Printf("fd2 = %x\n", fd2);
+		flag = 0;
+		char buf3[20] = "cg:how are you?";
+		write(fd2, buf3, Strlen(buf2));
+		char buf4[20];
+		int k2 = read(fd2, buf4, 18);
+		Printf("buf4 = %s\n", buf4);
+		delay(10);
+	}
 	}
 }
 
