@@ -33,7 +33,7 @@ void schedule_process() {
     while (!greatest_ticks) {
         // todo 测试需要，去掉用户进程USER_PROC_NUM。
         //for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
-         for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++) {
+         for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; p++) {
        // for (p = proc_table; p < proc_table + TASK_PROC_NUM; p++) {
             if (p->p_flag == RUNNING && p->ticks > greatest_ticks) {
                 greatest_ticks = p->ticks;
@@ -46,7 +46,7 @@ void schedule_process() {
         if (!greatest_ticks) {
            // for (p = proc_table; p < proc_table + TASK_PROC_NUM; p++) {
                 // todo 测试需要，去掉用户进程USER_PROC_NUM。
-                for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM; p++) {
+                for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; p++) {
                 if (p->p_flag == RUNNING) {
                     p->ticks = p->priority;
                 }

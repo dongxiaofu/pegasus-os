@@ -53,14 +53,16 @@ EXTERN TSS tss;
 #define TASK_SYS 1
 #define TASK_HD  2
 #define TASK_FS  3
+#define TASK_MM  4
+#define INIT_PID  5
 
-#define PROC_A	4
+#define PROC_A	6
 
 #define reassembly(val1, offset1, val2, offset2, val3) \
-        (val1 << offset1 + val2 << offset2 + val3)
+        ((val1 << offset1) + (val2 << offset2) + val3)
 
-
-#define alloc_mem(pid, size, base)  \
+// todo 不正确
+// #define alloc_mem(pid, size, base)  \
         (base + pid * size)
 
 
@@ -87,5 +89,8 @@ EXTERN TSS tss;
 #define O_CLOEXEC       6
 
 #define O_CREAT         7
+
+// todo fork创建的进程的内存空间的初始地址
+#define USER_PROC_MEM_BASE	0xA00000
 
 #endif

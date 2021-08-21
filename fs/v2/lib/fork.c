@@ -13,10 +13,10 @@
 int fork() {
     Message msg;
 
-    msg.type = FORK;
-    send_rec(BOTH, &msg, TASK_FS);
+    msg.TYPE = FORK;
+    send_rec(BOTH, &msg, TASK_MM);
 
-    assert(msg.type = SYSCALL_RET);
+    assert(msg.TYPE = SYSCALL_RET);
     assert(msg.RETVAL == 0);
     return msg.PID;
 }

@@ -1,5 +1,6 @@
 #include "stdio.h"
 #include "string.h"
+#include "mm.h"
 #include "const.h"
 #include "type.h"
 #include "protect.h"
@@ -276,9 +277,17 @@ void kernel_main() {
     unsigned char dpl;
     char *p_task_stack = proc_stack + STACK_SIZE;
     // todo 测试需要，去掉用户进程USER_PROC_NUM。
-    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++) {
+    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; i++) {
     //for (int i = 0; i < TASK_PROC_NUM; i++) {
         proc = proc_table + i;
+        proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
+        proc->pid = i;
+    	if(i >= TASK_PROC_NUM + USER_PROC_NUM ){
+		proc->p_flag = FREE_SLOT;	
+		 continue;
+	}
+	proc->p_flag = 0;
+       //  proc = proc_table + i;
         if (i < TASK_PROC_NUM) {
             task = sys_task_table + i;
             eflags = 0x1202;
@@ -297,9 +306,14 @@ void kernel_main() {
             proc->tty_index = 1;//i - TASK_PROC_NUM;
         }
 
+	// 进程名
+	Strcpy(proc->name, task->name);
+
+//	if(strcmp(proc->name, "INIT") != 0){
+	
         //proc->ldt_selector = LDT_FIRST_SELECTOR + i<<3;
-        proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
-        proc->pid = i;
+//        proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
+//        proc->pid = i;
         //proc->ldts[0] = ;
         Memcpy(&proc->ldts[0], &gdt[CS_SELECTOR_INDEX], sizeof(Descriptor));
         // 修改ldt描述符的属性。全局cs的属性是 0c9ah。
@@ -322,7 +336,41 @@ void kernel_main() {
 //proc->ldts[1].seg_base_below = base & 0xFFFF;
 //proc->ldts[1].seg_base_middle = (base >> 16) & 0xFF;
 //proc->ldts[1].seg_base_high = (unsigned char) ((base >> 24) & 0xFF);
+if(strcmp(proc->name, "INIT") == 0){
+//	dis_pos = 12000 - 128 + 10 + 320;
+//	disp_str_colour("enter INIT", 0x0C);
+	int init_image_size = 1024*40;
+//	int cs_attribute = 0x8000 | 0x4000 | 0x98 | (3 <<  5);
+//	InitDescriptor(&proc->ldts[0], 0, (init_image_size - 1)/4096, cs_attribute);
+//
+//	int ds_attribute = 0x8000 | 0x4000 | 0x92 | (3 << 5);
+//    InitDescriptor(&proc->ldts[1], 0, (init_image_size - 1)/4096, ds_attribute);
 
+	proc->ldts[0].seg_limit_below = init_image_size & 0xFFFF;
+	proc->ldts[0].seg_limit_high_and_attr2 = ((proc->ldts[0].seg_limit_high_and_attr2) & 0xF0) |(init_image_size >> 16);
+	proc->ldts[1].seg_limit_below = init_image_size & 0xFFFF;
+	proc->ldts[1].seg_limit_high_and_attr2 = ((proc->ldts[1].seg_limit_high_and_attr2) & 0xF0)|(init_image_size >> 16);
+}
+        // 初始化进程表的段寄存器
+        // 我又看不懂当初写的代码了。
+        // 一定要写非常详细的注释。
+        // 0101：rpl是01，TI是1，在ldt中的索引是0。
+        // 这里，是LDT的选择子，不是GDT的选择子。又耗费了很多很多时间才弄清楚。
+        unsigned short cs = 0x4 | rpl;
+        unsigned short ds = 0xC | rpl;
+        // proc->s_reg.cs = 0x05;	// 000 0101
+        // proc->s_reg.ds = 0x0D;	// 000 1101
+        // proc->s_reg.fs = 0x0D;	// 000 1101
+        // proc->s_reg.es = 0x0D;	// 000 1101
+        // //proc->s_reg.ss = 0x0D;	// 000 1101
+        // proc->s_reg.ss = 0x0D;	// 000 1100
+        proc->s_reg.cs = cs;
+        proc->s_reg.ds = ds;
+        proc->s_reg.fs = ds;
+        proc->s_reg.es = ds;
+        //proc->s_reg.ss = 0x0D;	// 000 1101
+        proc->s_reg.ss = ds;    // 000 1100
+}
         // 初始化进程表的段寄存器
         // 我又看不懂当初写的代码了。
         // 一定要写非常详细的注释。
@@ -447,11 +495,26 @@ void TestFS() {
 	}
 }
 
+void INIT()
+{
+	Printf("Init is running\n");
+	while(1){}
+			int pid = fork();
+			if(pid == 0){
+				Printf("Child is running\n");
+				spin("child");
+			}else{
+				Printf("A child pid = %x\n", pid);
+				Printf("Parent is running\n");
+				spin("parent");
+			}
+}
 
-// 行不通。并不能当进程体。
 void TestA() {
 	Printf("TestA is running\n");
-	TestFS();
+	while(1){}
+	//TestFS();
+//	TestFork();
 }
 
 void delay(int time) {
@@ -792,15 +855,8 @@ int dead_lock(int src, int dest) {
 
 // send_msg 通过sys_call调用
 int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
-assert(receiver_pid == 0 || receiver_pid == 1 || receiver_pid == 2 || receiver_pid == 3 || receiver_pid == 4 || receiver_pid == 15 || receiver_pid == 30);
     Proc *receiver = pid2proc(receiver_pid);
     int sender_pid = proc2pid(sender);
-    if (DEBUG == 1) {
-        Printf("sender = %x, receiver = %x\n", sender_pid, receiver_pid);
-
-        assert((sender_pid == 1) || (sender_pid == 2) || (sender_pid == 3) || (receiver_pid == 15));
-        assert((receiver_pid == 1) || (receiver_pid == 2) || (receiver_pid == 3) || (receiver_pid == 15));
-    }
     msg->source = sender_pid;
     // 死锁检测
     if (dead_lock(sender_pid, receiver_pid) == 1) {
@@ -1077,7 +1133,7 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         // 调试函数
         assert(sender_pid == TASK_TTY || sender_pid == TASK_SYS || sender_pid == TASK_HD
                  || sender_pid == TASK_FS || sender_pid == ANY || sender_pid == INTERRUPT
-                 || sender_pid == PROC_A);
+                 || sender_pid == PROC_A || sender_pid == TASK_MM);
 	
 //	dis_pos = (dis_pos / 160 + 1) * 160;
 //	disp_str_colour("receiver flag:", 0x0C);
@@ -1121,8 +1177,10 @@ int send_rec(int function, Message *msg, int pid) {
 //	disp_str_colour("send_rec pid:", 0x0C);
 //	disp_int(pid);
 	
-	assert(pid == TASK_TTY || pid == TASK_SYS || pid == TASK_HD
-                 || pid == TASK_FS || pid == ANY || pid == INTERRUPT || pid == PROC_A);
+//	assert(pid == TASK_TTY || pid == TASK_SYS || pid == TASK_HD
+//                 || pid == TASK_FS || pid == ANY || pid == INTERRUPT || pid == PROC_A
+//		 || pid == TASK_MM
+//		);
 	assert(function == SEND || function == RECEIVE || function == BOTH);
 
     int ret;
@@ -1236,4 +1294,21 @@ void inform_int(int task_nr) {
     } else {
         current->has_int_msg = 1;
     }
+}
+
+int strcmp(char *str1, char *str2) {
+    if (str1 == 0 || str2 == 0) {
+        return (str1 - str2);
+    }
+
+    char *p1 = str1;
+    char *p2 = str2;
+
+    for (; *p1 && *p2; p1++, p2++) {
+        if (*p1 != *p2) {
+            break;
+        }
+    }
+
+    return (*p1 - *p2);
 }

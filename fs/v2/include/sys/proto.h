@@ -168,6 +168,12 @@ void TaskSys();
 void TaskHD();
 // 文件系统
 void task_fs();
+// 内存管理
+void TaskMM();
+// INIT进程
+void INIT();
+// 测试内存管理
+void TestFork();
 
 void ReloadGDT();
 // 内核的入口函数

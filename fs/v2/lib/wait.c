@@ -13,7 +13,7 @@
 int wait(int *status) {
     Message msg;
 
-    msg.type = WAIT;
+    msg.TYPE = WAIT;
     send_rec(BOTH, &msg, TASK_MM);
     *status = msg.STATUS;
 
