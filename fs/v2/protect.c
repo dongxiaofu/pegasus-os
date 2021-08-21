@@ -86,7 +86,8 @@ void init_propt() {
     // 改成0x889也行。
     int tss_attribute = 0x89;        // todo tss的属性怎么确定？
     InitDescriptor(&gdt[TSS_SELECTOR_INDEX], tss_base, tss_size - 1, tss_attribute);
-    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++) {
+    //for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++) {
+    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; i++) {
         // 初始化LDT
         int ldt_size = 2 * sizeof(Descriptor);
         // int ldt_attribute = 0x0c92;          // todo ldt的属性怎么确定？

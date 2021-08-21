@@ -4,13 +4,11 @@
 #include "type.h"
 #include "protect.h"
 #include "process.h"
-#include "keyboard.h"
 #include "console.h"
 #include "proto.h"
 #include "global.h"
-#include "hd.h"
 
-int do_exec(Message *msg);
+//int do_exec(Message *msg);
 
 
 int do_exec(Message *msg) {
@@ -54,11 +52,14 @@ int do_exec(Message *msg) {
     // 把文件读取到mmbuf中。文件的最大长度是有限制的，因此，可以把mmbuf的长度设置为
     // 大于等于文件的最大长度。
     // 我们常用的文件的最大长度似乎没限制，后期，我想想怎么实现这个特性。
-    char mmbuf[MAX_FILE_SIZE];
+    // char mmbuf[MAX_FILE_SIZE];
+    // todo 先用硬编码
+    int MAX_FILE_SIZE = 1024*1024;
+    char mmbuf[1024*1024];
     char filename[20];
     // FILENAME的长度包含末尾的'0'吗？
     phycopy(v2l(TASK_MM, filename), v2l(caller_pid, msg->PATHNAME), msg->NAME_LEN);
-    int fd = open(filename);
+    int fd = open(filename, O_RDONLY);
     read(fd, mmbuf, MAX_FILE_SIZE);
 
     // 开始解析ELF文件了
@@ -82,8 +83,8 @@ int do_exec(Message *msg) {
 
     // 解除caller的阻塞
     Message m;
-    m.type = SYSCALL_RET;
-    m.RET_VAL = 0;
+    m.TYPE = SYSCALL_RET;
+    m.RETVAL = 0;
     m.PID = 0;
     send_rec(SEND, &m, caller_pid);
 }

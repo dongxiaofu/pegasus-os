@@ -13,7 +13,7 @@
 int getpid() {
     Message msg;
 
-    msg.type = GET_PID;
+    msg.TYPE = GET_PID;
     send_rec(BOTH, &msg, TASK_SYS);
 
     return msg.PID;

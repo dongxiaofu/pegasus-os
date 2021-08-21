@@ -13,9 +13,9 @@
 void exit(int status) {
     Message msg;
 
-    msg.type = EXIT;
+    msg.TYPE = EXIT;
     msg.STATUS = status;
     send_rec(BOTH, &msg, TASK_MM);
 
-    assert(msg.type == SYSCALL_RET);
+    assert(msg.TYPE == SYSCALL_RET);
 }

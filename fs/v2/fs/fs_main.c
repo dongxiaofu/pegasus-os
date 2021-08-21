@@ -26,7 +26,7 @@ void mkfs();
 void init_fs();
 
 // 比较str1和str2这两个字符串的大小。
-int strcmp(char *str1, char *str2);
+//int strcmp(char *str1, char *str2);
 
 // 去掉完整文件路径中的路径，只留下文件名
 int strip_path(char *filename, char *pathname, struct inode *dev_root);
@@ -454,22 +454,23 @@ int strip_path(char *filename, char *pathname, struct inode *dev_root) {
 }
 
 
-int strcmp(char *str1, char *str2) {
-    if (str1 == 0 || str2 == 0) {
-        return (str1 - str2);
-    }
-
-    char *p1 = str1;
-    char *p2 = str2;
-
-    for (; *p1 && *p2; p1++, p2++) {
-        if (*p1 != *p2) {
-            break;
-        }
-    }
-
-    return (*p1 - *p2);
-}
+// 移动到kernel的主体文件main.c中了。
+//int strcmp(char *str1, char *str2) {
+//    if (str1 == 0 || str2 == 0) {
+//        return (str1 - str2);
+//    }
+//
+//    char *p1 = str1;
+//    char *p2 = str2;
+//
+//    for (; *p1 && *p2; p1++, p2++) {
+//        if (*p1 != *p2) {
+//            break;
+//        }
+//    }
+//
+//    return (*p1 - *p2);
+//}
 
 
 int get_inode(struct inode *inode, int nr_inode) {

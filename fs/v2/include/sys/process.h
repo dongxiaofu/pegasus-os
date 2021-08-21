@@ -66,7 +66,7 @@ typedef struct proc{
 	struct file_desc *filp[FILP_TABLE_SIZE];	
 	
         // ipc start
-        unsigned char p_flag;           // 进程的状态：RUNNING等
+        char p_flag;           // 进程的状态：RUNNING等
         Message *p_msg; // 指向消息体
          int p_send_to;  // 要向哪个进程发送消息，目标进程ID
         int p_receive_from;     // 要从哪个进程接收消息，目标进程ID
@@ -76,10 +76,13 @@ typedef struct proc{
 	
 	unsigned int has_int_msg;	// 是否有中断消息。
 	
+	int parent_pid;
+	
         // ipc end
 }Proc;
 
 typedef struct{
+	char name[20];
         Func func_name;
         unsigned short stack_size;
 }Task;

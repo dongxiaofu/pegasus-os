@@ -18,6 +18,8 @@ KERNEL	=	kernel.bin
 OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
 		hd.o hd_rdwt.o process.o protect.o console.o keyboard.o \
 		open.o	read.o	write.o	close.o \
+		wait.o  exit.o 	fork.o	 getpid.o exec.o \
+		mm/main.o mm/exec.o mm/forkexit.o
 	#	wait.o	exit.o	fork.o	unlink.o getpid.o
 
 image:clean everything buildimg
@@ -33,6 +35,7 @@ buildimg:
 clean:
 	rm -rvf *.bin
 	rm -rvf *.o
+	rm -rvf mm/*.o
 
 # 不能使用所有的输入文件
 # kernel.bin:kernel.o string.o kernel_main.o hd.o syscall.o
@@ -103,18 +106,30 @@ write.o:lib/write.c
 close.o:lib/close.c
 	${CC} ${CFLAGS} -o $@ $<
 
-# 暂时不用这部分
-# wait.o:lib/wait.c
-# 	${CC} ${CFLAGS} -o $@ $<
-# 
-# exit.o:lib/exit.c
-# 	${CC} ${CFLAGS} -o $@ $<
-# 
-# fork.o:lib/fork.c
-# 	${CC} ${CFLAGS} -o $@ $<
-# 
-# unlink.o:lib/unlink.c
-# 	${CC} ${CFLAGS} -o $@ $<
-# 
-# getpid.o:lib/getpid.c
-# 	${CC} ${CFLAGS} -o $@ $<
+# MM
+mm/main.o:mm/main.c
+	${CC} ${CFLAGS} -o $@ $<
+
+mm/exec.o:mm/exec.c
+	${CC} ${CFLAGS} -o $@ $<
+
+mm/forkexit.o: mm/forkexit.c
+	${CC} ${CFLAGS} -o $@ $<
+
+wait.o:lib/wait.c
+	${CC} ${CFLAGS} -o $@ $<
+
+exit.o:lib/exit.c
+	${CC} ${CFLAGS} -o $@ $<
+
+fork.o:lib/fork.c
+	${CC} ${CFLAGS} -o $@ $<
+
+unlink.o:lib/unlink.c
+	${CC} ${CFLAGS} -o $@ $<
+
+getpid.o:lib/getpid.c
+	${CC} ${CFLAGS} -o $@ $<
+
+exec.o:lib/exec.c
+	${CC} ${CFLAGS} -o $@ $<

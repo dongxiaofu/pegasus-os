@@ -29,7 +29,9 @@
 #define RUNNING	0
 #define SENDING 1
 #define RECEIVING 2
-
+#define HANGING	3
+#define WAITING 4
+#define FREE_SLOT -1
 // send_rec的function的取值
 #define SEND 1
 #define RECEIVE 2
@@ -173,10 +175,11 @@
 
 // 进程相关 start
 // 用户进程的数量
-#define USER_PROC_NUM 1
+#define USER_PROC_NUM 2
 // 系统任务的数量
-#define TASK_PROC_NUM 4
+#define TASK_PROC_NUM 5
 // 用fork创建的用户进程的数量
+// todo 设置成32，合适吗？
 #define FORKED_USER_PROC_NUM 32
 // 消息收发对象是任意进程时，目标进程的pid是这个值
 #define ANY (USER_PROC_NUM + TASK_PROC_NUM + 10)
@@ -196,6 +199,8 @@
 #define TASK_SYS_SIZE DEFAULT_STACK_SIZE
 #define TASK_HD_SIZE DEFAULT_STACK_SIZE
 #define TASK_FS_SIZE DEFAULT_STACK_SIZE
+#define TASK_MM_SIZE DEFAULT_STACK_SIZE
+#define TASK_INIT_SIZE DEFAULT_STACK_SIZE
 //#define A_STACK_SIZE 128
 //#define B_STACK_SIZE 128
 //#define C_STACK_SIZE 128
@@ -205,7 +210,9 @@
         + TaskTTY_STACK_SIZE \
         + TASK_SYS_SIZE \
         + TASK_HD_SIZE  \
-        + TASK_FS_SIZE)
+        + TASK_FS_SIZE \
+        + TASK_MM_SIZE \
+        + TASK_INIT_SIZE)
 // 进程相关 end
 
 // todo 不会用enum，用常量代替。
@@ -231,16 +238,10 @@
 
 // 终端文件
 #define IS_CHAR_SPECIAL 0
-
-
-// 进程表的p_flag
-#define FREE_SLOT 0	// 空闲进程表
-
-
-// 最大文件长度。随便确定了一个值。
-#define MAX_FILE_SIZE 1024*1024
+// 最大文件长度。随便确定了一个值。 #define MAX_FILE_SIZE 1024*1024
 
 // todo 应该设置多大？512是我随便设置的值。
+#define PROC_IMAGE_DEFAULT_SIZE 0x100000 //1024*1024	// todo 这是我随便设置的值
 #define PROC_STACK_SIZE 512
 #define SECTOR_SIZE	512
 
