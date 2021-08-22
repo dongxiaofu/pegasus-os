@@ -490,9 +490,9 @@ void INIT()
 				dis_pos += 960;
 				Printf("Parent is running\n");
 				Printf("pid = %x\n", pid);
-	dis_pos = 12000 - 128 + 10 + 320 + 320;
+	dis_pos = 12000 - 128 + 10 + 160 * 3;
 	//dis_pos += 160;
-	disp_str_colour("Parent:", 0x0C);
+	disp_str_colour("Parent:", 0x0D);
 	disp_int(pid);
 				spin("parent\n");
 			}else{			//	spin("child");
@@ -500,7 +500,7 @@ void INIT()
 				dis_pos += 960 + 18 * 160;
 				Printf("Child is running\n");
 				Printf("pid = %x\n", pid);
-	dis_pos = 12000 - 128 + 10 + 320;
+	dis_pos = 12000 - 128 + 10 + 160 * 5;
 	//dis_pos += 160;
 	disp_str_colour("child222:", 0x0C);
 	disp_int(pid);
