@@ -293,7 +293,7 @@ void kernel_main() {
             eflags = 0x1202;
             rpl = 1;
             dpl = 1;
-            proc->ticks = proc->priority = 15;
+            proc->ticks = proc->priority = 4;
             proc->tty_index = 1;
         } else {
             task = user_task_table + i - TASK_PROC_NUM;
@@ -301,7 +301,7 @@ void kernel_main() {
             //eflags = 0x1202;
             rpl = 3;
             dpl = 3;
-            proc->ticks = proc->priority = 10;
+            proc->ticks = proc->priority = 2;
             //proc->tty_index = i - TASK_PROC_NUM;
             proc->tty_index = 1;//i - TASK_PROC_NUM;
         }
@@ -335,41 +335,26 @@ void kernel_main() {
         // proc->ldts[1].seg_attr1 = 0xb2;
 //proc->ldts[1].seg_base_below = base & 0xFFFF;
 //proc->ldts[1].seg_base_middle = (base >> 16) & 0xFF;
+
 //proc->ldts[1].seg_base_high = (unsigned char) ((base >> 24) & 0xFF);
+//}else{
 if(strcmp(proc->name, "INIT") == 0){
 //	dis_pos = 12000 - 128 + 10 + 320;
 //	disp_str_colour("enter INIT", 0x0C);
-	int init_image_size = 1024*40;
-//	int cs_attribute = 0x8000 | 0x4000 | 0x98 | (3 <<  5);
-//	InitDescriptor(&proc->ldts[0], 0, (init_image_size - 1)/4096, cs_attribute);
-//
-//	int ds_attribute = 0x8000 | 0x4000 | 0x92 | (3 << 5);
-//    InitDescriptor(&proc->ldts[1], 0, (init_image_size - 1)/4096, ds_attribute);
+	int init_image_size = (0x1000 + 0x020000 + 1);
+	//int cs_attribute = 0x8000 | 0x4000 | 0x98 | (3 <<  5);
+	int cs_attribute = 0xcfa;//0x8000 | 0x4000 | 0x98 | (3 <<  5);
+	InitDescriptor(&(proc_table[i].ldts[0]), 0, (init_image_size-1) >> 12, cs_attribute);
+//        proc->ldts[0].seg_attr1 = 0x9a | (dpl << 5);                // 1001	1010
+////
+	int ds_attribute = 0xcf2;//0x8000 | 0x4000 | 0x92 | (3 << 5);
+        InitDescriptor(&(proc_table[i].ldts[1]), 0,  (init_image_size-1) >> 12, ds_attribute);
+//        proc->ldts[1].seg_attr1 = 0x92 | (dpl << 5);            // 1001 0010
 
-	proc->ldts[0].seg_limit_below = init_image_size & 0xFFFF;
-	proc->ldts[0].seg_limit_high_and_attr2 = ((proc->ldts[0].seg_limit_high_and_attr2) & 0xF0) |(init_image_size >> 16);
-	proc->ldts[1].seg_limit_below = init_image_size & 0xFFFF;
-	proc->ldts[1].seg_limit_high_and_attr2 = ((proc->ldts[1].seg_limit_high_and_attr2) & 0xF0)|(init_image_size >> 16);
-}
-        // 初始化进程表的段寄存器
-        // 我又看不懂当初写的代码了。
-        // 一定要写非常详细的注释。
-        // 0101：rpl是01，TI是1，在ldt中的索引是0。
-        // 这里，是LDT的选择子，不是GDT的选择子。又耗费了很多很多时间才弄清楚。
-        unsigned short cs = 0x4 | rpl;
-        unsigned short ds = 0xC | rpl;
-        // proc->s_reg.cs = 0x05;	// 000 0101
-        // proc->s_reg.ds = 0x0D;	// 000 1101
-        // proc->s_reg.fs = 0x0D;	// 000 1101
-        // proc->s_reg.es = 0x0D;	// 000 1101
-        // //proc->s_reg.ss = 0x0D;	// 000 1101
-        // proc->s_reg.ss = 0x0D;	// 000 1100
-        proc->s_reg.cs = cs;
-        proc->s_reg.ds = ds;
-        proc->s_reg.fs = ds;
-        proc->s_reg.es = ds;
-        //proc->s_reg.ss = 0x0D;	// 000 1101
-        proc->s_reg.ss = ds;    // 000 1100
+//	proc->ldts[0].seg_limit_below = init_image_size & 0xFFFF;
+//	proc->ldts[0].seg_limit_high_and_attr2 = ((proc->ldts[0].seg_limit_high_and_attr2) & 0xF0) |(init_image_size >> 16);
+//	proc->ldts[1].seg_limit_below = init_image_size & 0xFFFF;
+//	proc->ldts[1].seg_limit_high_and_attr2 = ((proc->ldts[1].seg_limit_high_and_attr2) & 0xF0)|(init_image_size >> 16);
 }
         // 初始化进程表的段寄存器
         // 我又看不懂当初写的代码了。
@@ -497,17 +482,36 @@ void TestFS() {
 
 void INIT()
 {
-	Printf("Init is running\n");
-	while(1){}
+//	Printf("Init is running\n");
+//	while(1){}
 			int pid = fork();
-			if(pid == 0){
-				Printf("Child is running\n");
-				spin("child");
-			}else{
-				Printf("A child pid = %x\n", pid);
+		
+			if(pid > 0){
+				dis_pos += 960;
 				Printf("Parent is running\n");
-				spin("parent");
+				Printf("pid = %x\n", pid);
+	dis_pos = 12000 - 128 + 10 + 320 + 320;
+	//dis_pos += 160;
+	disp_str_colour("Parent:", 0x0C);
+	disp_int(pid);
+				spin("parent\n");
+			}else{			//	spin("child");
+			
+				dis_pos += 960 + 18 * 160;
+				Printf("Child is running\n");
+				Printf("pid = %x\n", pid);
+	dis_pos = 12000 - 128 + 10 + 320;
+	//dis_pos += 160;
+	disp_str_colour("child222:", 0x0C);
+	disp_int(pid);
+				spin("child\n");
 			}
+	//		}else{
+	//			Printf("A child pid = %x\n", pid);
+	//			Printf("Parent is running\n");
+	//			while(1){}
+	//			spin("parent");
+	//		}
 }
 
 void TestA() {
@@ -1131,9 +1135,9 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
 //	//dis_pos += Strlen("receiver2:");
 //	disp_int(receiver_pid);
         // 调试函数
-        assert(sender_pid == TASK_TTY || sender_pid == TASK_SYS || sender_pid == TASK_HD
-                 || sender_pid == TASK_FS || sender_pid == ANY || sender_pid == INTERRUPT
-                 || sender_pid == PROC_A || sender_pid == TASK_MM);
+//        assert(sender_pid == TASK_TTY || sender_pid == TASK_SYS || sender_pid == TASK_HD
+//                 || sender_pid == TASK_FS || sender_pid == ANY || sender_pid == INTERRUPT
+//                 || sender_pid == PROC_A || sender_pid == TASK_MM || sender_pid == INIT_PID);
 	
 //	dis_pos = (dis_pos / 160 + 1) * 160;
 //	disp_str_colour("receiver flag:", 0x0C);

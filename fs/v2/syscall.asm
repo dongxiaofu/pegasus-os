@@ -51,7 +51,7 @@ write_debug:
 	ret
 
 ; int send_msg(Message *msg, int receiver_pid)
-send_msg:
+send_msg2:
 	mov eax, _NR_SEND_MSG
 	; 第2个参数
 	mov ebx, [esp+8]
@@ -62,9 +62,33 @@ send_msg:
 
 	ret
 
+; int send_msg(Message *msg, int receiver_pid)
+send_msg:
+	push	ebp
+	mov	ebp,	esp
+;	push	eax
+	push	ebx
+	push	ecx
+
+	
+
+	mov eax, _NR_SEND_MSG
+	; 第2个参数
+	mov ebx, [ebp+12]
+	; 第1个参数
+	mov ecx, [ebp+8]
+
+	int INT_VECTOR_TICKS
+
+	pop	ecx
+	pop	ebx
+;	push	eax
+	pop	ebp
+
+	ret
 
 ; int receive_msg(Message *msg, int sender_id)
-receive_msg:
+receive_msg2:
 	mov eax, _NR_RECEIVE_MSG
 	; 第2个参数
 	mov ebx, [esp+8]
@@ -72,5 +96,29 @@ receive_msg:
 	mov ecx, [esp+4]
 
 	int INT_VECTOR_TICKS
+
+	ret
+
+; int receive_msg(Message *msg, int sender_id)
+receive_msg:
+	push	ebp
+	mov	ebp,	esp
+;	push	eax
+	push	ebx
+	push	ecx
+
+
+	mov eax, _NR_RECEIVE_MSG
+	; 第2个参数
+	mov ebx, [ebp+12]
+	; 第1个参数
+	mov ecx, [ebp+8]
+
+	int INT_VECTOR_TICKS
+
+	pop	ecx
+	pop	ebx
+;	pop	eax
+	pop	ebp
 
 	ret

@@ -40,7 +40,7 @@ int do_fork(Message *msg) {
     int ldt_sel = proc->ldt_selector;
     *proc = proc_table[parent_pid];
 	proc->pid = pid;
-    //proc->ldt_selector = ldt_sel;
+    proc->ldt_selector = ldt_sel;
 
     // 复制父进程的内存空间
     // 使用指针，是因为我想改动最小，不想把下面的->改成.。
@@ -64,31 +64,38 @@ int do_fork(Message *msg) {
     // 复制父进程的物理空间
     // phycopy(buf_line_addr + byte_wt, fsbuf + offset,  byte);
     // 两个参数都是物理地址。
-    caller_cs_size = 1024 * 100;
+    //caller_cs_size = PROC_IMAGE_DEFAULT_SIZE;
+//	caller_cs_size = (0x1000 + 0x015be4);
+//	caller_cs_base = 0x1000;
+//	child_base += 0x10;
     phycopy(child_base, caller_cs_base, caller_cs_size);
 
     // 设置子进程的ldt
     // todo 偷个懒，从我以前的代码中拼凑成的。我仍然不熟悉这块知识。
     int dpl = 3;
+	//child_base -= 0xA000;
 
-proc_table[pid].ldts[0].seg_base_below = child_base & 0xFF;
-proc_table[pid].ldts[0].seg_base_middle = (child_base & 0x0F0)>>4;
-proc_table[pid].ldts[0].seg_base_high = (child_base & 0xF000)>>12;
-
-proc_table[pid].ldts[1].seg_base_below = child_base & 0xFF;
-proc_table[pid].ldts[1].seg_base_middle = (child_base & 0x0F0)>>4;
-proc_table[pid].ldts[1].seg_base_high = (child_base & 0xF000)>>12;
+//proc_table[pid].ldts[0].seg_base_below = child_base & 0x0000FFFF;
+//proc_table[pid].ldts[0].seg_base_middle = (child_base & 0x00FF0000)>>8;
+//proc_table[pid].ldts[0].seg_base_high = (child_base & 0xFF000000)>>24;
+//
+//proc_table[pid].ldts[1].seg_base_below = child_base & 0x0000FFFF;
+//proc_table[pid].ldts[1].seg_base_middle = (child_base & 0x00FF0000)>>8;
+//proc_table[pid].ldts[1].seg_base_high = (child_base & 0x00FF0000)>>24;
     //int cs_attribute = 0x82;    // 最大难点。
     //int cs_attribute = 8000h | 4000h | 98h | (3 <<  5);
-//    int cs_attribute = 0x8000 | 0x4000 | 0x98 | (3 <<  5);
-//    //InitDescriptor(&proc_table[pid].ldts[0], child_base, caller_cs_limit, cs_attribute);
-//   InitDescriptor(&proc_table[pid].ldts[0], child_base, (PROC_IMAGE_DEFAULT_SIZE - 1)/4096, cs_attribute);
+    //int cs_attribute = 0x8000 | 0x4000 | 0x98 | (3 <<  5);
+    int cs_attribute = 0xcfa;//0x8000 | 0x4000 | 0x98 | (3 <<  5);
+    InitDescriptor(&proc_table[pid].ldts[0], child_base, caller_cs_limit, cs_attribute);
+//    int limit = (0x1000 + 0x020000);
+ //  InitDescriptor(&(proc_table[pid].ldts[0]), child_base, (limit - 1) >> 12, cs_attribute);
 ////	proc->ldts[0].seg_attr1 = 0x9a | (dpl << 5);
 ////    int ds_attribute = 0x82;    // 最大难点。
 //    //InitDescriptor(&proc_table[pid].ldts[1], child_base, caller_cs_limit, ds_attribute);
 //    //int ds_attribute = 8000h | 4000h | 92h | (3 << 5);
-//    int ds_attribute = 0x8000 | 0x4000 | 0x92 | (3 << 5);
-//   InitDescriptor(&proc_table[pid].ldts[1], child_base, (PROC_IMAGE_DEFAULT_SIZE - 1)/4096, ds_attribute);
+    //int ds_attribute = 0x8000 | 0x4000 | 0x92 | (3 << 5);
+    int ds_attribute = 0xcf2;//0x8000 | 0x4000 | 0x92 | (3 << 5);
+ InitDescriptor(&(proc_table[pid].ldts[1]), child_base, caller_cs_limit, ds_attribute);
 //proc->ldts[1].seg_attr1 = 0x92 | (dpl << 5);
 
     // 处理文件todo，暂时不处理。
@@ -106,8 +113,6 @@ proc_table[pid].ldts[1].seg_base_high = (child_base & 0xF000)>>12;
     m.RETVAL = 0;
     m.PID = 0;
     send_rec(SEND, &m, pid);
-
-	Printf("do_fork over\n");
 
     return pid;
 }
