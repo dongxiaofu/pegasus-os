@@ -54,9 +54,18 @@ void schedule_process() {
         }
 
     }
+
+	if(proc_ready_table->pid == 7){
+
+		int a = 8;
+	}
 }
 
 void clock_handler() {
+	if(proc_ready_table->p_flag == RECEIVING || proc_ready_table->p_flag == SENDING){
+	//	schedule_process();
+	//	return;
+	}
 //	check();
     if (++ticks >= MAX_TICKS) {
         ticks = 0;
