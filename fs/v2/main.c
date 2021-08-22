@@ -12,7 +12,8 @@
 #include "global.h"
 
 // 解包tar文件
-struct tar_header {
+struct tar_header
+{
     char name[100];
     char mode[8];
     char uid[8];
@@ -32,7 +33,8 @@ struct tar_header {
     char padding[12];
 };
 
-void untar(const char *filename) {
+void untar(const char *filename)
+{
     // 思路：
     // 1. 读取filename文件。
     // 2. 先读取一个扇区，再读取一个文件，并把这个文件的数据写入新文件。
@@ -47,13 +49,15 @@ void untar(const char *filename) {
     char buf[SECTOR_SIZE * 16];
     int chunk = sizeof(buf);
 
-    while (1) {
+    while (1)
+    {
         read(fd, buf, SECTOR_SIZE);
-        if (Strlen(buf) == 0) {
+        if (Strlen(buf) == 0)
+        {
             break;
         }
 
-        struct tar_header *tar_header = (struct tar_header *) buf;
+        struct tar_header *tar_header = (struct tar_header *)buf;
         // 不确定能不能用指针接收一个字符串。能。
         char *name = tar_header->name;
         int fdout = open(name, O_WRONLY);
@@ -61,13 +65,15 @@ void untar(const char *filename) {
         int len = 0;
         char *size_str = tar_header->size;
         char *p = size_str;
-        while (*p) {
+        while (*p)
+        {
             len = len * 8 + (*p - '0');
             p++;
         }
 
         int bytes_left = len;
-        while (bytes_left) {
+        while (bytes_left)
+        {
             int iobytes = MIN(chunk, bytes_left);
             read(fd, buf, ((iobytes - 1) / SECTOR_SIZE + 1) * SECTOR_SIZE);
             write(fdout, buf, iobytes);
@@ -80,23 +86,30 @@ void untar(const char *filename) {
     close(fd);
 }
 
-void atoi(char *str, int num) {
-//	char str2[20];
+void atoi(char *str, int num)
+{
+    //	char str2[20];
     char *p = str;
     *p++ = '0';
     *p++ = 'x';
     char ch;
     char flag = 0;
 
-    if (num == 0) {
+    if (num == 0)
+    {
         *p++ = '0';
-    } else {
-        for (int i = 28; i >= 0; i -= 4) {
+    }
+    else
+    {
+        for (int i = 28; i >= 0; i -= 4)
+        {
             ch = (num >> i) & 0xF;
-            if (flag == 0 && ch == 0) continue;
+            if (flag == 0 && ch == 0)
+                continue;
             flag = 1;
             ch = ch + '0';
-            if (ch > '9') {
+            if (ch > '9')
+            {
                 ch += 7;
             }
             *p++ = ch;
@@ -104,52 +117,54 @@ void atoi(char *str, int num) {
     }
 
     *p = 0;
-//	Memcpy(str, str2, Strlen(str2));
+    //	Memcpy(str, str2, Strlen(str2));
 
     return;
 }
 
-void disp_int(int num) {
+void disp_int(int num)
+{
     //char *str = "";
     char str[10];
-//	Memset(str, 0, sizeof(str));
+    //	Memset(str, 0, sizeof(str));
     atoi(str, num);
     //disp_str_colour("ABC", 0x0A);
     // disp_str(str);
     //char str2[20] = "0x57";
     disp_str_colour(str, 0x0B);
     //return;
-
 }
 
-void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags) {
+void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags)
+{
     char *msg[] = {
-            "# Divide by zero:",
-            "# Single step:",
-            "# Non-maskable  (NMI):",
-            "# Breakpoint:",
-            "# Overflow trap:",
-            "# BOUND range exceeded (186,286,386):",
-            "# Invalid opcode (186,286,386):",
-            "# Coprocessor not available (286,386):",
-            "# Double fault exception (286,386):",
-            "# Coprocessor segment overrun (286,386):",
-            "# Invalid task state segment (286,386):",
-            "# Segment not present (286,386):",
-            "# Stack exception (286,386):",
-            "# General protection exception (286,386):",
-            "# Page fault (286,386):",
-            //"# Reserved:",
-            "# Coprocessor error (286,386):",
+        "# Divide by zero:",
+        "# Single step:",
+        "# Non-maskable  (NMI):",
+        "# Breakpoint:",
+        "# Overflow trap:",
+        "# BOUND range exceeded (186,286,386):",
+        "# Invalid opcode (186,286,386):",
+        "# Coprocessor not available (286,386):",
+        "# Double fault exception (286,386):",
+        "# Coprocessor segment overrun (286,386):",
+        "# Invalid task state segment (286,386):",
+        "# Segment not present (286,386):",
+        "# Stack exception (286,386):",
+        "# General protection exception (286,386):",
+        "# Page fault (286,386):",
+        //"# Reserved:",
+        "# Coprocessor error (286,386):",
 
-            "#AC :",
-            "#MC :",
-            "#XF :",
+        "#AC :",
+        "#MC :",
+        "#XF :",
     };
-	// 这个值是第2个终端的显存初始处。
+    // 这个值是第2个终端的显存初始处。
     dis_pos = 12000 - 128 + 10;
     // 清屏
-    for (int i = 0; i < 80 * 25 * 2; i++) {
+    for (int i = 0; i < 80 * 25 * 2; i++)
+    {
         disp_str(" ");
     }
 
@@ -157,14 +172,15 @@ void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags) {
     // int colour = 0x74;
     int colour = 0x0A;
     char *error_msg = msg[vec_no];
-//	Printf("error:%s\n", error_msg);
+    //	Printf("error:%s\n", error_msg);
     disp_str_colour(error_msg, colour);
     disp_str("\n\n");
     disp_str_colour("vec_no:", colour);
     disp_int(vec_no);
     disp_str("\n\n");
 
-    if (error_no != 0xFFFFFFFF) {
+    if (error_no != 0xFFFFFFFF)
+    {
         disp_str_colour("error_no:", colour);
         disp_str_colour("error_no:", colour);
         disp_int(error_no);
@@ -189,7 +205,8 @@ void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags) {
     return;
 }
 
-void init_internal_interrupt() {
+void init_internal_interrupt()
+{
     InitInterruptDesc(0, divide_zero_fault, 0x08, 0x0E);
     InitInterruptDesc(1, single_step_fault, 0x08, 0x0E);
     InitInterruptDesc(2, non_maskable_interrupt, 0x08, 0x0E);
@@ -209,7 +226,6 @@ void init_internal_interrupt() {
     InitInterruptDesc(17, align_check_fault, 0x08, 0x0E);
     InitInterruptDesc(18, simd_float_exception_fault, 0x08, 0x0E);
 
-
     // 系统调用
     // 属性可能需要修改
     //InitInterruptDesc(0x90,sys_get_ticks,0x08,0x0E);
@@ -221,14 +237,16 @@ void init_internal_interrupt() {
     InitInterruptDesc(0x90, sys_call, 0x0E, 0x0E);
 }
 
-void test() {
+void test()
+{
     disp_str("A");
     disp_int(0x6);
     disp_str("\n");
     //return;
     //disp_str_colour2(0x9988, 0x74);
     dis_pos = 0;
-    for (int i = 0; i < 80 * 25 * 2; i++) {
+    for (int i = 0; i < 80 * 25 * 2; i++)
+    {
         disp_str(" ");
     }
     dis_pos = 0;
@@ -249,12 +267,12 @@ void test() {
     disp_str("\n");
 }
 
-
-void disp_str_colour3(char *str, int colour) {
-
+void disp_str_colour3(char *str, int colour)
+{
 }
 
-void spurious_irq(int irq) {
+void spurious_irq(int irq)
+{
     disp_str_colour("\n------------irq start---------------\n", 0x0B);
     disp_int(irq);
     ticks++;
@@ -264,7 +282,8 @@ void spurious_irq(int irq) {
     disp_str_colour("\n------------irq end---------------\n", 0x0C);
 }
 
-void kernel_main() {
+void kernel_main()
+{
     ticks = 0;
     counter = 0;
     // 在这个项目的C代码中，全局变量如此赋值才有效。原因未知，实践要求如此。
@@ -277,25 +296,30 @@ void kernel_main() {
     unsigned char dpl;
     char *p_task_stack = proc_stack + STACK_SIZE;
     // todo 测试需要，去掉用户进程USER_PROC_NUM。
-    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; i++) {
-    //for (int i = 0; i < TASK_PROC_NUM; i++) {
+    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; i++)
+    {
+        //for (int i = 0; i < TASK_PROC_NUM; i++) {
         proc = proc_table + i;
         proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
         proc->pid = i;
-    	if(i >= TASK_PROC_NUM + USER_PROC_NUM ){
-		proc->p_flag = FREE_SLOT;	
-		 continue;
-	}
-	proc->p_flag = 0;
-       //  proc = proc_table + i;
-        if (i < TASK_PROC_NUM) {
+        if (i >= TASK_PROC_NUM + USER_PROC_NUM)
+        {
+            proc->p_flag = FREE_SLOT;
+            continue;
+        }
+        proc->p_flag = 0;
+        //  proc = proc_table + i;
+        if (i < TASK_PROC_NUM)
+        {
             task = sys_task_table + i;
             eflags = 0x1202;
             rpl = 1;
             dpl = 1;
             proc->ticks = proc->priority = 4;
             proc->tty_index = 1;
-        } else {
+        }
+        else
+        {
             task = user_task_table + i - TASK_PROC_NUM;
             eflags = 0x202;
             //eflags = 0x1202;
@@ -303,59 +327,60 @@ void kernel_main() {
             dpl = 3;
             proc->ticks = proc->priority = 2;
             //proc->tty_index = i - TASK_PROC_NUM;
-            proc->tty_index = 1;//i - TASK_PROC_NUM;
+            proc->tty_index = 1; //i - TASK_PROC_NUM;
         }
 
-	// 进程名
-	Strcpy(proc->name, task->name);
+        // 进程名
+        Strcpy(proc->name, task->name);
 
-//	if(strcmp(proc->name, "INIT") != 0){
-	
+        //	if(strcmp(proc->name, "INIT") != 0){
+
         //proc->ldt_selector = LDT_FIRST_SELECTOR + i<<3;
-//        proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
-//        proc->pid = i;
+        //        proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
+        //        proc->pid = i;
         //proc->ldts[0] = ;
         Memcpy(&proc->ldts[0], &gdt[CS_SELECTOR_INDEX], sizeof(Descriptor));
         // 修改ldt描述符的属性。全局cs的属性是 0c9ah。
         //proc->ldts[0].seg_attr1 = 0xcd;
         //proc->ldts[0].seg_attr1 = 0xda;
         //proc->ldts[0].seg_attr1 = 0xba;			// 1011 1010
-        proc->ldts[0].seg_attr1 = 0x9a | (dpl << 5);                // 1001	1010
-	// todo 修改任务进程的内存的起始地址
-	// int base = 0x50000;
-	//int base = 5242880;
-//	proc->ldts[0].seg_base_below = base & 0xFFFF;
-//proc->ldts[0].seg_base_middle = (base >> 16) & 0xFF;
-//proc->ldts[0].seg_base_high = (unsigned char) ((base >> 24) & 0xFF);
+        proc->ldts[0].seg_attr1 = 0x9a | (dpl << 5); // 1001	1010
+                                                     // todo 修改任务进程的内存的起始地址
+                                                     // int base = 0x50000;
+                                                     //int base = 5242880;
+                                                     //	proc->ldts[0].seg_base_below = base & 0xFFFF;
+                                                     //proc->ldts[0].seg_base_middle = (base >> 16) & 0xFF;
+                                                     //proc->ldts[0].seg_base_high = (unsigned char) ((base >> 24) & 0xFF);
         Memcpy(&proc->ldts[1], &gdt[DS_SELECTOR_INDEX], sizeof(Descriptor));
         // 修改ldt描述符的属性。全局ds的属性是 0c92h
         // proc->ldts[1].seg_attr1 = 0xd2;
         // proc->ldts[1].seg_attr1 = 0xb2;			// 1011 0010
-        proc->ldts[1].seg_attr1 = 0x92 | (dpl << 5);            // 1001 0010
-        // proc->ldts[1].seg_attr1 = 0xb2;
-//proc->ldts[1].seg_base_below = base & 0xFFFF;
-//proc->ldts[1].seg_base_middle = (base >> 16) & 0xFF;
+        proc->ldts[1].seg_attr1 = 0x92 | (dpl << 5); // 1001 0010
+                                                     // proc->ldts[1].seg_attr1 = 0xb2;
+        //proc->ldts[1].seg_base_below = base & 0xFFFF;
+        //proc->ldts[1].seg_base_middle = (base >> 16) & 0xFF;
 
-//proc->ldts[1].seg_base_high = (unsigned char) ((base >> 24) & 0xFF);
-//}else{
-if(strcmp(proc->name, "INIT") == 0){
-//	dis_pos = 12000 - 128 + 10 + 320;
-//	disp_str_colour("enter INIT", 0x0C);
-	int init_image_size = (0x1000 + 0x020000 + 1);
-	//int cs_attribute = 0x8000 | 0x4000 | 0x98 | (3 <<  5);
-	int cs_attribute = 0xcfa;//0x8000 | 0x4000 | 0x98 | (3 <<  5);
-	InitDescriptor(&(proc_table[i].ldts[0]), 0, (init_image_size-1) >> 12, cs_attribute);
-//        proc->ldts[0].seg_attr1 = 0x9a | (dpl << 5);                // 1001	1010
-////
-	int ds_attribute = 0xcf2;//0x8000 | 0x4000 | 0x92 | (3 << 5);
-        InitDescriptor(&(proc_table[i].ldts[1]), 0,  (init_image_size-1) >> 12, ds_attribute);
-//        proc->ldts[1].seg_attr1 = 0x92 | (dpl << 5);            // 1001 0010
+        //proc->ldts[1].seg_base_high = (unsigned char) ((base >> 24) & 0xFF);
+        //}else{
+        if (strcmp(proc->name, "INIT") == 0)
+        {
+            //	dis_pos = 12000 - 128 + 10 + 320;
+            //	disp_str_colour("enter INIT", 0x0C);
+            int init_image_size = (0x1000 + 0x020000 + 1);
+            //int cs_attribute = 0x8000 | 0x4000 | 0x98 | (3 <<  5);
+            int cs_attribute = 0xcfa; //0x8000 | 0x4000 | 0x98 | (3 <<  5);
+            InitDescriptor(&(proc_table[i].ldts[0]), 0, (init_image_size - 1) >> 12, cs_attribute);
+            //        proc->ldts[0].seg_attr1 = 0x9a | (dpl << 5);                // 1001	1010
+            ////
+            int ds_attribute = 0xcf2; //0x8000 | 0x4000 | 0x92 | (3 << 5);
+            InitDescriptor(&(proc_table[i].ldts[1]), 0, (init_image_size - 1) >> 12, ds_attribute);
+            //        proc->ldts[1].seg_attr1 = 0x92 | (dpl << 5);            // 1001 0010
 
-//	proc->ldts[0].seg_limit_below = init_image_size & 0xFFFF;
-//	proc->ldts[0].seg_limit_high_and_attr2 = ((proc->ldts[0].seg_limit_high_and_attr2) & 0xF0) |(init_image_size >> 16);
-//	proc->ldts[1].seg_limit_below = init_image_size & 0xFFFF;
-//	proc->ldts[1].seg_limit_high_and_attr2 = ((proc->ldts[1].seg_limit_high_and_attr2) & 0xF0)|(init_image_size >> 16);
-}
+            //	proc->ldts[0].seg_limit_below = init_image_size & 0xFFFF;
+            //	proc->ldts[0].seg_limit_high_and_attr2 = ((proc->ldts[0].seg_limit_high_and_attr2) & 0xF0) |(init_image_size >> 16);
+            //	proc->ldts[1].seg_limit_below = init_image_size & 0xFFFF;
+            //	proc->ldts[1].seg_limit_high_and_attr2 = ((proc->ldts[1].seg_limit_high_and_attr2) & 0xF0)|(init_image_size >> 16);
+        }
         // 初始化进程表的段寄存器
         // 我又看不懂当初写的代码了。
         // 一定要写非常详细的注释。
@@ -374,7 +399,7 @@ if(strcmp(proc->name, "INIT") == 0){
         proc->s_reg.fs = ds;
         proc->s_reg.es = ds;
         //proc->s_reg.ss = 0x0D;	// 000 1101
-        proc->s_reg.ss = ds;    // 000 1100
+        proc->s_reg.ss = ds; // 000 1100
         // 需要修改gs的TI和RPL
         // proc->s_reg.gs = GS_SELECTOR;
         // proc->s_reg.gs = GS_SELECTOR | (0x101);
@@ -387,12 +412,12 @@ if(strcmp(proc->name, "INIT") == 0){
         // 初始化进程表的通用寄存器
         // proc->s_reg.eip = (int)TestA;
         //proc->s_reg.eip = (int)task_table.func_name;
-        proc->s_reg.eip = (int) task->func_name;
+        proc->s_reg.eip = (int)task->func_name;
         // proc->s_reg.eip = TestA;
 
         //proc->s_reg.esp = (int)(proc_stack + 128 * i);
         // proc->s_reg.esp = (int)(proc_stack + 128 * (i+1));
-        proc->s_reg.esp = (int) (p_task_stack);
+        proc->s_reg.esp = (int)(p_task_stack);
         p_task_stack -= DEFAULT_STACK_SIZE;
         // proc->s_reg.esp = proc_stack + 128;
         // 抄的于上神的。需要自己弄清楚。我已经理解了。
@@ -401,13 +426,12 @@ if(strcmp(proc->name, "INIT") == 0){
         //proc->s_reg.eflags = 0x1202;	// 0001 0010 0000 0010
         proc->s_reg.eflags = eflags;
 
-
-	proc->has_int_msg = 0;
-	proc->q_sending = 0;
-	proc->q_next = 0;
-	proc->p_receive_from = NO_TASK;
-	proc->p_send_to = NO_TASK;
-	proc->p_msg = 0;
+        proc->has_int_msg = 0;
+        proc->q_sending = 0;
+        proc->q_next = 0;
+        proc->p_receive_from = NO_TASK;
+        proc->p_send_to = NO_TASK;
+        proc->p_msg = 0;
 
         // ipc start
         //proc->header = {-1, NULL};
@@ -426,7 +450,6 @@ if(strcmp(proc->name, "INIT") == 0){
     //proc_ready_table = &proc_table[2];
     proc_ready_table = proc_table;
 
-
     // 键盘
     Memset(keyboard_buffer.buf, 0, sizeof(keyboard_buffer.buf));
     keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
@@ -435,7 +458,8 @@ if(strcmp(proc->name, "INIT") == 0){
     //init_keyboard_handler();
     dis_pos = 0;
     // 清屏
-    for (int i = 0; i < 80 * 25 * 2; i++) {
+    for (int i = 0; i < 80 * 25 * 2; i++)
+    {
         disp_str(" ");
     }
     dis_pos = 0;
@@ -443,7 +467,9 @@ if(strcmp(proc->name, "INIT") == 0){
     init_keyboard_handler();
     restart();
 
-    while (1) {}
+    while (1)
+    {
+    }
 }
 
 #define A_PRINT_NUM 3
@@ -451,93 +477,109 @@ if(strcmp(proc->name, "INIT") == 0){
 #define C_PRINT_NUM 3
 
 // 测试文件系统
-void TestFS() {
-	Printf("TestA is running\n");
-	char filename[5] = "AC";
-	char filename2[5] = "AB";
-	int flag = 1;
-	while(1){
-	if(flag == 1){
-	int fd = open(filename, O_CREAT);
-	Printf("fd = %x\n", fd);
-	flag = 0;
-	char buf[20] = "cg:hello,world!";
-	write(fd, buf, Strlen(buf));
-	char buf2[20];
-	int k = read(fd, buf2, 18);
-	Printf("buf2 = %s\n", buf2);
-	delay(10);
-	int fd2 = open(filename2, O_CREAT);
-	Printf("fd2 = %x\n", fd2);
-	flag = 0;
-	char buf3[20] = "cg:how are you?";
-	write(fd2, buf3, Strlen(buf2));
-	char buf4[20];
-	int k2 = read(fd2, buf4, 18);
-	Printf("buf4 = %s\n", buf4);
-	delay(10);
-	}
-	}
+void TestFS()
+{
+    Printf("TestA is running\n");
+    char filename[5] = "AC";
+    char filename2[5] = "AB";
+    int flag = 1;
+    while (1)
+    {
+        if (flag == 1)
+        {
+            int fd = open(filename, O_CREAT);
+            Printf("fd = %x\n", fd);
+            flag = 0;
+            char buf[20] = "cg:hello,world!";
+            write(fd, buf, Strlen(buf));
+            char buf2[20];
+            int k = read(fd, buf2, 18);
+            Printf("buf2 = %s\n", buf2);
+            delay(10);
+            int fd2 = open(filename2, O_CREAT);
+            Printf("fd2 = %x\n", fd2);
+            flag = 0;
+            char buf3[20] = "cg:how are you?";
+            write(fd2, buf3, Strlen(buf2));
+            char buf4[20];
+            int k2 = read(fd2, buf4, 18);
+            Printf("buf4 = %s\n", buf4);
+            delay(10);
+        }
+    }
 }
 
 void INIT()
 {
-//	Printf("Init is running\n");
-//	while(1){}
-			int pid = fork();
-		
-			if(pid > 0){
-				dis_pos += 960;
-				Printf("Parent is running\n");
-				Printf("pid = %x\n", pid);
-	dis_pos = 12000 - 128 + 10 + 320 + 320;
-	//dis_pos += 160;
-	disp_str_colour("Parent:", 0x0C);
-	disp_int(pid);
-				spin("parent\n");
-			}else{			//	spin("child");
-			
-				dis_pos += 960 + 18 * 160;
-				Printf("Child is running\n");
-				Printf("pid = %x\n", pid);
-	dis_pos = 12000 - 128 + 10 + 320;
-	//dis_pos += 160;
-	disp_str_colour("child222:", 0x0C);
-	disp_int(pid);
-				spin("child\n");
-			}
-	//		}else{
-	//			Printf("A child pid = %x\n", pid);
-	//			Printf("Parent is running\n");
-	//			while(1){}
-	//			spin("parent");
-	//		}
+    //	Printf("Init is running\n");
+    //	while(1){}
+    int pid = fork();
+
+    if (pid > 0)
+    {
+        dis_pos += 960;
+        Printf("Parent is running\n");
+        Printf("pid = %x\n", pid);
+        dis_pos = 12000 - 128 + 10 + 320 + 320;
+        //dis_pos += 160;
+        disp_str_colour("Parent:", 0x0C);
+        disp_int(pid);
+        spin("parent\n");
+    }
+    else
+    { //	spin("child");
+
+        dis_pos += 960 + 18 * 160;
+        Printf("Child is running\n");
+        Printf("pid = %x\n", pid);
+        dis_pos = 12000 - 128 + 10 + 320;
+        //dis_pos += 160;
+        disp_str_colour("child222:", 0x0C);
+        disp_int(pid);
+        spin("child\n");
+    }
+    //		}else{
+    //			Printf("A child pid = %x\n", pid);
+    //			Printf("Parent is running\n");
+    //			while(1){}
+    //			spin("parent");
+    //		}
 }
 
-void TestA() {
-	Printf("TestA is running\n");
-	while(1){}
-	//TestFS();
-//	TestFork();
+void TestA()
+{
+    Printf("TestA is running\n");
+    while (1)
+    {
+    }
+    //TestFS();
+    //	TestFork();
 }
 
-void delay(int time) {
-    for (int i = 0; i < time; i++) {
-        for (int j = 0; j < 10; j++) {
-            for (int k = 0; k < 1000; k++) {
+void delay(int time)
+{
+    for (int i = 0; i < time; i++)
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            for (int k = 0; k < 1000; k++)
+            {
             }
         }
     }
 }
 
-void TestB() {
+void TestB()
+{
     //Printf("<b ticks:%x\n>", get_ticks());
     // select_console(1);
     unsigned int i = 0;
-    while (1) {
+    while (1)
+    {
         //select_console(1);
         //Printf("<b ticks:%x\n>", get_ticks());
-        if (i < B_PRINT_NUM) {
+        if (i < B_PRINT_NUM)
+        {
             //int t_ipc = get_ticks_ipc();
             //int t_ipc = get_ticks();
             //Printf("%x", t_ipc);
@@ -560,13 +602,16 @@ void TestB() {
     }
 }
 
-void TestC() {
+void TestC()
+{
     //Printf("<c ticks:%x\n>", get_ticks());
     // select_console(2);
     unsigned int i = 0;
-    while (1) {
+    while (1)
+    {
         //select_console(2);
-        if (i < C_PRINT_NUM) {
+        if (i < C_PRINT_NUM)
+        {
             //Printf("i=%d\n", 5);
             //int t_ipc = get_ticks_ipc();
             //int t_ipc = get_ticks();
@@ -592,32 +637,40 @@ void TestC() {
     }
 }
 
-int sys_get_ticks() {
+int sys_get_ticks()
+{
     //disp_str("@@");
 
     return ticks;
 }
 
-void sys_write(char *buf, int len, Proc *proc) {
+void sys_write(char *buf, int len, Proc *proc)
+{
     //TTY *tty = &tty_table[proc - proc_table];
     TTY *tty = &tty_table[proc->tty_index];
     int i = len;
     char *p = buf;
-    while (i > 0) {
+    while (i > 0)
+    {
         out_char(tty, *p);
         p++;
         i--;
     }
 }
 
-void milli_delay(unsigned int milli_sec) {
+void milli_delay(unsigned int milli_sec)
+{
     int t = get_ticks_ipc();
 
-    while (((get_ticks_ipc() - t) / 100 * 1000) < milli_sec) {}
+    while (((get_ticks_ipc() - t) / 100 * 1000) < milli_sec)
+    {
+    }
 }
 
-void TaskSys() {
-    while (1) {
+void TaskSys()
+{
+    while (1)
+    {
         //Message *msg;
         //Printf("%c--", 'S');
         //Printf("flag:%x--,", proc_table[1].p_flag);
@@ -628,31 +681,34 @@ void TaskSys() {
         Message msg;
         Memset(&msg, 0, sizeof(Message));
         int ret = receive_msg(&msg, ANY);
-        if (ret != 0) {
+        if (ret != 0)
+        {
             return;
         }
         //int type = msg.type;
         int type = msg.TYPE;
         int source = msg.source;
-        switch (type) {
-            case TICKS_TASK_SYS_TYPE:
-                msg.val = ticks;
-                ret = send_msg(&msg, source);
-                break;
-            default:
+        switch (type)
+        {
+        case TICKS_TASK_SYS_TYPE:
+            msg.val = ticks;
+            ret = send_msg(&msg, source);
+            break;
+        default:
 
-                break;
+            break;
         }
     }
 }
 
 //
 // 只支持%x
-void Printf(char *fmt, ...) {
+void Printf(char *fmt, ...)
+{
     char buf[256];
     Memset(buf, 0, 256);
     // 理解这句，耗费了大量时间。
-    char *var_list = (char *) ((char *) &fmt + 4);
+    char *var_list = (char *)((char *)&fmt + 4);
     int len = vsprintf(buf, fmt, var_list);
     //char str[2] = {'A', 0};
     //len = 2;
@@ -660,7 +716,8 @@ void Printf(char *fmt, ...) {
     return;
 }
 
-int vsprintf(char *buf, char *fmt, char *var_list) {
+int vsprintf(char *buf, char *fmt, char *var_list)
+{
     // 指向buf
     char *p;
     // 必须作为全局变量。如果作为局部变量，然后初始化，会覆盖其他数据。
@@ -681,53 +738,57 @@ int vsprintf(char *buf, char *fmt, char *var_list) {
     //Memset(tmp, 0, 256);
     char *next_arg = var_list;
     int len2 = 0;
-    for (p = buf; *fmt; fmt++) {
-        if (*fmt != '%') {
+    for (p = buf; *fmt; fmt++)
+    {
+        if (*fmt != '%')
+        {
             *p++ = *fmt;
             //p++;
             continue;
         }
         // 跳过%
         fmt++;
-        switch (*fmt) {
-            //case 'd':;
-            case 'd': {
-                int m = *(int *) next_arg;
-                itoa(m, &str, 10);
-                //i2a(m, 10, &str);
-                //Strcpy(p, str);
-                Strcpy(p, inner_buf);
-                next_arg += 4;
-                // len2 = Strlen(str);
-                len2 = Strlen(inner_buf);
-                p += len2;
-                break;
-            }
-            case 'x':
-                atoi(tmp, *(int *) next_arg);
-                //Strcpy(buf, tmp);
-                Strcpy(p, tmp);
-                next_arg += 4;
-                len2 = Strlen(tmp);
-                p += len2;//Strlen(tmp);
-                break;
-            case 's':
-                //char *str = *(char **)next_arg;
-                Strcpy(p, *(char **) next_arg);
-                len2 = Strlen(*(char **) next_arg);
-                next_arg += 4;
-                //len2 = 6;//Strlen(*(char **)next_arg);
-                p += len2;//Strlen(tmp);
-                break;
-            case 'c':
-                //char c = *(char *)next_arg;
-                *p = *(char *) next_arg;
-                next_arg += 4;
-                len2 = 1;
-                p += len2;//Strlen(tmp);
-                break;
-            default:
-                break;
+        switch (*fmt)
+        {
+        //case 'd':;
+        case 'd':
+        {
+            int m = *(int *)next_arg;
+            itoa(m, &str, 10);
+            //i2a(m, 10, &str);
+            //Strcpy(p, str);
+            Strcpy(p, inner_buf);
+            next_arg += 4;
+            // len2 = Strlen(str);
+            len2 = Strlen(inner_buf);
+            p += len2;
+            break;
+        }
+        case 'x':
+            atoi(tmp, *(int *)next_arg);
+            //Strcpy(buf, tmp);
+            Strcpy(p, tmp);
+            next_arg += 4;
+            len2 = Strlen(tmp);
+            p += len2; //Strlen(tmp);
+            break;
+        case 's':
+            //char *str = *(char **)next_arg;
+            Strcpy(p, *(char **)next_arg);
+            len2 = Strlen(*(char **)next_arg);
+            next_arg += 4;
+            //len2 = 6;//Strlen(*(char **)next_arg);
+            p += len2; //Strlen(tmp);
+            break;
+        case 'c':
+            //char c = *(char *)next_arg;
+            *p = *(char *)next_arg;
+            next_arg += 4;
+            len2 = 1;
+            p += len2; //Strlen(tmp);
+            break;
+        default:
+            break;
         }
     }
 
@@ -735,12 +796,11 @@ int vsprintf(char *buf, char *fmt, char *var_list) {
 }
 // printf end
 
-
-
 // debug start
-void printx(char *fmt, ...) {
+void printx(char *fmt, ...)
+{
     char buf[256];
-    char *var_list = (char *) ((char *) &fmt + 4);
+    char *var_list = (char *)((char *)&fmt + 4);
     int len = vsprintf(buf, fmt, var_list);
     write_debug(buf, len);
 }
@@ -754,23 +814,27 @@ void sys_printx(char *error_msg, int len, Proc *proc)
     int base;
     //Proc *proc = pid2proc(caller_pid);
 
-    if (k_reenter == 0) {
+    if (k_reenter == 0)
+    {
         int ds = proc->s_reg.ds;
         base = Seg2PhyAddrLDT(ds, proc);
-    } else if (k_reenter > 0) {
+    }
+    else if (k_reenter > 0)
+    {
         base = Seg2PhyAddr(DS_SELECTOR);
     }
     // line_addr = base + error_msg;
     // line_addr = base + (int *)error_msg;
-    line_addr = base + (int) error_msg;
-
+    line_addr = base + (int)error_msg;
 
     // 打印字符串
     TTY *tty = &tty_table[proc->tty_index];
-    char *p = (char *) line_addr;
+    char *p = (char *)line_addr;
     char magic = *p;
-    while (len > 0) {
-        if (*p == ASSERT_MAGIC || *p == PANIC_MAGIC) {
+    while (len > 0)
+    {
+        if (*p == ASSERT_MAGIC || *p == PANIC_MAGIC)
+        {
             p++;
             continue;
         }
@@ -788,16 +852,20 @@ void sys_printx(char *error_msg, int len, Proc *proc)
     //	p++;
     //}
 
-
     //char magic = error_msg[0];
-    if (magic == ASSERT_MAGIC) {
-        if (k_reenter > 0) {
+    if (magic == ASSERT_MAGIC)
+    {
+        if (k_reenter > 0)
+        {
             disable_int();
             __asm__("hlt");
-        } else {
-
         }
-    } else if (magic == PANIC_MAGIC) {
+        else
+        {
+        }
+    }
+    else if (magic == PANIC_MAGIC)
+    {
         disable_int();
         __asm__("hlt");
     }
@@ -805,42 +873,50 @@ void sys_printx(char *error_msg, int len, Proc *proc)
     return;
 }
 
-void spin(char *error_msg) {
-    while (1) {}
+void spin(char *error_msg)
+{
+    while (1)
+    {
+    }
 }
 
-void panic(char *error_msg) {
+void panic(char *error_msg)
+{
     printx("%c%s\n", PANIC_MAGIC, error_msg);
     //Printf("%c%s\n", PANIC_MAGIC, error_msg);
 }
 
-void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line) {
+void assertion_failure(char *exp, char *filename, char *base_filename, unsigned int line)
+{
     // todo %d还未实现或者有问题。
     printx("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
-            //Printf("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
+           //Printf("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
            ASSERT_MAGIC, exp, filename, base_filename, line);
     spin("Stop Here!\n");
     return;
 }
 
-
 // debug end
 
-
 // ipc start
-int dead_lock(int src, int dest) {
+int dead_lock(int src, int dest)
+{
     Proc *src_proc = pid2proc(src);
     Proc *dest_proc = pid2proc(dest);
-    while (1) {
+    while (1)
+    {
         // Proc *src_proc = pid2proc(src);
         // Proc *dest_proc = pid2proc(dest);
-        if (dest_proc->p_flag == SENDING) {
-            if (dest_proc->p_send_to == src) {
+        if (dest_proc->p_flag == SENDING)
+        {
+            if (dest_proc->p_send_to == src)
+            {
                 // panic("dead lock!\n");
                 //Printf("%x---->%x---->", src, dest);
                 // 打印死锁环
                 Proc *p = dest_proc;
-                do {
+                do
+                {
                     // Printf("%x---->%x---->", proc2pid(p), p->p_send_to);
                     p = pid2proc(p->p_send_to);
                 } while (p->pid != src);
@@ -849,7 +925,9 @@ int dead_lock(int src, int dest) {
                 return 1;
             }
             dest_proc = pid2proc(dest_proc->p_send_to);
-        } else {
+        }
+        else
+        {
             break;
         }
     }
@@ -858,17 +936,19 @@ int dead_lock(int src, int dest) {
 }
 
 // send_msg 通过sys_call调用
-int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
+int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
+{
     Proc *receiver = pid2proc(receiver_pid);
     int sender_pid = proc2pid(sender);
     msg->source = sender_pid;
     // 死锁检测
-    if (dead_lock(sender_pid, receiver_pid) == 1) {
+    if (dead_lock(sender_pid, receiver_pid) == 1)
+    {
         panic("dead lock\n");
     }
 
-    if (receiver->p_flag == RECEIVING && (receiver->p_receive_from == sender_pid
-                                          || receiver->p_receive_from == ANY)) {
+    if (receiver->p_flag == RECEIVING && (receiver->p_receive_from == sender_pid || receiver->p_receive_from == ANY))
+    {
         // 计算msg的线性地址
         int ds = sender->s_reg.ds;
         int base = Seg2PhyAddrLDT(ds, sender);
@@ -879,11 +959,11 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
         int base2 = Seg2PhyAddrLDT(ds2, receiver);
         int msg_line_addr2 = base2 + receiver->p_msg;
         // 从sender中把消息复制到receiver
-    //    phycopy(receiver->p_msg, msg_line_addr, msg_size);
+        //    phycopy(receiver->p_msg, msg_line_addr, msg_size);
         phycopy(msg_line_addr2, msg_line_addr, msg_size);
         // 重置sender
-//        sender->p_msg = 0;
-//        sender->p_send_to = 0;
+        //        sender->p_msg = 0;
+        //        sender->p_send_to = 0;
         // 重置receiver
         receiver->p_msg = 0;
         receiver->p_flag = RUNNING;
@@ -901,20 +981,25 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
         assert(receiver->p_flag == 0);
         assert(receiver->p_receive_from == NO_TASK);
         //assert(receiver->p_send_to == NO_TASK);
-
-    } else {
+    }
+    else
+    {
         // 思路：
         // 1. 如何目标进程没有准备好接收消息，把消息加入目标进程的消息队列。
         // 2. 如果是目标进程的消息队列的第一个进程是空，把本进程设置成消息队列的第一个进程。
         // 3. 如果目标进程的消息队列的第一个进程不是空，把本进程放到消息队列的末尾。
         Proc *pre = 0;
         Proc *p = receiver;
-        if (receiver->q_sending == 0) {
+        if (receiver->q_sending == 0)
+        {
             receiver->q_sending = sender;
             sender->q_next = 0;
-        } else {
+        }
+        else
+        {
             Proc *p = receiver->q_sending;
-            while (p) {
+            while (p)
+            {
                 pre = p;
                 p = p->q_next;
             }
@@ -939,7 +1024,8 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender) {
 }
 
 // receive_msg 通过sys_call调用
-int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
+int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
+{
     int copy_ok = 0;
     Proc *p_from;
     Proc *pre;
@@ -947,32 +1033,34 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
     Proc *sender = pid2proc(sender_pid);
     int receiver_pid = proc2pid(receiver);
 
-//	dis_pos = (1024*12 + 0);
-//	dis_pos = (1024*12 + 0);
-//	dis_pos = 12000 - 128 + 10 + 320;
-//	//dis_pos += 160;
-//	disp_str_colour("sender0:", 0x0C);
-//	disp_int(sender_pid);
-//	disp_str("#");
-//	disp_str_colour("pid:", 0x0B);
-//	disp_int(proc_ready_table->pid);
-//	disp_str("#");
-	
-//	disp_str_colour("sender:", 0x0B);
-//	dis_pos += Strlen("sender:");
-//	disp_int(sender_pid);
-//	
-//	disp_str_colour("receiver:", 0x0B);
-//	dis_pos += Strlen("receiver:");
-//	disp_int(receiver_pid);
-    if (DEBUG == 1) {
+    //	dis_pos = (1024*12 + 0);
+    //	dis_pos = (1024*12 + 0);
+    //	dis_pos = 12000 - 128 + 10 + 320;
+    //	//dis_pos += 160;
+    //	disp_str_colour("sender0:", 0x0C);
+    //	disp_int(sender_pid);
+    //	disp_str("#");
+    //	disp_str_colour("pid:", 0x0B);
+    //	disp_int(proc_ready_table->pid);
+    //	disp_str("#");
+
+    //	disp_str_colour("sender:", 0x0B);
+    //	dis_pos += Strlen("sender:");
+    //	disp_int(sender_pid);
+    //
+    //	disp_str_colour("receiver:", 0x0B);
+    //	dis_pos += Strlen("receiver:");
+    //	disp_int(receiver_pid);
+    if (DEBUG == 1)
+    {
         Printf("sender = %x, receiver = %x\n", sender_pid, receiver_pid);
 
         assert((sender_pid == 1) || (sender_pid == 2) || (sender_pid == 3) || (sender_pid == 15));
         assert((receiver_pid == 1) || (receiver_pid == 2) || (receiver_pid == 3) || (receiver_pid == 15));
     }
 
-    if (receiver->has_int_msg && (sender_pid == ANY || sender_pid == INTERRUPT)) {
+    if (receiver->has_int_msg && (sender_pid == ANY || sender_pid == INTERRUPT))
+    {
 
         Message m;
         Memset(&m, 0, sizeof(Message));
@@ -992,36 +1080,41 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         return 0;
     }
 
-
     // 主要思路：
     // 1. 如果信息来源是ANY，从本进程的消息队列中取出一个消息进行处理。
     // 2. 如果消息来源不是ANY，进入下面的流程。
     // 2.1. 进程pid合法 && 消息来源的状态是SENDING && 消息来源的发送对象是本进程。
-    if (sender_pid == ANY) {
-        if (receiver->q_sending) {
-	// Printf("sending id:%x\n", receiver->q_sending->pid);
-//	dis_pos = 12000 - 128 + 10 + 160;
-//	disp_str_colour("send-id:", 0x0C);
-//	disp_int(receiver->q_sending->pid);
-//	disp_str("#");
-//	disp_str_colour("receiver-id:", 0x0C);
-//	disp_int(receiver->pid);
+    if (sender_pid == ANY)
+    {
+        if (receiver->q_sending)
+        {
+            // Printf("sending id:%x\n", receiver->q_sending->pid);
+            //	dis_pos = 12000 - 128 + 10 + 160;
+            //	disp_str_colour("send-id:", 0x0C);
+            //	disp_int(receiver->q_sending->pid);
+            //	disp_str("#");
+            //	disp_str_colour("receiver-id:", 0x0C);
+            //	disp_int(receiver->pid);
             p_from = receiver->q_sending;
-//	disp_str_colour("rpfrom-id:", 0x0C);
-//	disp_int(p_from->pid);
-//	disp_str("#");
-//	disp_str_colour("type:", 0x0C);
-//	disp_int(p_from->pid);
-//	disp_str("#");
+            //	disp_str_colour("rpfrom-id:", 0x0C);
+            //	disp_int(p_from->pid);
+            //	disp_str("#");
+            //	disp_str_colour("type:", 0x0C);
+            //	disp_int(p_from->pid);
+            //	disp_str("#");
             copy_ok = 1;
         }
-    } else if (0 <= sender_pid && sender_pid < USER_PROC_NUM + TASK_PROC_NUM) {
-        if (sender->p_flag == SENDING && (sender->p_send_to == ANY
-                                          || sender->p_send_to == receiver_pid)) {
+    }
+    else if (0 <= sender_pid && sender_pid < USER_PROC_NUM + TASK_PROC_NUM)
+    {
+        if (sender->p_flag == SENDING && (sender->p_send_to == ANY || sender->p_send_to == receiver_pid))
+        {
             p_from = receiver->q_sending;
-            while (p_from) {
+            while (p_from)
+            {
                 pre = p_from;
-                if (p_from->pid == sender_pid) {
+                if (p_from->pid == sender_pid)
+                {
                     copy_ok = 1;
                     break;
                 }
@@ -1030,8 +1123,8 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         }
     }
 
-
-    if (copy_ok == 1) {
+    if (copy_ok == 1)
+    {
         Proc *p_from_proc = p_from;
         // 计算msg的线性地址
         int ds = receiver->s_reg.ds;
@@ -1039,39 +1132,42 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         void *msg_line_addr = (void *)(base + msg);
         int msg_size = sizeof(Message);
 
-	
         int ds2 = receiver->s_reg.ds;
         int base2 = Seg2PhyAddrLDT(ds2, p_from_proc);
         void *msg_line_addr2 = (void *)(base2 + p_from_proc->p_msg);
 
         // 从receiver中把消息复制到sender
-       // phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);
+        // phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);
         phycopy(msg_line_addr, msg_line_addr2, msg_size);
-	Message *m = (Message *)msg_line_addr;
-//	dis_pos = 12000 - 128 + 10 + 320;
-//	disp_str_colour("current-id:", 0x0C);
-//	disp_int(proc_ready_table->pid);
-//	disp_str("#");
-//	disp_str_colour("from-id:", 0x0C);
-//	disp_int(p_from_proc->pid);
-//	assert(p_from_proc->p_msg->TYPE != 0);
+        Message *m = (Message *)msg_line_addr;
+        //	dis_pos = 12000 - 128 + 10 + 320;
+        //	disp_str_colour("current-id:", 0x0C);
+        //	disp_int(proc_ready_table->pid);
+        //	disp_str("#");
+        //	disp_str_colour("from-id:", 0x0C);
+        //	disp_int(p_from_proc->pid);
+        //	assert(p_from_proc->p_msg->TYPE != 0);
 
-	if(sender_pid == 4){
-		assert(msg->TYPE == OPEN);
-	}
+        if (sender_pid == 4)
+        {
+            assert(msg->TYPE == OPEN);
+        }
 
         // 移除已经处理过的消息。
-        if (p_from == receiver->q_sending) {
+        if (p_from == receiver->q_sending)
+        {
             receiver->q_sending = p_from->q_next;
             p_from->q_next = 0;
-        } else {
+        }
+        else
+        {
             pre->q_next = p_from->q_next;
             p_from->q_next = 0;
         }
-//	dis_pos = (dis_pos / 160 + 1) * 160;
-//	disp_str_colour("sender33:", 0x0C);
-//	disp_int(sender_pid);
-	//dis_pos -= Strlen("sender33:");
+        //	dis_pos = (dis_pos / 160 + 1) * 160;
+        //	disp_str_colour("sender33:", 0x0C);
+        //	disp_int(sender_pid);
+        //dis_pos -= Strlen("sender33:");
 
         // 重置sender
         p_from_proc->p_msg = 0;
@@ -1095,57 +1191,61 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
         assert(receiver->p_flag == 0);
         assert(receiver->p_receive_from == NO_TASK);
         assert(receiver->p_send_to == NO_TASK);
-
-    } else {
-//	dis_pos = (dis_pos / 160 + 1) * 160;
-//	disp_str_colour("sender3:", 0x0C);
-//	disp_int(sender_pid);
-//	disp_str("#");
+    }
+    else
+    {
+        //	dis_pos = (dis_pos / 160 + 1) * 160;
+        //	disp_str_colour("sender3:", 0x0C);
+        //	disp_int(sender_pid);
+        //	disp_str("#");
         receiver->p_flag = RECEIVING;
         receiver->p_msg = msg;
-       // receiver->p_msg = 0;
+        // receiver->p_msg = 0;
 
-        if (sender_pid == ANY) {
+        if (sender_pid == ANY)
+        {
             receiver->p_receive_from = ANY;
-        } else {
+        }
+        else
+        {
             receiver->p_receive_from = sender_pid;
         }
-//	sender_pid = 3;
+        //	sender_pid = 3;
 
-//	dis_pos = (80 * 80 + 0)*2; 
-//	dis_pos = 1024 * (10 +1) + 160;
+        //	dis_pos = (80 * 80 + 0)*2;
+        //	dis_pos = 1024 * (10 +1) + 160;
 
-//	dis_pos = (1024*12 + 0);
-	dis_pos = (dis_pos / 160 + 1) * 160;
-//	disp_str_colour("sender4:", 0x0C);
-//	disp_int(sender_pid);
-//	disp_str("#");
-//	disp_str_colour("type:", 0x0B);
-//	disp_int(msg->TYPE);
-//	disp_str("#");
-//	disp_str_colour("copy_ok:", 0x0B);
-//	disp_int(copy_ok);
-//	disp_str("#");
-//	disp_str_colour("type2:", 0x0B);
-//	disp_int(msg->TYPE);
-//	disp_str("#");
-//	
-//	dis_pos = (dis_pos / 160 + 1) * 160;
-//	disp_str_colour("receiver2:", 0x0B);
-//	//dis_pos += Strlen("receiver2:");
-//	disp_int(receiver_pid);
+        //	dis_pos = (1024*12 + 0);
+        dis_pos = (dis_pos / 160 + 1) * 160;
+        //	disp_str_colour("sender4:", 0x0C);
+        //	disp_int(sender_pid);
+        //	disp_str("#");
+        //	disp_str_colour("type:", 0x0B);
+        //	disp_int(msg->TYPE);
+        //	disp_str("#");
+        //	disp_str_colour("copy_ok:", 0x0B);
+        //	disp_int(copy_ok);
+        //	disp_str("#");
+        //	disp_str_colour("type2:", 0x0B);
+        //	disp_int(msg->TYPE);
+        //	disp_str("#");
+        //
+        //	dis_pos = (dis_pos / 160 + 1) * 160;
+        //	disp_str_colour("receiver2:", 0x0B);
+        //	//dis_pos += Strlen("receiver2:");
+        //	disp_int(receiver_pid);
         // 调试函数
-//        assert(sender_pid == TASK_TTY || sender_pid == TASK_SYS || sender_pid == TASK_HD
-//                 || sender_pid == TASK_FS || sender_pid == ANY || sender_pid == INTERRUPT
-//                 || sender_pid == PROC_A || sender_pid == TASK_MM || sender_pid == INIT_PID);
-	
-//	dis_pos = (dis_pos / 160 + 1) * 160;
-//	disp_str_colour("receiver flag:", 0x0C);
-//	disp_int(receiver->p_flag);
+        //        assert(sender_pid == TASK_TTY || sender_pid == TASK_SYS || sender_pid == TASK_HD
+        //                 || sender_pid == TASK_FS || sender_pid == ANY || sender_pid == INTERRUPT
+        //                 || sender_pid == PROC_A || sender_pid == TASK_MM || sender_pid == INIT_PID);
+
+        //	dis_pos = (dis_pos / 160 + 1) * 160;
+        //	disp_str_colour("receiver flag:", 0x0C);
+        //	disp_int(receiver->p_flag);
         //assert(receiver->p_flag == RECEIVING || receiver->p_flag == RUNNING);
         assert(receiver->p_flag == RECEIVING);
         //assert(receiver->p_msg == 0);
-	assert(receiver->p_receive_from == sender_pid);
+        assert(receiver->p_receive_from == sender_pid);
 
         block(receiver);
     }
@@ -1167,57 +1267,59 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver) {
 // todo 以后去掉这个函数。
 void disp_str_colour_debug(char *strr)
 {
-
-
 }
 
 // send_rec封装send_msg和receive_msg，直接被外部使用
 // function：选择发送还是接收还是其他;pid，sender或receiver的进程id
-int send_rec(int function, Message *msg, int pid) {
-	
-	// todo 调试
-//	dis_pos = 12000 - 128 + 10 + 320;
-//	//dis_pos += 160;
-//	disp_str_colour("send_rec pid:", 0x0C);
-//	disp_int(pid);
-	
-//	assert(pid == TASK_TTY || pid == TASK_SYS || pid == TASK_HD
-//                 || pid == TASK_FS || pid == ANY || pid == INTERRUPT || pid == PROC_A
-//		 || pid == TASK_MM
-//		);
-	assert(function == SEND || function == RECEIVE || function == BOTH);
+int send_rec(int function, Message *msg, int pid)
+{
+
+    // todo 调试
+    //	dis_pos = 12000 - 128 + 10 + 320;
+    //	//dis_pos += 160;
+    //	disp_str_colour("send_rec pid:", 0x0C);
+    //	disp_int(pid);
+
+    //	assert(pid == TASK_TTY || pid == TASK_SYS || pid == TASK_HD
+    //                 || pid == TASK_FS || pid == ANY || pid == INTERRUPT || pid == PROC_A
+    //		 || pid == TASK_MM
+    //		);
+    assert(function == SEND || function == RECEIVE || function == BOTH);
 
     int ret;
-    switch (function) {
-        case SEND:
-            ret = send_msg(msg, pid);
-            break;
-        case RECEIVE:
-            ret = receive_msg(msg, pid);
-            break;
-        case BOTH:
-            // 两个函数都使用pid，正确吗？
-            // 很费解。在send_msg中，pid是本进程投递消息的目标。
-            // 在receive_msg中，pid是本进程要从哪个进程接收消息。
-            ret = send_msg(msg, pid);    // pid是receiver
-            //while(proc_table[1].p_flag != RUNNING){
+    switch (function)
+    {
+    case SEND:
+        ret = send_msg(msg, pid);
+        break;
+    case RECEIVE:
+        ret = receive_msg(msg, pid);
+        break;
+    case BOTH:
+        // 两个函数都使用pid，正确吗？
+        // 很费解。在send_msg中，pid是本进程投递消息的目标。
+        // 在receive_msg中，pid是本进程要从哪个进程接收消息。
+        ret = send_msg(msg, pid); // pid是receiver
+        //while(proc_table[1].p_flag != RUNNING){
 
-            //}
-            //assert(proc_table[1].p_flag == RUNNING);
-            if (ret == 0) {
-                ret = receive_msg(msg, pid);    // pid是sender
-                // assert(msg->val != 0);
-            }
-            break;
-        default:
-            panic("function is invalid\n");
-            break;
+        //}
+        //assert(proc_table[1].p_flag == RUNNING);
+        if (ret == 0)
+        {
+            ret = receive_msg(msg, pid); // pid是sender
+            // assert(msg->val != 0);
+        }
+        break;
+    default:
+        panic("function is invalid\n");
+        break;
     }
     return 0;
 }
 
 // 阻塞进程
-int block(Proc *proc) {
+int block(Proc *proc)
+{
     // 判断，调试函数
     assert(proc->p_flag != RUNNING);
     schedule_process();
@@ -1225,14 +1327,16 @@ int block(Proc *proc) {
 }
 
 // 解除阻塞
-int unblock(Proc *proc) {
+int unblock(Proc *proc)
+{
     // do nothing
     assert(proc->p_flag == RUNNING);
 
     return 0;
 }
 
-int get_ticks_ipc() {
+int get_ticks_ipc()
+{
     //return ticks;
     Message msg;
     Memset(&msg, 0, sizeof(Message));
@@ -1246,14 +1350,16 @@ int get_ticks_ipc() {
 
 // 把整型数字转成指定进制的字符串
 //void itoa(int value, char *str, int base)
-char *itoa(int value, char **str, int base) {
+char *itoa(int value, char **str, int base)
+{
     int remainder = value % base;
     int queotion = value / base;
     // 这是递归啊，怎么会用while呢？
     //while(queotion > 0){
     //	itoa(queotion, str, base);
     //}
-    if (queotion) {
+    if (queotion)
+    {
         itoa(queotion, str, base);
     }
     // *str++，是这样写吗？没有把握。不是！致命的常规错误，耗费了很长时间。
@@ -1264,10 +1370,12 @@ char *itoa(int value, char **str, int base) {
 }
 // ipc end
 
-char *i2a(int val, int base, char **ps) {
+char *i2a(int val, int base, char **ps)
+{
     int m = val % base;
     int q = val / base;
-    if (q) {
+    if (q)
+    {
         i2a(q, base, ps);
     }
     *(*ps)++ = (m < 10) ? (m + '0') : (m - 10 + 'A');
@@ -1278,7 +1386,8 @@ char *i2a(int val, int base, char **ps) {
     return *ps;
 }
 
-void inform_int(int task_nr) {
+void inform_int(int task_nr)
+{
     Proc *current = pid2proc(task_nr);
     // 思路：
     // 1. 如果目标进程是RECEIVING状态。
@@ -1287,29 +1396,37 @@ void inform_int(int task_nr) {
     // 1.3. 改变目标进程的p_flag。
     // 1.4. 改变目标进程的消息源、消息体等。
     // 2. 如果目标进程不是RECEIVING状态，把该进程的成员has_int_msg设置成1。
-    if (current->p_flag & RECEIVING) {
-        if (current->p_receive_from == INTERRUPT || current->p_receive_from == ANY) {
+    if (current->p_flag & RECEIVING)
+    {
+        if (current->p_receive_from == INTERRUPT || current->p_receive_from == ANY)
+        {
             current->has_int_msg = 0;
             current->p_receive_from = NO_TASK;
             current->p_msg = 0;
             current->p_flag = RUNNING;
             unblock(current);
         }
-    } else {
+    }
+    else
+    {
         current->has_int_msg = 1;
     }
 }
 
-int strcmp(char *str1, char *str2) {
-    if (str1 == 0 || str2 == 0) {
+int strcmp(char *str1, char *str2)
+{
+    if (str1 == 0 || str2 == 0)
+    {
         return (str1 - str2);
     }
 
     char *p1 = str1;
     char *p2 = str2;
 
-    for (; *p1 && *p2; p1++, p2++) {
-        if (*p1 != *p2) {
+    for (; *p1 && *p2; p1++, p2++)
+    {
+        if (*p1 != *p2)
+        {
             break;
         }
     }
