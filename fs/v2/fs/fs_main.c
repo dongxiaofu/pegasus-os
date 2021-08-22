@@ -77,52 +77,55 @@ void do_rdwt(Message *msg);
 // 关闭文件
 int do_close(int fd);
 
-void task_fs() {
+void task_fs()
+{
     Printf("%s\n", "FS is running");
-   init_fs();
-    while (1) {
+    init_fs();
+    while (1)
+    {
         Message msg;
-	Memset(&msg, 0, sizeof(Message));
+        Memset(&msg, 0, sizeof(Message));
         send_rec(RECEIVE, &msg, ANY);
         int type = msg.TYPE;
- int source = msg.source;
-		int fd = msg.FD;
-// 不知道为何会发送来source为0、type为0的消息，不处理吧。
-if(msg.source == 0){
-	continue;
-}
-assert(type == OPEN || type == READ || type == WRITE || type == CLOSE);
+        int source = msg.source;
+        int fd = msg.FD;
+        // 不知道为何会发送来source为0、type为0的消息，不处理吧。
+        if (msg.source == 0)
+        {
+            continue;
+        }
+        assert(type == OPEN || type == READ || type == WRITE || type == CLOSE);
 
         // open
         char *pathname = msg.PATHNAME;
         int oflags = msg.FLAGS;
-	//Printf("source = %x, type = %x\n", msg.source, msg.TYPE); 
+        //Printf("source = %x, type = %x\n", msg.source, msg.TYPE);
         pcaller = &proc_table[source];
 
         Message fs_msg;
-//        fs_msg.type = SYSCALL_RET;
-//        send_rec(SEND, &fs_msg, source);
-//	return;
+        //        fs_msg.type = SYSCALL_RET;
+        //        send_rec(SEND, &fs_msg, source);
+        //	return;
 
-        switch (type) {
-            case OPEN:
-                fs_msg.FD = do_open(pathname, oflags);
-                break;
-            case READ:
-            case WRITE:
-                do_rdwt(&msg);
-                break;
-            case CLOSE:
-	//	int fd = msg.FD;
-                do_close(fd);
-                break;
-            default:
-                panic("FS Unknown message");
-                break;
+        switch (type)
+        {
+        case OPEN:
+            fs_msg.FD = do_open(pathname, oflags);
+            break;
+        case READ:
+        case WRITE:
+            do_rdwt(&msg);
+            break;
+        case CLOSE:
+            //	int fd = msg.FD;
+            do_close(fd);
+            break;
+        default:
+            panic("FS Unknown message");
+            break;
         }
-	
-	assert(source == TASK_TTY || source == TASK_SYS || source == TASK_HD
-		 || source == TASK_FS || source == ANY || source == INTERRUPT || source == PROC_A);
+
+        assert(source == TASK_TTY || source == TASK_SYS || source == TASK_HD || source == TASK_FS || source == ANY || source == INTERRUPT || source == PROC_A);
 
         fs_msg.type = SYSCALL_RET;
         fs_msg.TYPE = SYSCALL_RET;
@@ -130,7 +133,8 @@ assert(type == OPEN || type == READ || type == WRITE || type == CLOSE);
     }
 }
 
-void rd_wt(int pos, int device, char *buf, int len, int type) {
+void rd_wt(int pos, int device, char *buf, int len, int type)
+{
     Message msg;
     Memset(&msg, 0, sizeof(Message));
     msg.TYPE = type;
@@ -138,7 +142,7 @@ void rd_wt(int pos, int device, char *buf, int len, int type) {
     msg.BUF = buf;
     msg.LEN = len;
     msg.POSITION = pos * SECTOR_SIZE;
- //   msg.POSITION = pos;// * SECTOR_SIZE;
+    //   msg.POSITION = pos;// * SECTOR_SIZE;
     // 文件系统的PID
     // msg.source = TASK_FS;
     assert(type == READ || type == WRITE);
@@ -146,24 +150,25 @@ void rd_wt(int pos, int device, char *buf, int len, int type) {
     send_rec(BOTH, &msg, TASK_HD);
 }
 
-void mkfs() {
-//    // fsbuf未定义。神奇！
-//    //Memset(fsbuf, 0, 512);
-//    RD_SECT(ROOT_DEV, 1);
-//    Printf("read over\n");
-//    Memset(fsbuf, 0x0, 512);
-//    WT_SECT(ROOT_DEV, 1);
-//    Memset(fsbuf, 0xFF, 512);
-//    RD_SECT(ROOT_DEV, 1);
-//    Printf("fsbuf = %s\n", fsbuf);
-//    return;
+void mkfs()
+{
+    //    // fsbuf未定义。神奇！
+    //    //Memset(fsbuf, 0, 512);
+    //    RD_SECT(ROOT_DEV, 1);
+    //    Printf("read over\n");
+    //    Memset(fsbuf, 0x0, 512);
+    //    WT_SECT(ROOT_DEV, 1);
+    //    Memset(fsbuf, 0xFF, 512);
+    //    RD_SECT(ROOT_DEV, 1);
+    //    Printf("fsbuf = %s\n", fsbuf);
+    //    return;
     // 写入超级块
 
     // 写入超级块
     RD_SECT(ROOT_DEV, 1);
-    struct super_block *sp = (struct super_block *) fsbuf;
+    struct super_block *sp = (struct super_block *)fsbuf;
     sp->cnt_of_inode_map_sect = 1;
-	sp->nr_sect = CNT_OF_FILE_SECT;
+    sp->nr_sect = CNT_OF_FILE_SECT;
     // 1. 是多少？无头绪。
     // 2. 有条理地思考。
     // 3. 需要记录的扇区有多少个？
@@ -175,9 +180,9 @@ void mkfs() {
     // 6. 每个文件占用多少个扇区？
     // 7. cnt_of_sector_map_sect = 每个文件占用的扇区数量 * 文件数量 / (512字节 * 8)。
     sp->cnt_of_sector_map_sect = CNT_OF_FILE_SECT * CNT_OF_FILE / SECTOR_SIZE / 8;
-   // sp->cnt_of_inode_sect = (1 * 512 * 8 * 16) / 512;
-// todo 文件数 * 16 / 512    
-sp->cnt_of_inode_sect = (CNT_OF_FILE * INODE_SIZE) / SECTOR_SIZE;
+    // sp->cnt_of_inode_sect = (1 * 512 * 8 * 16) / 512;
+    // todo 文件数 * 16 / 512
+    sp->cnt_of_inode_sect = (CNT_OF_FILE * INODE_SIZE) / SECTOR_SIZE;
 
     // 1. 数据区的第一个扇区 = 引导扇区 + 超级块 + inode-map + sector-map + inodes。
     // 2. 上面的公式中的每个元素都是简写，完整表述应该是："XX占用的扇区数量”,例如，超级块占用的扇区
@@ -192,23 +197,23 @@ sp->cnt_of_inode_sect = (CNT_OF_FILE * INODE_SIZE) / SECTOR_SIZE;
     // 参数1是写入超级的位置
     //int sp_size = sizeof(struct super_block);
     int sp_size = SUPER_BLOCK_SIZE;
-	// 调试
-	assert(sp->data_1st_sect == 2211);
-	assert(sp->cnt_of_sector_map_sect == 2048);
-	assert(sp->cnt_of_inode_sect == 160);
-	assert(sp->cnt_of_inode_map_sect == 1);
-	assert(sp->nr_sect = CNT_OF_FILE_SECT);
-//    Memcpy(fsbuf, sp, sp_size);
-	Memset(fsbuf + sp_size, 0x90, 512 - sp_size);
+    // 调试
+    assert(sp->data_1st_sect == 2211);
+    assert(sp->cnt_of_sector_map_sect == 2048);
+    assert(sp->cnt_of_inode_sect == 160);
+    assert(sp->cnt_of_inode_map_sect == 1);
+    assert(sp->nr_sect = CNT_OF_FILE_SECT);
+    //    Memcpy(fsbuf, sp, sp_size);
+    Memset(fsbuf + sp_size, 0x90, 512 - sp_size);
     WT_SECT(ROOT_DEV, 1);
 
-	struct super_block sp2 = *sp;
+    struct super_block sp2 = *sp;
 
     // 写入inode-map
     // todo 又看不懂这块的逻辑了。先让语法错误消失吧。
     // char first_bit = 0x3;    // 0x3 的二进制形式：0000 0011。
     // imap的第0个bit是保留位，剩下的依次是：根目录、dev_tty1、dev_tty2、dev_tty3。
-    char first_byte = 31;    // 31 的二进制形式：0001 1111。
+    char first_byte = 31; // 31 的二进制形式：0001 1111。
     // todo 如此写入first_bit，好像不妥。
     Memset(fsbuf, first_byte, 1);
     Memset(fsbuf + 1, 0x80, SECTOR_SIZE - 1);
@@ -232,59 +237,60 @@ sp->cnt_of_inode_sect = (CNT_OF_FILE * INODE_SIZE) / SECTOR_SIZE;
     //Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x01, SECTOR_SIZE >> 1 - 1);
     //Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x01, 1);
     Memset(fsbuf + (SECTOR_SIZE >> 1), 0x01, 1);
-	// 这个扇区的后255个字节都是0，前256个字节是0xFF,第256个字节是0x1。
-	int rest_bits = (SECTOR_SIZE >> 1) - 1;
-	// Memset(fsbuf + (SECTOR_SIZE >> 1) + 1 + 1, 0x0, rest_bits);
-	Memset(fsbuf + (SECTOR_SIZE >> 1) + 1 , 0x0, rest_bits);
+    // 这个扇区的后255个字节都是0，前256个字节是0xFF,第256个字节是0x1。
+    int rest_bits = (SECTOR_SIZE >> 1) - 1;
+    // Memset(fsbuf + (SECTOR_SIZE >> 1) + 1 + 1, 0x0, rest_bits);
+    Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x0, rest_bits);
     WT_SECT(ROOT_DEV, pos);
-//        Memset(fsbuf, 0x40, SECTOR_SIZE);
-//        WT_SECT(ROOT_DEV, pos + 1);
+    //        Memset(fsbuf, 0x40, SECTOR_SIZE);
+    //        WT_SECT(ROOT_DEV, pos + 1);
     // 写入sector-map的剩余扇区
     int rest_sects = sp2.cnt_of_sector_map_sect - 1;
-    for (int i = 1; i <= rest_sects; i++) {
+    for (int i = 1; i <= rest_sects; i++)
+    {
         Memset(fsbuf, 0x0, SECTOR_SIZE);
         WT_SECT(ROOT_DEV, pos + i);
     }
-	//return;
+    //return;
     // 写入inode-array
     // 先找出第一个空闲的inode。初始化时不必寻找。
     //Memset(fsbuf, 0, SECTOR_SIZE);
-//    struct inode *inode = (struct inode *)fsbuf;;
-//    inode->type = FILE_TYPE_TEXT;
-//    inode->size = sizeof(struct dir_entry);
-//    inode->start_sect = sp2.data_1st_sect;
-//    inode->nr_sect = CNT_OF_FILE_SECT;
+    //    struct inode *inode = (struct inode *)fsbuf;;
+    //    inode->type = FILE_TYPE_TEXT;
+    //    inode->size = sizeof(struct dir_entry);
+    //    inode->start_sect = sp2.data_1st_sect;
+    //    inode->nr_sect = CNT_OF_FILE_SECT;
     // 只存在于内存中的inode成员，不能在此时赋值。
-  //  Memcpy(fsbuf, &inode, INODE_SIZE);
+    //  Memcpy(fsbuf, &inode, INODE_SIZE);
     // 很想用一个变量存储1 + 1 + 1 + sp.cnt_of_sector_map_sect，可想不出好名字。
     WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp2.cnt_of_sector_map_sect);
 
-  
-  // 创建默认文件：根目录、终端。
-	// 错了！这是inode-array的初始位置。没错。
+    // 创建默认文件：根目录、终端。
+    // 错了！这是inode-array的初始位置。没错。
     RD_SECT(ROOT_DEV, 1 + 1 + 1 + sp2.cnt_of_sector_map_sect);
-//	RD_SECT(ROOT_DEV, sp2.data_1st_sect);
+    //	RD_SECT(ROOT_DEV, sp2.data_1st_sect);
     // 创建根目录
-    struct inode *pinode = (struct inode *) fsbuf;
+    struct inode *pinode = (struct inode *)fsbuf;
     pinode->type = FILE_TYPE_TEXT;
-	// todo 初始化文件系统时默认有4个文件，分别是：根目录、三个终端。
+    // todo 初始化文件系统时默认有4个文件，分别是：根目录、三个终端。
     pinode->size = sizeof(struct dir_entry) * 4;
     pinode->start_sect = sp2.data_1st_sect;
     pinode->nr_sect = CNT_OF_FILE_SECT;
-	// 根目录的inode用imap中的第1个bit记录。
+    // 根目录的inode用imap中的第1个bit记录。
     pinode->nr_inode = 1;
-	
-	// todo 存储根目录的inode到root中，下面的方法是否可以？
-	//Memcpy(&root, pinode, sizeof(pinode));
-	//Memcpy(&root, pinode, sizeof(struct inode));
-	// todo 这种方法是否行得通？
-	 //*root = *pinode;
-	 root = *pinode;
+
+    // todo 存储根目录的inode到root中，下面的方法是否可以？
+    //Memcpy(&root, pinode, sizeof(pinode));
+    //Memcpy(&root, pinode, sizeof(struct inode));
+    // todo 这种方法是否行得通？
+    //*root = *pinode;
+    root = *pinode;
 
     // 创建终端
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++)
+    {
         //pinode = (struct inode *) (fsbuf + sizeof(struct inode) * (i + 1));
-        pinode = (struct inode *) (fsbuf + INODE_SIZE * (i + 1));
+        pinode = (struct inode *)(fsbuf + INODE_SIZE * (i + 1));
         pinode->type = FILE_TYPE_SPECIAL_CHAR;
         pinode->size = 0;
         pinode->nr_sect = 0;
@@ -294,37 +300,38 @@ sp->cnt_of_inode_sect = (CNT_OF_FILE * INODE_SIZE) / SECTOR_SIZE;
     }
     WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp2.cnt_of_sector_map_sect);
 
-
     // 写入根目录
     RD_SECT(ROOT_DEV, sp2.data_1st_sect);
     struct dir_entry dir_entry2;
     dir_entry2.nr_inode = 0xCC;
-   // 并不需要手工添加字符串的结束字符，因为Memcpy并不会复制结束字符。
-   // 说错了，Memcpy会复制指定长度的字符串，可以看Memcpy的实现。
-   char filename[2] = "A";
-   //filename[0] = '.';
-   //filename[1] = '0';
-   //filename[1] = 0;
-//    char filename[3] = "AB";
-//	filename[3] = 0;
+    // 并不需要手工添加字符串的结束字符，因为Memcpy并不会复制结束字符。
+    // 说错了，Memcpy会复制指定长度的字符串，可以看Memcpy的实现。
+    char filename[2] = "A";
+    //filename[0] = '.';
+    //filename[1] = '0';
+    //filename[1] = 0;
+    //    char filename[3] = "AB";
+    //	filename[3] = 0;
     //Memcpy(dir_entry2.filename, filename, sizeof(filename));
     struct dir_entry *dir_entry = (struct dir_entry *)fsbuf;
-	dir_entry->nr_inode = 0x1;
+    dir_entry->nr_inode = 0x1;
     Memcpy(dir_entry->filename, filename, Strlen(filename));
     //Memcpy(fsbuf, &dir_entry2, sizeof(struct dir_entry));
-   
-	char *tty_name[10] = {"dev_tty0", "dev_tty1", "dev_tty2"}; 
-	int tty_cnt = 3;
-	// 写入终端的目录项
-	for(int i = 0; i < tty_cnt; i++){
-		dir_entry++;
-		dir_entry->nr_inode = 2 + i;
-		Memcpy(dir_entry->filename, tty_name[i], Strlen(tty_name[i]));
-	}
+
+    char *tty_name[10] = {"dev_tty0", "dev_tty1", "dev_tty2"};
+    int tty_cnt = 3;
+    // 写入终端的目录项
+    for (int i = 0; i < tty_cnt; i++)
+    {
+        dir_entry++;
+        dir_entry->nr_inode = 2 + i;
+        Memcpy(dir_entry->filename, tty_name[i], Strlen(tty_name[i]));
+    }
     WT_SECT(ROOT_DEV, sp2.data_1st_sect);
 }
 
-void init_fs() {
+void init_fs()
+{
 
     Message driver_msg;
     driver_msg.TYPE = OPEN;
@@ -334,12 +341,15 @@ void init_fs() {
     mkfs();
 }
 
-int do_open(char *pathname, int oflag) {
+int do_open(char *pathname, int oflag)
+{
     // pcaller是调用open的进程
     // 从pcaller的filp_table中找出空闲的元素
     int i = -1;
-    for (int j = 0; j < FILP_TABLE_SIZE; j++) {
-        if (pcaller->filp[j] == 0) {
+    for (int j = 0; j < FILP_TABLE_SIZE; j++)
+    {
+        if (pcaller->filp[j] == 0)
+        {
             i = j;
             break;
         }
@@ -348,8 +358,10 @@ int do_open(char *pathname, int oflag) {
 
     // 从文件描述符数组中找出空闲的文件描述符
     int j = -1;
-    for (int i = 0; i < FILE_DESC_SIZE; i++) {
-        if (file_desc_table[i].nr_inode == 0) {
+    for (int i = 0; i < FILE_DESC_SIZE; i++)
+    {
+        if (file_desc_table[i].nr_inode == 0)
+        {
             j = i;
             break;
         }
@@ -359,24 +371,28 @@ int do_open(char *pathname, int oflag) {
     struct inode pinode;
     // 根据pathname查找文件是否存在
     int nr_inode = search_file(pathname);
-    if (oflag == O_CREAT) {
-        if (nr_inode > 0) {
+    if (oflag == O_CREAT)
+    {
+        if (nr_inode > 0)
+        {
             panic("file exists\n");
         }
         // 创建文件
         //pinode = create_file(pathname);
         create_file(&pinode, pathname);
-    } else {
+    }
+    else
+    {
         get_inode(&pinode, nr_inode);
     }
 
-//    panic("open file failure\n");
+    //    panic("open file failure\n");
 
-//	assert(pinode.nr_inode == 5);
+    //	assert(pinode.nr_inode == 5);
     // 把flip、pinode、file_desc联系起来。
     pcaller->filp[i] = &file_desc_table[j];
     file_desc_table[j].nr_inode = pinode.nr_inode;
-//	assert(file_desc_table[j].nr_inode == 5);
+    //	assert(file_desc_table[j].nr_inode == 5);
     // 刚打开文件，pos应该是0
     file_desc_table[j].pos = 0;
     // mode怎么设置？
@@ -387,8 +403,8 @@ int do_open(char *pathname, int oflag) {
     return fd;
 }
 
-
-int search_file(char *pathname) {
+int search_file(char *pathname)
+{
     // 获取文件名
     char filename[MAX_FILENAME_LEN];
     struct inode *dev_root;
@@ -405,16 +421,20 @@ int search_file(char *pathname) {
     int nr_1st_data_sect = sb->data_1st_sect;
     int dev = ROOT_DEV;
     int m = 0;
-    for (int i = 0; i < dev_root_dir_sect; i++) {
+    for (int i = 0; i < dev_root_dir_sect; i++)
+    {
         RD_SECT(dev, nr_1st_data_sect + i);
         // 遍历扇区
-        struct dir_entry *entry = (struct dir_entry *) fsbuf;
-        for (int j = 0; j < SECTOR_SIZE / DIR_ENTRY_SIZE; j++, entry++) {
-            if (++m > dir_entry_num) {
+        struct dir_entry *entry = (struct dir_entry *)fsbuf;
+        for (int j = 0; j < SECTOR_SIZE / DIR_ENTRY_SIZE; j++, entry++)
+        {
+            if (++m > dir_entry_num)
+            {
                 break;
             }
 
-            if (strcmp(filename, entry->filename) == 0) {
+            if (strcmp(filename, entry->filename) == 0)
+            {
                 return entry->nr_inode;
             }
         }
@@ -423,22 +443,26 @@ int search_file(char *pathname) {
     return -1;
 }
 
-
-int strip_path(char *filename, char *pathname, struct inode *dev_root) {
-    if (pathname == 0) {
+int strip_path(char *filename, char *pathname, struct inode *dev_root)
+{
+    if (pathname == 0)
+    {
         return -1;
     }
 
     char *t = filename;
     char *s = pathname;
 
-    if (*s == '/') {
+    if (*s == '/')
+    {
         s++;
     }
 
     //while (s) {
-    while (*s) {
-        if (*s == '/') {
+    while (*s)
+    {
+        if (*s == '/')
+        {
             return -1;
         }
 
@@ -452,7 +476,6 @@ int strip_path(char *filename, char *pathname, struct inode *dev_root) {
 
     return 0;
 }
-
 
 // 移动到kernel的主体文件main.c中了。
 //int strcmp(char *str1, char *str2) {
@@ -472,21 +495,27 @@ int strip_path(char *filename, char *pathname, struct inode *dev_root) {
 //    return (*p1 - *p2);
 //}
 
-
-int get_inode(struct inode *inode, int nr_inode) {
-    if (nr_inode == 0) {
+int get_inode(struct inode *inode, int nr_inode)
+{
+    if (nr_inode == 0)
+    {
         return 0;
     }
 
     struct inode *p = 0;
     // 从缓冲中找到目标元素
-    for (struct inode *q = &inode_table[0]; q <= &inode_table[INODE_TABLE_SIZE]; q++) {
-        if (q->cnt > 0) {
-            if (q->nr_inode == nr_inode) {
-		*inode = *q;
+    for (struct inode *q = &inode_table[0]; q <= &inode_table[INODE_TABLE_SIZE]; q++)
+    {
+        if (q->cnt > 0)
+        {
+            if (q->nr_inode == nr_inode)
+            {
+                *inode = *q;
                 return q;
             }
-        } else {
+        }
+        else
+        {
             p = q;
             break;
         }
@@ -500,47 +529,50 @@ int get_inode(struct inode *inode, int nr_inode) {
     int dev = ROOT_DEV;
     RD_SECT(dev, pos);
     int offset = (nr_inode - 1) % (SECTOR_SIZE / inode_size);
-    struct inode *new_inode = (struct inode *) (fsbuf + inode_size * offset);
+    struct inode *new_inode = (struct inode *)(fsbuf + inode_size * offset);
 
     // 把数据放到缓存中
-//    p->nr_inode = nr_inode;
-//    p->size = new_inode->size;
-//    p->start_sect = new_inode->start_sect;
-//    p->type = new_inode->type;
-//    p->nr_sect = new_inode->nr_sect;
+    //    p->nr_inode = nr_inode;
+    //    p->size = new_inode->size;
+    //    p->start_sect = new_inode->start_sect;
+    //    p->type = new_inode->type;
+    //    p->nr_sect = new_inode->nr_sect;
 
-//    p->nr_inode = nr_inode;
-//    p->size = new_inode->size;
-//    p->start_sect = new_inode->start_sect;
-//    p->type = new_inode->type;
-//    p->nr_sect = new_inode->nr_sect;
+    //    p->nr_inode = nr_inode;
+    //    p->size = new_inode->size;
+    //    p->start_sect = new_inode->start_sect;
+    //    p->type = new_inode->type;
+    //    p->nr_sect = new_inode->nr_sect;
 
-	*p = *new_inode;
-	p->nr_inode = nr_inode;
-	
+    *p = *new_inode;
+    p->nr_inode = nr_inode;
+
     // inode的成员dev、cnt也需要放到缓存中吗？不放。理由是，理由不明，我不知道把dev、cnt
     // 放进去有什么用。
     p->dev = dev;
 
-	//*inode = *new_inode;
-	*inode = *p;
+    //*inode = *new_inode;
+    *inode = *p;
 
     return inode;
 }
 
-int  create_file(struct inode *inode, char *pathname) {
+int create_file(struct inode *inode, char *pathname)
+{
     // 获取文件名
     // todo 复制root中的内容，花了很多时间理解。还不能随心所欲使用指针。
     // struct inode *dev_root;
     struct inode dev_root;
     char filename[MAX_FILENAME_LEN];
-    if (strip_path(filename, pathname, &dev_root) == -1) {
+    if (strip_path(filename, pathname, &dev_root) == -1)
+    {
         return 0;
     }
 
     // 获取nr_inode
     int nr_inode = alloc_imap_bit();
-    if (nr_inode == 0) {
+    if (nr_inode == 0)
+    {
         return 0;
     }
 
@@ -548,30 +580,34 @@ int  create_file(struct inode *inode, char *pathname) {
     struct super_block *sb = get_super_block();
     int nr_sect_to_alloc = sb->nr_sect;
     int nr_start_sect = alloc_smap_bit(nr_inode, nr_sect_to_alloc);
-    if (nr_start_sect == 0) {
+    if (nr_start_sect == 0)
+    {
         return 0;
     }
 
     // 获取inode
     struct inode pinode;
     int ret = new_inode(&pinode, nr_inode, nr_start_sect);
-    if (ret == 0) {
+    if (ret == 0)
+    {
         return 0;
     }
 
     // 创建根目录中的目录项
     struct dir_entry entry;
-	int ret2  = new_dir_entry(&entry, &dev_root, filename, nr_inode);
-    if (ret2 == 0) {
+    int ret2 = new_dir_entry(&entry, &dev_root, filename, nr_inode);
+    if (ret2 == 0)
+    {
         return 0;
     }
 
-	*inode = pinode;
+    *inode = pinode;
 
     return inode;
 }
 
-int alloc_imap_bit() {
+int alloc_imap_bit()
+{
     // 分区内的扇区分布:引导扇区(1) + 超级块(1) + inode-map(1) + sector-map(多少？)
     int pos = 1 + 1;
     //  dev的值从何处获得？
@@ -579,20 +615,24 @@ int alloc_imap_bit() {
     RD_SECT(dev, pos);
 
     int nr_inode = 0;
-    for (int i = 0; i < SECTOR_SIZE; i++) {
+    for (int i = 0; i < SECTOR_SIZE; i++)
+    {
         // 找到第一个值不是0xFF的字节。
-        if (fsbuf[i] == 0xFF) continue;
-        for (int j = 0; j < 8; j++) {
+        if (fsbuf[i] == 0xFF)
+            continue;
+        for (int j = 0; j < 8; j++)
+        {
             // 找到字节中第一个值不是1的bit。
             // if (fsbuf[i] & (1 << j) == 1) continue;
             // todo 这个语句是错误的，耗费了不少时间才发现。
             //if ((fsbuf[i] & (1 << j)) == 1) continue;
-            if((fsbuf[i] >> j) & 1  == 1) continue;
+            if ((fsbuf[i] >> j) & 1 == 1)
+                continue;
             // 把这个bit的值设置成1。
             fsbuf[i] |= 1 << j;
             // 为新文件分配的bit。仍然会纠结于偏移量这种常识问题。
             nr_inode = 8 * i + j;
-           // nr_inode = 8 * i + j + 1;
+            // nr_inode = 8 * i + j + 1;
             // 修改了数据，应该写入硬盘。
             WT_SECT(dev, pos);
             return nr_inode;
@@ -600,7 +640,8 @@ int alloc_imap_bit() {
     }
 }
 
-int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc) {
+int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc)
+{
     // 思路：
     // 1. 从sector-map区域的第一个扇区开始，遍历N个扇区，遍历单位是扇区。
     // 2. 以字节为单位遍历每个扇区，一直找到值不是0xFF的那个字节A。
@@ -621,48 +662,60 @@ int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc) {
     int nr_free_smap_bit = 0;
 
     int dev = ROOT_DEV;
-    for (int i = 0; i < nr_smap_sect; i++) {
+    for (int i = 0; i < nr_smap_sect; i++)
+    {
         int pos = nr_sect_blk0 + i;
         RD_SECT(dev, pos);
-        for (int j = 0; j < SECTOR_SIZE; j++) {
+        for (int j = 0; j < SECTOR_SIZE; j++)
+        {
             int k = 0;
-            if (nr_free_smap_bit == 0) {
-                if (fsbuf[j] == 0xFF) continue;
-                for (; k < 8; k++) {
+            if (nr_free_smap_bit == 0)
+            {
+                if (fsbuf[j] == 0xFF)
+                    continue;
+                for (; k < 8; k++)
+                {
                     // if (fsbuf[j] & (1 << k) == 1) continue;
-                    if ((fsbuf[j] >> k) & 1 == 1) continue;
+                    if ((fsbuf[j] >> k) & 1 == 1)
+                        continue;
                     nr_free_smap_bit = (i * SECTOR_SIZE + j) * 8 + k;
                     break;
                 }
             }
 
             // 设置bit的值
-            for (; k < 8; k++) {
+            for (; k < 8; k++)
+            {
                 //fsbuf[j] &= 1 << k;
                 fsbuf[j] |= 1 << k;
-                if (--nr_sect_to_alloc == 0) {
+                if (--nr_sect_to_alloc == 0)
+                {
                     break;
                 }
             }
         }
         // 写入硬盘
-        if (nr_free_smap_bit) {
+        if (nr_free_smap_bit)
+        {
             WT_SECT(dev, pos);
         }
 
-        if (nr_sect_to_alloc == 0) {
+        if (nr_sect_to_alloc == 0)
+        {
             break;
         }
     }
 
-	// todo 减去1，有点费解。
+    // todo 减去1，有点费解。
     return (nr_free_smap_bit - 1 + sb->data_1st_sect);
 }
 
-int new_inode(struct inode *inode, int nr_inode, int nr_start_sect) {
+int new_inode(struct inode *inode, int nr_inode, int nr_start_sect)
+{
     struct inode new_inode;
-	int ret  = get_inode(&new_inode, nr_inode);
-    if (ret == 0) {
+    int ret = get_inode(&new_inode, nr_inode);
+    if (ret == 0)
+    {
         return 0;
     }
 
@@ -677,25 +730,28 @@ int new_inode(struct inode *inode, int nr_inode, int nr_start_sect) {
     sync_inode(&new_inode);
 
     new_inode.cnt = 1;
-	// 同步到缓存中
-	// todo 后期优化
-//	struct inode *p = inode_table[INODE_TABLE_SIZE];
-	int i;
-	for(i = 0; i < INODE_TABLE_SIZE; i++){
-		if(inode_table[i].nr_inode == nr_inode){
-			break;
-		}
-	}
+    // 同步到缓存中
+    // todo 后期优化
+    //	struct inode *p = inode_table[INODE_TABLE_SIZE];
+    int i;
+    for (i = 0; i < INODE_TABLE_SIZE; i++)
+    {
+        if (inode_table[i].nr_inode == nr_inode)
+        {
+            break;
+        }
+    }
 
-	inode_table[i] = new_inode;
-	
-	*inode = new_inode;
+    inode_table[i] = new_inode;
+
+    *inode = new_inode;
 }
 
-int new_dir_entry(struct dir_entry *dir_entry, struct inode *dir_root, char *filename, int nr_inode) {
+int new_dir_entry(struct dir_entry *dir_entry, struct inode *dir_root, char *filename, int nr_inode)
+{
     // 当前有多少个目录项
     int dir_entry_size = sizeof(struct dir_entry);
-	// 下面两种运算，绝对不等价。我怎么连这样的错误也犯！
+    // 下面两种运算，绝对不等价。我怎么连这样的错误也犯！
     // int nr_entry = dir_root->size >> dir_entry_size;
     int nr_entry = dir_root->size / dir_entry_size;
     // 目录区域最多能存储max_nr_entry个目录项
@@ -716,66 +772,75 @@ int new_dir_entry(struct dir_entry *dir_entry, struct inode *dir_root, char *fil
 
     // todo 暂时这样处理dev。
     int dev = ROOT_DEV;
-    for (i = 0; i < nr_sector_max; i++) {
+    for (i = 0; i < nr_sector_max; i++)
+    {
         RD_SECT(dev, nr_dir_entry_blk0 + i);
         // 在已经使用过的目录项中寻找空闲目录项
-        pde = (struct dir_entry *) fsbuf;
-        for (int j = 0; j < SECTOR_SIZE / dir_entry_size; j++, pde++) {
-            if (++m > nr_entry) {
+        pde = (struct dir_entry *)fsbuf;
+        for (int j = 0; j < SECTOR_SIZE / dir_entry_size; j++, pde++)
+        {
+            if (++m > nr_entry)
+            {
                 break;
             }
 
-            if (pde->nr_inode == 0) {
+            if (pde->nr_inode == 0)
+            {
                 new_pde = pde;
                 break;
             }
         }
 
-        if (m > nr_entry || new_pde) {
+        if (m > nr_entry || new_pde)
+        {
             break;
         }
     }
 
     // 当根目录区域的所有根目录都非空闲时
-    if (nr_entry == max_nr_entry) {
+    if (nr_entry == max_nr_entry)
+    {
         // 根目录区域已经满了
         return 0;
     }
 
-	int is_add = 0;
+    int is_add = 0;
     // 新增目录项
-    if (new_pde == 0) {
+    if (new_pde == 0)
+    {
         new_pde = pde;
         dir_root->size += dir_entry_size;
-	is_add = 1;
+        is_add = 1;
         //sync_inode(dir_root);
     }
 
     // 设置新目录项的值
     new_pde->nr_inode = nr_inode;
     Strcpy(new_pde->filename, filename);
-	*dir_entry = *new_pde;
+    *dir_entry = *new_pde;
 
     // 写入硬盘
     WT_SECT(dev, nr_dir_entry_blk0 + i);
 
     // 新增目录项
-//    if (new_pde == 0) {
-//        new_pde = pde;
-//        dir_root->size += dir_entry_size;
-//        sync_inode(dir_root);
-//    }
-	if(is_add){
-		root = *dir_root;
-		sync_inode(dir_root);
-	}
-	//*dir_entry = *new_pde;
+    //    if (new_pde == 0) {
+    //        new_pde = pde;
+    //        dir_root->size += dir_entry_size;
+    //        sync_inode(dir_root);
+    //    }
+    if (is_add)
+    {
+        root = *dir_root;
+        sync_inode(dir_root);
+    }
+    //*dir_entry = *new_pde;
 
-	return dir_entry;
+    return dir_entry;
 }
 
 // 函数也不好确定。我不了解所有情况，所以不好确定函数。
-void do_unlink(char *filename) {
+void do_unlink(char *filename)
+{
     // 简略思路：
     // 1. 检查是否能够删除目标文件
     // 2. 清除imap
@@ -785,22 +850,26 @@ void do_unlink(char *filename) {
     // 实说实说，我写这个函数，不轻松，比较费劲。
     //
     // 根目录不能删除
-    if (strcmp("/", filename) == 0) {
+    if (strcmp("/", filename) == 0)
+    {
         panic("Can not delete the root dir");
     }
 
     int nr_inode = search_file(filename);
-    if (nr_inode == -1) {
+    if (nr_inode == -1)
+    {
         panic("The file does not exist\n");
     }
     struct inode inode;
-	int ret  = get_inode(&inode, nr_inode);
-    if (ret == 0) {
+    int ret = get_inode(&inode, nr_inode);
+    if (ret == 0)
+    {
         panic("The file does not exist\n");
     }
 
     // 被其他进程使用的文件不能删除
-    if (inode.cnt > 0) {
+    if (inode.cnt > 0)
+    {
         panic("Can not delete the file that is using by other process.");
     }
 
@@ -841,8 +910,10 @@ void do_unlink(char *filename) {
     int i = 1;
     int s = smap_sect_idx;
 
-    for (; i < smap_byte_left; i++, smap_bit_left -= 8) {
-        if (i == SECTOR_SIZE) {
+    for (; i < smap_byte_left; i++, smap_bit_left -= 8)
+    {
+        if (i == SECTOR_SIZE)
+        {
             i = 0;
             WT_SECT(dev, s);
             RD_SECT(dev, s++);
@@ -850,7 +921,8 @@ void do_unlink(char *filename) {
         fsbuf[i] = 0;
     }
 
-    if (i == SECTOR_SIZE) {
+    if (i == SECTOR_SIZE)
+    {
         i = 0;
         WT_SECT(dev, s);
         RD_SECT(dev, s++);
@@ -887,40 +959,48 @@ void do_unlink(char *filename) {
     int j;
 
     int n = 0;
-    for (; n < root_dir_nr_sect; n++) {
+    for (; n < root_dir_nr_sect; n++)
+    {
         RD_SECT(dev, root_dir_sect_blk0 + n);
-        struct dir_entry *pde = (struct dir_entry *) fsbuf;
-        for (j = 0; j < root_dir_nr_sect; j++, pde++) {
-            if (++m > nr_dir_entry) {
+        struct dir_entry *pde = (struct dir_entry *)fsbuf;
+        for (j = 0; j < root_dir_nr_sect; j++, pde++)
+        {
+            if (++m > nr_dir_entry)
+            {
                 break;
             }
 
             new_root_dir_size += sizeof(struct dir_entry);
 
-            if (strcmp(pde->filename, filename) == 0) {
+            if (strcmp(pde->filename, filename) == 0)
+            {
                 flag = 1;
                 Memset(pde, 0, sizeof(struct dir_entry));
                 break;
             }
         }
 
-        if (m > nr_dir_entry || flag) {
+        if (m > nr_dir_entry || flag)
+        {
             break;
         }
     }
 
-    if (m == nr_dir_entry) {
+    if (m == nr_dir_entry)
+    {
         dev_root->size = new_root_dir_size;
         sync_inode(dev_root);
     }
 
     // 修改了根目录才写硬盘。
-    if (flag) {
+    if (flag)
+    {
         WT_SECT(dev, root_dir_sect_blk0 + i);
     }
 }
 
-void do_rdwt(Message *msg) {
+void do_rdwt(Message *msg)
+{
     // 这个函数的主要思路：
     // 1. 先读取N个扇区。
     // 2. 读，从N个扇区中把数据复制到buf中。
@@ -951,35 +1031,40 @@ void do_rdwt(Message *msg) {
     int pos = msg->POS;
     //struct inode *inode = proc_table[sender].filp[fd]->inode;
     // todo 在任务进程中直接这样获取proc_table是否合适？
-    int nr_inode  = proc_table[sender].filp[fd]->nr_inode;
-	assert(sender == PROC_A);
-//	assert(fd == 0);
-//	assert(nr_inode == 5);
-	
-	struct inode pinode;
-	int ret = get_inode(&pinode, nr_inode);
-	if(ret == 0){
-		panic("file doesn't\n");
-	}
+    int nr_inode = proc_table[sender].filp[fd]->nr_inode;
+    assert(sender == PROC_A);
+    //	assert(fd == 0);
+    //	assert(nr_inode == 5);
 
-//	assert(pinode.nr_inode == 5);
+    struct inode pinode;
+    int ret = get_inode(&pinode, nr_inode);
+    if (ret == 0)
+    {
+        panic("file doesn't\n");
+    }
+
+    //	assert(pinode.nr_inode == 5);
 
     // 文件大小
     int file_size = pinode.size;
 
-	//assert(len == 6);
-//	assert(fd == 0);
-	assert(sender == PROC_A);
-	assert(hd_operate_type == WRITE || hd_operate_type == READ);
+    //assert(len == 6);
+    //	assert(fd == 0);
+    assert(sender == PROC_A);
+    assert(hd_operate_type == WRITE || hd_operate_type == READ);
 
     // 文件是IS_CHAR_SPECIAL
-    if (pinode.type == IS_CHAR_SPECIAL) {
+    if (pinode.type == IS_CHAR_SPECIAL)
+    {
         // 请求TTY
         // 如果type不是READ也不是WRITE，怎么处理？
         int type;
-        if (msg->type == READ) {
+        if (msg->type == READ)
+        {
             type = DEV_READ;
-        } else if (msg->type == WRITE) {
+        }
+        else if (msg->type == WRITE)
+        {
             type = DEV_WRITE;
         }
 
@@ -997,11 +1082,13 @@ void do_rdwt(Message *msg) {
     // 文件操作的结束位置
     // pos的参照坐标是0，是相对于文件的初始位置的字节偏移量。
     int pos_end;
-    if (hd_operate_type == READ) {
+    if (hd_operate_type == READ)
+    {
 
         pos_end = MIN(pos + len, file_size);
-
-    } else {
+    }
+    else
+    {
 
         pos_end = MIN(pos + len, pinode.nr_sect * SECTOR_SIZE);
     }
@@ -1025,14 +1112,14 @@ void do_rdwt(Message *msg) {
     int base = Seg2PhyAddrLDT(ds, sender_proc);
     int buf_line_addr = base + buf;
 
-	// todo 调试
-//	assert();
-//	assert();
-//	assert();
-//	assert();
+    // todo 调试
+    //	assert();
+    //	assert();
+    //	assert();
+    //	assert();
 
-
-    for (int i = start_sect; i <= start_end && byte_left; i += chunk) {
+    for (int i = start_sect; i <= start_end && byte_left; i += chunk)
+    {
         int byte = MIN(byte_left, chunk * SECTOR_SIZE - offset);
         // device是什么？是分区号。
         // 是安装了文件系统的那个分区的分区号吗？是的。
@@ -1041,11 +1128,14 @@ void do_rdwt(Message *msg) {
         int device = ROOT_DEV;
         rd_wt(i, device, fsbuf, SECTOR_SIZE * chunk, READ);
 
-        if (hd_operate_type == READ) {
+        if (hd_operate_type == READ)
+        {
             // 把数据从fsbuf中复制到buf中
             phycopy(buf_line_addr + byte_wt, fsbuf + offset, byte);
             // 文件的大小不会改变
-        } else {
+        }
+        else
+        {
             // 把数据从buf中复制到fsbuf中
             phycopy(fsbuf + offset, buf_line_addr + byte_wt, byte);
             // 把fsbuf中的数据写入硬盘
@@ -1059,18 +1149,19 @@ void do_rdwt(Message *msg) {
     }
 
     // 呵呵，这个常识，还让费解。悲伤！
-    if (pos + len > pinode.size) {
+    if (pos + len > pinode.size)
+    {
         pinode.size = pos + len;
         sync_inode(&pinode);
     }
 }
 
-
-void sync_inode(struct inode *inode) {
+void sync_inode(struct inode *inode)
+{
     // 本函数不负责处理目标inode是否存在于硬盘上，只复制更新数据到硬盘上。
     // 主要思路：从硬盘中读取包含目标inode的扇区，更新fsbuf的inode后，把fsbuf写入硬盘。
     // int inode_size = sizeof(struct inode_size);
-    int inode_size = INODE_SIZE;// sizeof(struct inode);
+    int inode_size = INODE_SIZE; // sizeof(struct inode);
     int nr_inode = inode->nr_inode;
     // inode的数量的偏移量
     int inode_idx = (nr_inode - 1) % (SECTOR_SIZE / inode_size);
@@ -1082,28 +1173,30 @@ void sync_inode(struct inode *inode) {
     int pos = 1 + 1 + sb->cnt_of_inode_map_sect + sb->cnt_of_sector_map_sect + sect_idx;
     RD_SECT(dev, pos);
 
-    struct inode *new_inode = (struct inode *) fsbuf;
+    struct inode *new_inode = (struct inode *)fsbuf;
     Memcpy(new_inode, inode, inode_size);
 
     WT_SECT(dev, pos);
 }
 
-void put_inode(struct inode *inode) {
+void put_inode(struct inode *inode)
+{
     assert(inode->cnt > 0);
     inode->cnt--;
 }
 
-
-int do_close(int fd) {
+int do_close(int fd)
+{
     // 主要思路：
     // 1. 关闭文件，实质是：减少inode的引用数、减少文件描述符的引用数、
     // 	把进程表中对应的flip[i]设置成0。
     // 2. 详细说明“减少文件描述符的引用数”。当一个文件描述符的引用数是0时，把这个文件描述符
     // 	设置成不指向任何inode。
 
-	// todo 这里的逻辑似乎有问题，暂时不管。
-//    put_inode(pcaller->filp[fd]->inode);
-    if (--pcaller->filp[fd]->fd_cnt == 0) {
+    // todo 这里的逻辑似乎有问题，暂时不管。
+    //    put_inode(pcaller->filp[fd]->inode);
+    if (--pcaller->filp[fd]->fd_cnt == 0)
+    {
         pcaller->filp[fd]->nr_inode = 0;
     }
     pcaller->filp[fd] = 0;
@@ -1111,8 +1204,9 @@ int do_close(int fd) {
     return 0;
 }
 
-struct super_block *get_super_block() {
-   RD_SECT(ROOT_DEV, 1);
-    *super_block_buf  = *((struct super_block *) fsbuf);
+struct super_block *get_super_block()
+{
+    RD_SECT(ROOT_DEV, 1);
+    *super_block_buf = *((struct super_block *)fsbuf);
     return super_block_buf;
 }
