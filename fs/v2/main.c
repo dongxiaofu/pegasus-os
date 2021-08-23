@@ -315,7 +315,7 @@ void kernel_main()
             eflags = 0x1202;
             rpl = 1;
             dpl = 1;
-            proc->ticks = proc->priority = 4;
+            proc->ticks = proc->priority = 15;
             proc->tty_index = 1;
         }
         else
@@ -325,7 +325,7 @@ void kernel_main()
             //eflags = 0x1202;
             rpl = 3;
             dpl = 3;
-            proc->ticks = proc->priority = 2;
+            proc->ticks = proc->priority = 5;
             //proc->tty_index = i - TASK_PROC_NUM;
             proc->tty_index = 1; //i - TASK_PROC_NUM;
         }
@@ -511,6 +511,15 @@ void TestFS()
 
 void INIT()
 {
+	int fd_stdout = open("dev_tty0", O_RDWR);
+//	int fd_stdout = 0;
+	char buf[40] = "INIT is running";
+	//Printf("fd_stdout = %d\n", fd_stdout);
+	Printf("fd_stdout = %d\n", fd_stdout);
+	while(1){}
+//	write(fd_stdout, buf, Strlen(buf));
+	return;
+
 			int pid = fork();
 		
 			if(pid > 0){
@@ -923,7 +932,14 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 {
     Proc *receiver = pid2proc(receiver_pid);
     int sender_pid = proc2pid(sender);
-    msg->source = sender_pid;
+        // 计算msg的线性地址
+        int ds = sender->s_reg.ds;
+        int base = Seg2PhyAddrLDT(ds, sender);
+        int msg_line_addr = base + (int)msg;
+        int msg_size = sizeof(Message);
+	Message *msg_tmp =  (Message *)msg_line_addr;
+	msg_tmp->source = sender_pid;
+//    msg->source = sender_pid;
     // 死锁检测
     if (dead_lock(sender_pid, receiver_pid) == 1)
     {
@@ -933,14 +949,14 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
     if (receiver->p_flag == RECEIVING && (receiver->p_receive_from == sender_pid || receiver->p_receive_from == ANY))
     {
         // 计算msg的线性地址
-        int ds = sender->s_reg.ds;
-        int base = Seg2PhyAddrLDT(ds, sender);
-        int msg_line_addr = base + msg;
-        int msg_size = sizeof(Message);
+       // int ds = sender->s_reg.ds;
+       // int base = Seg2PhyAddrLDT(ds, sender);
+       // int msg_line_addr = base + (int)msg;
+       // int msg_size = sizeof(Message);
 
         int ds2 = receiver->s_reg.ds;
         int base2 = Seg2PhyAddrLDT(ds2, receiver);
-        int msg_line_addr2 = base2 + receiver->p_msg;
+        int msg_line_addr2 = base2 + (int)(receiver->p_msg);
         // 从sender中把消息复制到receiver
         //    phycopy(receiver->p_msg, msg_line_addr, msg_size);
         phycopy(msg_line_addr2, msg_line_addr, msg_size);
@@ -1112,12 +1128,12 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
         // 计算msg的线性地址
         int ds = receiver->s_reg.ds;
         int base = Seg2PhyAddrLDT(ds, receiver);
-        void *msg_line_addr = (void *)(base + msg);
+        void *msg_line_addr = (void *)(base + (int)msg);
         int msg_size = sizeof(Message);
 
         int ds2 = receiver->s_reg.ds;
         int base2 = Seg2PhyAddrLDT(ds2, p_from_proc);
-        void *msg_line_addr2 = (void *)(base2 + p_from_proc->p_msg);
+        void *msg_line_addr2 = (void *)(base2 + (int)(p_from_proc->p_msg));
 
         // 从receiver中把消息复制到sender
         // phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);

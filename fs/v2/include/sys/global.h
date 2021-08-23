@@ -54,9 +54,9 @@ EXTERN TSS tss;
 #define TASK_HD  2
 #define TASK_FS  3
 #define TASK_MM  4
-#define INIT_PID  5
+#define INIT_PID  6
 
-#define PROC_A	6
+#define PROC_A	5
 
 #define reassembly(val1, offset1, val2, offset2, val3) \
         ((val1 << offset1) + (val2 << offset2) + val3)
