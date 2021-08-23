@@ -86,9 +86,12 @@ void task_fs()
         Message msg;
         Memset(&msg, 0, sizeof(Message));
         send_rec(RECEIVE, &msg, ANY);
+	Printf("Enter FS\n");
         int type = msg.TYPE;
         int source = msg.source;
         int fd = msg.FD;
+	Printf("0 fs type = %d, source = %d\n", type, source);
+	assert(source == TASK_HD || source == INIT_PID);
         // 不知道为何会发送来source为0、type为0的消息，不处理吧。
         if (msg.source == 0)
         {
@@ -135,6 +138,7 @@ void task_fs()
 
 void rd_wt(int pos, int device, char *buf, int len, int type)
 {
+//	Printf("enter fs rd_wt\n");
     Message msg;
     Memset(&msg, 0, sizeof(Message));
     msg.TYPE = type;
@@ -343,6 +347,7 @@ void init_fs()
 
 int do_open(char *pathname, int oflag)
 {
+	Printf("Enter fs open\n");
     // pcaller是调用open的进程
     // 从pcaller的filp_table中找出空闲的元素
     int i = -1;
@@ -1001,6 +1006,7 @@ void do_unlink(char *filename)
 
 void do_rdwt(Message *msg)
 {
+	Printf("enter fs do_rdwt\n");
     // 这个函数的主要思路：
     // 1. 先读取N个扇区。
     // 2. 读，从N个扇区中把数据复制到buf中。
@@ -1053,9 +1059,11 @@ void do_rdwt(Message *msg)
     assert(sender == PROC_A);
     assert(hd_operate_type == WRITE || hd_operate_type == READ);
 
+	Printf("fs pinode.type = %d\n", pinode.type);
     // 文件是IS_CHAR_SPECIAL
     if (pinode.type == IS_CHAR_SPECIAL)
     {
+	Printf("fs tty\n");
         // 请求TTY
         // 如果type不是READ也不是WRITE，怎么处理？
         int type;
@@ -1073,6 +1081,8 @@ void do_rdwt(Message *msg)
         msg->PROCNR = msg->source;
         // todo 假设 BUF、BUF_LEN 已经在用户进程传递给本进程的消息体中了。
         // 怎么确定TTY的pid？在sys_task_table中查看，TASK_TTY是第0个元素。
+        Printf("fs 2 tty\n");
+	Printf("fs type = %d, source = %d", type, msg->source);
         send_rec(BOTH, msg, TASK_TTY);
 
         return;

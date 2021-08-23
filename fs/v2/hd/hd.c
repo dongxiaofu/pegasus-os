@@ -59,10 +59,9 @@ int get_hd_ioctl(int device);
 
 // 硬盘驱动
 void TaskHD() {
-//    //Printf("%s\n", "HD driver is running!");
+    //Printf("%s\n", "HD driver is running!");
     // 初始硬盘
-//    init_hd();
-	while(1){}
+ init_hd();
     while (1) {
         hd_handle();
     }

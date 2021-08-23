@@ -18,7 +18,9 @@ int open(const char *pathname, int flags) {
     msg.FLAGS = flags;
     msg.NAME_LEN = Strlen(pathname);
 
+	Printf("lib open start\n");
     send_rec(BOTH, &msg, TASK_FS);
+	Printf("lib open end\n");
 
     //assert(msg.type == SYSCALL_RET);
 
