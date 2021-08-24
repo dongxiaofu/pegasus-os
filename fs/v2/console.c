@@ -224,6 +224,7 @@ void tty_dev_write(TTY *tty) {
         if (tty->tail == tty->buf + KEYBOARD_BUF_SIZE) {
             tty->tail = tty->buf;
         }
+// todo 调试使用，等全部功能结束后，可能要注释掉。
         out_char(tty, key);
 
         // 把数据从终端缓冲区读取到用户进程
@@ -251,11 +252,13 @@ void tty_dev_write(TTY *tty) {
                 tty->tran_cnt = 0;
 
                 // IPC返回
+                // todo 这里，需要补充，把tty的req_buf中存储的数据放到msg中，然后发送给用户进程。
                 Message msg;
                 msg.type = RESUME_PROC;
                 // 能用msg.RETVAL = tty->tran_cnt 吗?
                 msg.CNT = tty->tran_cnt;
                 msg.PROCNR = tty->procnr;
+                msg.BUF = tty->req_buf;
                 send_rec(SEND, &msg, tty->pcaller);
             }
         }
@@ -269,7 +272,8 @@ void tty_do_read(TTY *tty, Message *msg) {
     tty->procnr = msg->PROCNR;
     tty->pcaller = msg->source;
     tty->left_cnt = msg->BUF_LEN;
-    tty->req_buf = v2l(tty->procnr, msg->BUF);
+	Memset(tty->req_buf, Strlen(tty->req_buf));
+//    tty->req_buf = v2l(tty->procnr, msg->BUF);
 
     // IPC返回
     msg->type = SUPEND_PROC;
@@ -285,8 +289,13 @@ void tty_do_read(TTY *tty, Message *msg) {
 void tty_do_write(TTY *tty, Message *msg) {
     int TTY_WRITE_BUF_SIZE = 128;
     char buf[TTY_WRITE_BUF_SIZE];
+	Memset(buf, 0, TTY_WRITE_BUF_SIZE);
     // 用户进程要向终端写入多少字符。
     int cnt = msg->CNT;
+	// todo 第二次调用write写终端无效果，是因为，tty->tran_cnt继承了上一个write写终端
+	// 的值。例如，本次要写的字符串的长度是3，上一次执行write写终端后tty->tran_cnt是4，
+	// 从本次字符串的4开始读取字符，自然读取不到数据。
+	tty->tran_cnt = 0;
 
     // 把用户进程的数据复制到TTY进程，然后输出。
     while (cnt) {
@@ -395,8 +404,12 @@ void TaskTTY() {
 
         Message msg;
         send_rec(RECEIVE, &msg, ANY);
+	
+	if(msg.source == TASK_FS){
+	//	Printf("FS is calling\n");
+	}
 
-        int type = msg.type;
+        int type = msg.TYPE;
 
         switch (type) {
             case DEV_OPEN:
@@ -409,7 +422,7 @@ void TaskTTY() {
                 tty_do_write(current_tty, &msg);
                 break;
             default:
-                //panic("Unknown message type");
+                panic("Unknown tty message type");
                 break;
         }
     }

@@ -520,13 +520,16 @@ void INIT()
 //	write(fd_stdout, buf, 40);
 //	write(fd_stdout, "\n", 1);
 //	write(fd_stdout, "T", 1);
-//	write(fd_stdout, buf, Strlen(buf));
+	write(fd_stdout, buf, Strlen(buf));
 int j = 0;
 			int pid = fork();
 		
 			if(pid > 0){
 				j++;
 				char buf1[40] = "Parent\n";
+				write(fd_stdout, buf1, Strlen(buf1));			
+				write(fd_stdout, buf1, Strlen(buf1));			
+				write(fd_stdout, buf1, Strlen(buf1));			
 				for(int i = 0; i < 5; i++){
 					j++;
 					//write(fd_stdout, buf1, Strlen(buf1));			
@@ -537,16 +540,18 @@ int j = 0;
 			j += 2;
 		//		int fd2 = open("dev_tty0", O_RDWR);
 				char buf2[40] = "Child\n";
-				write(fd_stdout, buf2, Strlen(buf2));			
+			write(fd_stdout, buf2, Strlen(buf2));			
+			write(fd_stdout, buf2, Strlen(buf2));			
+			write(fd_stdout, buf2, Strlen(buf2));			
 		dis_pos = 12000 - 128 + 10 + 160 * 8;
 		disp_str_colour("j = ", 0x0C);
 		disp_int(j);
 				spin("child\n");
 			}
 
-		dis_pos = 12000 - 128 + 10 + 160 * 7;
-		disp_str_colour("j = ", 0x0C);
-		disp_int(j);
+//		dis_pos = 12000 - 128 + 10 + 160 * 7;
+//		disp_str_colour("j = ", 0x0C);
+//		disp_int(j);
 				spin("parent\n");
 }
 
