@@ -306,7 +306,7 @@ void tty_do_write(TTY *tty, Message *msg) {
     // IPC返回
     // todo 能沿用上面的msg吗？
     Message msg2FS;
-    msg2FS.type = SYSCALL_RET;
+    msg2FS.TYPE = SYSCALL_RET;
     msg2FS.RETVAL = tty->tran_cnt;
     send_rec(SEND, &msg2FS, msg->source);
 }
@@ -384,6 +384,7 @@ void TaskTTY() {
     init_tty();
     select_console(1);
     //Printf("T:%x", 3);
+    Printf("Enter tty\n");
     while (1) {
         for (TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++) {
             do {
@@ -393,7 +394,7 @@ void TaskTTY() {
         }
 
         Message msg;
-        //send_rec(RECEIVE, &msg, ANY);
+        send_rec(RECEIVE, &msg, ANY);
 
         int type = msg.type;
 

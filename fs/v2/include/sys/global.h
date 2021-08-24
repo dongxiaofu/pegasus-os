@@ -91,6 +91,6 @@ EXTERN TSS tss;
 #define O_CREAT         7
 
 // todo fork创建的进程的内存空间的初始地址
-#define USER_PROC_MEM_BASE	0xF00000
+#define USER_PROC_MEM_BASE	0xA00000
 
 #endif

@@ -241,7 +241,7 @@
 // 最大文件长度。随便确定了一个值。 #define MAX_FILE_SIZE 1024*1024
 
 // todo 应该设置多大？512是我随便设置的值。
-#define PROC_IMAGE_DEFAULT_SIZE 0x300000 //1024*1024	// todo 这是我随便设置的值
+#define PROC_IMAGE_DEFAULT_SIZE 1024*1024	// todo 这是我随便设置的值
 #define PROC_STACK_SIZE 512
 #define SECTOR_SIZE	512
 
