@@ -79,19 +79,20 @@ int do_close(int fd);
 
 void task_fs()
 {
-    Printf("%s\n", "FS is running");
+    //Printf("%s\n", "FS is running");
     init_fs();
     while (1)
     {
         Message msg;
         Memset(&msg, 0, sizeof(Message));
         send_rec(RECEIVE, &msg, ANY);
-	Printf("Enter FS\n");
+	//Printf("Enter FS\n");
         int type = msg.TYPE;
         int source = msg.source;
         int fd = msg.FD;
-	Printf("0 fs type = %d, source = %d\n", type, source);
-	assert(source == TASK_HD || source == INIT_PID);
+	//Printf("0 fs type = %d, source = %d\n", type, source);
+        //assert(source == TASK_TTY || source == TASK_SYS || source == TASK_HD || source == TASK_FS || source == ANY || source == INTERRUPT || source == PROC_A || source == INIT_PID);
+	//assert(source == TASK_HD || source == INIT_PID);
         // 不知道为何会发送来source为0、type为0的消息，不处理吧。
         if (msg.source == 0)
         {
@@ -102,7 +103,7 @@ void task_fs()
         // open
         char *pathname = msg.PATHNAME;
         int oflags = msg.FLAGS;
-        //Printf("source = %x, type = %x\n", msg.source, msg.TYPE);
+        ////Printf("source = %x, type = %x\n", msg.source, msg.TYPE);
         pcaller = &proc_table[source];
 
         Message fs_msg;
@@ -128,7 +129,7 @@ void task_fs()
             break;
         }
 
-        assert(source == TASK_TTY || source == TASK_SYS || source == TASK_HD || source == TASK_FS || source == ANY || source == INTERRUPT || source == PROC_A);
+//        assert(source == TASK_TTY || source == TASK_SYS || source == TASK_HD || source == TASK_FS || source == ANY || source == INTERRUPT || source == PROC_A || source == INIT_PID);
 
         fs_msg.type = SYSCALL_RET;
         fs_msg.TYPE = SYSCALL_RET;
@@ -138,7 +139,7 @@ void task_fs()
 
 void rd_wt(int pos, int device, char *buf, int len, int type)
 {
-//	Printf("enter fs rd_wt\n");
+//	//Printf("enter fs rd_wt\n");
     Message msg;
     Memset(&msg, 0, sizeof(Message));
     msg.TYPE = type;
@@ -159,12 +160,12 @@ void mkfs()
     //    // fsbuf未定义。神奇！
     //    //Memset(fsbuf, 0, 512);
     //    RD_SECT(ROOT_DEV, 1);
-    //    Printf("read over\n");
+    //    //Printf("read over\n");
     //    Memset(fsbuf, 0x0, 512);
     //    WT_SECT(ROOT_DEV, 1);
     //    Memset(fsbuf, 0xFF, 512);
     //    RD_SECT(ROOT_DEV, 1);
-    //    Printf("fsbuf = %s\n", fsbuf);
+    //    //Printf("fsbuf = %s\n", fsbuf);
     //    return;
     // 写入超级块
 
@@ -347,7 +348,7 @@ void init_fs()
 
 int do_open(char *pathname, int oflag)
 {
-	Printf("Enter fs open\n");
+	//Printf("Enter fs open\n");
     // pcaller是调用open的进程
     // 从pcaller的filp_table中找出空闲的元素
     int i = -1;
@@ -1006,7 +1007,7 @@ void do_unlink(char *filename)
 
 void do_rdwt(Message *msg)
 {
-	Printf("enter fs do_rdwt\n");
+	//Printf("enter fs do_rdwt\n");
     // 这个函数的主要思路：
     // 1. 先读取N个扇区。
     // 2. 读，从N个扇区中把数据复制到buf中。
@@ -1038,7 +1039,7 @@ void do_rdwt(Message *msg)
     //struct inode *inode = proc_table[sender].filp[fd]->inode;
     // todo 在任务进程中直接这样获取proc_table是否合适？
     int nr_inode = proc_table[sender].filp[fd]->nr_inode;
-    assert(sender == PROC_A);
+	int source = msg->source;
     //	assert(fd == 0);
     //	assert(nr_inode == 5);
 
@@ -1056,33 +1057,32 @@ void do_rdwt(Message *msg)
 
     //assert(len == 6);
     //	assert(fd == 0);
-    assert(sender == PROC_A);
     assert(hd_operate_type == WRITE || hd_operate_type == READ);
 
-	Printf("fs pinode.type = %d\n", pinode.type);
+	//Printf("fs pinode.type = %d\n", pinode.type);
     // 文件是IS_CHAR_SPECIAL
     if (pinode.type == IS_CHAR_SPECIAL)
     {
-	Printf("fs tty\n");
+	//Printf("fs tty\n");
         // 请求TTY
         // 如果type不是READ也不是WRITE，怎么处理？
         int type;
-        if (msg->type == READ)
+        if (hd_operate_type == READ)
         {
             type = DEV_READ;
         }
-        else if (msg->type == WRITE)
+        else if (hd_operate_type == WRITE)
         {
             type = DEV_WRITE;
         }
 
         msg->type = type;
         msg->TYPE = type;
-        msg->PROCNR = msg->source;
+        msg->PROCNR = source;
         // todo 假设 BUF、BUF_LEN 已经在用户进程传递给本进程的消息体中了。
         // 怎么确定TTY的pid？在sys_task_table中查看，TASK_TTY是第0个元素。
-        Printf("fs 2 tty\n");
-	Printf("fs type = %d, source = %d", type, msg->source);
+        //Printf("fs 2 tty\n");
+	//Printf("fs type = %d, source = %d", type, source);
         send_rec(BOTH, msg, TASK_TTY);
 
         return;

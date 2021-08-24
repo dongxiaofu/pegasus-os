@@ -511,36 +511,48 @@ void TestFS()
 
 void INIT()
 {
-	int fd_stdout = open("dev_tty0", O_RDWR);
+	int fd_stdout = open("dev_tty1", O_RDWR);
 //	int fd_stdout = 0;
-	char buf[40] = "INIT is running";
+	char buf[40] = "INIT is running\n";
 	//Printf("fd_stdout = %d\n", fd_stdout);
 	Printf("fd_stdout = %d\n", fd_stdout);
-	while(1){}
+//	while(1){}
+//	write(fd_stdout, buf, 40);
+//	write(fd_stdout, "\n", 1);
+//	write(fd_stdout, "T", 1);
 //	write(fd_stdout, buf, Strlen(buf));
-	return;
-
+int j = 0;
 			int pid = fork();
 		
 			if(pid > 0){
-	dis_pos = 12000 - 128 + 10 + 160 * 3;
-	//dis_pos += 160;
-	disp_str_colour("Parent:", 0x0D);
-	disp_int(pid);
-				spin("parent\n");
-			}else{			//	spin("child");
-			
-	dis_pos = 12000 - 128 + 10 + 160 * 5;
-	//dis_pos += 160;
-	disp_str_colour("child222:", 0x0C);
-	disp_int(pid);
+				j++;
+				char buf1[40] = "Parent\n";
+				for(int i = 0; i < 5; i++){
+					j++;
+					//write(fd_stdout, buf1, Strlen(buf1));			
+				}
+				//spin("parent\n");
+			}else{	
+			j++;		//	spin("child");
+			j += 2;
+		//		int fd2 = open("dev_tty0", O_RDWR);
+				char buf2[40] = "Child\n";
+				write(fd_stdout, buf2, Strlen(buf2));			
+		dis_pos = 12000 - 128 + 10 + 160 * 8;
+		disp_str_colour("j = ", 0x0C);
+		disp_int(j);
 				spin("child\n");
 			}
+
+		dis_pos = 12000 - 128 + 10 + 160 * 7;
+		disp_str_colour("j = ", 0x0C);
+		disp_int(j);
+				spin("parent\n");
 }
 
 void TestA()
 {
-    Printf("TestA is running\n");
+//    Printf("TestA is running\n");
     while (1)
     {
     }

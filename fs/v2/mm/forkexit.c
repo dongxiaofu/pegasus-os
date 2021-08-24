@@ -33,7 +33,6 @@ int do_fork(Message *msg)
         proc++;
     }
 
-    Printf("mm pid = %x\n", pid);
     //assert(pid > TASK_PROC_NUM + USER_PROC_NUM);
     // assert(pid > (TASK_PROC_NUM + USER_PROC_NUM));
     assert(pid >= (TASK_PROC_NUM + USER_PROC_NUM));
@@ -44,6 +43,7 @@ int do_fork(Message *msg)
     *proc = proc_table[parent_pid];
     proc->pid = pid;
     proc->ldt_selector = ldt_sel;
+	proc->parent_pid = parent_pid;
 
     // 复制父进程的内存空间
     // 使用指针，是因为我想改动最小，不想把下面的->改成.。
