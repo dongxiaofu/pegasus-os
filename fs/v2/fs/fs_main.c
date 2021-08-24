@@ -93,6 +93,9 @@ void task_fs()
 	//Printf("0 fs type = %d, source = %d\n", type, source);
         //assert(source == TASK_TTY || source == TASK_SYS || source == TASK_HD || source == TASK_FS || source == ANY || source == INTERRUPT || source == PROC_A || source == INIT_PID);
 	//assert(source == TASK_HD || source == INIT_PID);
+	if(msg.source == INIT_PID){
+		Printf("INIT is calling\n");
+	}
         // 不知道为何会发送来source为0、type为0的消息，不处理吧。
         if (msg.source == 0)
         {
