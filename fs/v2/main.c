@@ -512,15 +512,21 @@ void TestFS()
 void INIT()
 {
 	int fd_stdout = open("dev_tty1", O_RDWR);
+	int fd_stdin = open("dev_tty2", O_RDWR);
 //	int fd_stdout = 0;
 	char buf[40] = "INIT is running\n";
+	Memset(buf, 0, Strlen(buf));
 	//Printf("fd_stdout = %d\n", fd_stdout);
 	Printf("fd_stdout = %d\n", fd_stdout);
+	Printf("fd_stdin = %d\n", fd_stdin);
 //	while(1){}
 //	write(fd_stdout, buf, 40);
 //	write(fd_stdout, "\n", 1);
 //	write(fd_stdout, "T", 1);
+	read(fd_stdin, buf, 30);
 	write(fd_stdout, buf, Strlen(buf));
+	Printf("read over\n");
+	while(1){};
 int j = 0;
 			int pid = fork();
 		
@@ -1301,6 +1307,10 @@ int send_rec(int function, Message *msg, int pid)
     //		 || pid == TASK_MM
     //		);
     assert(function == SEND || function == RECEIVE || function == BOTH);
+	
+	if(function == RECEIVE){
+		Memset(msg, 0, sizeof(Message));
+	}
 
     int ret;
     switch (function)
@@ -1322,6 +1332,7 @@ int send_rec(int function, Message *msg, int pid)
         //assert(proc_table[1].p_flag == RUNNING);
         if (ret == 0)
         {
+		Memset(msg, 0, sizeof(Message));
             ret = receive_msg(msg, pid); // pid是sender
             // assert(msg->val != 0);
         }
@@ -1416,8 +1427,13 @@ void inform_int(int task_nr)
     {
         if (current->p_receive_from == INTERRUPT || current->p_receive_from == ANY)
         {
+		// todo 怎么往进程中塞进去一个变量？此处使用了未声明的变量msg，行不通。
+//		phycopy(v2l(current, msg), &msg2tty, sizeof(Message));
+		// 只有一个办法通知TTY，接收到识别不了的TYPE，不终止进程。
             current->has_int_msg = 0;
-            current->p_receive_from = NO_TASK;
+		// todo 想不到更好的方法，只能这样做。
+            // current->p_receive_from = NO_TASK;
+            current->p_receive_from = INTERRUPT;
             current->p_msg = 0;
             current->p_flag = RUNNING;
             unblock(current);

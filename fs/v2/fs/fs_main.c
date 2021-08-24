@@ -134,9 +134,23 @@ void task_fs()
 
 //        assert(source == TASK_TTY || source == TASK_SYS || source == TASK_HD || source == TASK_FS || source == ANY || source == INTERRUPT || source == PROC_A || source == INIT_PID);
 
-        fs_msg.type = SYSCALL_RET;
-        fs_msg.TYPE = SYSCALL_RET;
-        send_rec(SEND, &fs_msg, source);
+        //fs_msg.TYPE = SYSCALL_RET;
+//	if(msg->TYPE != RESUME_PROC){
+	if(msg.TYPE ==	SUPEND_PROC){
+		Printf("fs type = %d, do nothing\n", type);
+	//	assert(type != READ);
+	//	assert(( type == WRITE && msg.TYPE == RESUME_PROC) || type == OPEN );
+	//	fs_msg.TYPE = SYSCALL_RET;
+	//	send_rec(SEND, &fs_msg, source);
+	}else{
+		
+		Printf("fs type = %d, resume\n", type);
+		assert(type != READ);
+		assert(( type == WRITE && msg.TYPE == RESUME_PROC) || type == OPEN );
+		fs_msg.TYPE = SYSCALL_RET;
+		send_rec(SEND, &fs_msg, source);
+	} 
+        //send_rec(SEND, &fs_msg, source);
     }
 }
 
@@ -1062,7 +1076,7 @@ void do_rdwt(Message *msg)
     //	assert(fd == 0);
     assert(hd_operate_type == WRITE || hd_operate_type == READ);
 
-	//Printf("fs pinode.type = %d\n", pinode.type);
+	Printf("fs pinode.type = %d\n", pinode.type);
     // 文件是IS_CHAR_SPECIAL
     if (pinode.type == IS_CHAR_SPECIAL)
     {
@@ -1079,13 +1093,12 @@ void do_rdwt(Message *msg)
             type = DEV_WRITE;
         }
 
-        msg->type = type;
         msg->TYPE = type;
         msg->PROCNR = source;
         // todo 假设 BUF、BUF_LEN 已经在用户进程传递给本进程的消息体中了。
         // 怎么确定TTY的pid？在sys_task_table中查看，TASK_TTY是第0个元素。
         //Printf("fs 2 tty\n");
-	//Printf("fs type = %d, source = %d", type, source);
+	Printf("fs type = %d, source = %d", type, source);
         send_rec(BOTH, msg, TASK_TTY);
 
         return;

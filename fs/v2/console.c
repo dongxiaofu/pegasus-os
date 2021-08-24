@@ -225,8 +225,9 @@ void tty_dev_write(TTY *tty) {
             tty->tail = tty->buf;
         }
 // todo 调试使用，等全部功能结束后，可能要注释掉。
-        out_char(tty, key);
+//        out_char(tty, key);
 
+//	Printf("tty->left_cnt = %d\n", tty->left_cnt);
         // 把数据从终端缓冲区读取到用户进程
         if (tty->left_cnt) {
             // 是可打印字符
@@ -247,6 +248,7 @@ void tty_dev_write(TTY *tty) {
                 out_char(tty, key);
             } else if (key == '\n' || tty->tran_cnt == req_cnt) {// 是换行符或达到需要的长度
 
+		Printf("tty resume \n");
                 out_char(tty, key);
                 tty->left_cnt = 0;
                 tty->tran_cnt = 0;
@@ -254,12 +256,15 @@ void tty_dev_write(TTY *tty) {
                 // IPC返回
                 // todo 这里，需要补充，把tty的req_buf中存储的数据放到msg中，然后发送给用户进程。
                 Message msg;
-                msg.type = RESUME_PROC;
+                msg.TYPE = RESUME_PROC;
                 // 能用msg.RETVAL = tty->tran_cnt 吗?
                 msg.CNT = tty->tran_cnt;
                 msg.PROCNR = tty->procnr;
                 msg.BUF = tty->req_buf;
                 send_rec(SEND, &msg, tty->pcaller);
+
+		// todo	本次读操作结束。
+		return;
             }
         }
     }
@@ -271,12 +276,13 @@ void tty_do_read(TTY *tty, Message *msg) {
     tty->tran_cnt = 0;
     tty->procnr = msg->PROCNR;
     tty->pcaller = msg->source;
-    tty->left_cnt = msg->BUF_LEN;
-	Memset(tty->req_buf, Strlen(tty->req_buf));
+    tty->left_cnt = msg->CNT;
+	Memset(tty->req_buf, 0, Strlen(tty->req_buf));
 //    tty->req_buf = v2l(tty->procnr, msg->BUF);
 
+	Printf("\tty read %d return\n", tty->left_cnt);
     // IPC返回
-    msg->type = SUPEND_PROC;
+    msg->TYPE = SUPEND_PROC;
     send_rec(SEND, msg, tty->pcaller);
 }
 
@@ -410,6 +416,7 @@ void TaskTTY() {
 	}
 
         int type = msg.TYPE;
+//	Printf("tty type===%d\n", type);
 
         switch (type) {
             case DEV_OPEN:
@@ -422,7 +429,9 @@ void TaskTTY() {
                 tty_do_write(current_tty, &msg);
                 break;
             default:
-                panic("Unknown tty message type");
+               // panic("Unknown tty message type");
+               // 当接收到clock_handler中发送的通知时，需要继续运行本进程，所以，此处
+               // 不能终止。
                 break;
         }
     }
