@@ -67,6 +67,7 @@ typedef struct proc{
 	
         // ipc start
         char p_flag;           // 进程的状态：RUNNING等
+	char wait_status;	// 在exit、wait中使用。和p_flag分开，降低难度。
         Message *p_msg; // 指向消息体
          int p_send_to;  // 要向哪个进程发送消息，目标进程ID
         int p_receive_from;     // 要从哪个进程接收消息，目标进程ID
@@ -77,6 +78,7 @@ typedef struct proc{
 	unsigned int has_int_msg;	// 是否有中断消息。
 	
 	int parent_pid;
+	int exit_status;	// wait、exit系列中的退出状态码
 	
         // ipc end
 }Proc;
