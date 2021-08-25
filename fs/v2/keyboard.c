@@ -259,7 +259,7 @@ void in_process(TTY *tty, unsigned int key)
 			}
 		}	
 	}	
-	key_pressed = 0;
+	//key_pressed = 0;
 }
 
 // 键盘 end

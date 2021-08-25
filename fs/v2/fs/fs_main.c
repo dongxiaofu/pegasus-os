@@ -77,36 +77,53 @@ void do_rdwt(Message *msg);
 // 关闭文件
 int do_close(int fd);
 
+int c = 0;
+
 void task_fs()
 {
-    //Printf("%s\n", "FS is running");
+    ////Printf("%s\n", "FS is running");
     init_fs();
     while (1)
     {
+//	dis_pos = 12000 - 128 + 180 * 9 - 120;
+//	disp_str_colour("type-1 = ", 0x0E);
+//	disp_int(c);
         Message msg;
         Memset(&msg, 0, sizeof(Message));
         send_rec(RECEIVE, &msg, ANY);
-	//Printf("Enter FS\n");
+	////Printf("Enter FS\n");
         int type = msg.TYPE;
         int source = msg.source;
         int fd = msg.FD;
-	//Printf("0 fs type = %d, source = %d\n", type, source);
+	// todo 很辛苦才找到的错误。
+	int proc_who_want_to_rdwt = msg.PROCNR;
+//	dis_pos = 12000 - 128 + 180 * 10 - 120;
+//	disp_str_colour("type0 = ", 0x0E);
+//	disp_int(type);
+//	disp_str_colour(" , source0 = ", 0x0E);
+//	disp_int(source);
+//	disp_str_colour(" , c = ", 0x0F);
+//	disp_int(c);
+	////Printf("0 fs type = %d, source = %d\n", type, source);
         //assert(source == TASK_TTY || source == TASK_SYS || source == TASK_HD || source == TASK_FS || source == ANY || source == INTERRUPT || source == PROC_A || source == INIT_PID);
 	//assert(source == TASK_HD || source == INIT_PID);
 	if(msg.source == INIT_PID){
-		Printf("INIT is calling\n");
+		//Printf("INIT is calling\n");
 	}
         // 不知道为何会发送来source为0、type为0的消息，不处理吧。
+        // todo 耗费了好多好多好多好多时间才发现，原来是这里阻止了TTY通过FS唤醒INIT进程。
+        // 我的调试能力，太差了。
         if (msg.source == 0)
         {
-            continue;
+            //continue;
+            int t = 5;
         }
-        assert(type == OPEN || type == READ || type == WRITE || type == CLOSE);
+        //assert(type == OPEN || type == READ || type == WRITE || type == CLOSE);
 
         // open
         char *pathname = msg.PATHNAME;
         int oflags = msg.FLAGS;
-        ////Printf("source = %x, type = %x\n", msg.source, msg.TYPE);
+        //Printf("[source = %x, type = %x\n]", msg.source, msg.TYPE);
         pcaller = &proc_table[source];
 
         Message fs_msg;
@@ -128,7 +145,7 @@ void task_fs()
             do_close(fd);
             break;
         default:
-            panic("FS Unknown message");
+//            panic("FS Unknown message");
             break;
         }
 
@@ -136,27 +153,47 @@ void task_fs()
 
         //fs_msg.TYPE = SYSCALL_RET;
 //	if(msg->TYPE != RESUME_PROC){
+//	dis_pos = 12000 - 128 + 180 * 11 - 120;
+//	disp_str_colour("type = ", 0x0F);
+//	disp_int(type);
+//	disp_str_colour(" , source = ", 0x0F);
+//	disp_int(source);
+//	disp_str_colour(" , c = ", 0x0F);
+//	disp_int(c);
 	if(msg.TYPE ==	SUPEND_PROC){
-		Printf("fs type = %d, do nothing\n", type);
+		//Printf("fs type = %d, do nothing\n", type);
 	//	assert(type != READ);
 	//	assert(( type == WRITE && msg.TYPE == RESUME_PROC) || type == OPEN );
 	//	fs_msg.TYPE = SYSCALL_RET;
 	//	send_rec(SEND, &fs_msg, source);
 	}else{
-		
-		Printf("fs type = %d, resume\n", type);
-		assert(type != READ);
-		assert(( type == WRITE && msg.TYPE == RESUME_PROC) || type == OPEN );
+		int	dest = source;
+		if(type == RESUME_PROC){
+			dest = proc_who_want_to_rdwt;
+		}
+//		assert(type != OPEN);
+		//assert(( type == WRITE && msg.TYPE == RESUME_PROC) || type == OPEN );
 		fs_msg.TYPE = SYSCALL_RET;
-		send_rec(SEND, &fs_msg, source);
+		// todo 又一个刻骨铭心的的错误！此处，应该发送给用户进程INIT。
+		// 可是，source，是什么？是TTY进程啊！如何能唤醒INIT进程！
+		// send_rec(SEND, &fs_msg, source);
+		send_rec(SEND, &fs_msg, dest);
+//	dis_pos = 12000 - 128 + 180 * 11 - 120;
+//	disp_str_colour("type = ", 0x0F);
+//	disp_int(type);
+//	disp_str_colour(" , source = ", 0x0F);
+//	disp_int(source);
+//	disp_str_colour(" , c = ", 0x0F);
+//	disp_int(c);
 	} 
         //send_rec(SEND, &fs_msg, source);
+        c++;
     }
 }
 
 void rd_wt(int pos, int device, char *buf, int len, int type)
 {
-//	//Printf("enter fs rd_wt\n");
+//	////Printf("enter fs rd_wt\n");
     Message msg;
     Memset(&msg, 0, sizeof(Message));
     msg.TYPE = type;
@@ -177,12 +214,12 @@ void mkfs()
     //    // fsbuf未定义。神奇！
     //    //Memset(fsbuf, 0, 512);
     //    RD_SECT(ROOT_DEV, 1);
-    //    //Printf("read over\n");
+    //    ////Printf("read over\n");
     //    Memset(fsbuf, 0x0, 512);
     //    WT_SECT(ROOT_DEV, 1);
     //    Memset(fsbuf, 0xFF, 512);
     //    RD_SECT(ROOT_DEV, 1);
-    //    //Printf("fsbuf = %s\n", fsbuf);
+    //    ////Printf("fsbuf = %s\n", fsbuf);
     //    return;
     // 写入超级块
 
@@ -365,7 +402,7 @@ void init_fs()
 
 int do_open(char *pathname, int oflag)
 {
-	//Printf("Enter fs open\n");
+	////Printf("Enter fs open\n");
     // pcaller是调用open的进程
     // 从pcaller的filp_table中找出空闲的元素
     int i = -1;
@@ -1024,7 +1061,7 @@ void do_unlink(char *filename)
 
 void do_rdwt(Message *msg)
 {
-	//Printf("enter fs do_rdwt\n");
+	////Printf("enter fs do_rdwt\n");
     // 这个函数的主要思路：
     // 1. 先读取N个扇区。
     // 2. 读，从N个扇区中把数据复制到buf中。
@@ -1076,11 +1113,11 @@ void do_rdwt(Message *msg)
     //	assert(fd == 0);
     assert(hd_operate_type == WRITE || hd_operate_type == READ);
 
-	Printf("fs pinode.type = %d\n", pinode.type);
+	//Printf("fs pinode.type = %d\n", pinode.type);
     // 文件是IS_CHAR_SPECIAL
     if (pinode.type == IS_CHAR_SPECIAL)
     {
-	//Printf("fs tty\n");
+	////Printf("fs tty\n");
         // 请求TTY
         // 如果type不是READ也不是WRITE，怎么处理？
         int type;
@@ -1097,8 +1134,8 @@ void do_rdwt(Message *msg)
         msg->PROCNR = source;
         // todo 假设 BUF、BUF_LEN 已经在用户进程传递给本进程的消息体中了。
         // 怎么确定TTY的pid？在sys_task_table中查看，TASK_TTY是第0个元素。
-        //Printf("fs 2 tty\n");
-	Printf("fs type = %d, source = %d", type, source);
+        ////Printf("fs 2 tty\n");
+	//Printf("fs type = %d, source = %d", type, source);
         send_rec(BOTH, msg, TASK_TTY);
 
         return;

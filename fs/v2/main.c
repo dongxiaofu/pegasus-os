@@ -512,21 +512,24 @@ void TestFS()
 void INIT()
 {
 	int fd_stdout = open("dev_tty1", O_RDWR);
-	int fd_stdin = open("dev_tty2", O_RDWR);
+	int fd_stdin = open("dev_tty1", O_RDWR);
 //	int fd_stdout = 0;
 	char buf[40] = "INIT is running\n";
 	Memset(buf, 0, Strlen(buf));
 	//Printf("fd_stdout = %d\n", fd_stdout);
-	Printf("fd_stdout = %d\n", fd_stdout);
-	Printf("fd_stdin = %d\n", fd_stdin);
+	//Printf("fd_stdout = %d\n", fd_stdout);
+	//Printf("fd_stdin = %d\n", fd_stdin);
 //	while(1){}
 //	write(fd_stdout, buf, 40);
 //	write(fd_stdout, "\n", 1);
 //	write(fd_stdout, "T", 1);
-	read(fd_stdin, buf, 30);
-	write(fd_stdout, buf, Strlen(buf));
-	Printf("read over\n");
-	while(1){};
+//	dis_pos = 12000 - 128 + 180 * 1 + 60;
+//	disp_str_colour("read over2\n", 0x0E);
+	read(fd_stdin, buf, 40);
+//	dis_pos = 12000 - 128 + 180 * 1 + 60;
+//	disp_str_colour("read over\n", 0x0E);
+	write(fd_stdout, buf, 40);
+//	while(1){};
 int j = 0;
 			int pid = fork();
 		
@@ -534,8 +537,8 @@ int j = 0;
 				j++;
 				char buf1[40] = "Parent\n";
 				write(fd_stdout, buf1, Strlen(buf1));			
-				write(fd_stdout, buf1, Strlen(buf1));			
-				write(fd_stdout, buf1, Strlen(buf1));			
+		write(fd_stdout, buf1, Strlen(buf1));			
+		write(fd_stdout, buf1, Strlen(buf1));			
 				for(int i = 0; i < 5; i++){
 					j++;
 					//write(fd_stdout, buf1, Strlen(buf1));			
@@ -549,9 +552,12 @@ int j = 0;
 			write(fd_stdout, buf2, Strlen(buf2));			
 			write(fd_stdout, buf2, Strlen(buf2));			
 			write(fd_stdout, buf2, Strlen(buf2));			
-		dis_pos = 12000 - 128 + 10 + 160 * 8;
-		disp_str_colour("j = ", 0x0C);
-		disp_int(j);
+//		dis_pos = 12000 - 128 + 10 + 160 * 8;
+//		disp_str_colour("j = ", 0x0C);
+//		disp_int(j);
+		char buf4[] = "Child j = ";
+//		
+		write(fd_stdout, buf4, Strlen(buf4));
 				spin("child\n");
 			}
 
@@ -1087,9 +1093,7 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
         Message m;
         Memset(&m, 0, sizeof(Message));
         m.source = INTERRUPT;
-        m.type = 1;
-
-        assert(msg);
+        m.TYPE = HARD_INT;
 
         phycopy(v2l(receiver_pid, msg), &m,
                 sizeof(Message));
@@ -1427,13 +1431,17 @@ void inform_int(int task_nr)
     {
         if (current->p_receive_from == INTERRUPT || current->p_receive_from == ANY)
         {
+
+		// todo 我并不理解把current的p_msg设置成这两个值在哪里会被用到。
+		current->p_msg->source = INTERRUPT;
+		current->p_msg->TYPE = HARD_INT;
 		// todo 怎么往进程中塞进去一个变量？此处使用了未声明的变量msg，行不通。
 //		phycopy(v2l(current, msg), &msg2tty, sizeof(Message));
 		// 只有一个办法通知TTY，接收到识别不了的TYPE，不终止进程。
             current->has_int_msg = 0;
 		// todo 想不到更好的方法，只能这样做。
             // current->p_receive_from = NO_TASK;
-            current->p_receive_from = INTERRUPT;
+            current->p_receive_from = NO_TASK;
             current->p_msg = 0;
             current->p_flag = RUNNING;
             unblock(current);

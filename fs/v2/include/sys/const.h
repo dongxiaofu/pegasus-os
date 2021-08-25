@@ -170,6 +170,7 @@
 #define VM_TOTAL (0xBFFFF - 0xb8000)
 // 打印字符的默认颜色
 #define DEFAULT_COLOUR 0x0A
+#define DEFAULT_COLOUR2 0x0D
 // console相关 end
 
 
@@ -229,12 +230,15 @@
 #define GET_HD_IOCTL 11	// 获取文件系统所在分区的扇区数量
 
 #define SYSCALL_RET 101
+#define RESUME_PROC 102
+#define SUPEND_PROC 103
 
 // TTY使用
 #define DEV_OPEN 2001
 #define DEV_READ 2002
 #define DEV_WRITE 2003
 #define DEV_CLOSE 2004
+#define HARD_INT 2005
 
 // 终端文件
 #define IS_CHAR_SPECIAL 0
@@ -247,9 +251,6 @@
 
 #define HD_DEV_READ 1
 #define HD_DEV_WRITE 2
-
-#define RESUME_PROC 1
-#define SUPEND_PROC 2
 
 // 一些进程PID
 #define INTERRUPT -10
