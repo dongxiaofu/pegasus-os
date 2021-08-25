@@ -509,7 +509,34 @@ void TestFS()
     }
 }
 
-void INIT()
+// wait、exit测试用例
+void wait_exit()
+{
+	int fd_stdout = open("dev_tty1", O_RDWR);
+	int fd_stdin = open("dev_tty1", O_RDWR);
+
+	int pid = fork();
+	if(pid > 0){
+		int s = 2;
+//		wait(&s);
+		Printf("child main exit status %d\n", s);
+		while(1){}
+	}else{
+		Printf("I am child\n");
+		int c = 0;
+		while(1){
+			if(c++ > 50000){
+				break;
+			}
+		}
+		exit(9);
+		Printf("I am child 1\n");
+		while(1){}
+	}
+}
+
+// fork、write、read测试用例
+void INIT_fork()
 {
 	int fd_stdout = open("dev_tty1", O_RDWR);
 	int fd_stdin = open("dev_tty1", O_RDWR);
@@ -565,6 +592,12 @@ int j = 0;
 //		disp_str_colour("j = ", 0x0C);
 //		disp_int(j);
 				spin("parent\n");
+}
+
+
+void INIT()
+{
+	wait_exit();
 }
 
 void TestA()
@@ -733,7 +766,9 @@ void Printf(char *fmt, ...)
     int len = vsprintf(buf, fmt, var_list);
     //char str[2] = {'A', 0};
     //len = 2;
-    write2(buf, len);
+    // todo 想办法不使用硬编码0。0是文件描述符。
+    write(0, buf, len);
+//    write2(buf, len);
     return;
 }
 

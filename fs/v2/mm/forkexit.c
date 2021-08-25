@@ -127,22 +127,24 @@ void do_exit(Message *msg, int exit_code)
     int pid = msg->source;
     Proc *proc = &proc_table[pid];
 
-    // 处理文件
-    Message msg2fs;
-    msg2fs.type = EXIT;
-    msg2fs.PID = pid;
-    send_rec(BOTH, &msg2fs, pid);
+    // 处理文件 todo 暂时不实现。
+//    Message msg2fs;
+//    msg2fs.type = EXIT;
+//    msg2fs.PID = pid;
+//    send_rec(BOTH, &msg2fs, pid);
 
     // 处理caller
     int parent_pid = proc->parent_pid;
-    if (proc_table[parent_pid].p_flag == WAITING)
+	proc->exit_status = msg->STATUS;
+    if (proc_table[parent_pid].wait_status == WAITING)
     {
-        proc_table[parent_pid].p_flag = ~WAITING;
+        proc_table[parent_pid].wait_status = ~WAITING;
         cleanup(proc);
     }
     else
     {
-        proc->p_flag = FREE_SLOT;
+        //proc->p_flag = FREE_SLOT;
+        proc->p_flag = HANGING;
     }
 
     // 处理caller的子进程
@@ -151,30 +153,30 @@ void do_exit(Message *msg, int exit_code)
         if (proc_table[i].parent_pid == pid)
         {
             proc_table[i].parent_pid = INIT_PID;
-            if (proc_table[INIT_PID].p_flag == WAITING && proc_table[i].p_flag == HANGING)
+            if (proc_table[INIT_PID].wait_status == WAITING && proc_table[i].wait_status == HANGING)
             {
-                proc_table[INIT_PID].p_flag = ~WAITING;
+                proc_table[INIT_PID].wait_status = ~WAITING;
                 cleanup(proc_table[i]);
             }
         }
     }
 }
 
-void do_wait(Message msg)
+void do_wait(Message *msg)
 {
     // caller
-    int pid = msg.source;
+    int pid = msg->source;
     int child_count = 0;
 
     // 检查子进程是否处于HANGING状态
     for (int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++)
     {
-        if (proc_table[i].parent_pid = pid)
+        if (proc_table[i].parent_pid == pid)
         {
             child_count++;
-            if (proc_table[i].p_flag == HANGING)
+            if (proc_table[i].wait_status == HANGING)
             {
-                proc_table[pid].p_flag = ~WAITING;
+                proc_table[pid].wait_status = ~WAITING;
                 cleanup(proc_table[i]);
                 return;
             }
@@ -184,7 +186,8 @@ void do_wait(Message msg)
     // 有子进程；无子进程。
     if (child_count)
     {
-        proc_table[pid].p_flag = HANGING;
+        //proc_table[pid].wait_status = HANGING;
+        proc_table[pid].wait_status = WAITING;
     }
     else
     {
@@ -204,6 +207,8 @@ void cleanup(Proc *proc)
     msg2parent.TYPE = SYSCALL_RET;
     msg2parent.RETVAL = 0;
     msg2parent.PID = proc->parent_pid;
+	msg2parent.STATUS = proc->exit_status;
+// todo 把子进程的退出码传递给父进程。
     send_rec(SEND, &msg2parent, proc->parent_pid);
     // 回收子进程的进程表
     proc->p_flag = FREE_SLOT;
