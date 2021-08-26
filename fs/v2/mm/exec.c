@@ -54,8 +54,8 @@ int do_exec(Message *msg) {
     // 我们常用的文件的最大长度似乎没限制，后期，我想想怎么实现这个特性。
     // char mmbuf[MAX_FILE_SIZE];
     // todo 先用硬编码
-    int MAX_FILE_SIZE = 1024*1024;
-    char mmbuf[1024*1024];
+    int MAX_FILE_SIZE = 1024 * 1024;
+    char mmbuf[1024 * 1024];
     char filename[20];
     // FILENAME的长度包含末尾的'0'吗？
     phycopy(v2l(TASK_MM, filename), v2l(caller_pid, msg->PATHNAME), msg->NAME_LEN);

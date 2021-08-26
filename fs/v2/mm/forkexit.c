@@ -18,15 +18,12 @@
 //
 //void do_wait(Message msg, int *data);
 
-int do_fork(Message *msg)
-{
+int do_fork(Message *msg) {
     // 找到一个空闲进程表
     Proc *proc = &proc_table[TASK_PROC_NUM + USER_PROC_NUM];
     int pid = 0;
-    for (int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++)
-    {
-        if (proc->p_flag == FREE_SLOT)
-        {
+    for (int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++) {
+        if (proc->p_flag == FREE_SLOT) {
             pid = i;
             break;
         }
@@ -43,18 +40,18 @@ int do_fork(Message *msg)
     *proc = proc_table[parent_pid];
     proc->pid = pid;
     proc->ldt_selector = ldt_sel;
-	proc->parent_pid = parent_pid;
+    proc->parent_pid = parent_pid;
 
     // 复制父进程的内存空间
     // 使用指针，是因为我想改动最小，不想把下面的->改成.。
     Descriptor *cs_descriptor = &proc_table[parent_pid].ldts[0];
     // 该在哪个文件实现reassembly？满足两点：本文件对应的头文件；能被本文件引用。
     int caller_cs_base = reassembly(
-        cs_descriptor->seg_base_high, 24, cs_descriptor->seg_base_middle, 16, cs_descriptor->seg_base_below);
+            cs_descriptor->seg_base_high, 24, cs_descriptor->seg_base_middle, 16, cs_descriptor->seg_base_below);
 
     // todo 不知道怎么计算。
     int caller_cs_limit = reassembly(
-        cs_descriptor->seg_limit_high_and_attr2 & 0xF, 16, cs_descriptor->seg_limit_below, 0, 0);
+            cs_descriptor->seg_limit_high_and_attr2 & 0xF, 16, cs_descriptor->seg_limit_below, 0, 0);
 
     // cs段的size
     // todo 需验证，段大小的单位是4K还是字节。
@@ -121,8 +118,7 @@ int do_fork(Message *msg)
 }
 
 // todo exit_code没用到。不知道怎么处理。
-void do_exit(Message *msg, int exit_code)
-{
+void do_exit(Message *msg, int exit_code) {
     // 获取caller
     int pid = msg->source;
     Proc *proc = &proc_table[pid];
@@ -135,26 +131,20 @@ void do_exit(Message *msg, int exit_code)
 
     // 处理caller
     int parent_pid = proc->parent_pid;
-	proc->exit_status = msg->STATUS;
-    if (proc_table[parent_pid].wait_status == WAITING)
-    {
+    proc->exit_status = msg->STATUS;
+    if (proc_table[parent_pid].wait_status == WAITING) {
         proc_table[parent_pid].wait_status = ~WAITING;
         cleanup(proc);
-    }
-    else
-    {
+    } else {
         //proc->p_flag = FREE_SLOT;
         proc->p_flag = HANGING;
     }
 
     // 处理caller的子进程
-    for (int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++)
-    {
-        if (proc_table[i].parent_pid == pid)
-        {
+    for (int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++) {
+        if (proc_table[i].parent_pid == pid) {
             proc_table[i].parent_pid = INIT_PID;
-            if (proc_table[INIT_PID].wait_status == WAITING && proc_table[i].wait_status == HANGING)
-            {
+            if (proc_table[INIT_PID].wait_status == WAITING && proc_table[i].wait_status == HANGING) {
                 proc_table[INIT_PID].wait_status = ~WAITING;
                 cleanup(proc_table[i]);
             }
@@ -162,20 +152,16 @@ void do_exit(Message *msg, int exit_code)
     }
 }
 
-void do_wait(Message *msg)
-{
+void do_wait(Message *msg) {
     // caller
     int pid = msg->source;
     int child_count = 0;
 
     // 检查子进程是否处于HANGING状态
-    for (int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++)
-    {
-        if (proc_table[i].parent_pid == pid)
-        {
+    for (int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++) {
+        if (proc_table[i].parent_pid == pid) {
             child_count++;
-            if (proc_table[i].wait_status == HANGING)
-            {
+            if (proc_table[i].wait_status == HANGING) {
                 proc_table[pid].wait_status = ~WAITING;
                 cleanup(proc_table[i]);
                 return;
@@ -184,13 +170,10 @@ void do_wait(Message *msg)
     }
 
     // 有子进程；无子进程。
-    if (child_count)
-    {
+    if (child_count) {
         //proc_table[pid].wait_status = HANGING;
         proc_table[pid].wait_status = WAITING;
-    }
-    else
-    {
+    } else {
         // 解除caller的阻塞
         Message m;
         m.TYPE = SYSCALL_RET;
@@ -200,14 +183,13 @@ void do_wait(Message *msg)
     }
 }
 
-void cleanup(Proc *proc)
-{
+void cleanup(Proc *proc) {
     // 解除父进程的阻塞
     Message msg2parent;
     msg2parent.TYPE = SYSCALL_RET;
     msg2parent.RETVAL = 0;
     msg2parent.PID = proc->parent_pid;
-	msg2parent.STATUS = proc->exit_status;
+    msg2parent.STATUS = proc->exit_status;
 // todo 把子进程的退出码传递给父进程。
     send_rec(SEND, &msg2parent, proc->parent_pid);
     // 回收子进程的进程表

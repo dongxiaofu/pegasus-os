@@ -19,8 +19,8 @@ OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
 		hd.o hd_rdwt.o process.o protect.o console.o keyboard.o \
 		open.o	read.o	write.o	close.o \
 		wait.o  exit.o 	fork.o	 getpid.o exec.o \
-		mm/main.o mm/exec.o mm/forkexit.o
-	#	wait.o	exit.o	fork.o	unlink.o getpid.o
+		mm/main.o mm/exec.o mm/forkexit.o \
+		debug.o	miscellaneous.o printf.o vsprintf.o
 
 image:clean everything buildimg
 
@@ -132,4 +132,16 @@ getpid.o:lib/getpid.c
 	${CC} ${CFLAGS} -o $@ $<
 
 exec.o:lib/exec.c
+	${CC} ${CFLAGS} -o $@ $<
+
+debug.o:lib/debug.c
+	${CC} ${CFLAGS} -o $@ $<
+
+miscellaneous.o:lib/miscellaneous.c
+	${CC} ${CFLAGS} -o $@ $<
+
+printf.o:lib/printf.c
+	${CC} ${CFLAGS} -o $@ $<
+
+vsprintf.o:lib/vsprintf.c
 	${CC} ${CFLAGS} -o $@ $<

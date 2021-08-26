@@ -11,7 +11,7 @@
 
 int open(const char *pathname, int flags) {
     Message msg;
-	Memset(&msg, 0, sizeof(Message));
+    Memset(&msg, 0, sizeof(Message));
     msg.TYPE = OPEN;//OPEN;
     msg.PATHNAME = (void *) pathname;
     // todo FLAGS FD定义了吗？
