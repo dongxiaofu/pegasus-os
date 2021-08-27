@@ -22,9 +22,16 @@ OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
 		mm/main.o mm/exec.o mm/forkexit.o
 	#	wait.o	exit.o	fork.o	unlink.o getpid.o
 
+LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
+		hd.o hd_rdwt.o process.o protect.o console.o keyboard.o \
+		open.o	read.o	write.o	close.o \
+		wait.o  exit.o 	fork.o	 getpid.o exec.o \
+
+LOBJS	=	lib/pegasus_crt.a
+
 image:clean everything buildimg
 
-everything:${BOOT} ${KERNEL}
+everything:${BOOT} ${KERNEL} ${LOBJS}
 
 buildimg:
 	dd if=boot.bin of=a.img bs=512 count=1 conv=notrunc
@@ -36,6 +43,7 @@ clean:
 	rm -rvf *.bin
 	rm -rvf *.o
 	rm -rvf mm/*.o
+	rm -rvf lib/*.a
 
 # 不能使用所有的输入文件
 # kernel.bin:kernel.o string.o kernel_main.o hd.o syscall.o
@@ -133,3 +141,8 @@ getpid.o:lib/getpid.c
 
 exec.o:lib/exec.c
 	${CC} ${CFLAGS} -o $@ $<
+
+
+# 生成CRT，C语言运行时环境
+${LOBJS}:${OBJS}
+	ar rcs $@ $^
