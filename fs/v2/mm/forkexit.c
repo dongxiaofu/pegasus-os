@@ -71,7 +71,7 @@ int do_fork(Message *msg)
     //	caller_cs_size = (0x1000 + 0x015be4);
     //	caller_cs_base = 0x1000;
     //	child_base += 0x10;
-    phycopy(child_base, caller_cs_base, caller_cs_size);
+    phycopy((void *)child_base, (void *)caller_cs_base, caller_cs_size);
 
     // 设置子进程的ldt
     // todo 偷个懒，从我以前的代码中拼凑成的。我仍然不熟悉这块知识。
