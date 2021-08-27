@@ -19,13 +19,15 @@ OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
 		hd.o hd_rdwt.o process.o protect.o console.o keyboard.o \
 		open.o	read.o	write.o	close.o \
 		wait.o  exit.o 	fork.o	 getpid.o exec.o \
-		mm/main.o mm/exec.o mm/forkexit.o
+		mm/main.o mm/exec.o mm/forkexit.o \
+		printf.o
 	#	wait.o	exit.o	fork.o	unlink.o getpid.o
 
-LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
+LOBJS2	=	string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
 		hd.o hd_rdwt.o process.o protect.o console.o keyboard.o \
 		open.o	read.o	write.o	close.o \
 		wait.o  exit.o 	fork.o	 getpid.o exec.o \
+		printf.o
 
 LOBJS	=	lib/pegasus_crt.a
 
@@ -142,7 +144,10 @@ getpid.o:lib/getpid.c
 exec.o:lib/exec.c
 	${CC} ${CFLAGS} -o $@ $<
 
+printf.o:lib/printf.c
+	${CC} ${CFLAGS} -o $@ $<
+
 
 # 生成CRT，C语言运行时环境
-${LOBJS}:${OBJS}
+${LOBJS}:${LOBJS2}
 	ar rcs $@ $^
