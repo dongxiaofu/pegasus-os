@@ -2,15 +2,15 @@
 #define _PEGASUS_OS_FS_H
 
 // 文件名的最大长度
-#define MAX_FILENAME_LEN	14
+#define MAX_FILENAME_LEN	12
 // 最大文件数量
 #define CNT_OF_FILE	4096	// 512*8 = 4096。
 // #define SECTOR_SIZE	512
 // 一个文件占用的扇区数量
 #define CNT_OF_FILE_SECT  2048
 // 一个inode占用多少空间
-#define INODE_SIZE	20
-#define SUPER_BLOCK_SIZE 20
+#define INODE_SIZE	32
+#define SUPER_BLOCK_SIZE 32
 // 超级块
 struct super_block{
 	// 数据区域的第一个扇区的偏移量。
@@ -23,6 +23,7 @@ struct super_block{
 	int cnt_of_inode_sect;
 	// 一个文件分配多少个扇区。放在inode中，能随时获取这个值。
 	int nr_sect;
+	char _unused[12];
 	// 只存在于内存中
 	// 次设备号
 	int dev;
@@ -44,6 +45,7 @@ struct inode{
 	int nr_sect;
 	// 在imap中的索引
 	int nr_inode;
+	char _unused[12];
 
 	// 只存在于内存中
 	// 次设备号

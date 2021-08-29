@@ -254,16 +254,16 @@ void mkfs()
     // Memcpy(fsbuf, sp + SECTOR_SIZE, SECTOR_SIZE);
     // ROOT_DEV 是安装文件系统的分区的次设备号。
     // 参数1是写入超级的位置
-    //int sp_size = sizeof(struct super_block);
+    //int sp_size = SUPER_BLOCK_SIZE;
     int sp_size = SUPER_BLOCK_SIZE;
     // 调试
-    assert(sp->data_1st_sect == 2211);
-    assert(sp->cnt_of_sector_map_sect == 2048);
-    assert(sp->cnt_of_inode_sect == 160);
-    assert(sp->cnt_of_inode_map_sect == 1);
-    assert(sp->nr_sect = CNT_OF_FILE_SECT);
+    //assert(sp->data_1st_sect == 2211);
+    //assert(sp->cnt_of_sector_map_sect == 2048);
+    //assert(sp->cnt_of_inode_sect == 160);
+    //assert(sp->cnt_of_inode_map_sect == 1);
+    //assert(sp->nr_sect = CNT_OF_FILE_SECT);
     //    Memcpy(fsbuf, sp, sp_size);
-    Memset(fsbuf + sp_size, 0x90, 512 - sp_size);
+    Memset(fsbuf + sp_size, 0x80, 512 - sp_size);
     WT_SECT(ROOT_DEV, 1);
 
     struct super_block sp2 = *sp;
@@ -316,7 +316,7 @@ void mkfs()
     //Memset(fsbuf, 0, SECTOR_SIZE);
     //    struct inode *inode = (struct inode *)fsbuf;;
     //    inode->type = FILE_TYPE_TEXT;
-    //    inode->size = sizeof(struct dir_entry);
+    //    inode->size = DIR_ENTRY_SIZE;
     //    inode->start_sect = sp2.data_1st_sect;
     //    inode->nr_sect = CNT_OF_FILE_SECT;
     // 只存在于内存中的inode成员，不能在此时赋值。
@@ -332,7 +332,7 @@ void mkfs()
     struct inode *pinode = (struct inode *)fsbuf;
     pinode->type = FILE_TYPE_TEXT;
     // todo 初始化文件系统时默认有4个文件，分别是：根目录、三个终端。
-    pinode->size = sizeof(struct dir_entry) * 4;
+    pinode->size = DIR_ENTRY_SIZE * 4;
     pinode->start_sect = sp2.data_1st_sect;
     pinode->nr_sect = CNT_OF_FILE_SECT;
     // 根目录的inode用imap中的第1个bit记录。
@@ -340,7 +340,7 @@ void mkfs()
 
     // todo 存储根目录的inode到root中，下面的方法是否可以？
     //Memcpy(&root, pinode, sizeof(pinode));
-    //Memcpy(&root, pinode, sizeof(struct inode));
+    //Memcpy(&root, pinode, INODE_SIZE);
     // todo 这种方法是否行得通？
     //*root = *pinode;
     root = *pinode;
@@ -348,7 +348,7 @@ void mkfs()
     // 创建终端
     for (int i = 0; i < 3; i++)
     {
-        //pinode = (struct inode *) (fsbuf + sizeof(struct inode) * (i + 1));
+        //pinode = (struct inode *) (fsbuf + INODE_SIZE * (i + 1));
         pinode = (struct inode *)(fsbuf + INODE_SIZE * (i + 1));
         pinode->type = FILE_TYPE_SPECIAL_CHAR;
         pinode->size = 0;
@@ -375,7 +375,7 @@ void mkfs()
     struct dir_entry *dir_entry = (struct dir_entry *)fsbuf;
     dir_entry->nr_inode = 0x1;
     Memcpy(dir_entry->filename, filename, Strlen(filename));
-    //Memcpy(fsbuf, &dir_entry2, sizeof(struct dir_entry));
+    //Memcpy(fsbuf, &dir_entry2, DIR_ENTRY_SIZE);
 
     char *tty_name[10] = {"dev_tty0", "dev_tty1", "dev_tty2"};
     int tty_cnt = 3;
@@ -583,7 +583,7 @@ int get_inode(struct inode *inode, int nr_inode)
 
     // 在缓存中没有找到目标inode，从硬盘中读取。
     struct super_block *sb = get_super_block();
-    int inode_size = sizeof(struct inode);
+    int inode_size = INODE_SIZE;
     int pos = 1 + 1 + sb->cnt_of_inode_map_sect + sb->cnt_of_sector_map_sect +
               (nr_inode - 1) / (SECTOR_SIZE / inode_size);
     int dev = ROOT_DEV;
@@ -810,7 +810,7 @@ int new_inode(struct inode *inode, int nr_inode, int nr_start_sect)
 int new_dir_entry(struct dir_entry *dir_entry, struct inode *dir_root, char *filename, int nr_inode)
 {
     // 当前有多少个目录项
-    int dir_entry_size = sizeof(struct dir_entry);
+    int dir_entry_size = DIR_ENTRY_SIZE;
     // 下面两种运算，绝对不等价。我怎么连这样的错误也犯！
     // int nr_entry = dir_root->size >> dir_entry_size;
     int nr_entry = dir_root->size / dir_entry_size;
@@ -1011,7 +1011,7 @@ void do_unlink(char *filename)
     // 根目录占用的扇区
     int root_dir_nr_sect = dev_root->nr_sect;
     // 根目录中的目录项的数量
-    int nr_dir_entry = root_dir_size / sizeof(struct dir_entry);
+    int nr_dir_entry = root_dir_size / DIR_ENTRY_SIZE;
     int flag = 0;
     // 纠结m的值。m是对遍历过的目录项的数量的统计。
     int m = 0;
@@ -1030,12 +1030,12 @@ void do_unlink(char *filename)
                 break;
             }
 
-            new_root_dir_size += sizeof(struct dir_entry);
+            new_root_dir_size += DIR_ENTRY_SIZE;
 
             if (strcmp(pde->filename, filename) == 0)
             {
                 flag = 1;
-                Memset(pde, 0, sizeof(struct dir_entry));
+                Memset(pde, 0, DIR_ENTRY_SIZE);
                 break;
             }
         }
@@ -1115,7 +1115,10 @@ void do_rdwt(Message *msg)
 
 	//Printf("fs pinode.type = %d\n", pinode.type);
     // 文件是IS_CHAR_SPECIAL
-    if (pinode.type == IS_CHAR_SPECIAL)
+
+//	FILE_TYPE_SPECIAL_CHAR
+    //if (pinode.type == IS_CHAR_SPECIAL)
+    if (pinode.type == FILE_TYPE_SPECIAL_CHAR)
     {
 	////Printf("fs tty\n");
         // 请求TTY
@@ -1224,7 +1227,7 @@ void sync_inode(struct inode *inode)
     // 本函数不负责处理目标inode是否存在于硬盘上，只复制更新数据到硬盘上。
     // 主要思路：从硬盘中读取包含目标inode的扇区，更新fsbuf的inode后，把fsbuf写入硬盘。
     // int inode_size = sizeof(struct inode_size);
-    int inode_size = INODE_SIZE; // sizeof(struct inode);
+    int inode_size = INODE_SIZE; // INODE_SIZE;
     int nr_inode = inode->nr_inode;
     // inode的数量的偏移量
     int inode_idx = (nr_inode - 1) % (SECTOR_SIZE / inode_size);

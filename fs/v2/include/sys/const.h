@@ -253,7 +253,7 @@
 #define HD_DEV_WRITE 2
 
 // 一些进程PID
-#define INTERRUPT -10
+#define INTERRUPT 531
 
 #define MAX_TICKS 0x7FFFABCD
 

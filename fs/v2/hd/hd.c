@@ -12,6 +12,7 @@
 
 struct hd_info hd_info[1];
 
+int is_empty(char *buf, int len);
 
 // 等待硬盘准备好传输数据
 void wait_for();
@@ -87,8 +88,14 @@ void hd_handle() {
     //send_rec(RECEIVE, &msg, TaskHD);
     // 这个不起眼的小错误，耗费了几个小时才找出来！
     //send_rec(RECEIVE, &msg, TASK_FS);
-    send_rec(RECEIVE, &msg, 3);
+    //send_rec(RECEIVE, &msg, 3);
+    send_rec(RECEIVE, &msg, ANY);
     unsigned int type = msg.TYPE;
+	// 硬盘中断通过inform会产生许多type是0的消息。
+	//
+	if(type == 0)	{
+		return;
+	}
  unsigned int source = msg.source;
 
 //	msg.val = 0;
@@ -125,7 +132,7 @@ void hd_handle() {
 
 // void hd_cmd_out(unsigned char driver_number, int command, unsigned int lba, unsigned sector_count)
 void hd_cmd_out(struct hd_cmd *cmd) {
-    if (!waitfor(0x80, 0, 10000))
+    if (!waitfor(0x80, 0, 15000))
         panic("hd error.");
 //    while (in_byte(0x1F7) & 0x80 != 0) {
 //        int t = in_byte(0x1F7);
@@ -353,7 +360,7 @@ int get_hd_ioctl(int device) {
 
 
 void wait_for() {
-    if (!waitfor(0x8, 0x8, 10000))
+    if (!waitfor(0x8, 0x8, 1000000))
         panic("hd writing error.");
 }
 
@@ -439,8 +446,10 @@ void hd_rdwt(Message *msg) {
             // 把数据从phy_hdbuf写入到REG_DATA端口
             // Memset(phy_hdbuf, 0x0, 512);
             // write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, SECTOR_SIZE);
-            write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, bytes);
-            interrupt_wait();
+           if(is_empty(phy_hdbuf, bytes) == 0){ 
+        	    write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, bytes);
+            		interrupt_wait();
+		}
         }
         bytes_left -= bytes;
         phy_hdbuf += bytes;
@@ -485,5 +494,16 @@ void print_hd_info()
 			hd_info[0].logical_part[i].size, i);
 	}	
 	Printf("hd info logical part end:\n");
+}
+
+int is_empty(char *buf, int len)
+{
+	for(int i = 0; i < len; i++){
+		if(buf[i] != 0){
+			return 0;
+		}
+	}
+
+	return 1;
 }
 

@@ -39,11 +39,14 @@ buildimg:
 	sudo cp loader.bin	/mnt/floppy/ -v
 	sudo cp kernel.bin 	/mnt/floppy/ -v
 	sudo umount /mnt/floppy
+	cp -rvf ../v1/80m.img ./
+	chown cg 80m.img
 clean:
 	rm -rvf *.bin
 	rm -rvf *.o
 	rm -rvf mm/*.o
 	rm -rvf lib/*.a
+	rm -rvf 80m.img
 
 # 不能使用所有的输入文件
 # kernel.bin:kernel.o string.o kernel_main.o hd.o syscall.o

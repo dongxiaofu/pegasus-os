@@ -479,32 +479,46 @@ void kernel_main()
 // 测试文件系统
 void TestFS()
 {
+	int fd_stdout = open("dev_tty1", O_RDWR);
+//	while(1){}
+	int fd_stdin = open("dev_tty1", O_RDWR);
     Printf("TestA is running\n");
     char filename[5] = "AC";
-    char filename2[5] = "AB";
+    char filename2[5] = "cAB";
+    char filename3[10] = "INTERRUPT";
     int flag = 1;
     while (1)
     {
         if (flag == 1)
         {
             int fd = open(filename, O_CREAT);
-            Printf("fd = %x\n", fd);
+         Printf("fd = %x\n", fd);
             flag = 0;
             char buf[20] = "cg:hello,world!";
             write(fd, buf, Strlen(buf));
             char buf2[20];
             int k = read(fd, buf2, 18);
-            Printf("buf2 = %s\n", buf2);
+           Printf("buf2 = %s\n", buf2);
             delay(10);
             int fd2 = open(filename2, O_CREAT);
-            Printf("fd2 = %x\n", fd2);
+           Printf("fd2 = %x\n", fd2);
             flag = 0;
             char buf3[20] = "cg:how are you?";
-            write(fd2, buf3, Strlen(buf2));
+            write(fd2, buf3, Strlen(buf3));
             char buf4[20];
             int k2 = read(fd2, buf4, 18);
             Printf("buf4 = %s\n", buf4);
-            delay(10);
+         //   delay(10);
+            int fd3 = open(filename3, O_CREAT);
+           Printf("fd2 = %x\n", fd2);
+            flag = 0;
+            char buf5[30] = "I will success at last.";
+            write(fd3, buf5, Strlen(buf5));
+            char buf6[30];
+		for(int i = 0; i < 6; i++){
+            int k3 = read(fd3, buf6, Strlen(buf5));
+            Printf("buf6 = %s\n", buf6);
+		}
         }
     }
 }
@@ -513,9 +527,12 @@ void TestFS()
 void wait_exit()
 {
 	int fd_stdout = open("dev_tty1", O_RDWR);
+//	while(1){}
 	int fd_stdin = open("dev_tty1", O_RDWR);
+	//while(1){}
 
 	int pid = fork();
+	//while(1){}
 	if(pid > 0){
 		int s = 2;
 //		wait(&s);
@@ -523,6 +540,7 @@ void wait_exit()
 		while(1){}
 	}else{
 		Printf("I am child\n");
+	while(1){}
 		int c = 0;
 		while(1){
 			if(c++ > 50000){
@@ -597,7 +615,9 @@ int j = 0;
 
 void INIT()
 {
-	wait_exit();
+	TestFS();
+	while(1){};
+//	wait_exit();
 }
 
 void TestA()
@@ -767,8 +787,8 @@ void Printf(char *fmt, ...)
     //char str[2] = {'A', 0};
     //len = 2;
     // todo 想办法不使用硬编码0。0是文件描述符。
-    write(0, buf, len);
-//    write2(buf, len);
+//    write(0, buf, len);
+    write2(buf, len);
     return;
 }
 
@@ -1122,6 +1142,7 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
         assert((receiver_pid == 1) || (receiver_pid == 2) || (receiver_pid == 3) || (receiver_pid == 15));
     }
 
+	int int_flag = 0;
     if (receiver->has_int_msg && (sender_pid == ANY || sender_pid == INTERRUPT))
     {
 
@@ -1138,8 +1159,14 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
         receiver->p_send_to = NO_TASK;
         receiver->p_flag = RUNNING;
 
-        return 0;
+	int_flag = 1;
+	
+       // return 0;
     }
+
+	if(int_flag == 1){
+		return;
+	}
 
     // 主要思路：
     // 1. 如果信息来源是ANY，从本进程的消息队列中取出一个消息进行处理。
@@ -1481,8 +1508,7 @@ void inform_int(int task_nr)
             current->p_flag = RUNNING;
             unblock(current);
         }
-    }
-    else
+    } else
     {
         current->has_int_msg = 1;
     }
