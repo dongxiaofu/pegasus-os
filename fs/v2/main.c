@@ -49,10 +49,21 @@ void untar(const char *filename)
     char buf[SECTOR_SIZE * 16];
     int chunk = sizeof(buf);
 
+	int bytes_read2 = 0;
+	int bytes_read = 0;
+
     while (1)
     {
-        read(fd, buf, SECTOR_SIZE);
-        if (Strlen(buf) == 0)
+	// 跳过上一个文件占用的空间
+	if(bytes_read2 > 0){
+		int sector_count = (bytes_read2 - 1 + SECTOR_SIZE) / SECTOR_SIZE;		
+			Memset(buf, 0, SECTOR_SIZE * 16);
+       		 	bytes_read = read(fd, buf, sector_count * SECTOR_SIZE - bytes_read2);
+	}
+
+	Memset(buf, 0, SECTOR_SIZE * 16);
+        bytes_read = read(fd, buf, SECTOR_SIZE);
+        if (bytes_read == 0)
         {
             break;
         }
@@ -60,10 +71,17 @@ void untar(const char *filename)
         struct tar_header *tar_header = (struct tar_header *)buf;
         // 不确定能不能用指针接收一个字符串。能。
         char *name = tar_header->name;
-        int fdout = open(name, O_WRONLY);
+        // int fdout = open(name, O_WRONLY);
+        int fdout = open(name, O_CREAT);
         // 计算文件大小
         int len = 0;
         char *size_str = tar_header->size;
+	
+	// 检查有效数据是否已经结束
+	if(Strlen(name) == 0 && Strlen(size_str) == 0){
+		break;
+	}
+
         char *p = size_str;
         while (*p)
         {
@@ -72,15 +90,20 @@ void untar(const char *filename)
         }
 
         int bytes_left = len;
-        while (bytes_left)
-        {
-            int iobytes = MIN(chunk, bytes_left);
-            read(fd, buf, ((iobytes - 1) / SECTOR_SIZE + 1) * SECTOR_SIZE);
-            write(fdout, buf, iobytes);
-            bytes_left -= iobytes;
-        }
+        //while (bytes_left)
+       // {
+//            int iobytes = MIN(chunk, bytes_left);
+            //read(fd, buf, ((iobytes - 1) / SECTOR_SIZE + 1) * SECTOR_SIZE);
+            Memset(buf, 0, SECTOR_SIZE);
+            bytes_read2 = read(fd, buf, len);
+            // write(fdout, buf, iobytes);
+            write(fdout, buf, len);
+           // bytes_left -= iobytes;
+       // }
 
         close(fdout);
+
+	
     }
 
     close(fd);
@@ -626,8 +649,8 @@ void test_exec()
 
 void INIT()
 {
-//	test_exec();
-	TestFS();
+	test_exec();
+//	TestFS();
 //	wait_exit();
 	while(1){};
 }

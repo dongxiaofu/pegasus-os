@@ -72,7 +72,8 @@ void do_unlink(char *filename);
 
 // 读写文件。
 // 不知道返回值，不知道需要哪些参数。边写边想吧。
-void do_rdwt(Message *msg);
+// void do_rdwt(Message *msg);
+int do_rdwt(Message *msg);
 
 // 关闭文件
 int do_close(int fd);
@@ -130,7 +131,8 @@ void task_fs()
         //        fs_msg.type = SYSCALL_RET;
         //        send_rec(SEND, &fs_msg, source);
         //	return;
-
+        // 已经写入获取读取的数据的长度。
+	int byte_rdwt = 0;
         switch (type)
         {
         case OPEN:
@@ -138,7 +140,7 @@ void task_fs()
             break;
         case READ:
         case WRITE:
-            do_rdwt(&msg);
+           byte_rdwt =  do_rdwt(&msg);
             break;
         case CLOSE:
             //	int fd = msg.FD;
@@ -177,6 +179,7 @@ void task_fs()
 		// todo 又一个刻骨铭心的的错误！此处，应该发送给用户进程INIT。
 		// 可是，source，是什么？是TTY进程啊！如何能唤醒INIT进程！
 		// send_rec(SEND, &fs_msg, source);
+		fs_msg.CNT = byte_rdwt;
 		send_rec(SEND, &fs_msg, dest);
 //	dis_pos = 12000 - 128 + 180 * 11 - 120;
 //	disp_str_colour("type = ", 0x0F);
@@ -1103,7 +1106,7 @@ void do_unlink(char *filename)
     }
 }
 
-void do_rdwt(Message *msg)
+int do_rdwt(Message *msg)
 {
 	////Printf("enter fs do_rdwt\n");
     // 这个函数的主要思路：
@@ -1157,7 +1160,8 @@ void do_rdwt(Message *msg)
 	// todo 有问题吗？
 //	int pos = pinode.start_sect;
 //	int pos = pinode.start_sect + file_desc->pos;
-	int pos = 0;
+//	int pos = 0;
+	int pos = file_desc->pos;
     //assert(len == 6);
     //	assert(fd == 0);
     assert(hd_operate_type == WRITE || hd_operate_type == READ);
@@ -1190,8 +1194,19 @@ void do_rdwt(Message *msg)
 	//Printf("fs type = %d, source = %d", type, source);
         send_rec(BOTH, msg, TASK_TTY);
 
-        return;
+        return 0;
     }
+
+
+	// 读写了多少数据
+	if (hd_operate_type == READ && pos == file_size){
+		return 0;
+	}
+
+	
+	if (hd_operate_type == WRITE && pos == pinode.nr_sect * SECTOR_SIZE){
+		return 0;
+	}
 
     // 文件是普通文件，即非终端文件
     // 文件操作的结束位置
@@ -1257,13 +1272,16 @@ void do_rdwt(Message *msg)
         offset = 0;
     }
 
+	file_desc->pos += len;
     // 呵呵，这个常识，还让费解。悲伤！
     if (pos + len > pinode.size)
     {
         pinode.size = pos + len;
-	file_desc->pos += len;
+	//file_desc->pos += len;
         sync_inode(&pinode);
     }
+	// 返回值是已经写入或读取的数据的长度。
+	return byte_wt;
 }
 
 void sync_inode(struct inode *inode)

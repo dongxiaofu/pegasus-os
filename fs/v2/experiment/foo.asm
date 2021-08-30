@@ -9,7 +9,7 @@ Str:	db	"Hello"
 ;StrLe	equ	$ - Str 未定义
 
 ;Str	dd	"Hello"
-Strlen	dd	5
+Strlen2	dd	5
 
 [section .text]
 

@@ -131,10 +131,12 @@ Strlen:
 	mov byte al, [esi]
 	;cmp al, 0
 	;jz .2
-	inc esi
-	inc ecx
+	;inc esi
+	;inc ecx
 	cmp al, 0
 	jz .2
+	inc esi
+	inc ecx
 	jmp .1
 .2:
 	mov eax, ecx
