@@ -40,7 +40,7 @@ buildimg:
 	sudo cp loader.bin	/mnt/floppy/ -v
 	sudo cp kernel.bin 	/mnt/floppy/ -v
 	sudo umount /mnt/floppy
-	cp -rvf ../v1/80m.img ./
+	cp -rvf /home/cg/os/pegasus-os/hd/80m.img ./
 	chown cg 80m.img
 clean:
 	rm -rvf *.bin
