@@ -400,6 +400,9 @@ void hd_rdwt(Message *msg) {
 
     // 读写硬盘
     int len = msg->LEN;
+	// int sector_count = len >> SECTOR_SIZE_SHIFT;
+	//int sector_count = (len + SECTOR_SIZE - 1) >> SECTOR_SIZE_SHIFT;
+	int sector_count = (len + SECTOR_SIZE - 1) / SECTOR_SIZE;
     int bytes_left = len;
     // 从msg中获取内存地址。
     // 这个内存地址存储了要写入硬盘的数据，	或用来存储从硬盘中读取到的数据。
@@ -413,7 +416,8 @@ void hd_rdwt(Message *msg) {
     // 执行hd_cmd_out，指挥硬盘
     struct hd_cmd cmd;
     cmd.feature = 0;
-    cmd.sector_count = 1;
+    // cmd.sector_count = 1;
+    cmd.sector_count = sector_count;
     cmd.lba_low = nr_sects & 0xFF;
     cmd.lba_mid = (nr_sects >> 8) & 0xFF;
     cmd.lba_high = (nr_sects >> 16) & 0xFF;
@@ -429,6 +433,13 @@ void hd_rdwt(Message *msg) {
 //	cmd.lba_high = 0;
 //	cmd.device = 224;
 //	cmd.command = 48;
+
+
+	if(type == READ && nr_sects == 26626){
+		assert(sector_count == 1);
+	}
+
+
     hd_cmd_out(&cmd);
 
 //	bytes_left = 512;
@@ -439,7 +450,16 @@ void hd_rdwt(Message *msg) {
             // todo 不知道哪里出了问题，会向硬盘驱动发出我预期之外的读写操作。
             // 这个时候读取不到数据，被阻塞后不会被中断解除阻塞。
             // 神奇，为啥会读取不到数据？
-            if(Strlen(phy_hdbuf) == 0)	continue;
+//         if(Strlen(phy_hdbuf) == 0)	continue;
+            //if(Strlen(phy_hdbuf) != 0)	continue;
+	//	dis_pos = 12000 - 128 + 180 * 1 + 60;
+	//	disp_int(sector_count);
+		//disp_str_colour("#", 0x0E);
+		//disp_int(len);
+		// todo 这里，需要随便执行几条语句。如上，打印语句可可以，wait_for也可以。
+		// 原因不明。
+            wait_for();
+		
             // 读
             interrupt_wait();
             // 从REG_DATA端口读取数据存储到phy_hdbuf中
@@ -452,10 +472,10 @@ void hd_rdwt(Message *msg) {
             // 把数据从phy_hdbuf写入到REG_DATA端口
             // Memset(phy_hdbuf, 0x0, 512);
             // write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, SECTOR_SIZE);
-          if(is_empty(phy_hdbuf, bytes) == 0){ 
+         // if(is_empty(phy_hdbuf, bytes) == 0){ 
         	    write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, bytes);
             		interrupt_wait();
-		}
+	//	}
         }
         bytes_left -= bytes;
         phy_hdbuf += bytes;

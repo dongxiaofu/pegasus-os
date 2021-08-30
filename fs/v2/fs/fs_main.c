@@ -373,13 +373,16 @@ Memset(fsbuf+1, 0x0, SECTOR_SIZE-1);
 
 	// 创建其他文件，例如install.tar
 	// todo 这个数组，语法有问题吗？
-	int other_file_cnt = 3;
+	int other_file_cnt = 1;
 	// error: variable-sized object may not be initialized
 	// char *other_file_name[other_file_cnt] = {"install.tar"};
-	char *other_file_name[3] = {"install.tar"};
+	char *other_file_name[10] = {"install.tar"};
 	for(int i = 0; i < other_file_cnt; i++){
-		if(Strlen(other_file_name[i]) == 0)	continue;
+		// 错误，other_file_name[i] 的长度是10。
+//		if(Strlen(other_file_name[i]) == 0)	continue;
 		
+	// todo 漏掉了这句。更好的方式，使用pinode++。
+        pinode = (struct inode *)(fsbuf + INODE_SIZE * (i + 4));
 	    pinode->type = FILE_TYPE_TEXT;
 	    // todo 初始化文件系统时默认有5个文件，分别是：根目录、三个终端、install.tar
 	    pinode->size = 10240;
@@ -1130,10 +1133,12 @@ void do_rdwt(Message *msg)
     int buf = msg->BUF;
     // todo 下面获取inode的方法正确吗？
     int fd = msg->FD;
-    int pos = msg->POS;
+	// todo 大错特错！
+//    int pos = msg->POS;
     //struct inode *inode = proc_table[sender].filp[fd]->inode;
     // todo 在任务进程中直接这样获取proc_table是否合适？
-    int nr_inode = proc_table[sender].filp[fd]->nr_inode;
+    struct file_desc *file_desc = proc_table[sender].filp[fd];
+    int nr_inode = file_desc->nr_inode;
 	int source = msg->source;
     //	assert(fd == 0);
     //	assert(nr_inode == 5);
@@ -1149,7 +1154,10 @@ void do_rdwt(Message *msg)
 
     // 文件大小
     int file_size = pinode.size;
-
+	// todo 有问题吗？
+//	int pos = pinode.start_sect;
+//	int pos = pinode.start_sect + file_desc->pos;
+	int pos = 0;
     //assert(len == 6);
     //	assert(fd == 0);
     assert(hd_operate_type == WRITE || hd_operate_type == READ);
@@ -1219,12 +1227,6 @@ void do_rdwt(Message *msg)
     int base = Seg2PhyAddrLDT(ds, sender_proc);
     int buf_line_addr = base + buf;
 
-    // todo 调试
-    //	assert();
-    //	assert();
-    //	assert();
-    //	assert();
-
     for (int i = start_sect; i <= start_end && byte_left; i += chunk)
     {
         int byte = MIN(byte_left, chunk * SECTOR_SIZE - offset);
@@ -1259,6 +1261,7 @@ void do_rdwt(Message *msg)
     if (pos + len > pinode.size)
     {
         pinode.size = pos + len;
+	file_desc->pos += len;
         sync_inode(&pinode);
     }
 }

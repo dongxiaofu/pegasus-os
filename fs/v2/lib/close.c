@@ -12,12 +12,12 @@
 int close(int fd) {
     Message msg;
 
-    msg.type = CLOSE;
+    msg.TYPE = CLOSE;
     msg.FD = fd;
 
     send_rec(BOTH, &msg, TASK_FS);
 
-    assert(msg.type == SYSCALL_RET);
+    assert(msg.TYPE == SYSCALL_RET);
 
     return msg.RETVAL;
 }

@@ -20,12 +20,13 @@ everything:echo pwd
 install:
 	tar cvf install.tar echo.c
 	cp -rvf ../kernel.bin ./
-	dd if=install.tar of=${HD} seek=24579 bs=512 count=20 conv=notrunc
+	dd if=install.tar of=${HD} seek=24578 bs=512 count=20 conv=notrunc
 
 clean:
 	#rm -rvf *.o
 	rm -rvf ${OBJS}
 	rm -rvf ${BIN}
+	rm -rvf install.tar
 
 start.o:start.asm
 	${ASM} ${ASKFLAGS} -o $@ $<

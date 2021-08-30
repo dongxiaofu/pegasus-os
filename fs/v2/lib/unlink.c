@@ -12,7 +12,7 @@
 int unlink(const char *pathname) {
     Message msg;
 
-    msg.type = UNLINK;
+    msg.TYPE = UNLINK;
     msg.PATHNAME = pathname;
     msg.NAME_LEN = Strlen(pathname);
 

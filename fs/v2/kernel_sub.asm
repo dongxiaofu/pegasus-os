@@ -22,6 +22,7 @@ extern dis_pos
 extern test
 extern kernel_main
 
+global _start
 
 
 _start:
