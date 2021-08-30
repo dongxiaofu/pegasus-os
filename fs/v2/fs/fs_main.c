@@ -224,7 +224,8 @@ void mkfs()
     // 写入超级块
 
     // 写入超级块
-    RD_SECT(ROOT_DEV, 1);
+    Memset(fsbuf, 0x0, 512);
+    WT_SECT(ROOT_DEV, 0);
     struct super_block *sp = (struct super_block *)fsbuf;
     sp->cnt_of_inode_map_sect = 1;
     sp->nr_sect = CNT_OF_FILE_SECT;
@@ -272,7 +273,8 @@ void mkfs()
     // todo 又看不懂这块的逻辑了。先让语法错误消失吧。
     // char first_bit = 0x3;    // 0x3 的二进制形式：0000 0011。
     // imap的第0个bit是保留位，剩下的依次是：根目录、dev_tty1、dev_tty2、dev_tty3。
-    char first_byte = 31; // 31 的二进制形式：0001 1111。
+    // char first_byte = 31; // 31 的二进制形式：0001 1111。
+    char first_byte = 0x3F; //  二进制形式：0011 1111。
     // todo 如此写入first_bit，好像不妥。
     Memset(fsbuf, first_byte, 1);
     Memset(fsbuf + 1, 0x80, SECTOR_SIZE - 1);
@@ -280,32 +282,43 @@ void mkfs()
     // 写入sector-map
     // pos的值 = 1（引导扇区）+ 1（超级块）+ 1(inode-map)。
     int pos = 1 + 1 + 1;
+	// 新增 install.tar 之前的sector-map初始 start
     // 写入第一个扇区。这个扇区的前256个字节的所有bit都是1，后256个字节的所有bit都是0。
     // 一个文件最多占用256 * 8 = 2048个扇区，2048*512/1024/1024个字节 = 1M个字节。
-    Memset(fsbuf, 0xFF, SECTOR_SIZE >> 1);
-    // 前面256*8 + 1个bit都是1，后面所有的字节的bit都是0。
-    // 这里，费解！三四个小时前写的，现在看，又花了点时间才理解。
-    // 1个字节：0000 0001。多出来的1，是sector-map的第0个bti是保留位造成的。
-    // error: invalid operands to binary >> (have 'char *' and 'int')
-    // Memset(fsbuf + SECTOR_SIZE >> 1, 1, 1);
-    // Memset(fsbuf + (SECTOR_SIZE >> 1), 1, 1);
-    // 256 * 8 + 1，256*8个扇区，这是一个文件能占用的最大扇区数量。
-    // 256 + 1 个字节，前256个字节的每个bit都是1，第257个字节的8个bit中的第0个bit是1。
-    // error: invalid operands to binary >> (have 'char *' and 'int')
-    // Memset(fsbuf + SECTOR_SIZE >> 1 + 1, 0, SECTOR_SIZE >> 1 - 1);
-    //Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x01, SECTOR_SIZE >> 1 - 1);
-    //Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x01, 1);
-    Memset(fsbuf + (SECTOR_SIZE >> 1), 0x01, 1);
-    // 这个扇区的后255个字节都是0，前256个字节是0xFF,第256个字节是0x1。
-    int rest_bits = (SECTOR_SIZE >> 1) - 1;
-    // Memset(fsbuf + (SECTOR_SIZE >> 1) + 1 + 1, 0x0, rest_bits);
-    Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x0, rest_bits);
-    WT_SECT(ROOT_DEV, pos);
+//    Memset(fsbuf, 0xFF, SECTOR_SIZE >> 1);
+//    // 前面256*8 + 1个bit都是1，后面所有的字节的bit都是0。
+//    // 这里，费解！三四个小时前写的，现在看，又花了点时间才理解。
+//    // 1个字节：0000 0001。多出来的1，是sector-map的第0个bti是保留位造成的。
+//    // error: invalid operands to binary >> (have 'char *' and 'int')
+//    // Memset(fsbuf + SECTOR_SIZE >> 1, 1, 1);
+//    // Memset(fsbuf + (SECTOR_SIZE >> 1), 1, 1);
+//    // 256 * 8 + 1，256*8个扇区，这是一个文件能占用的最大扇区数量。
+//    // 256 + 1 个字节，前256个字节的每个bit都是1，第257个字节的8个bit中的第0个bit是1。
+//    // error: invalid operands to binary >> (have 'char *' and 'int')
+//    // Memset(fsbuf + SECTOR_SIZE >> 1 + 1, 0, SECTOR_SIZE >> 1 - 1);
+//    //Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x01, SECTOR_SIZE >> 1 - 1);
+//    //Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x01, 1);
+//    Memset(fsbuf + (SECTOR_SIZE >> 1), 0x01, 1);
+//    // 这个扇区的后255个字节都是0，前256个字节是0xFF,第256个字节是0x1。
+//    int rest_bits = (SECTOR_SIZE >> 1) - 1;
+//    // Memset(fsbuf + (SECTOR_SIZE >> 1) + 1 + 1, 0x0, rest_bits);
+//    Memset(fsbuf + (SECTOR_SIZE >> 1) + 1, 0x0, rest_bits);
+	// 新增 install.tar 之前的sector-map初始 end
+	// 新增 install.tar 之后的sector-map初始 start
+Memset(fsbuf, 0xFF, SECTOR_SIZE);
+WT_SECT(ROOT_DEV, pos);	
+// 因为保留位而多出来的一个bit
+Memset(fsbuf, 0x1, 1);
+// todo 硬盘不会写入0，怎么办？
+Memset(fsbuf+1, 0x0, SECTOR_SIZE-1);
+	// 新增 install.tar 之后的sector-map初始 end
+    WT_SECT(ROOT_DEV, pos + 1);
     //        Memset(fsbuf, 0x40, SECTOR_SIZE);
     //        WT_SECT(ROOT_DEV, pos + 1);
     // 写入sector-map的剩余扇区
-    int rest_sects = sp2.cnt_of_sector_map_sect - 1;
-    for (int i = 1; i <= rest_sects; i++)
+    int rest_sects = sp2.cnt_of_sector_map_sect - 2;
+	// todo 不是非常确定此处是否应该加1。
+    for (int i = 2; i <= rest_sects + 1; i++)
     {
         Memset(fsbuf, 0x0, SECTOR_SIZE);
         WT_SECT(ROOT_DEV, pos + i);
@@ -331,8 +344,8 @@ void mkfs()
     // 创建根目录
     struct inode *pinode = (struct inode *)fsbuf;
     pinode->type = FILE_TYPE_TEXT;
-    // todo 初始化文件系统时默认有4个文件，分别是：根目录、三个终端。
-    pinode->size = DIR_ENTRY_SIZE * 4;
+    // todo 初始化文件系统时默认有5个文件，分别是：根目录、三个终端、install.tar
+    pinode->size = DIR_ENTRY_SIZE * INIT_FS_FILE_CNT;
     pinode->start_sect = sp2.data_1st_sect;
     pinode->nr_sect = CNT_OF_FILE_SECT;
     // 根目录的inode用imap中的第1个bit记录。
@@ -357,6 +370,25 @@ void mkfs()
         int task_tty = 0;
         pinode->start_sect = MAKE_DEV(task_tty, i);
     }
+
+	// 创建其他文件，例如install.tar
+	// todo 这个数组，语法有问题吗？
+	int other_file_cnt = 3;
+	// error: variable-sized object may not be initialized
+	// char *other_file_name[other_file_cnt] = {"install.tar"};
+	char *other_file_name[3] = {"install.tar"};
+	for(int i = 0; i < other_file_cnt; i++){
+		if(Strlen(other_file_name[i]) == 0)	continue;
+		
+	    pinode->type = FILE_TYPE_TEXT;
+	    // todo 初始化文件系统时默认有5个文件，分别是：根目录、三个终端、install.tar
+	    pinode->size = 10240;
+	    pinode->start_sect = sp2.data_1st_sect + (i+1) * CNT_OF_FILE_SECT;
+	    pinode->nr_sect = CNT_OF_FILE_SECT;
+	    // 根目录的inode用imap中的第1个bit记录。
+	    pinode->nr_inode = INIT_FS_FILE_CNT + i;
+	}
+
     WT_SECT(ROOT_DEV, 1 + 1 + 1 + sp2.cnt_of_sector_map_sect);
 
     // 写入根目录
@@ -386,6 +418,15 @@ void mkfs()
         dir_entry->nr_inode = 2 + i;
         Memcpy(dir_entry->filename, tty_name[i], Strlen(tty_name[i]));
     }
+    //WT_SECT(ROOT_DEV, sp2.data_1st_sect);
+
+	// 写入其他文件的目录项，例如install.tar
+	for(int i = 0; i < other_file_cnt; i++){
+		if(Strlen(other_file_name[i]) == 0) continue;
+        	dir_entry++;
+        	dir_entry->nr_inode = INIT_FS_FILE_CNT + i;
+        	Memcpy(dir_entry->filename, other_file_name[i], Strlen(other_file_name[i]));
+	}
     WT_SECT(ROOT_DEV, sp2.data_1st_sect);
 }
 

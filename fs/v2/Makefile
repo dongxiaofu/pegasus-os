@@ -15,7 +15,7 @@ LDFLAGS		= -Ttext 0x1000 -Map krnl.map -m elf_i386
 
 BOOT = loader.bin boot.bin
 KERNEL	=	kernel.bin
-OBJS	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
+OBJS	=	kernel_sub.o kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
 		hd.o hd_rdwt.o process.o protect.o console.o keyboard.o \
 		open.o	read.o	write.o	close.o \
 		wait.o  exit.o 	fork.o	 getpid.o exec.o \
@@ -26,6 +26,7 @@ LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
 		hd.o hd_rdwt.o process.o protect.o console.o keyboard.o \
 		open.o	read.o	write.o	close.o \
 		wait.o  exit.o 	fork.o	 getpid.o exec.o \
+		mm/main.o mm/exec.o mm/forkexit.o
 
 LOBJS	=	lib/pegasus_crt.a
 
@@ -68,6 +69,9 @@ loader.bin:pmtest2.asm
 
 # kernel.o:kernel.asm include/string.h include/hd.h
 kernel.o:kernel.asm
+	${ASM} ${ASKFLAGS} -o $@ $<
+
+kernel_sub.o:kernel_sub.asm
 	${ASM} ${ASKFLAGS} -o $@ $<
 
 # string.o:string.asm  include/main.h include/string.h
@@ -147,5 +151,5 @@ exec.o:lib/exec.c
 
 
 # 生成CRT，C语言运行时环境
-${LOBJS}:${OBJS}
+${LOBJS}:${LOBJS2}
 	ar rcs $@ $^

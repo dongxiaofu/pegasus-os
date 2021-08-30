@@ -11,6 +11,7 @@
 #include "hd.h"
 
 struct hd_info hd_info[1];
+char hd_cache[SECTOR_SIZE];
 
 int is_empty(char *buf, int len);
 
@@ -82,7 +83,6 @@ void init_hd() {
 void hd_handle() {
 //    //Printf("%s\n", "HD handle is running!");
     Message msg;
-    Memset(&msg, 0, sizeof(Message));
     //send_rec(RECEIVE, &msg, ANY);
     //send_rec(RECEIVE, &msg, task_fs);
     //send_rec(RECEIVE, &msg, TaskHD);
@@ -121,6 +121,7 @@ void hd_handle() {
             break;
     }
 
+	Memset(&msg, 0, sizeof(Message));
 	msg.TYPE = 100;	// todo 调试，无实际作用。
     msg.val = 0;
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
@@ -377,7 +378,7 @@ void hd_rdwt(Message *msg) {
     //delay(500);
     //hd_open();
     // 从msg中获取硬盘操作的位置pos
-    unsigned long long pos = msg->POSITION;
+    unsigned int pos = msg->POSITION;
     // 计算pos在安装文件系统的分区的LBA地址
     int device = msg->DEVICE;
     int driver = DR_OF_DEV(device);
@@ -435,18 +436,23 @@ void hd_rdwt(Message *msg) {
         int bytes = MIN(SECTOR_SIZE, bytes_left);
         if (type == READ) {
             //delay(500);
+            // todo 不知道哪里出了问题，会向硬盘驱动发出我预期之外的读写操作。
+            // 这个时候读取不到数据，被阻塞后不会被中断解除阻塞。
+            // 神奇，为啥会读取不到数据？
+            if(Strlen(phy_hdbuf) == 0)	continue;
             // 读
             interrupt_wait();
             // 从REG_DATA端口读取数据存储到phy_hdbuf中
-            Memset(phy_hdbuf, 0, bytes);
-            read_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, bytes);
+            Memset(hd_cache, 0, bytes);
+            read_port(PRIMARY_CMD_DATA_REGISTER, hd_cache, SECTOR_SIZE);
+		phycopy(phy_hdbuf, hd_cache, bytes);	
         } else if (type == WRITE) {
             // 写
             wait_for();
             // 把数据从phy_hdbuf写入到REG_DATA端口
             // Memset(phy_hdbuf, 0x0, 512);
             // write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, SECTOR_SIZE);
-           if(is_empty(phy_hdbuf, bytes) == 0){ 
+          if(is_empty(phy_hdbuf, bytes) == 0){ 
         	    write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, bytes);
             		interrupt_wait();
 		}

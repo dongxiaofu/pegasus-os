@@ -11,17 +11,21 @@ LDFLAGS		= -Ttext 0x1000 -Map krnl.map -m elf_i386
 LIB	=	../lib/pegasus_crt.a
 KERNEL	=	kernel.bin
 OBJS	=	start.o	pwd.o echo.o
+BIN	=	echo pwd
 
-image:clean everything install
+all:clean everything install
 
 everything:echo pwd
 
 install:
+	tar cvf install.tar echo.c
 	cp -rvf ../kernel.bin ./
-	dd if=install.tar of=${HD} seek=10354176 bs=512 count=1 conv=notrunc
+	dd if=install.tar of=${HD} seek=24579 bs=512 count=20 conv=notrunc
 
 clean:
-	rm -rvf *.o
+	#rm -rvf *.o
+	rm -rvf ${OBJS}
+	rm -rvf ${BIN}
 
 start.o:start.asm
 	${ASM} ${ASKFLAGS} -o $@ $<

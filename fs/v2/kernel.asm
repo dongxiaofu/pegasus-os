@@ -37,7 +37,6 @@ extern hd_handler
 
 global disp_str
 global disp_str_colour
-global _start
 global InterruptTest
 global restart
 global in_byte
@@ -84,70 +83,6 @@ global disable_8259A_casecade_irq
 global enable_8259A_slave_winchester_irq
 ; 关闭8259A的从片的硬盘中断
 global disable_8259A_slave_winchester_irq
-
-
-_start:
-	;times	131072	db	0
-	;times	131072	db	0
-	;times	131072	db	0
-	;times	131072	db	0
-	;times	131072	db	0
-	;times	131072	db	0
-	;jmp $
-	;jmp $
-	;jmp $
-	;xchg bx, bx	
-	;mov word [dis_pos], 0
-	mov dword [dis_pos], 0
-	mov ah, 0Bh
-	mov al, 'L'
-	mov [gs:(80 * 20 + 40) * 2], ax
-	
-	mov esp, StackTop
-	mov word [dis_pos], 0
-	;xchg bx, bx
-	sgdt [gdt_ptr]
-	call ReloadGDT
-	lgdt [gdt_ptr]
-	lidt [idt_ptr]
-	jmp 0x8:csinit
-	;;;;;;xhcg bx, bx
-	;jmp $
-csinit:
-	;;;;;;xhcg bx, bx
-	; 加载tss
-	; 怎么使用C代码中的常量？
-	; ltr TSS_SELECTOR
-	;ltr [TSS_SELECTOR]
-	xor eax, eax
-	mov ax, TSS_SELECTOR
-	ltr ax
-	;xchg bx, bx
-	jmp kernel_main
-	hlt
-	jmp $	
-	sti
-	mov ah, 0Bh
-	mov al, 'M'
-	mov [gs:(80 * 20 + 41) * 2], ax
-	jmp $
-	hlt
-	;mov word [dis_pos], 0
-	;mov esp, StackTop
-	push 0
-	popfd
-	jmp $	
-	call test
-	;hlt	
-	; 测试resb是否把堆栈初始化成了0
-	push 1
-	push 2
-	push 3
-	;int 0x0D
-	;ud2
-	;int 0x0
-
-	hlt
 
 ; 中断例程
 InterruptTest:

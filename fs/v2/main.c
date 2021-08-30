@@ -534,19 +534,20 @@ void wait_exit()
 	int pid = fork();
 	//while(1){}
 	if(pid > 0){
-		int s = 2;
-//		wait(&s);
+		int s;;
+		wait(&s);
 		Printf("child main exit status %d\n", s);
 		while(1){}
 	}else{
 		Printf("I am child\n");
-	while(1){}
+		//exit(5);
 		int c = 0;
 		while(1){
 			if(c++ > 50000){
 				break;
 			}
 		}
+		Printf("I am child 0\n");
 		exit(9);
 		Printf("I am child 1\n");
 		while(1){}
@@ -612,12 +613,19 @@ int j = 0;
 				spin("parent\n");
 }
 
+// exec测试用例
+void test_exec()
+{
+	char filename[20] = "install.tar";
+	untar(filename);
+}
 
 void INIT()
 {
-	TestFS();
+//	test_exec();
+//	TestFS();
+	wait_exit();
 	while(1){};
-//	wait_exit();
 }
 
 void TestA()
@@ -787,8 +795,8 @@ void Printf(char *fmt, ...)
     //char str[2] = {'A', 0};
     //len = 2;
     // todo 想办法不使用硬编码0。0是文件描述符。
-//    write(0, buf, len);
-    write2(buf, len);
+    write(0, buf, len);
+//    write2(buf, len);
     return;
 }
 

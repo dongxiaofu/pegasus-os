@@ -33,6 +33,8 @@ struct super_block{
 #define FILE_TYPE_SPECIAL_CHAR 1
 // 文本文件
 #define FILE_TYPE_TEXT 2
+// 初始化文件系统时的文件数量
+#define INIT_FS_FILE_CNT	5
 // inode
 struct inode{
 	// 文件类型，例如：终端、文本文件
