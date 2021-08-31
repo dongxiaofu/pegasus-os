@@ -649,8 +649,8 @@ void test_exec()
 
 void INIT()
 {
-	test_exec();
-//	TestFS();
+//	test_exec();
+	TestFS();
 //	wait_exit();
 	while(1){};
 }
