@@ -388,7 +388,7 @@ Memset(fsbuf+1, 0x0, SECTOR_SIZE-1);
         pinode = (struct inode *)(fsbuf + INODE_SIZE * (i + 4));
 	    pinode->type = FILE_TYPE_TEXT;
 	    // todo 初始化文件系统时默认有5个文件，分别是：根目录、三个终端、install.tar
-	    pinode->size = 10240;
+	    pinode->size = 296960;
 	    pinode->start_sect = sp2.data_1st_sect + (i+1) * CNT_OF_FILE_SECT;
 	    pinode->nr_sect = CNT_OF_FILE_SECT;
 	    // 根目录的inode用imap中的第1个bit记录。

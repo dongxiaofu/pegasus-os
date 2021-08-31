@@ -115,7 +115,8 @@ struct inode inode_table[INODE_TABLE_SIZE];
 // 我本想按照上面的定义来修改，因为需要修改的地方太多太多，放弃了。
 // char *fsbuf = (char *)0x1000000;
 char *fsbuf = (char *)0x700000;
-const int FSBUF_SIZE = 1024 * 1024;
+// const int FSBUF_SIZE = 1024 * 1024;
+const int FSBUF_SIZE = 1024/2;
 
 //char *super_block_buf = (char *)0x900000;
 struct super_block *super_block_buf = (char *)0x900000;

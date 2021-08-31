@@ -18,9 +18,10 @@ all:clean everything install
 everything:echo pwd
 
 install:
-	tar cvf install.tar echo.c pwd.c
+	# tar cvf install.tar echo.c pwd.c
+	tar cvf install.tar echo pwd
 	cp -rvf ../kernel.bin ./
-	dd if=install.tar of=${HD} seek=24578 bs=512 count=20 conv=notrunc
+	dd if=install.tar of=${HD} seek=24578 bs=512 count=580 conv=notrunc
 
 clean:
 	#rm -rvf *.o

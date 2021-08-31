@@ -458,7 +458,7 @@ void hd_rdwt(Message *msg) {
 		//disp_int(len);
 		// todo 这里，需要随便执行几条语句。如上，打印语句可可以，wait_for也可以。
 		// 原因不明。
-            wait_for();
+           wait_for();
 		
             // 读
             interrupt_wait();
