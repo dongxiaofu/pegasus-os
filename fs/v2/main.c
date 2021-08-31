@@ -90,16 +90,16 @@ void untar(const char *filename)
         }
 
         int bytes_left = len;
-        //while (bytes_left)
-       // {
-//            int iobytes = MIN(chunk, bytes_left);
-            //read(fd, buf, ((iobytes - 1) / SECTOR_SIZE + 1) * SECTOR_SIZE);
+	int chunk = SECTOR_SIZE;
+        while (bytes_left)
+       {
+       int iobytes = MIN(chunk, bytes_left);
             Memset(buf, 0, SECTOR_SIZE);
-            bytes_read2 = read(fd, buf, len);
-            // write(fdout, buf, iobytes);
-            write(fdout, buf, len);
-           // bytes_left -= iobytes;
-       // }
+            bytes_read2 += read(fd, buf, iobytes);
+            write(fdout, buf, iobytes);
+            //write(fdout, buf, len);
+           bytes_left -= iobytes;
+        }
 
         close(fdout);
 
@@ -649,8 +649,8 @@ void test_exec()
 
 void INIT()
 {
-//	test_exec();
-	TestFS();
+	test_exec();
+//	TestFS();
 //	wait_exit();
 	while(1){};
 }

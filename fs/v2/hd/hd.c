@@ -435,9 +435,9 @@ void hd_rdwt(Message *msg) {
 //	cmd.command = 48;
 
 
-	if(type == READ && nr_sects == 26626){
-		assert(sector_count == 1);
-	}
+//	if(type == READ && nr_sects == 26626){
+//		assert(sector_count == 1);
+//	}
 
 
     hd_cmd_out(&cmd);
