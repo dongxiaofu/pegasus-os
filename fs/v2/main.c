@@ -58,7 +58,8 @@ void untar(const char *filename)
 	if(bytes_read2 > 0){
 		int sector_count = (bytes_read2 - 1 + SECTOR_SIZE) / SECTOR_SIZE;		
 			Memset(buf, 0, SECTOR_SIZE * 16);
-       		 	bytes_read = read(fd, buf, sector_count * SECTOR_SIZE - bytes_read2);
+       		 	read(fd, buf, sector_count * SECTOR_SIZE - bytes_read2);
+			bytes_read2 = 0;
 	}
 
 	Memset(buf, 0, SECTOR_SIZE * 16);
@@ -67,6 +68,9 @@ void untar(const char *filename)
         {
             break;
         }
+
+	bytes_read2 += bytes_read;
+	bytes_read = 0;
 
         struct tar_header *tar_header = (struct tar_header *)buf;
         // 不确定能不能用指针接收一个字符串。能。
@@ -96,7 +100,7 @@ void untar(const char *filename)
        int iobytes = MIN(chunk, bytes_left);
             Memset(buf, 0, SECTOR_SIZE);
             bytes_read2 += read(fd, buf, iobytes);
-            write(fdout, buf, iobytes);
+           write(fdout, buf, iobytes);
             //write(fdout, buf, len);
            bytes_left -= iobytes;
         }

@@ -45,7 +45,7 @@ struct super_block *get_super_block();
 int alloc_imap_bit();
 
 // 分配sector-map
-int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc);
+int alloc_smap_bit(int nr_inode, unsigned int nr_sect_to_alloc);
 
 // 新建inode
 // struct inode *new_inode(int nr_inode, int nr_start_sect);
@@ -388,7 +388,7 @@ Memset(fsbuf+1, 0x0, SECTOR_SIZE-1);
         pinode = (struct inode *)(fsbuf + INODE_SIZE * (i + 4));
 	    pinode->type = FILE_TYPE_TEXT;
 	    // todo 初始化文件系统时默认有5个文件，分别是：根目录、三个终端、install.tar
-	    pinode->size = 440320;
+	    pinode->size = 583680;
 	    pinode->start_sect = sp2.data_1st_sect + (i+1) * CNT_OF_FILE_SECT;
 	    pinode->nr_sect = CNT_OF_FILE_SECT;
 	    // 根目录的inode用imap中的第1个bit记录。
@@ -403,7 +403,7 @@ Memset(fsbuf+1, 0x0, SECTOR_SIZE-1);
     dir_entry2.nr_inode = 0xCC;
     // 并不需要手工添加字符串的结束字符，因为Memcpy并不会复制结束字符。
     // 说错了，Memcpy会复制指定长度的字符串，可以看Memcpy的实现。
-    char filename[2] = "A";
+    char filename[2] = ".";
     //filename[0] = '.';
     //filename[1] = '0';
     //filename[1] = 0;
@@ -747,7 +747,9 @@ int alloc_imap_bit()
     }
 }
 
-int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc)
+// todo 在函数中，nr_sect_to_alloc的值被递减成负数。
+// int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc)
+int alloc_smap_bit(int nr_inode, unsigned int nr_sect_to_alloc)
 {
     // 思路：
     // 1. 从sector-map区域的第一个扇区开始，遍历N个扇区，遍历单位是扇区。
@@ -769,9 +771,10 @@ int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc)
     int nr_free_smap_bit = 0;
 
     int dev = ROOT_DEV;
+	int pos;
     for (int i = 0; i < nr_smap_sect; i++)
     {
-        int pos = nr_sect_blk0 + i;
+        pos = nr_sect_blk0 + i;
         RD_SECT(dev, pos);
         for (int j = 0; j < SECTOR_SIZE; j++)
         {
@@ -791,30 +794,50 @@ int alloc_smap_bit(int nr_inode, int nr_sect_to_alloc)
             }
 
             // 设置bit的值
-            for (; k < 8; k++)
+            for (; nr_sect_to_alloc > 0 &&  k < 8; k++)
             {
                 //fsbuf[j] &= 1 << k;
+//                fsbuf[j] |= 1 << k;
+		// todo 这种写法，问题非常大!当nr_sect_to_alloc是int类型时，巧妙地跳过了0和0的比较。
+		// 究竟是比较nr_sect_to_alloc和0还是比较--nr_sect_to_alloc和0？
+//                if (--nr_sect_to_alloc == 0)
+//                {
+//                    break;
+//                }
+//		nr_sect_to_alloc--;
+		if(nr_sect_to_alloc == 0){
+			break;
+		}
+		
                 fsbuf[j] |= 1 << k;
-                if (--nr_sect_to_alloc == 0)
-                {
-                    break;
-                }
+		nr_sect_to_alloc--;
             }
         }
         // 写入硬盘
+        // 必须放在这里，而不能放到循环外面。这是我运行代码得出的结论。
+        // 并没有完全理解为什么会这样。放在外面，有时会导致后面的文件覆盖前面文件的smap记录。
+        // 我的猜想是：有的文件的smap记录跨越两个扇区。放在外面，只更新了一个扇区。
         if (nr_free_smap_bit)
         {
             WT_SECT(dev, pos);
         }
 
+	// todo 神奇！当nr_sect_to_alloc的数据类型是int时，执行到这里，nr_sect_to_alloc的值是负数。
         if (nr_sect_to_alloc == 0)
         {
             break;
         }
     }
+        // 写入硬盘
+//        if (nr_free_smap_bit)
+//        {
+//            WT_SECT(dev, pos);
+//        }
 
     // todo 减去1，有点费解。
+    // todo 我不怎么理解是否要减去1。不减去1，结果不正确。
     return (nr_free_smap_bit - 1 + sb->data_1st_sect);
+//    return (nr_free_smap_bit + sb->data_1st_sect);
 }
 
 int new_inode(struct inode *inode, int nr_inode, int nr_start_sect)
@@ -1286,7 +1309,9 @@ int do_rdwt(Message *msg)
 
 void sync_inode(struct inode *inode)
 {
-    // 本函数不负责处理目标inode是否存在于硬盘上，只复制更新数据到硬盘上。
+	// todo 更新缓存中的inode。暂时没有想出方法。我不愿使用遍历数组的方式来更新。
+
+    // 本函数不负责处理目标inode是否存在于硬盘上，只负责更新数据到硬盘上。
     // 主要思路：从硬盘中读取包含目标inode的扇区，更新fsbuf的inode后，把fsbuf写入硬盘。
     // int inode_size = sizeof(struct inode_size);
     int inode_size = INODE_SIZE; // INODE_SIZE;
