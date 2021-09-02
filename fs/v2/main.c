@@ -647,8 +647,21 @@ int j = 0;
 // exec测试用例
 void test_exec()
 {
+	int fd_stdout = open("dev_tty1", O_RDWR);
 	char filename[20] = "install.tar";
 	untar(filename);
+
+	int pid = fork();
+	if(pid > 0){
+		int s;
+		wait(&s);
+		Printf("My child exit %d\n", s);
+	}else{
+		Printf("I am a child\n");
+		// exit(5);
+		execl("/echo", "echo", "hello", 0);
+	}
+
 }
 
 void INIT()
