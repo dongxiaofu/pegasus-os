@@ -18,8 +18,8 @@ Proc proc_table[TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM];
 // 用户进程元数据
 Task user_task_table[USER_PROC_NUM] = {
 //Task user_task_table[1] = {
-        {"A", TestA, A_STACK_SIZE},
-	{"INIT", INIT, TASK_INIT_SIZE}
+	{"INIT", INIT, TASK_INIT_SIZE},
+        {"A", TestA, A_STACK_SIZE}
 //        {TestB, B_STACK_SIZE},
 //        {TestC, C_STACK_SIZE}
 };

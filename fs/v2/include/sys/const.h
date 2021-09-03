@@ -189,7 +189,7 @@
 
 // 进程栈默认大小
 // #define DEFAULT_STACK_SIZE 32768     // 这个值，导致无法加载内核
-#define DEFAULT_STACK_SIZE 2048
+#define DEFAULT_STACK_SIZE (1024*16)
 
 // 进程A、B、C的堆栈大小
 #define A_STACK_SIZE DEFAULT_STACK_SIZE
@@ -201,19 +201,21 @@
 #define TASK_HD_SIZE DEFAULT_STACK_SIZE
 #define TASK_FS_SIZE DEFAULT_STACK_SIZE
 #define TASK_MM_SIZE DEFAULT_STACK_SIZE
-#define TASK_INIT_SIZE DEFAULT_STACK_SIZE
+// #define TASK_INIT_SIZE DEFAULT_STACK_SIZE
+#define TASK_INIT_SIZE (DEFAULT_STACK_SIZE)
 //#define A_STACK_SIZE 128
 //#define B_STACK_SIZE 128
 //#define C_STACK_SIZE 128
 //#define TaskTTY_STACK_SIZE 128
 // 进程栈
-#define STACK_SIZE (A_STACK_SIZE \
+#define STACK_SIZE (\
         + TaskTTY_STACK_SIZE \
         + TASK_SYS_SIZE \
         + TASK_HD_SIZE  \
         + TASK_FS_SIZE \
         + TASK_MM_SIZE \
-        + TASK_INIT_SIZE)
+        + TASK_INIT_SIZE \
+	+ A_STACK_SIZE )
 // 进程相关 end
 
 // todo 不会用enum，用常量代替。
@@ -245,8 +247,8 @@
 // 最大文件长度。随便确定了一个值。 #define MAX_FILE_SIZE 1024*1024
 
 // todo 应该设置多大？512是我随便设置的值。
-#define PROC_IMAGE_DEFAULT_SIZE 1024*1024	// todo 这是我随便设置的值
-#define PROC_STACK_SIZE 512
+#define PROC_IMAGE_DEFAULT_SIZE (1024*1024 + 0x800)	// todo 这是我随便设置的值
+#define PROC_STACK_SIZE (1024*1)			// 1kb，不清楚为什么需要设置这个值，借用于上神的。
 #define SECTOR_SIZE	512
 
 #define HD_DEV_READ 1

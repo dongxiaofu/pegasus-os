@@ -393,7 +393,7 @@ void kernel_main()
         {
             //	dis_pos = 12000 - 128 + 10 + 320;
             //	disp_str_colour("enter INIT", 0x0C);
-            int init_image_size = (0x1000 + 0x020000 + 1);
+            int init_image_size = (0x1000 + 1024 * 1024);
             //int cs_attribute = 0x8000 | 0x4000 | 0x98 | (3 <<  5);
             int cs_attribute = 0xcfa; //0x8000 | 0x4000 | 0x98 | (3 <<  5);
             InitDescriptor(&(proc_table[i].ldts[0]), 0, (init_image_size - 1) >> 12, cs_attribute);
@@ -445,7 +445,8 @@ void kernel_main()
         //proc->s_reg.esp = (int)(proc_stack + 128 * i);
         // proc->s_reg.esp = (int)(proc_stack + 128 * (i+1));
         proc->s_reg.esp = (int)(p_task_stack);
-        p_task_stack -= DEFAULT_STACK_SIZE;
+        // p_task_stack -= DEFAULT_STACK_SIZE;
+        p_task_stack -= task->stack_size;
         // proc->s_reg.esp = proc_stack + 128;
         // 抄的于上神的。需要自己弄清楚。我已经理解了。
         // IOPL = 1, IF = 1
@@ -660,6 +661,7 @@ void test_exec()
 		Printf("I am a child\n");
 		// exit(5);
 		execl("/echo", "echo", "hello", 0);
+		while(1){};
 	}
 
 }
