@@ -1310,6 +1310,13 @@ int do_rdwt(Message *msg)
 void sync_inode(struct inode *inode)
 {
 	// todo 更新缓存中的inode。暂时没有想出方法。我不愿使用遍历数组的方式来更新。
+	// todo 想不到好方法，先使用遍历数组的方式来实现吧。
+	for(int i = 0; i < INODE_TABLE_SIZE ;i++){
+		if(inode_table[i].nr_inode == inode->nr_inode){
+			inode_table[i] = *inode;
+			break;
+		}
+	}
 
     // 本函数不负责处理目标inode是否存在于硬盘上，只负责更新数据到硬盘上。
     // 主要思路：从硬盘中读取包含目标inode的扇区，更新fsbuf的inode后，把fsbuf写入硬盘。

@@ -22,7 +22,7 @@ int do_exec(Message *msg) {
     // 4. 写非常接近正式代码的伪代码。因为，很多函数都没有实现。
     //
     //
-
+int fd_stdout = open("dev_tty1", O_RDONLY);
 	int source = msg->source;    
 
     // 重新放置二进制代码
@@ -37,13 +37,23 @@ int do_exec(Message *msg) {
     // char mmbuf[MAX_FILE_SIZE];
     // todo 先用硬编码
     int MAX_FILE_SIZE = 148368;
-    char mmbuf[148368];
+    char mmbuf[158368];
     char filename[12];
+        dis_pos = 12000 - 128 + 10 + 160 * 7;
     // FILENAME的长度包含末尾的'0'吗？
     phycopy(v2l(TASK_MM, filename), v2l(source, msg->PATHNAME), msg->NAME_LEN);
     int fd = open(filename, O_RDONLY);
-    read(fd, mmbuf, MAX_FILE_SIZE);
-	close(fd);
+        int byte_rdwt = 0;
+        while(1){
+
+            int cnt = read(fd, mmbuf + byte_rdwt, 512);
+                byte_rdwt += cnt;
+                if(cnt == 0){
+                        break;
+                }
+        }
+
+        close(fd);
 
     // 开始解析ELF文件了
     // Elf32_Ehdr、Elf32_Phdr 需要在我的操作系统中定义吗？需要。我的操作系统不使用其他操作系统的库文件。
@@ -75,6 +85,18 @@ int do_exec(Message *msg) {
     // 把caller的数据空间复制到当前进程，即TASK_MM。
     // 复制函数太难用了。
     phycopy(v2l(TASK_MM, stackcopy), v2l(source, buf), buf_len);
+
+	// 打印数据看看
+	int stackcopy_line_addr = v2l(TASK_MM, stackcopy);
+	char **ptr = (char **)stackcopy_line_addr;
+	int cnt2 = 0;
+	while(*ptr){
+		cnt2++;
+		Printf("*ptr = %x\n", *ptr);
+		ptr++;
+	}
+	Printf("cnt2 = %x\n", cnt2);
+
     // 调整caller的数据空间的值
     //int delta = stackcopy - buf;
     int delta = origin_stack - buf;

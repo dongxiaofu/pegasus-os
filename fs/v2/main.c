@@ -651,6 +651,8 @@ void test_exec()
 	int fd_stdout = open("dev_tty1", O_RDWR);
 	char filename[20] = "install.tar";
 	untar(filename);
+//	execl("/echo", "echo", "hello", 0);
+//		while(1){};
 
 	int pid = fork();
 	if(pid > 0){
@@ -660,7 +662,8 @@ void test_exec()
 	}else{
 		Printf("I am a child\n");
 		// exit(5);
-		execl("/echo", "echo", "hello", 0);
+		// execl("/pwd", "echo", "hello",  "world", 0);
+		execl("/echo", "echo", "hello",  "world", 0);
 		while(1){};
 	}
 
@@ -1035,19 +1038,19 @@ int dead_lock(int src, int dest)
     Proc *dest_proc = pid2proc(dest);
     while (1)
     {
-        // Proc *src_proc = pid2proc(src);
-        // Proc *dest_proc = pid2proc(dest);
+        Proc *src_proc = pid2proc(src);
+        Proc *dest_proc = pid2proc(dest);
         if (dest_proc->p_flag == SENDING)
         {
             if (dest_proc->p_send_to == src)
             {
                 // panic("dead lock!\n");
-                //Printf("%x---->%x---->", src, dest);
+//                Printf("%x---->%x---->", src, dest);
                 // 打印死锁环
                 Proc *p = dest_proc;
                 do
                 {
-                    // Printf("%x---->%x---->", proc2pid(p), p->p_send_to);
+  //                  Printf("%x--2-->%x---->", proc2pid(p), p->p_send_to);
                     p = pid2proc(p->p_send_to);
                 } while (p->pid != src);
                 //Printf("%x\n", src);

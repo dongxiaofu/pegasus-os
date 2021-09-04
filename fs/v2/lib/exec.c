@@ -49,42 +49,65 @@ int execv(const char *pathname, char **argv) {
     // char *p = argv;
     // 必须使用类型转换。
     char arg_stack[PROC_STACK_SIZE];
-    char *p = (char *) argv;
+	Memset(arg_stack, 0, PROC_STACK_SIZE);
+    char **p = (char **) argv;
     int len = 0;
     while (*p) {
+//	Printf("*p0 = %x\n", *p);
+//	Printf("*p0_str = %s\n", *p);
         // 第三个难点：应该使用p++还是*p++？
         p++;
         len += sizeof(char *);
     }
+//	Printf("*p0 = %x\n", *p);
 
     // 存储空字符。
     // 加上空字符占用的长度。
     arg_stack[len] = 0;
     // len += sizeof(char *);
-    len += sizeof(char);
-
+    len += sizeof(char *);
     // 复制数据
     // char arg_stack[PROC_STACK_SIZE];
-    char *ptr = arg_stack;
-    char **q = argv;
+    //char *ptr = arg_stack;
+    char **ptr = arg_stack;
+    char **q = (char **)argv;
+	int cnt = 0;
     while (*q) {
+//	Printf("cnt0 = %d\n", cnt);
         // 开始复制argv中的数据到arg_stack中
-        *ptr = &arg_stack[len];
+       *ptr = &arg_stack[len];
+	Printf("*q-- = %s\n", *q);
         Strcpy(&arg_stack[len], *q);
+//	Printf("arg_stack[%d] = %s\n", len, (char *)(&arg_stack[len]));
         len += Strlen(*q);
         arg_stack[len] = 0;
         len += sizeof(char);
 
         q++;
         ptr++;
+	cnt++;
     }
+//Printf("len = %d\n", len);
+//Printf("cnt = %x\n", cnt);
+char **t = (char **)arg_stack;
+while(*t){
+	Printf("*t = %x\n", *t);
+	t++;
+}
+	Printf("*t0 = %x\n", *t);
+
+
+//	return 0;
 
     Message msg;
+
+	char *tmp[10] = {"hello1", "hello2"};
 
     msg.TYPE = EXEC;
     msg.PATHNAME = pathname;
     msg.NAME_LEN = Strlen(pathname);
     msg.BUF = arg_stack;
+//    msg.BUF = tmp;
     msg.BUF_LEN = len;
 
     send_rec(BOTH, &msg, TASK_MM);
