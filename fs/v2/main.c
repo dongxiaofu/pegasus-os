@@ -645,6 +645,79 @@ int j = 0;
 				spin("parent\n");
 }
 
+
+// shell
+void simple_shell()
+{
+	// 打开终端，用来输入输出
+	int fd_stdout = open("dev_tty1", O_RDWR);
+	int fd_stdin = open("dev_tty1", O_RDWR);
+	
+	char read_buf[128];
+	read(fd_stdout, read_buf, 128);
+	Printf("read_buf = %s\n", read_buf);
+
+	// 分割从终端读取的字符串
+	char *argv[10];
+	int argc = 0;
+	int word = 0;
+	char *p = read_buf;
+	char *s;
+
+	while(*p){
+		Printf("*p = %d\n", *p); 
+		if((*p != ' ' || *p != 0) && word == 0){
+			s = p;
+			word = 1;
+		}
+
+		if((*p == ' ' || *p == 0) && word == 1){
+			argv[argc++] = s;
+			//Printf("argc[%d] = %s\n", argc-1, argc[argc-1]);
+			*p = 0;
+			Printf("argc[%d] = %s\n", argc-1, argv[argc-1]);
+			word = 0;
+		}
+
+		p++;
+	}
+
+	return;
+
+	int fd = open(argv[0], O_RDWR);
+	if(fd == -1){
+		Printf("{%s}\n", argv[0]);
+	}else{
+		// 实现shell	
+		int pid = fork();
+		if(pid > 0){
+			int s;
+			wait(&s);
+		}else{
+			close(fd);
+			execv(argv[0], argv);	
+		}
+	}
+}
+
+void test_shell()
+{
+	int fd_stdout = open("dev_tty1", O_RDWR);
+	char filename[20] = "install.tar";
+	untar(filename);
+
+	int pid = fork();
+	if(pid > 0){
+		int s;
+		wait(&s);
+		Printf("My child exit %d\n", s);
+	}else{
+		Printf("I am a child\n");
+		simple_shell();
+	}
+
+}
+
 // exec测试用例
 void test_exec()
 {
@@ -671,7 +744,8 @@ void test_exec()
 
 void INIT()
 {
-	test_exec();
+	test_shell();
+//	test_exec();
 //	TestFS();
 //	wait_exit();
 	while(1){};

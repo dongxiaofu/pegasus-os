@@ -517,7 +517,10 @@ int search_file(char *pathname)
     struct inode *dev_root;
     int res = strip_path(filename, pathname, dev_root);
 
-    assert(res != -1);
+	if(res == -1){
+		return -1;
+	}
+    //assert(res != -1);
 
     int dev_root_dir_size = dev_root->size;
     int dev_root_dir_sect = (dev_root_dir_size + SECTOR_SIZE) / SECTOR_SIZE;
