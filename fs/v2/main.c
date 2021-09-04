@@ -664,7 +664,7 @@ void test_exec()
 		// exit(5);
 		// execl("/pwd", "echo", "hello",  "world", 0);
 		execl("/echo", "echo", "hello",  "world", 0);
-		while(1){};
+		//while(1){};
 	}
 
 }

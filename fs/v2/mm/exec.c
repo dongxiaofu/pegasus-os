@@ -92,10 +92,10 @@ int fd_stdout = open("dev_tty1", O_RDONLY);
 	int cnt2 = 0;
 	while(*ptr){
 		cnt2++;
-		Printf("*ptr = %x\n", *ptr);
+	//	Printf("*ptr = %x\n", *ptr);
 		ptr++;
 	}
-	Printf("cnt2 = %x\n", cnt2);
+	//Printf("cnt2 = %x\n", cnt2);
 
     // 调整caller的数据空间的值
     //int delta = stackcopy - buf;

@@ -76,7 +76,7 @@ int execv(const char *pathname, char **argv) {
 //	Printf("cnt0 = %d\n", cnt);
         // 开始复制argv中的数据到arg_stack中
        *ptr = &arg_stack[len];
-	Printf("*q-- = %s\n", *q);
+//	Printf("*q-- = %s\n", *q);
         Strcpy(&arg_stack[len], *q);
 //	Printf("arg_stack[%d] = %s\n", len, (char *)(&arg_stack[len]));
         len += Strlen(*q);
@@ -91,10 +91,10 @@ int execv(const char *pathname, char **argv) {
 //Printf("cnt = %x\n", cnt);
 char **t = (char **)arg_stack;
 while(*t){
-	Printf("*t = %x\n", *t);
+//	Printf("*t = %x\n", *t);
 	t++;
 }
-	Printf("*t0 = %x\n", *t);
+//	Printf("*t0 = %x\n", *t);
 
 
 //	return 0;
