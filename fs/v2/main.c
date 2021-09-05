@@ -665,8 +665,7 @@ void simple_shell()
 	char *s;
 
 	while(*p){
-		Printf("*p = %d\n", *p); 
-		if((*p != ' ' || *p != 0) && word == 0){
+		if((*p != ' ' && *p != 0) && word == 0){
 			s = p;
 			word = 1;
 		}
@@ -681,8 +680,9 @@ void simple_shell()
 
 		p++;
 	}
+	argv[argc] = s;
+	
 
-	return;
 
 	int fd = open(argv[0], O_RDWR);
 	if(fd == -1){
