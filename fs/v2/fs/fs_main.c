@@ -490,7 +490,13 @@ int do_open(char *pathname, int oflag)
     }
     else
     {
-        get_inode(&pinode, nr_inode);
+	if(nr_inode == -1){
+		return -1;
+	}
+        int res = get_inode(&pinode, nr_inode);
+	if(res == 0){
+//		return -1;
+	}
     }
 
     //    panic("open file failure\n");

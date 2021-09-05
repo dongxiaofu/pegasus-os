@@ -700,6 +700,76 @@ void simple_shell()
 	}
 }
 
+void test_split_str()
+{
+	char *argv[100];
+	int argc = 0;
+	int word = 0;
+	char *p = "echo hello world";
+	char *s;
+
+	do{
+		if(argc == 0){
+		Printf("*p = %x\n", *p); 
+		}
+		if((*p != ' ' || *p != 0) && word == 0){
+			s = p;
+			word = 1;
+		}
+
+		if((*p == ' ' || *p == 0) && word == 1){
+			argv[argc++] = s;
+			//Printf("argc[%d] = %s\n", argc-1, argc[argc-1]);
+			*p = 0;
+//			Printf("argv2[%d] = %s\n", argc-1, argv2[argc-1]);
+			word = 0;
+		}
+
+		p++;
+	}while(*p);
+	argv[argc] = s;
+
+	Printf("print argv, argc = %x\n", argc);
+	// for(int i = 0; i < argc; i++){
+	for(int i = 0; i <= argc; i++){
+		Printf("argv[%x] = %s\n", i, argv[i]);
+	}
+
+	if(strcmp(argv[0], "echo") == 0){
+		Printf("Yes,it is.\n");
+	}
+
+//	return;
+	//char *argv[10] = {"echo4", "Hello2", "World3"};
+	Printf("argv[0] = %s\n", argv[0]);
+	Printf("print argv[0]\n");
+	int j = 0;
+	while(j <= 5){
+		Printf("ch = %x\n", argv[0][j]);
+		j++;
+	}
+	return;
+//	argv[0] = "echo ";
+	int fd = open(argv[0], O_RDWR);
+//	int fd = open("echo", O_RDWR);
+	if(fd == -1){
+		Printf("{%s}\n", argv[0]);
+	}else{
+		// 实现shell	
+		int pid = fork();
+		if(pid > 0){
+			int s;
+			wait(&s);
+		}else{
+			close(fd);
+			execv(argv[0], argv);	
+		}
+	}
+}
+
+
+
+
 void test_shell()
 {
 	int fd_stdout = open("dev_tty1", O_RDWR);

@@ -234,7 +234,9 @@ void tty_dev_write(TTY *tty) {
         // 把数据从终端缓冲区读取到用户进程
         if (tty->left_cnt) {
             // 是可打印字符
-            if ('!' <= key && key <= '~') {
+            // if ('!' <= key && key <= '~') {
+            // 上面的判断不能把空格符合空字符发送给用户进程。
+            if (('!' <= key && key <= '~') || (key == ' ' || key == 0)) {
                 // 复制数据
                 // phycopy(tty->req_buf + tty->tran_cnt, key, 1);
                 phycopy(tty->req_buf + tty->tran_cnt, v2l(TASK_TTY, &key), 1);
@@ -252,6 +254,10 @@ void tty_dev_write(TTY *tty) {
                 out_char(tty, key);
             } else if (key == '\n' || tty->tran_cnt == req_cnt) {// 是换行符或达到需要的长度
 
+		char end_flag = 0;
+                phycopy(tty->req_buf + tty->tran_cnt, v2l(TASK_TTY, &end_flag), 1);
+                tty->left_cnt--;
+                tty->tran_cnt++;
 		//Printf("tty resume, pcaller = %x \n", tty->pcaller);
                 out_char(tty, key);
 //                tty->left_cnt = 0;
