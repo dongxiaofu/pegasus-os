@@ -65,7 +65,8 @@ int new_dir_entry(struct dir_entry *dir_entry, struct inode *dir_root, char *fil
 int create_file(struct inode *inode, char *pathname);
 
 // 打开文件
-int do_open(char *pathname, int oflag);
+// int do_open(char *pathname, int oflag);
+int do_open(Message *msg);
 
 // 删除文件
 void do_unlink(char *filename);
@@ -122,9 +123,6 @@ void task_fs()
         //assert(type == OPEN || type == READ || type == WRITE || type == CLOSE);
 
         // open
-        char *pathname = msg.PATHNAME;
-        int oflags = msg.FLAGS;
-        //Printf("[source = %x, type = %x\n]", msg.source, msg.TYPE);
         pcaller = &proc_table[source];
 
         Message fs_msg;
@@ -136,7 +134,8 @@ void task_fs()
         switch (type)
         {
         case OPEN:
-            fs_msg.FD = do_open(pathname, oflags);
+            // fs_msg.FD = do_open(pathname, oflags);
+            fs_msg.FD = do_open(&msg);
             break;
         case READ:
         case WRITE:
@@ -447,8 +446,17 @@ void init_fs()
     mkfs();
 }
 
-int do_open(char *pathname, int oflag)
+// int do_open(char *pathname, int oflag)
+int do_open(Message *msg)
 {
+	
+    	char pathname[12];
+	Memset(pathname, 0, 12);
+    // FILENAME的长度包含末尾的'0'吗？
+//    int p_source = 0xA00000 + msg.PATHNAME;
+    phycopy(v2l(TASK_FS, pathname), v2l(msg->source, msg->PATHNAME), msg->NAME_LEN);
+	pathname[msg->NAME_LEN] = 0;
+	int oflag = msg->FLAGS;
 	////Printf("Enter fs open\n");
     // pcaller是调用open的进程
     // 从pcaller的filp_table中找出空闲的元素
@@ -520,17 +528,20 @@ int search_file(char *pathname)
 {
     // 获取文件名
     char filename[MAX_FILENAME_LEN];
-    struct inode *dev_root;
-    int res = strip_path(filename, pathname, dev_root);
+	Memset(filename, 0, MAX_FILENAME_LEN);
+    // struct inode *dev_root;
+    struct inode dev_root;
+	Memset(&dev_root, 0, sizeof(struct inode));
+    int res = strip_path(filename, pathname, &dev_root);
 
 	if(res == -1){
 		return -1;
 	}
     //assert(res != -1);
 
-    int dev_root_dir_size = dev_root->size;
+    int dev_root_dir_size = dev_root.size;
     int dev_root_dir_sect = (dev_root_dir_size + SECTOR_SIZE) / SECTOR_SIZE;
-    int dir_entry_num = dev_root->size / DIR_ENTRY_SIZE;
+    int dir_entry_num = dev_root.size / DIR_ENTRY_SIZE;
 
     // 数据区的第一个扇区地址
     struct super_block *sb = get_super_block();

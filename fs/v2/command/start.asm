@@ -12,8 +12,10 @@ _start:
 	push	eax
 	push	ecx
 	call	main
+
 	push	eax
 	call	exit
 	
+	jmp $
 	; todo 能用ret吗？
 	hlt

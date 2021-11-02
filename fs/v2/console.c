@@ -105,8 +105,10 @@ void put_key(TTY *tty, unsigned char key) {
 3. 滚屏，涉及到寄存器操作。
 ======================================================*/
 void scroll_up(TTY *tty) {
-    if (tty->console->start_video_addr > tty->console->original_addr) {
-        set_console_start_video_addr(tty->console->start_video_addr - SCREEN_SIZE);
+    // if (tty->console->start_video_addr > tty->console->original_addr) {
+    if (tty->console->start_video_addr - SCREEN_WIDTH > tty->console->original_addr) {
+        // set_console_start_video_addr(tty->console->start_video_addr - SCREEN_SIZE);
+        set_console_start_video_addr(tty->console->start_video_addr - SCREEN_WIDTH);
     }
 }
 
@@ -116,13 +118,19 @@ void scroll_up(TTY *tty) {
 2. 记得不牢，需要再次分析、计算。
 3. 剩余的显存大于一屏的空间，怎么写代码？
 ======================================================*/
+// void scroll_down(TTY *tty) {
+//     if (tty->console->start_video_addr + 2 * SCREEN_SIZE < tty->console->original_addr + tty->console->vm_limit) {
+//         set_console_start_video_addr(tty->console->start_video_addr + SCREEN_SIZE);
+//         tty->console->start_video_addr += SCREEN_SIZE;
+//     }
+// }
+
 void scroll_down(TTY *tty) {
-    if (tty->console->start_video_addr + 2 * SCREEN_SIZE < tty->console->original_addr + tty->console->vm_limit) {
-        set_console_start_video_addr(tty->console->start_video_addr + SCREEN_SIZE);
-        tty->console->start_video_addr += SCREEN_SIZE;
+    if (tty->console->start_video_addr + SCREEN_WIDTH < tty->console->original_addr + tty->console->vm_limit) {
+        set_console_start_video_addr(tty->console->start_video_addr + SCREEN_WIDTH);
+        tty->console->start_video_addr += SCREEN_WIDTH;
     }
 }
-
 /*====================================================
 耗费最多时间。
 把字符写入显存，代替disp_str。逻辑如下：
@@ -254,10 +262,10 @@ void tty_dev_write(TTY *tty) {
                 out_char(tty, key);
             } else if (key == '\n' || tty->tran_cnt == req_cnt) {// 是换行符或达到需要的长度
 
-		char end_flag = 0;
-                phycopy(tty->req_buf + tty->tran_cnt, v2l(TASK_TTY, &end_flag), 1);
-                tty->left_cnt--;
-                tty->tran_cnt++;
+	//	char end_flag = 0;
+        //        phycopy(tty->req_buf + tty->tran_cnt, v2l(TASK_TTY, &end_flag), 1);
+        //        tty->left_cnt--;
+        //        tty->tran_cnt++;
 		//Printf("tty resume, pcaller = %x \n", tty->pcaller);
                 out_char(tty, key);
 //                tty->left_cnt = 0;

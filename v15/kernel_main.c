@@ -15,7 +15,7 @@ void ReloadGDT()
 {
 	Memcpy(&gdt,
 		(void *)(*((int *)(&gdt_ptr[2]))),
-		*((short *)(&gdt_ptr[0]))
+		*((short *)(&gdt_ptr[0])) + 1
 	);
 	short *pm_gdt_limit = (short *)(&gdt_ptr[0]);
 	int *pm_gdt_base = (int *)(&gdt_ptr[2]);

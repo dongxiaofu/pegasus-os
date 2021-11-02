@@ -9,7 +9,7 @@
 #include "proto.h"
 #include "global.h"
 
-int open(const char *pathname, int flags) {
+int open(char *pathname, int flags) {
     Message msg;
 	Memset(&msg, 0, sizeof(Message));
     msg.TYPE = OPEN;//OPEN;

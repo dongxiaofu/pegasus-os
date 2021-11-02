@@ -3,6 +3,7 @@
 int main(int argc, char *argv[])
 {
 //	Printf("Hello,World\n");
+//	return 0;
 //	while(1){}
 	//for(int i = 1; i < argc; i++){
 	for(int i = 0; i < argc; i++){

@@ -269,7 +269,7 @@ void test()
     disp_str("A");
     disp_int(0x6);
     disp_str("\n");
-    //return;
+    return;
     //disp_str_colour2(0x9988, 0x74);
     dis_pos = 0;
     for (int i = 0; i < 80 * 25 * 2; i++)
@@ -393,7 +393,9 @@ void kernel_main()
         {
             //	dis_pos = 12000 - 128 + 10 + 320;
             //	disp_str_colour("enter INIT", 0x0C);
-            int init_image_size = (0x1000 + 1024 * 1024);
+           int init_image_size = (0x1000 + 1024 * 1024);
+//            int init_image_size = 0x1000 + 0x8246c + 513;
+            // int init_image_size = (0x10000);
             //int cs_attribute = 0x8000 | 0x4000 | 0x98 | (3 <<  5);
             int cs_attribute = 0xcfa; //0x8000 | 0x4000 | 0x98 | (3 <<  5);
             InitDescriptor(&(proc_table[i].ldts[0]), 0, (init_image_size - 1) >> 12, cs_attribute);
@@ -444,9 +446,13 @@ void kernel_main()
 
         //proc->s_reg.esp = (int)(proc_stack + 128 * i);
         // proc->s_reg.esp = (int)(proc_stack + 128 * (i+1));
-        proc->s_reg.esp = (int)(p_task_stack);
-        // p_task_stack -= DEFAULT_STACK_SIZE;
-        p_task_stack -= task->stack_size;
+        if (strcmp(proc->name, "INIT") == 0){
+        	// proc->s_reg.esp = 0x1000 + 1024 * 1024;
+        	proc->s_reg.esp = (int)(p_task_stack);
+        }else{
+        	proc->s_reg.esp = (int)(p_task_stack);
+        }
+	p_task_stack -= task->stack_size;
         // proc->s_reg.esp = proc_stack + 128;
         // 抄的于上神的。需要自己弄清楚。我已经理解了。
         // IOPL = 1, IF = 1
@@ -507,9 +513,10 @@ void kernel_main()
 // 测试文件系统
 void TestFS()
 {
-	int fd_stdout = open("dev_tty1", O_RDWR);
+	char tty1[10] = "dev_tty1";
+	int fd_stdout = open(tty1, O_RDWR);
 //	while(1){}
-	int fd_stdin = open("dev_tty1", O_RDWR);
+	int fd_stdin = open(tty1, O_RDWR);
     Printf("TestA is running\n");
     char filename[5] = "AC";
     char filename2[5] = "cAB";
@@ -525,6 +532,7 @@ void TestFS()
             char buf[20] = "cg:hello,world!";
             write(fd, buf, Strlen(buf));
             char buf2[20];
+		Memset(buf2, 0, 20);
             int k = read(fd, buf2, 18);
            Printf("buf2 = %s\n", buf2);
             delay(10);
@@ -534,6 +542,7 @@ void TestFS()
             char buf3[20] = "cg:how are you?";
             write(fd2, buf3, Strlen(buf3));
             char buf4[20];
+		Memset(buf4, 0, 20);
             int k2 = read(fd2, buf4, 18);
             Printf("buf4 = %s\n", buf4);
          //   delay(10);
@@ -544,12 +553,15 @@ void TestFS()
             write(fd3, buf5, Strlen(buf5));
             char buf6[30];
 		for(int i = 0; i < 6; i++){
+		Memset(buf6, 0, 30);
             int k3 = read(fd3, buf6, Strlen(buf5));
             Printf("buf6 = %s\n", buf6);
 		}
-            int fd4 = open("install.tar", O_RDONLY);
+		char file[20] = "install.tar";
+            int fd4 = open(file, O_RDONLY);
            Printf("fd4 = %x\n", fd4);
 		char buf7[512];
+		Memset(buf7, 0, 20);
             int k4 = read(fd4, buf7, 512);
             Printf("buf7 = %s\n", buf7);
         }
@@ -559,9 +571,10 @@ void TestFS()
 // wait、exit测试用例
 void wait_exit()
 {
-	int fd_stdout = open("dev_tty1", O_RDWR);
+	char tty1[10] = "dev_tty1";
+	int fd_stdout = open(tty1, O_RDWR);
 //	while(1){}
-	int fd_stdin = open("dev_tty1", O_RDWR);
+	int fd_stdin = open(tty1, O_RDWR);
 	//while(1){}
 
 	int pid = fork();
@@ -589,8 +602,9 @@ void wait_exit()
 // fork、write、read测试用例
 void INIT_fork()
 {
-	int fd_stdout = open("dev_tty1", O_RDWR);
-	int fd_stdin = open("dev_tty1", O_RDWR);
+	char tty1[10] = "dev_tty1";
+	int fd_stdout = open(tty1, O_RDWR);
+	int fd_stdin = open(tty1, O_RDWR);
 //	int fd_stdout = 0;
 	char buf[40] = "INIT is running\n";
 	Memset(buf, 0, Strlen(buf));
@@ -650,53 +664,93 @@ int j = 0;
 void simple_shell()
 {
 	// 打开终端，用来输入输出
-	int fd_stdout = open("dev_tty1", O_RDWR);
-	int fd_stdin = open("dev_tty1", O_RDWR);
+	char tty1[10] = "dev_tty1";
+	int fd_stdout = open(tty1, O_RDWR);
+	int fd_stdin = open(tty1, O_RDWR);
 	
 	char read_buf[128];
+	while(1){
+	Memset(read_buf, 0, 128);
 	read(fd_stdout, read_buf, 128);
-	Printf("read_buf = %s\n", read_buf);
+//	Printf("read_buf = %s\n", read_buf);
 
 	// 分割从终端读取的字符串
 	char *argv[10];
+//	Memset(argv, 0, 10);
+//	char argv[5][10];
 	int argc = 0;
 	int word = 0;
 	char *p = read_buf;
 	char *s;
+	char ch;
 
-	while(*p){
+	do{
+		ch = *p;
 		if((*p != ' ' && *p != 0) && word == 0){
 			s = p;
 			word = 1;
 		}
 
 		if((*p == ' ' || *p == 0) && word == 1){
+//			int index = argc++;
+//			Memset(argv[index], 0, sizeof(argv[index]));
+//			argv[index] = s;
 			argv[argc++] = s;
 			//Printf("argc[%d] = %s\n", argc-1, argc[argc-1]);
 			*p = 0;
-			Printf("argc[%d] = %s\n", argc-1, argv[argc-1]);
+		//	Printf("argv[%d] = %s\n", argc-1, argv[argc-1]);
 			word = 0;
 		}
 
 		p++;
-	}
-	argv[argc] = s;
+	}while(ch);
+	// argv[argc] = s;
+	argv[argc] = 0;
 	
-
-
+	int i = -1;
+//	while(argv[++i]){
+//		Printf("argv[%d] = %s\n", i, argv[i]);
+//	}
+//	// int fd = open(argv[0], O_RDWR);
+//	argv[0][5] = 0;
+//	Printf("argv2[0] = %s\n", argv[0]);
 	int fd = open(argv[0], O_RDWR);
+//	char file[5] = "echo";
+//	int fd = open(file, O_RDWR);
+//	int fd = open("echo", O_RDWR);
+//	int fd = 2;
+		//	Printf("simple shell start3\n");
 	if(fd == -1){
+		for(int i = 0; i < 6; i++){
+			Printf("%x:%x\n", i, argv[0][i]);
+		}
 		Printf("{%s}\n", argv[0]);
 	}else{
 		// 实现shell	
+//			Printf("simple shell start4\n");
 		int pid = fork();
+//		Printf("simple shell start5\n");
+		//return;
 		if(pid > 0){
 			int s;
 			wait(&s);
+//			Printf("simple shell over\n");
 		}else{
+//			Printf("simple shell start\n");
 			close(fd);
+//			exit(5);
 			execv(argv[0], argv);	
+			while(1){}
+	//		char *s1 = "echo";
+	//		char *s2 = "hello";
+	//		argv[0] = s1;
+	//		argv[1] = s2;
+			
+	//		execv("echo", argv);	
+	//		exit(5);
 		}
+	}
+
 	}
 }
 
@@ -772,10 +826,13 @@ void test_split_str()
 
 void test_shell()
 {
-	int fd_stdout = open("dev_tty1", O_RDWR);
+	char tty1[10] = "dev_tty1";
+	int fd_stdout = open(tty1, O_RDWR);
 	char filename[20] = "install.tar";
 	untar(filename);
-
+//		Printf("I am a child\n");
+//		simple_shell();
+//	return;
 	int pid = fork();
 	if(pid > 0){
 		int s;
@@ -783,7 +840,14 @@ void test_shell()
 		Printf("My child exit %d\n", s);
 	}else{
 		Printf("I am a child\n");
+		close(fd_stdout);
 		simple_shell();
+	}
+
+	while(1){
+		int s;
+		int child = wait(&s);
+		Printf("child exit with status %d\n", s);
 	}
 
 }
@@ -791,7 +855,8 @@ void test_shell()
 // exec测试用例
 void test_exec()
 {
-	int fd_stdout = open("dev_tty1", O_RDWR);
+	char tty1[10] = "dev_tty1";
+	int fd_stdout = open(tty1, O_RDWR);
 	char filename[20] = "install.tar";
 	untar(filename);
 //	execl("/echo", "echo", "hello", 0);
@@ -807,16 +872,16 @@ void test_exec()
 		// exit(5);
 		// execl("/pwd", "echo", "hello",  "world", 0);
 		execl("/echo", "echo", "hello",  "world", 0);
-		//while(1){};
+		while(1){};
 	}
 
 }
 
 void INIT()
 {
-	test_shell();
+//	test_shell();
 //	test_exec();
-//	TestFS();
+	TestFS();
 //	wait_exit();
 	while(1){};
 }
@@ -1178,12 +1243,13 @@ void assertion_failure(char *exp, char *filename, char *base_filename, unsigned 
 // ipc start
 int dead_lock(int src, int dest)
 {
+	return 0;
     Proc *src_proc = pid2proc(src);
     Proc *dest_proc = pid2proc(dest);
     while (1)
     {
-        Proc *src_proc = pid2proc(src);
-        Proc *dest_proc = pid2proc(dest);
+//        Proc *src_proc = pid2proc(src);
+//        Proc *dest_proc = pid2proc(dest);
         if (dest_proc->p_flag == SENDING)
         {
             if (dest_proc->p_send_to == src)
@@ -1194,7 +1260,7 @@ int dead_lock(int src, int dest)
                 Proc *p = dest_proc;
                 do
                 {
-  //                  Printf("%x--2-->%x---->", proc2pid(p), p->p_send_to);
+                    Printf("%x--2-->%x---->", proc2pid(p), p->p_send_to);
                     p = pid2proc(p->p_send_to);
                 } while (p->pid != src);
                 //Printf("%x\n", src);
@@ -1564,10 +1630,10 @@ int send_rec(int function, Message *msg, int pid)
 {
 
     // todo 调试
-    //	dis_pos = 12000 - 128 + 10 + 320;
-    //	//dis_pos += 160;
-    //	disp_str_colour("send_rec pid:", 0x0C);
-    //	disp_int(pid);
+//    	dis_pos = 12000 - 128 + 10 + 320;
+//    	//dis_pos += 160;
+//    	disp_str_colour("send_rec pid:", 0x0C);
+//    	disp_int(function);
 
     //	assert(pid == TASK_TTY || pid == TASK_SYS || pid == TASK_HD
     //                 || pid == TASK_FS || pid == ANY || pid == INTERRUPT || pid == PROC_A
@@ -1592,6 +1658,10 @@ int send_rec(int function, Message *msg, int pid)
         // 两个函数都使用pid，正确吗？
         // 很费解。在send_msg中，pid是本进程投递消息的目标。
         // 在receive_msg中，pid是本进程要从哪个进程接收消息。
+//    	dis_pos = 12000 - 128 + 10 + 320;
+//    	dis_pos += 160;
+//    	disp_str_colour("send_rec pid2:", 0x0C);
+//    	disp_int(pid);
         ret = send_msg(msg, pid); // pid是receiver
         //while(proc_table[1].p_flag != RUNNING){
 

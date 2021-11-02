@@ -35,7 +35,7 @@ void disp_int(int num);
 
 // debug end
 
-int open(const char *pathname, int flags);
+int open(char *pathname, int flags);
 int read(int fd, void *buf, int count);
 int write(int fd, const void *buf, int count);
 int close(int fd);

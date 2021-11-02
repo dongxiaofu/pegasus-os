@@ -12,6 +12,7 @@
 
 int fork() {
     Message msg;
+	Memset(&msg, 0, sizeof(Message));
 
     msg.TYPE = FORK;
     send_rec(BOTH, &msg, TASK_MM);

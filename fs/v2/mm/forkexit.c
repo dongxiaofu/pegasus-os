@@ -71,6 +71,8 @@ int do_fork(Message *msg)
     //	caller_cs_size = (0x1000 + 0x015be4);
     //	caller_cs_base = 0x1000;
     //	child_base += 0x10;
+   // caller_cs_base = 0x1000;
+//	caller_cs_size = 1024*1024;
     phycopy((void *)child_base, (void *)caller_cs_base, caller_cs_size);
 
     // 设置子进程的ldt
@@ -156,7 +158,7 @@ void do_exit(Message *msg, int exit_code)
             if (proc_table[INIT_PID].wait_status == WAITING && proc_table[i].wait_status == HANGING)
             {
                 proc_table[INIT_PID].wait_status = ~WAITING;
-                cleanup(proc_table[i]);
+                cleanup(&proc_table[i]);
             }
         }
     }
@@ -177,7 +179,7 @@ void do_wait(Message *msg)
             if (proc_table[i].wait_status == HANGING)
             {
                 proc_table[pid].wait_status = ~WAITING;
-                cleanup(proc_table[i]);
+                cleanup(&proc_table[i]);
                 return;
             }
         }
@@ -201,13 +203,16 @@ void do_wait(Message *msg)
 }
 
 void cleanup(Proc *proc)
+// void cleanup(Proc proc)
 {
     // 解除父进程的阻塞
     Message msg2parent;
     msg2parent.TYPE = SYSCALL_RET;
     msg2parent.RETVAL = 0;
     msg2parent.PID = proc->parent_pid;
+//    msg2parent.PID = proc.parent_pid;
 	msg2parent.STATUS = proc->exit_status;
+//	msg2parent.STATUS = proc.exit_status;
 // todo 把子进程的退出码传递给父进程。
     send_rec(SEND, &msg2parent, proc->parent_pid);
     // 回收子进程的进程表

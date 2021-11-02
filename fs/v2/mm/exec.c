@@ -22,7 +22,8 @@ int do_exec(Message *msg) {
     // 4. 写非常接近正式代码的伪代码。因为，很多函数都没有实现。
     //
     //
-int fd_stdout = open("dev_tty1", O_RDONLY);
+	char tty1[10] = "dev_tty1";
+int fd_stdout = open(tty1, O_RDONLY);
 	int source = msg->source;    
 
     // 重新放置二进制代码
@@ -39,7 +40,7 @@ int fd_stdout = open("dev_tty1", O_RDONLY);
     int MAX_FILE_SIZE = 148368;
     char mmbuf[158368];
     char filename[12];
-        dis_pos = 12000 - 128 + 10 + 160 * 7;
+	Memset(filename,0,12);
     // FILENAME的长度包含末尾的'0'吗？
     phycopy(v2l(TASK_MM, filename), v2l(source, msg->PATHNAME), msg->NAME_LEN);
     int fd = open(filename, O_RDONLY);
@@ -151,6 +152,8 @@ int fd_stdout = open("dev_tty1", O_RDONLY);
     proc_table[caller_pid].s_reg.ecx = argc;
     proc_table[caller_pid].s_reg.eip = elf_header->e_entry;
     proc_table[caller_pid].s_reg.esp = origin_stack;
+
+proc_table[caller_pid].p_send_to = NO_TASK;
 
     // 解除caller的阻塞
     Message m;

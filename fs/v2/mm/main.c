@@ -47,11 +47,14 @@ void TaskMM(){
     m.TYPE = SYSCALL_RET;
 	m.RETVAL = 0;
 
+	char *t = (char *)(0x0006d073+0xA00000);
+
 		switch(type){
 			case FORK:
 				m.PID = do_fork(&msg);
 				break;
 		case EXEC:
+			reply = 0;
 			do_exec(&msg);
 			break;
 		case EXIT:
@@ -81,6 +84,11 @@ int alloc_mem(int pid, int memory_size)
 
 	int address = USER_PROC_MEM_BASE + (pid - TASK_PROC_NUM - USER_PROC_NUM) * PROC_IMAGE_DEFAULT_SIZE;
 //	int address = USER_PROC_MEM_BASE + (pid - TASK_PROC_NUM - USER_PROC_NUM) * memory_size;
+
+	if(address + memory_size >= 0x8246c){
+		
+//		panic("can not support such large memeory");
+	}
 
 	return address;
 }

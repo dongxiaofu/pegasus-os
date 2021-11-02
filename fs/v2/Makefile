@@ -68,7 +68,9 @@ loader.bin:pmtest2.asm
 	nasm -o loader.bin loader.asm
 
 # kernel.o:kernel.asm include/string.h include/hd.h
-kernel.o:kernel.asm
+# kernel.o:kernel-30.asm
+kernel.o:kernel-20.asm
+# kernel.o:kernel.asm
 	${ASM} ${ASKFLAGS} -o $@ $<
 
 kernel_sub.o:kernel_sub.asm

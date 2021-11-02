@@ -181,6 +181,7 @@ TSS tss;
 Proc proc_table[PROC_NUM];
 Proc *proc_ready_table;
 typedef void (*Func)();
+// void (*Func)();
 
 typedef struct{
 	Func func_name;

@@ -1,5 +1,6 @@
 [section .bss]
-Stack	resb	1024*2
+;Stack	resb	1024*2
+Stack	resb	1024*8
 ;Stack	resb	1024*1024
 ;Stack	resb	1024*1024*16
 ;Stack	resb	1024*2

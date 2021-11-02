@@ -57,7 +57,8 @@ unsigned int VirAddr2PhyAddr(unsigned int base, void *offset)
 unsigned int v2l(int pid, void *offset)
 {
     Proc *proc = pid2proc(pid);
-    int ds = proc->s_reg.ds;
+    // int ds = proc->s_reg.ds;
+    int ds = 1;
     int base = Seg2PhyAddrLDT(ds, proc);
     int line_addr = base + offset;
     return line_addr;
