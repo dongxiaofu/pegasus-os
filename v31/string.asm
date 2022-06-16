@@ -56,6 +56,11 @@ Memcpy:
 
 	ret
 
+; ebp是基址，也就是执行push ebp之后的esp的值。
+; 原来的ebp的地址是 ebp + 4。
+; size的地址是 ebp + 8。
+; character的地址是 ebp + 12。
+; dst的地址是 ebp + 16。
 ; Memset(void *dest, char character, int size)
 Memset:
 	;;;;;;;;;;xhcg bx, bx
