@@ -139,7 +139,6 @@ LABEL_START:
 	xchg bx, bx
 
 	; 获取物理内存容量	
-	xchg bx, bx
 	push eax
 	push ebx
 	push di
@@ -148,39 +147,20 @@ LABEL_START:
 	mov di,	AddressStruct	
 	mov ebx, 0
 .GET_MEM:
-;	push eax
-;	push ebx
-;	push di
-;	push ecx
-;	push edx		
 
 	mov eax,	0E820h
-	;mov ebx, 0
-	;mov di,	_AddressStruct	
 	mov di,	AddressStruct	
 	mov ecx, 20
 	mov edx, 0534D4150h
 	int 15h
 	jc	.GET_MEM_ERROR
 
-	;cmp ebx, 0
-	;jz	.GET_MEM_OVER	
-	;inc byte [_MemCheckNum]
-	;inc dd [MemCheckNum]
 	inc dword [MemCheckNum]
-	;inc [MemCheckNum]
-	;add dword di, 20
 	add  di, 20
 	cmp ebx, 0
-	;jne .GET_MEM
 	je .GET_MEM_OVER
-	xchg bx, bx
 	jmp .GET_MEM
-	;jmp .GET_MEM_OVER
 .GET_MEM_ERROR:
-	;mov byte [_MemCheckNum], 0
-	;mov byte [MemCheckNum], 0
-	;mov dd [MemCheckNum], 0
 	mov dword [MemCheckNum], 0
 .GET_MEM_OVER:
 	pop eax
@@ -205,7 +185,6 @@ LABEL_START:
 	
 	mov bx, OffSetOfLoader
 	call ReadSector
-	;;;;;;;xhcg bx, bx
 	mov cx, 4
 	mov bx, (80 * 18 + 40) * 2
 	mov di, OffSetOfLoader
