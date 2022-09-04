@@ -68,6 +68,34 @@ org	0100h
 	SelectFlatWR_16	equ	LABLE_GDT_FLAT_WR_16 - LABEL_GDT
 	SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 3
 
+; ----------- 获取物理内存容量 start ----------------------
+AddressStruct:
+	BaseAddrLow:	dd		0	
+	BaseAddrHigh:	dd		0	
+	LengthLow:		dd		0	
+	LengthHigh:		dd		0	
+	Type:			dd		0
+_AddressStruct          equ     AddressStruct - $$
+    _BaseAddrLow        equ     BaseAddrLow - $$
+    _BaseAddrHigh       equ     BaseAddrHigh - $$
+    _LengthLow          equ     LengthLow - $$
+    _LengthHigh         equ     LengthHigh - $$
+    _Type               equ     Type - $$
+
+;_AddressStruct		equ		$ - AddressStruct
+;	_BaseAddrLow	equ		$ - BaseAddrLow	
+;	_BaseAddrHigh   equ     $ - BaseAddrHigh
+;	_LengthLow      equ     $ - LengthLow
+;	_LengthHigh     equ     $ - LengthHigh
+;	_Type     		equ     $ - Type
+
+MemCheckBuf:	times 256 db 0
+_MemCheckBuf	equ		$ - MemCheckBuf
+MemCheckNum:	dd	0
+_MemCheckNum	equ		$ - MemCheckNum
+
+; ----------- 获取物理内存容量 start ----------------------
+
 
 LABEL_START:
 	mov	ax,	cs
@@ -102,12 +130,65 @@ LABEL_START:
 	mov		ax,	cs
 	;mov		[BaseOfLoaderPhyAddr + GO_BACK_REAL_MODEL + 3],	ax
 	
+	xchg bx, bx
 	mov ax, 0B800h
 	mov gs, ax
 	mov ah, 0Ch
 	mov al, 'X'
 	mov [gs:(80 * 16 + 20)*2], ax
+	xchg bx, bx
 
+	; 获取物理内存容量	
+	xchg bx, bx
+	push eax
+	push ebx
+	push di
+	push ecx
+	push edx		
+	mov di,	AddressStruct	
+	mov ebx, 0
+.GET_MEM:
+;	push eax
+;	push ebx
+;	push di
+;	push ecx
+;	push edx		
+
+	mov eax,	0E820h
+	;mov ebx, 0
+	;mov di,	_AddressStruct	
+	mov di,	AddressStruct	
+	mov ecx, 20
+	mov edx, 0534D4150h
+	int 15h
+	jc	.GET_MEM_ERROR
+
+	;cmp ebx, 0
+	;jz	.GET_MEM_OVER	
+	;inc byte [_MemCheckNum]
+	;inc dd [MemCheckNum]
+	inc dword [MemCheckNum]
+	;inc [MemCheckNum]
+	;add dword di, 20
+	add  di, 20
+	cmp ebx, 0
+	;jne .GET_MEM
+	je .GET_MEM_OVER
+	xchg bx, bx
+	jmp .GET_MEM
+	;jmp .GET_MEM_OVER
+.GET_MEM_ERROR:
+	;mov byte [_MemCheckNum], 0
+	;mov byte [MemCheckNum], 0
+	;mov dd [MemCheckNum], 0
+	mov dword [MemCheckNum], 0
+.GET_MEM_OVER:
+	pop eax
+	pop ebx
+	pop di
+	pop ecx
+	pop edx		
+	; 打印物理内存容量
 	
 	mov ax, BaseOfKernel
 	mov es, ax
@@ -533,6 +614,41 @@ LABEL_PM_START:
 	;;;xhcg bx, bx	
 	; 跳入16位模式（保护模式)
 	;jmp word SelectFlatX_16:0
+
+	; --------------------获取物理内存容量start--------------------------
+	; 获取物理内存容量	
+;.GET_MEM:
+;	push ax
+;	push ebx
+;	push di
+;	push ecx
+;	push edx		
+;
+;	mov ax,	0E820h
+;	mov ebx, 0
+;	mov di,	_AddressStruct	
+;	mov ecx, 20
+;	mov edx, 0534D4150h
+;	int 15h
+;	jc	.GET_MEM_ERROR
+;
+;	cmp ebx, 0
+;	jz	.GET_MEM_OVER	
+;	inc byte [_MemCheckNum]
+;	add byte di, 20
+;	jmp .GET_MEM
+;.GET_MEM_ERROR:
+;	mov byte [_MemCheckNum], 0
+;.GET_MEM_OVER:
+;	pop ax
+;	pop ebx
+;	pop di
+;	pop ecx
+;	pop edx		
+	; 打印物理内存容量
+	; --------------------获取物理内存容量end--------------------------
+
+
 	
 	call Init_8259A
 	call Init8253
