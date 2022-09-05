@@ -344,6 +344,10 @@ FILE_NOT_FOUND:
 	jmp OVER
 
 READ_FILE_OVER:
+
+	;分页
+	;call SetupPage
+
 	;xchg	bx, bx
 	;mov al, 'O'
 	;mov ah, 0Dh
@@ -464,6 +468,11 @@ _AddressStruct          equ     AddressStruct + BaseOfLoaderPhyAddr
 
 _RamSize		equ		RamSize + BaseOfLoaderPhyAddr
 _MemCheckBuf	equ		MemCheckBuf + BaseOfLoaderPhyAddr
+
+;分页
+PageDirectoryTablePhysicalAddress		equ			0x100000
+PageTablePhysicalAddress				equ		    PageDirectoryTablePhysicalAddress + 4096	
+;PageDirectoryTablePhysicalAddress		equ			0x100000
 
 ; 根据FAT项的编号获取这个FAT项的值
 GetFATEntry:
@@ -638,6 +647,8 @@ LABEL_PM_START:
 	;;;xhcg bx, bx	
 	; 跳入16位模式（保护模式)
 	;jmp word SelectFlatX_16:0
+	;分页
+	call SetupPage
 
 	; --------------------获取物理内存容量start--------------------------
 	push esi
@@ -898,8 +909,6 @@ Memcpy:
 	jmp .1
 
 .2:
-	;;;;;;;;;;;;xhcg bx, bx
-	;pop es
 	mov eax, [ebp + 8]
 
 	pop edi
@@ -910,7 +919,61 @@ Memcpy:
 
 	ret
 
+;分页
+;函数开头和结尾的栈处理，费了一些时间。参考UCC和ABI。
+SetupPage:
+	push ebp
+	push ebx
+	push esi
+	push edi
+	push esp
 
+	;清空页目录表
+	mov ecx, 4096
+	mov eax, PageDirectoryTablePhysicalAddress
+.ClearPageDirectoryTable:
+	;mov ecx, 4096
+	;mov [eax], 0
+	mov dword [eax], 0
+	add eax, 1
+	loop .ClearPageDirectoryTable
+
+	;设置第0个、第768个、第1023个PDE的值
+	mov dword [PageDirectoryTablePhysicalAddress], PageTablePhysicalAddress
+	mov dword [PageDirectoryTablePhysicalAddress + 0xC00], PageTablePhysicalAddress
+	mov dword [PageDirectoryTablePhysicalAddress + 0xFFC], PageTablePhysicalAddress
+
+	;设置第一个页表的前256个PTE
+	mov ecx, 256
+	;mov esi, 0
+	xor esi, esi
+	xor eax, eax
+.SetPre256PTE:
+	;mov dword [PageTablePhysicalAddress + 4 * esi], 4096 * esi
+	;mov dword [PageTablePhysicalAddress + 4 * esi], 4096
+	mov dword [PageTablePhysicalAddress + 4 * esi], eax
+	add eax, 4096
+	inc esi
+	loop .SetPre256PTE
+
+	;设置页目录的第769到1022个PDE
+	mov ecx, 254
+	mov esi, 1
+	mov eax, PageTablePhysicalAddress + 4096
+.SetHigh1GBMemPDE:
+	;mov dword [PageDirectoryTablePhysicalAddress + 4 * esi], PageTablePhysicalAddress + 4096 * esi 
+	mov dword [PageDirectoryTablePhysicalAddress + 4 * esi], eax
+	add eax, 4096
+	inc esi
+	loop .SetHigh1GBMemPDE
+
+	pop esp
+	pop edi
+	pop esi
+	pop ebx
+	pop ebp
+
+	ret
 
 BaseOfKernelPhyAddr	equ	BaseOfKernel * 10h  ; Kernel.BIN 被加载到的位置 ---- 物理地址 中的段基址部分
 
