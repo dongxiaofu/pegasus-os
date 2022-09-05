@@ -163,15 +163,12 @@ LABEL_START:
 .GET_MEM:
 
 	mov eax,	0E820h
-	;mov di,	AddressStruct	
-	;mov di, MemCheckBuf
 	mov ecx, 20
 	mov edx, 0534D4150h
 	int 15h
 	jc	.GET_MEM_ERROR
 
 	inc dword [MemCheckNum]
-	;stosd
 	add  di, 20
 	cmp ebx, 0
 	je .GET_MEM_OVER
@@ -654,32 +651,21 @@ LABEL_PM_START:
 
 	xor edi, edi 
 	xor edx, edx
-	
-	;mov edi, _AddressStruct
 .DispMem:
 	xor esi, esi
 	mov ebx, 5
-	;mov eax, [_MemCheckBuf + edx]
 	mov edi, _AddressStruct
 .1:
-	;mov eax, [_MemCheckBuf + edx]
-	;mov edi, _AddressStruct
-	;xchg bx, bx
 	mov eax, [_MemCheckBuf + edx + esi]
-	;stosd
-	;cmp ebx, 0
-	;je .2
 	stosd
 
 	add esi, 4
-	;add edi, 4
 	dec ebx
 	cmp ebx, 0
 	je .2
 	jmp .1
 
 .2:
-	;mov eax, [_Type + edi]
 	mov eax, [_Type]
 	cmp eax, 1		
 	jne .NotAddressRangeMemory
@@ -687,7 +673,6 @@ LABEL_PM_START:
 	xchg bx, bx
 	add ebx, [_LengthLow]
 	cmp ebx, [_RamSize]
-	;ja	.NotAddressRangeMemory
 	jb	.NotAddressRangeMemory
 	mov [_RamSize], ebx
 .NotAddressRangeMemory:
