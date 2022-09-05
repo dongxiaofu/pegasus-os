@@ -648,7 +648,9 @@ LABEL_PM_START:
 	; 跳入16位模式（保护模式)
 	;jmp word SelectFlatX_16:0
 	;分页
+	xchg bx, bx
 	call SetupPage
+	
 
 	; --------------------获取物理内存容量start--------------------------
 	push esi
@@ -681,7 +683,6 @@ LABEL_PM_START:
 	cmp eax, 1		
 	jne .NotAddressRangeMemory
 	mov ebx, [_BaseAddrLow]
-	xchg bx, bx
 	add ebx, [_LengthLow]
 	cmp ebx, [_RamSize]
 	jb	.NotAddressRangeMemory
@@ -940,8 +941,11 @@ SetupPage:
 
 	;设置第0个、第768个、第1023个PDE的值
 	mov dword [PageDirectoryTablePhysicalAddress], PageTablePhysicalAddress
-	mov dword [PageDirectoryTablePhysicalAddress + 0xC00], PageTablePhysicalAddress
-	mov dword [PageDirectoryTablePhysicalAddress + 0xFFC], PageTablePhysicalAddress
+	;mov dword [PageDirectoryTablePhysicalAddress + 0xC00], PageTablePhysicalAddress
+	;mov dword [PageDirectoryTablePhysicalAddress + 0xFFC], PageTablePhysicalAddress
+	mov dword [PageDirectoryTablePhysicalAddress + 0x300 * 4], PageTablePhysicalAddress
+	mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], PageDirectoryTablePhysicalAddress
+	;mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], PageTablePhysicalAddress
 
 	;设置第一个页表的前256个PTE
 	mov ecx, 256
@@ -958,7 +962,7 @@ SetupPage:
 
 	;设置页目录的第769到1022个PDE
 	mov ecx, 254
-	mov esi, 1
+	mov esi, 769
 	mov eax, PageTablePhysicalAddress + 4096
 .SetHigh1GBMemPDE:
 	;mov dword [PageDirectoryTablePhysicalAddress + 4 * esi], PageTablePhysicalAddress + 4096 * esi 
@@ -966,6 +970,7 @@ SetupPage:
 	add eax, 4096
 	inc esi
 	loop .SetHigh1GBMemPDE
+	xchg bx, bx
 
 	pop esp
 	pop edi
