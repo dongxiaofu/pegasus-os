@@ -69,19 +69,32 @@ org	0100h
 	SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 3
 
 ; ----------- 获取物理内存容量 start ----------------------
-AddressStruct:
-	BaseAddrLow:	dd		0	
-	BaseAddrHigh:	dd		0	
-	LengthLow:		dd		0	
-	LengthHigh:		dd		0	
-	Type:			dd		0
-_AddressStruct          equ     AddressStruct - $$
-    _BaseAddrLow        equ     BaseAddrLow - $$
-    _BaseAddrHigh       equ     BaseAddrHigh - $$
-    _LengthLow          equ     LengthLow - $$
-    _LengthHigh         equ     LengthHigh - $$
-    _Type               equ     Type - $$
-
+;MemCheckBuf:	times 256 db 0
+;MemCheckNum:	dd	0
+;AddressStruct:
+;	BaseAddrLow:	dd		0	
+;	BaseAddrHigh:	dd		0	
+;	LengthLow:		dd		0	
+;	LengthHigh:		dd		0	
+;	Type:			dd		0
+;MemCheckBuf:	times 256 db 0
+;
+;;_MemCheckBuf	equ		MemCheckBuf - $$
+;_MemCheckNum	equ		MemCheckNum - $$
+;_AddressStruct          equ     AddressStruct - $$
+;    _BaseAddrLow        equ     BaseAddrLow - $$
+;    _BaseAddrHigh       equ     BaseAddrHigh - $$
+;    _LengthLow          equ     LengthLow - $$
+;    _LengthHigh         equ     LengthHigh - $$
+;    _Type               equ     Type - $$
+;;    _BaseAddrLow        equ     BaseAddrLow - AddressStruct
+;;    _BaseAddrHigh       equ     BaseAddrHigh - AddressStruct
+;;    _LengthLow          equ     LengthLow - AddressStruct
+;;    _LengthHigh         equ     LengthHigh - AddressStruct
+;;    _Type               equ     Type - AddressStruct
+;
+;_MemCheckBuf	equ		MemCheckBuf - $$
+;_RamSize		equ		0
 ;_AddressStruct		equ		$ - AddressStruct
 ;	_BaseAddrLow	equ		$ - BaseAddrLow	
 ;	_BaseAddrHigh   equ     $ - BaseAddrHigh
@@ -89,10 +102,13 @@ _AddressStruct          equ     AddressStruct - $$
 ;	_LengthHigh     equ     $ - LengthHigh
 ;	_Type     		equ     $ - Type
 
-MemCheckBuf:	times 256 db 0
-_MemCheckBuf	equ		$ - MemCheckBuf
-MemCheckNum:	dd	0
-_MemCheckNum	equ		$ - MemCheckNum
+;MemCheckBuf:	times 256 db 0
+;_MemCheckBuf	equ		$ - MemCheckBuf
+;_MemCheckBuf	equ		MemCheckBuf - $$
+;MemCheckNum:	dd	0
+;_MemCheckNum	equ		$ - MemCheckNum
+;_MemCheckNum	equ		MemCheckNum - $$
+;_RamSize		equ		0
 
 ; ----------- 获取物理内存容量 start ----------------------
 
@@ -130,13 +146,11 @@ LABEL_START:
 	mov		ax,	cs
 	;mov		[BaseOfLoaderPhyAddr + GO_BACK_REAL_MODEL + 3],	ax
 	
-	xchg bx, bx
 	mov ax, 0B800h
 	mov gs, ax
 	mov ah, 0Ch
 	mov al, 'X'
 	mov [gs:(80 * 16 + 20)*2], ax
-	xchg bx, bx
 
 	; 获取物理内存容量	
 	push eax
@@ -144,18 +158,20 @@ LABEL_START:
 	push di
 	push ecx
 	push edx		
-	mov di,	AddressStruct	
+	mov di, MemCheckBuf
 	mov ebx, 0
 .GET_MEM:
 
 	mov eax,	0E820h
-	mov di,	AddressStruct	
+	;mov di,	AddressStruct	
+	;mov di, MemCheckBuf
 	mov ecx, 20
 	mov edx, 0534D4150h
 	int 15h
 	jc	.GET_MEM_ERROR
 
 	inc dword [MemCheckNum]
+	;stosd
 	add  di, 20
 	cmp ebx, 0
 	je .GET_MEM_OVER
@@ -163,12 +179,12 @@ LABEL_START:
 .GET_MEM_ERROR:
 	mov dword [MemCheckNum], 0
 .GET_MEM_OVER:
-	pop eax
-	pop ebx
-	pop di
-	pop ecx
+	mov eax, [MemCheckNum]
 	pop edx		
-	; 打印物理内存容量
+	pop ecx
+	pop di
+	pop ebx
+	pop eax
 	
 	mov ax, BaseOfKernel
 	mov es, ax
@@ -421,6 +437,37 @@ LoaderBinFileNameLength	equ	$ - LoaderBinFileName	; 中间两个空格
 
 FATEntryIsInt	equ 0		; FAT项的字节偏移量是不是整数个字节：0，不是；1，是。
 BytesOfSector	equ	512	; 每个扇区包含的字节数量
+; ----------- 获取物理内存容量 start ----------------------
+;MemCheckBuf:	times 256 db 0
+MemCheckNum:	dd	0
+AddressStruct:
+	BaseAddrLow:	dd		0	
+	BaseAddrHigh:	dd		0	
+	LengthLow:		dd		0	
+	LengthHigh:		dd		0	
+	Type:			dd		0
+RamSize:	dd	0
+MemCheckBuf:	times 256 db 0
+
+;_MemCheckBuf	equ		MemCheckBuf - $$
+;_MemCheckNum	equ		MemCheckNum - $$
+;_MemCheckNum	equ		MemCheckNum + 0x00090000 - $$
+_MemCheckNum	equ		MemCheckNum + BaseOfLoaderPhyAddr
+_AddressStruct          equ     AddressStruct + BaseOfLoaderPhyAddr
+    _BaseAddrLow        equ     BaseAddrLow + BaseOfLoaderPhyAddr
+    _BaseAddrHigh       equ     BaseAddrHigh + BaseOfLoaderPhyAddr
+    _LengthLow          equ     LengthLow + BaseOfLoaderPhyAddr
+    _LengthHigh         equ     LengthHigh + BaseOfLoaderPhyAddr
+    _Type               equ     Type + BaseOfLoaderPhyAddr
+;    _BaseAddrLow        equ     BaseAddrLow - AddressStruct
+;    _BaseAddrHigh       equ     BaseAddrHigh - AddressStruct
+;    _LengthLow          equ     LengthLow - AddressStruct
+;    _LengthHigh         equ     LengthHigh - AddressStruct
+;    _Type               equ     Type - AddressStruct
+
+_RamSize		equ		RamSize + BaseOfLoaderPhyAddr
+_MemCheckBuf	equ		MemCheckBuf + BaseOfLoaderPhyAddr
+
 ; 根据FAT项的编号获取这个FAT项的值
 GetFATEntry:
 	; 用FAT项的编号计算出这个FAT项的字节偏移量 start
@@ -567,6 +614,7 @@ OffSetOfLoader	equ	0x0
 BaseOfFATEntry	equ	0x1000
 ;BaseOfLoader    equ     0x9000
 BaseOfLoader    equ     0x9000
+;BaseOfLoader    equ     0x2000
 
 
 BaseOfLoaderPhyAddr	equ	BaseOfLoader * 10h	; LOADER.BIN 被加载到的位置 ---- 物理地址 (= BaseOfLoader * 10h)
@@ -595,36 +643,63 @@ LABEL_PM_START:
 	;jmp word SelectFlatX_16:0
 
 	; --------------------获取物理内存容量start--------------------------
-	; 获取物理内存容量	
-;.GET_MEM:
-;	push ax
-;	push ebx
-;	push di
-;	push ecx
-;	push edx		
-;
-;	mov ax,	0E820h
-;	mov ebx, 0
-;	mov di,	_AddressStruct	
-;	mov ecx, 20
-;	mov edx, 0534D4150h
-;	int 15h
-;	jc	.GET_MEM_ERROR
-;
-;	cmp ebx, 0
-;	jz	.GET_MEM_OVER	
-;	inc byte [_MemCheckNum]
-;	add byte di, 20
-;	jmp .GET_MEM
-;.GET_MEM_ERROR:
-;	mov byte [_MemCheckNum], 0
-;.GET_MEM_OVER:
-;	pop ax
-;	pop ebx
-;	pop di
-;	pop ecx
-;	pop edx		
+	push esi
+	push ecx
+	push edi
+	push ebx
+	push eax
 	; 打印物理内存容量
+	xor ecx, ecx
+	mov ecx, [_MemCheckNum]
+
+	xor edi, edi 
+	xor edx, edx
+	
+	;mov edi, _AddressStruct
+.DispMem:
+	xor esi, esi
+	mov ebx, 5
+	;mov eax, [_MemCheckBuf + edx]
+	mov edi, _AddressStruct
+.1:
+	;mov eax, [_MemCheckBuf + edx]
+	;mov edi, _AddressStruct
+	;xchg bx, bx
+	mov eax, [_MemCheckBuf + edx + esi]
+	;stosd
+	;cmp ebx, 0
+	;je .2
+	stosd
+
+	add esi, 4
+	;add edi, 4
+	dec ebx
+	cmp ebx, 0
+	je .2
+	jmp .1
+
+.2:
+	;mov eax, [_Type + edi]
+	mov eax, [_Type]
+	cmp eax, 1		
+	jne .NotAddressRangeMemory
+	mov ebx, [_BaseAddrLow]
+	xchg bx, bx
+	add ebx, [_LengthLow]
+	cmp ebx, [_RamSize]
+	;ja	.NotAddressRangeMemory
+	jb	.NotAddressRangeMemory
+	mov [_RamSize], ebx
+.NotAddressRangeMemory:
+	add edx, 20
+	loop .DispMem
+	mov eax, [_RamSize]
+	xchg bx, bx
+	pop eax
+	pop ebx
+	pop edi
+	pop ecx
+	pop esi
 	; --------------------获取物理内存容量end--------------------------
 
 
