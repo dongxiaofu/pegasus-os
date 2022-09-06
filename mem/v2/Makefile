@@ -6,7 +6,8 @@ ASM	=	nasm
 CC	=	gcc
 LD	=	ld
 ASKFLAGS=	-I include/ -f elf
-CFLAGS	=	-I include/ -I include/sys  -g -c -fno-builtin -m32	
+CFLAGS	=	-I include/ -I include/sys -I include/mem \
+			-g -c -fno-builtin -m32	
 # CFLAGS	=	-I include/ -I include/sys -c -fno-builtin -m32	
 # LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker /lib/ld-linux.so.2 -lc
 # LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386
@@ -19,7 +20,8 @@ OBJS	=	kernel_sub.o kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o glo
 		hd.o hd_rdwt.o process.o protect.o console.o keyboard.o \
 		open.o	read.o	write.o	close.o \
 		wait.o  exit.o 	fork.o	 getpid.o exec.o \
-		mm/main.o mm/exec.o mm/forkexit.o
+		mm/main.o mm/exec.o mm/forkexit.o	\
+		mem/mem.o
 	#	wait.o	exit.o	fork.o	unlink.o getpid.o
 
 LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
@@ -150,7 +152,9 @@ getpid.o:lib/getpid.c
 
 exec.o:lib/exec.c
 	${CC} ${CFLAGS} -o $@ $<
-
+# 内存管理
+mem.o:mem/mem.c
+	${CC} ${CFLAGS} -o $@ $<
 
 # 生成CRT，C语言运行时环境
 ${LOBJS}:${LOBJS2}
