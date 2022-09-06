@@ -320,7 +320,7 @@ READ_FILE:
 	push bx
 	;;;;xhcg bx, bx
 	call GetFATEntry
-	;;xchg	bx,	bx
+	;;;;xchg	bx,	bx
 	pop bx
 	push ax
 	cmp ax, 0xFF8
@@ -348,7 +348,7 @@ READ_FILE_OVER:
 	;分页
 	;call SetupPage
 
-	;xchg	bx, bx
+	;;;xchg	bx, bx
 	;mov al, 'O'
 	;mov ah, 0Dh
 	;mov [gs:(80 * 23 + 33) * 2], ax
@@ -473,6 +473,12 @@ _MemCheckBuf	equ		MemCheckBuf + BaseOfLoaderPhyAddr
 PageDirectoryTablePhysicalAddress		equ			0x100000
 PageTablePhysicalAddress				equ		    PageDirectoryTablePhysicalAddress + 4096	
 ;PageDirectoryTablePhysicalAddress		equ			0x100000
+PG_P_NO				equ			0
+PG_P_YES			equ			1
+PG_RW_R				equ			00b
+PG_RW_RW			equ			10b
+PG_US_SUPER			equ			100b
+PG_US_USER			equ			100b
 
 ; 根据FAT项的编号获取这个FAT项的值
 GetFATEntry:
@@ -648,10 +654,22 @@ LABEL_PM_START:
 	; 跳入16位模式（保护模式)
 	;jmp word SelectFlatX_16:0
 	;分页
-	xchg bx, bx
+	;;xchg bx, bx
 	call SetupPage
+	;开启分页
+	call OpenPaging
+	;设置cr3的值
+;	mov eax, PageDirectoryTablePhysicalAddress
+;	mov cr3, eax
+;
+;	;设置cr0的PG位
+;	;xchg bx, bx
+;	mov eax, cr0
+;	or eax, 0x80000000
+;	mov cr0, eax
 	
 
+	;xchg bx, bx
 	; --------------------获取物理内存容量start--------------------------
 	push esi
 	push ecx
@@ -691,7 +709,7 @@ LABEL_PM_START:
 	add edx, 20
 	loop .DispMem
 	mov eax, [_RamSize]
-	xchg bx, bx
+	;;xchg bx, bx
 	pop eax
 	pop ebx
 	pop edi
@@ -700,13 +718,13 @@ LABEL_PM_START:
 	; --------------------获取物理内存容量end--------------------------
 
 
-	
+	;xchg bx, bx	
 	call Init_8259A
 	call Init8253
 
 	;;xhcg bx, bx
 	call InitKernel
-	;;xhcg bx, bx	
+	;xchg bx, bx	
 
 	;mov gs, ax
 	mov al, 'G'
@@ -715,26 +733,26 @@ LABEL_PM_START:
 	
 	
 	; 测试读写5M之上的内存读写 start
-	push es
-	mov ax, SelectFlatWR_TEST
-	mov es, ax
-	mov esi, 0
-	mov edi, 0
-	;;;xhcg bx, bx
-	mov byte [es:edi], 'W'
-	mov byte al, [es:edi]
-	mov ah, 0Ah
-	mov [gs:(80*20 + 20) * 2], ax
-	
-	mov byte [es:edi], 'Q'
-	mov byte al, [es:edi]
-	mov [gs:(80*20 + 21) * 2], ax
-	
-	pop es
+;	push es
+;	mov ax, SelectFlatWR_TEST
+;	mov es, ax
+;	mov esi, 0
+;	mov edi, 0
+;	;;;xhcg bx, bx
+;	mov byte [es:edi], 'W'
+;	mov byte al, [es:edi]
+;	mov ah, 0Ah
+;	mov [gs:(80*20 + 20) * 2], ax
+;	
+;	mov byte [es:edi], 'Q'
+;	mov byte al, [es:edi]
+;	mov [gs:(80*20 + 21) * 2], ax
+;	
+;	pop es
 	; 测试读写5M之上的内存读写 end
 
 
-	xchg bx, bx
+	;;xchg bx, bx
 	;jmp SelectFlatX:0x30400
 	jmp SelectFlatX:0x1000
 	jmp $
@@ -940,21 +958,42 @@ SetupPage:
 	loop .ClearPageDirectoryTable
 
 	;设置第0个、第768个、第1023个PDE的值
-	mov dword [PageDirectoryTablePhysicalAddress], PageTablePhysicalAddress
+	mov eax, PageTablePhysicalAddress
+	;or eax, PG_P_YES + PG_RW_RW + PG_US_SUPER
+	or eax, PG_P_YES |  PG_RW_RW |  PG_US_SUPER
+;	or eax, PG_P_YES
+;	or eax, PG_RW_RW
+;	or eax, PG_US_SUPER
+	mov dword [PageDirectoryTablePhysicalAddress], eax
+	;mov dword [PageDirectoryTablePhysicalAddress], PageTablePhysicalAddress
 	;mov dword [PageDirectoryTablePhysicalAddress + 0xC00], PageTablePhysicalAddress
 	;mov dword [PageDirectoryTablePhysicalAddress + 0xFFC], PageTablePhysicalAddress
-	mov dword [PageDirectoryTablePhysicalAddress + 0x300 * 4], PageTablePhysicalAddress
-	mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], PageDirectoryTablePhysicalAddress
+	;mov dword [PageDirectoryTablePhysicalAddress + 0x300 * 4], PageTablePhysicalAddress
+	mov dword [PageDirectoryTablePhysicalAddress + 0x300 * 4], eax
+	mov eax, PageDirectoryTablePhysicalAddress
+	;or eax, PG_P_YES + PG_RW_RW + PG_US_SUPER
+	or eax, PG_P_YES |  PG_RW_RW |  PG_US_SUPER
+;	or eax, PG_P_YES
+;	or eax, PG_RW_RW
+;	or eax, PG_US_SUPER
+	;mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], PageDirectoryTablePhysicalAddress
+	mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], eax
 	;mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], PageTablePhysicalAddress
 
 	;设置第一个页表的前256个PTE
-	mov ecx, 256
+	;mov ecx, 256
+	mov ecx, 1024
 	;mov esi, 0
 	xor esi, esi
 	xor eax, eax
 .SetPre256PTE:
 	;mov dword [PageTablePhysicalAddress + 4 * esi], 4096 * esi
 	;mov dword [PageTablePhysicalAddress + 4 * esi], 4096
+	;or eax, PG_P_YES + PG_RW_RW + PG_US_SUPER
+	or eax, PG_P_YES |  PG_RW_RW |  PG_US_SUPER
+;	or eax, PG_P_YES
+;	or eax, PG_RW_RW
+;	or eax, PG_US_SUPER
 	mov dword [PageTablePhysicalAddress + 4 * esi], eax
 	add eax, 4096
 	inc esi
@@ -966,11 +1005,49 @@ SetupPage:
 	mov eax, PageTablePhysicalAddress + 4096
 .SetHigh1GBMemPDE:
 	;mov dword [PageDirectoryTablePhysicalAddress + 4 * esi], PageTablePhysicalAddress + 4096 * esi 
+	;or eax, PG_P_YES + PG_RW_RW + PG_US_SUPER
+	or eax, PG_P_YES |  PG_RW_RW |  PG_US_SUPER
+;	or eax, PG_P_YES
+;	or eax, PG_RW_RW
+;	or eax, PG_US_SUPER
 	mov dword [PageDirectoryTablePhysicalAddress + 4 * esi], eax
 	add eax, 4096
 	inc esi
 	loop .SetHigh1GBMemPDE
-	xchg bx, bx
+	;;xchg bx, bx
+
+	pop esp
+	pop edi
+	pop esi
+	pop ebx
+	pop ebp
+
+	ret
+
+;开启分页
+OpenPaging:
+	push ebp
+	push ebx
+	push esi
+	push edi
+	push esp
+
+	sgdt [GdtPtr]             ; 存储到原来gdt所有的位置
+	add dword [GdtPtr + 2], 0xc0000000
+
+	add esp, 0xc0000000        ; 将栈指针同样映射到内核地址
+	
+	;设置cr3的值
+	mov eax, PageDirectoryTablePhysicalAddress
+	mov cr3, eax
+
+	;设置cr0的PG位
+	;;xchg bx, bx
+	mov eax, cr0
+	or eax, 0x80000000
+	mov cr0, eax
+
+	lgdt [GdtPtr]             ; 重新加载
 
 	pop esp
 	pop edi

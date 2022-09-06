@@ -888,6 +888,7 @@ void INIT()
 
 void TestA()
 {
+	disp_int(5);
 //    Printf("TestA is running\n");
     while (1)
     {

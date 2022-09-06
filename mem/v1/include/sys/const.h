@@ -176,7 +176,7 @@
 
 // 进程相关 start
 // 用户进程的数量
-#define USER_PROC_NUM 2
+#define USER_PROC_NUM 1
 // 系统任务的数量
 #define TASK_PROC_NUM 5
 // 用fork创建的用户进程的数量
