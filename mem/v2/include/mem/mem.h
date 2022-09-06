@@ -25,9 +25,10 @@ typedef struct _MemPool
 	int start_addr;
 }* MemPool;
 
-int test_bit_val(int idx);
-int set_bit_val(int idx);
-int get_bits(int cnt);
+int test_bit_val(Bitmap map, int idx);
+int set_bit_val(Bitmap map, int idx, int val);
+int set_bits(Bitmap map, int idx, int val, int cnt);
+int get_bits(Bitmap map, int cnt);
 
 // 分配内存
 // 申请一个物理页框
@@ -35,7 +36,7 @@ int get_a_page(int type, MemPool pool);
 // 申请一个虚拟内存地址
 // cnt是页框数量
 // 每个进程的虚拟内存地址池不同，是不是要指定进程？
-int get_virtual_address(int cnt);
+int get_virtual_address(Bitmap map, int cnt);
 // 增加映射条目
 void add_map_entry(int vaddr, int phy_addr);
 // 申请内存，返回内存空间的虚拟地址

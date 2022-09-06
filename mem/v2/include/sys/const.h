@@ -261,4 +261,7 @@
 
 #define MAX_TICKS 0x7FFFABCD
 
+// 内存管理
+#define PAGE_SIZE	4096
+
 #endif
