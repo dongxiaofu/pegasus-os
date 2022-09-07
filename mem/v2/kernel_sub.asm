@@ -61,7 +61,7 @@ csinit:
 	xor eax, eax
 	mov ax, TSS_SELECTOR
 	ltr ax
-	;xchg bx, bx
+	xchg bx, bx
 	jmp kernel_main
 	hlt
 	jmp $	

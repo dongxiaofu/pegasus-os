@@ -310,9 +310,46 @@ void spurious_irq(int irq)
     disp_str_colour("\n------------irq end---------------\n", 0x0C);
 }
 
+
+void init_keyboard()
+{
+    // 键盘
+    Memset(keyboard_buffer.buf, 0, sizeof(keyboard_buffer.buf));
+    keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
+    keyboard_buffer.counter = 0;
+    // 初始键盘中断例程
+    //init_keyboard_handler();
+    dis_pos = 0;
+    // 清屏
+    for (int i = 0; i < 80 * 25 * 2; i++)
+    {
+        disp_str(" ");
+    }
+    dis_pos = 0;
+
+    init_keyboard_handler();
+
+}
+
+void init()
+{
+//	asm ("xchgw %bx, %bx");
+	init_keyboard();
+	asm ("xchgw %bx, %bx");
+	init_memory();
+	asm ("xchgw %bx, %bx");
+}
+
 void kernel_main()
 {
+//	asm ("xchgw %bx, %bx");
 	disp_str("Hello,World");
+	
+	init();
+	
+	disp_int(7);
+	disp_str("Hello,World");
+
     while (1);
 }
 

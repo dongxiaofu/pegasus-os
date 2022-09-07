@@ -176,6 +176,9 @@ void INIT();
 void TestFork();
 
 void ReloadGDT();
+
+void init_keyboard();
+void init();
 // 内核的入口函数
 void kernel_main();
 

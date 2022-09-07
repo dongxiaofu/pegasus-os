@@ -10,7 +10,7 @@
 #include "proto.h"
 #include "global.h"
 
-int test_bit_val(Bitmap map, int idx)
+int test_bit_val(Bitmap *map, int idx)
 {
 	int byte_idx = idx / 8;
 	int bit_idx = idx % 8;	
@@ -20,7 +20,7 @@ int test_bit_val(Bitmap map, int idx)
 	return (bit_val > 0 ? 1 : 0);
 }
 
-int set_bit_val(Bitmap map, int idx, int val)
+int set_bit_val(Bitmap *map, int idx, int val)
 {
 	// TODO 要判断val。它只能是0或1。
 	// TODO 判断idx
@@ -38,7 +38,7 @@ int set_bit_val(Bitmap map, int idx, int val)
 	return 1;
 }
 
-int set_bits(Bitmap map, int idx, int val, int cnt)
+int set_bits(Bitmap *map, int idx, int val, int cnt)
 {
 	for(int i = 0; i < cnt; i++){
 		set_bit_val(map, idx++, val);
@@ -48,7 +48,7 @@ int set_bits(Bitmap map, int idx, int val, int cnt)
 	return 1;
 }
 
-int get_first_free_bit(Bitmap map, int idx)
+int get_first_free_bit(Bitmap *map, int idx)
 {
 	int length = map->length * 8;
 
@@ -61,7 +61,7 @@ int get_first_free_bit(Bitmap map, int idx)
 	return -1;
 }
 
-int get_bits(Bitmap map, int cnt)
+int get_bits(Bitmap *map, int cnt)
 {
 	int first_free_bit = get_first_free_bit(map, 0);
 	if(first_free_bit == -1){
@@ -101,15 +101,23 @@ int get_bits(Bitmap map, int cnt)
 }
 
 // 申请一个物理页框
-int get_a_page(int type, MemPool pool)
+int get_a_page(MEMORY_POOL_TYPE pool_type)
 {
+	struct _MemPool pool;
+	
+	if(pool_type == KERNEL){
+		pool = KernelPool;
+	}else{
+		// TODO 某个用户进程的虚拟地址池
+		pool = UserPool;
+	}
 	// 找到位图中的空闲bit，返回它的索引。
-	Bitmap map = pool->map;
-	int index = get_bits(map, 1);
+	Bitmap map = pool.map;
+	int index = get_bits(&map, 1);
 	// TODO 内存不足，无法分配。
-	int addr = pool->start_addr + PAGE_SIZE * index;
+	int addr = pool.start_addr + PAGE_SIZE * index;
 	// 把第index个bit设置成1。
-	set_bit_val(map, index, 1);
+	set_bit_val(&map, index, 1);
 
 	return addr;
 }
@@ -117,11 +125,21 @@ int get_a_page(int type, MemPool pool)
 // 申请一个虚拟内存地址
 // cnt是页框数量
 // 每个进程的虚拟内存地址池不同，是不是要指定进程？
-int get_virtual_address(Bitmap map, int cnt)
+int get_virtual_address(int cnt, MEMORY_POOL_TYPE pool_type)
 {
-	int index = get_bits(map, cnt);
+	VirtualMemoryAddress pool;
+
+	if(pool_type == KERNEL){
+		pool = KernelVirtualMemory;
+	}else{
+		// TODO 某个用户进程的虚拟地址池
+	}
+	
+	Bitmap map = pool.map;
+
+	int index = get_bits(&map, cnt);
 	int addr = PAGE_SIZE * index;
-	set_bits(map, index, 1, cnt);
+	set_bits(&map, index, 1, cnt);
 
 	return addr;
 }
@@ -164,9 +182,7 @@ void add_map_entry(int vaddr, int phy_addr)
 		}
 	}else{
 			// TODO 内存池没有规划好，只能先这样。
-			int type = 1;
-			MemPool pool = 0x0;
-			int addr = get_a_page(type, pool);
+			int addr = get_a_page(KERNEL);
 		// 要把这个页框初始化。
 		*pde = addr;
 		Memset(pde, 0, PAGE_SIZE);
@@ -188,15 +204,12 @@ void add_map_entry(int vaddr, int phy_addr)
 	}
 }
 
-int alloc_memory(int cnt)
+int alloc_memory(int cnt, MEMORY_POOL_TYPE pool_type)
 {
-	// TODO pool的值应该是多少？
-	MemPool pool = 0x0;
-	Bitmap map = map;
-	int vaddr = get_virtual_address(map, cnt);
+	int vaddr = get_virtual_address(cnt, pool_type);
 
 	while(cnt--){
-		int phy_addr = get_a_page(1, pool);
+		int phy_addr = get_a_page(pool_type);
 		add_map_entry(vaddr, phy_addr);
 		vaddr += PAGE_SIZE;
 	}
@@ -204,3 +217,62 @@ int alloc_memory(int cnt)
 	return vaddr;
 }
 
+void init_memory()
+{
+	int total_memory = 32 * 1024 * 1024;
+	// 低端1MB和紧随其后的两个页框被内核、页目录表、页表使用。
+	KernelPool.start_addr = 0x100000 + 0x2000;
+	total_memory = total_memory - KernelPool.start_addr;
+	KernelPool.length = total_memory / 2;	
+	UserPool.length = total_memory - KernelPool.length;
+	// 设置内核内存池的位图。
+	// 用户内存池池有多少个页？
+	// int page_cnt = (KernelPool.length + PAGE_SIZE - 1)/ PAGE_SIZE;
+	int page_cnt = ROUND_UP(KernelPool.length, PAGE_SIZE);
+	KernelPool.map.length = ROUND_UP(page_cnt, 8);	
+	// 位图的初始地址怎么确定？
+	KernelPool.map.bits = (char *)(KernelPool.start_addr);
+	// 初始化内核的位图。
+	asm ("xchgw %bx, %bx");
+	Memset(KernelPool.map.bits, 0, KernelPool.map.length);
+	// 位图放在内核内存池。更新内核内存池的初始化地址。
+	// KernelPool.start_addr += KernelPool.map.length;
+	// 不更新内核内存池的初始化地址了。把位图占用的内存标记成已经使用。
+	// 内核内存池的位图占用多少个扇区？
+	int bitmap_page_cnt = ROUND_UP(KernelPool.map.length, PAGE_SIZE);	
+	int userPoolMapBitIdx = bitmap_page_cnt;
+	asm ("xchgw %bx, %bx");
+	set_bits(&KernelPool.map, 0, 1, bitmap_page_cnt);
+
+	// 处理物理内存池
+	page_cnt = ROUND_UP(UserPool.length, PAGE_SIZE);
+	UserPool.map.length = ROUND_UP(page_cnt, 8);
+	// 用户内存池的位图的初始地址 = 内核内存池的初始地址 + 内核内存池的位图的长度。
+	UserPool.map.bits = (char *)(KernelPool.start_addr + KernelPool.map.length);
+	// 初始化用户内存池的位图。
+	asm ("xchgw %bx, %bx");
+	Memset(UserPool.map.bits, 0, UserPool.map.length);
+	bitmap_page_cnt = ROUND_UP(UserPool.map.length, PAGE_SIZE);
+	int bit_idx = userPoolMapBitIdx; 
+	asm ("xchgw %bx, %bx");
+	set_bits(&KernelPool.map, bit_idx, 1, bitmap_page_cnt);
+
+	// 初始化内核的虚拟内存池
+	// int virtual_total_memory = 4*1024*1024*1024;
+	// long long virtual_total_memory = 4*1024*1024*1024;
+//	unsigned long long virtual_total_memory = 4*1024*1024*1024;
+	// 4GB/4KB
+	int virtual_total_memory_page_cnt = 1024*1024;
+//	page_cnt = ROUND_UP(virtual_total_memory, PAGE_SIZE);
+	page_cnt = virtual_total_memory_page_cnt;
+	KernelVirtualMemory.map.length = ROUND_UP(page_cnt, 8);	
+	// 初始化内核的虚拟内存池的位图。
+	KernelVirtualMemory.map.bits = (char *)(KernelPool.start_addr + KernelPool.map.length + UserPool.map.length);
+	asm ("xchgw %bx, %bx");
+	Memset(KernelVirtualMemory.map.bits, 0, KernelVirtualMemory.map.length);
+	// 把虚拟内存池的位图占用的内核内存标记为已经使用。
+	bit_idx = userPoolMapBitIdx + bitmap_page_cnt;
+	asm ("xchgw %bx, %bx");
+	set_bits(&KernelPool.map, bit_idx, 1, page_cnt);
+	
+}
