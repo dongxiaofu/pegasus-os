@@ -28,6 +28,7 @@ typedef struct _MemPool
 int test_bit_val(Bitmap map, int idx);
 int set_bit_val(Bitmap map, int idx, int val);
 int set_bits(Bitmap map, int idx, int val, int cnt);
+int get_first_free_bit(Bitmap map, int idx);
 int get_bits(Bitmap map, int cnt);
 
 // 分配内存

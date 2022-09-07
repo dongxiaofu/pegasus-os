@@ -176,7 +176,7 @@ LOAD mem/mem.o
 .plt.sec
  *(.plt.sec)
 
-.text           0x0000000000001000     0x7615
+.text           0x0000000000001000     0x77c5
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
@@ -380,17 +380,18 @@ LOAD mem/mem.o
                 0x000000000000820b                do_exit
                 0x0000000000008307                do_wait
                 0x00000000000083d1                cleanup
- .text          0x0000000000008425      0x1f0 mem/mem.o
+ .text          0x0000000000008425      0x3a0 mem/mem.o
                 0x0000000000008425                test_bit_val
-                0x000000000000842f                set_bit_val
-                0x0000000000008439                set_bits
-                0x000000000000846f                get_bits
-                0x0000000000008479                get_a_page
-                0x00000000000084bd                get_virtual_address
-                0x00000000000084f5                ptr_pde
-                0x0000000000008508                ptr_pte
-                0x0000000000008530                add_map_entry
-                0x00000000000085bb                alloc_memory
+                0x000000000000848e                set_bit_val
+                0x00000000000084f9                set_bits
+                0x0000000000008533                get_first_free_bit
+                0x0000000000008577                get_bits
+                0x0000000000008629                get_a_page
+                0x000000000000866d                get_virtual_address
+                0x00000000000086a5                ptr_pde
+                0x00000000000086b8                ptr_pte
+                0x00000000000086e0                add_map_entry
+                0x000000000000876b                alloc_memory
  *(.gnu.warning)
 
 .fini
@@ -399,30 +400,30 @@ LOAD mem/mem.o
                 [!provide]                        PROVIDE (_etext = .)
                 [!provide]                        PROVIDE (etext = .)
 
-.rodata         0x0000000000008620      0x9f3
+.rodata         0x00000000000087e0      0x9f3
  *(.rodata .rodata.* .gnu.linkonce.r.*)
- .rodata        0x0000000000008620      0x6b1 kernel_main.o
- .rodata        0x0000000000008cd1      0x10e hd.o
- *fill*         0x0000000000008ddf        0x1 
- .rodata        0x0000000000008de0      0x173 fs_main.o
-                0x0000000000008de0                FSBUF_SIZE
- .rodata        0x0000000000008f53        0x6 process.o
- .rodata        0x0000000000008f59       0x24 close.o
- .rodata        0x0000000000008f7d       0x1b fork.o
- .rodata        0x0000000000008f98       0x31 exec.o
- .rodata        0x0000000000008fc9       0x11 mm/main.o
- *fill*         0x0000000000008fda        0x2 
- .rodata        0x0000000000008fdc       0x37 mm/forkexit.o
+ .rodata        0x00000000000087e0      0x6b1 kernel_main.o
+ .rodata        0x0000000000008e91      0x10e hd.o
+ *fill*         0x0000000000008f9f        0x1 
+ .rodata        0x0000000000008fa0      0x173 fs_main.o
+                0x0000000000008fa0                FSBUF_SIZE
+ .rodata        0x0000000000009113        0x6 process.o
+ .rodata        0x0000000000009119       0x24 close.o
+ .rodata        0x000000000000913d       0x1b fork.o
+ .rodata        0x0000000000009158       0x31 exec.o
+ .rodata        0x0000000000009189       0x11 mm/main.o
+ *fill*         0x000000000000919a        0x2 
+ .rodata        0x000000000000919c       0x37 mm/forkexit.o
 
-.txt            0x0000000000009013       0xaa
- .txt           0x0000000000009013       0x82 string.o
-                0x0000000000009013                Memcpy
-                0x0000000000009041                Memset
-                0x0000000000009060                Strcpy
-                0x000000000000907a                Strlen
- .txt           0x0000000000009095       0x28 hd_rdwt.o
-                0x0000000000009095                read_port
-                0x00000000000090a9                write_port
+.txt            0x00000000000091d3       0xaa
+ .txt           0x00000000000091d3       0x82 string.o
+                0x00000000000091d3                Memcpy
+                0x0000000000009201                Memset
+                0x0000000000009220                Strcpy
+                0x000000000000923a                Strlen
+ .txt           0x0000000000009255       0x28 hd_rdwt.o
+                0x0000000000009255                read_port
+                0x0000000000009269                write_port
 
 .rodata1
  *(.rodata1)
@@ -431,47 +432,47 @@ LOAD mem/mem.o
  *(.eh_frame_hdr)
  *(.eh_frame_entry .eh_frame_entry.*)
 
-.eh_frame       0x00000000000090c0     0x1238
+.eh_frame       0x0000000000009280     0x125c
  *(.eh_frame)
- .eh_frame      0x00000000000090c0      0x58c kernel_main.o
- .eh_frame      0x000000000000964c      0x244 hd.o
+ .eh_frame      0x0000000000009280      0x58c kernel_main.o
+ .eh_frame      0x000000000000980c      0x244 hd.o
                                         0x25c (size before relaxing)
- .eh_frame      0x0000000000009890      0x288 fs_main.o
+ .eh_frame      0x0000000000009a50      0x288 fs_main.o
                                         0x2a0 (size before relaxing)
- .eh_frame      0x0000000000009b18       0xa0 process.o
+ .eh_frame      0x0000000000009cd8       0xa0 process.o
                                          0xb8 (size before relaxing)
- .eh_frame      0x0000000000009bb8      0x104 protect.o
+ .eh_frame      0x0000000000009d78      0x104 protect.o
                                         0x11c (size before relaxing)
- .eh_frame      0x0000000000009cbc      0x1e0 console.o
+ .eh_frame      0x0000000000009e7c      0x1e0 console.o
                                         0x1f8 (size before relaxing)
- .eh_frame      0x0000000000009e9c       0xa0 keyboard.o
+ .eh_frame      0x000000000000a05c       0xa0 keyboard.o
                                          0xb8 (size before relaxing)
- .eh_frame      0x0000000000009f3c       0x20 open.o
+ .eh_frame      0x000000000000a0fc       0x20 open.o
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000009f5c       0x20 read.o
+ .eh_frame      0x000000000000a11c       0x20 read.o
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000009f7c       0x20 write.o
+ .eh_frame      0x000000000000a13c       0x20 write.o
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000009f9c       0x20 close.o
+ .eh_frame      0x000000000000a15c       0x20 close.o
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000009fbc       0x20 wait.o
+ .eh_frame      0x000000000000a17c       0x20 wait.o
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000009fdc       0x20 exit.o
+ .eh_frame      0x000000000000a19c       0x20 exit.o
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000009ffc       0x20 fork.o
+ .eh_frame      0x000000000000a1bc       0x20 fork.o
                                          0x38 (size before relaxing)
- .eh_frame      0x000000000000a01c       0x20 getpid.o
+ .eh_frame      0x000000000000a1dc       0x20 getpid.o
                                          0x38 (size before relaxing)
- .eh_frame      0x000000000000a03c       0x64 exec.o
+ .eh_frame      0x000000000000a1fc       0x64 exec.o
                                          0x7c (size before relaxing)
- .eh_frame      0x000000000000a0a0       0x3c mm/main.o
+ .eh_frame      0x000000000000a260       0x3c mm/main.o
                                          0x54 (size before relaxing)
- .eh_frame      0x000000000000a0dc       0x4c mm/exec.o
+ .eh_frame      0x000000000000a29c       0x4c mm/exec.o
                                          0x64 (size before relaxing)
- .eh_frame      0x000000000000a128       0x90 mm/forkexit.o
+ .eh_frame      0x000000000000a2e8       0x90 mm/forkexit.o
                                          0xa8 (size before relaxing)
- .eh_frame      0x000000000000a1b8      0x140 mem/mem.o
-                                        0x158 (size before relaxing)
+ .eh_frame      0x000000000000a378      0x164 mem/mem.o
+                                        0x17c (size before relaxing)
  *(.eh_frame.*)
 
 .gcc_except_table
@@ -775,7 +776,7 @@ LOAD mem/mem.o
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x0000000000000000    0x12ac7
+.debug_info     0x0000000000000000    0x12bda
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x0000000000000000     0x2207 kernel_main.o
  .debug_info    0x0000000000002207     0x13ca hd.o
@@ -797,7 +798,7 @@ LOAD mem/mem.o
  .debug_info    0x000000000000f5ec      0xb0b mm/main.o
  .debug_info    0x00000000000100f7      0xdf5 mm/exec.o
  .debug_info    0x0000000000010eec      0xd5f mm/forkexit.o
- .debug_info    0x0000000000011c4b      0xe7c mem/mem.o
+ .debug_info    0x0000000000011c4b      0xf8f mem/mem.o
 
 .debug_abbrev   0x0000000000000000     0x2666
  *(.debug_abbrev)
@@ -823,7 +824,7 @@ LOAD mem/mem.o
  .debug_abbrev  0x0000000000002286      0x1e4 mm/forkexit.o
  .debug_abbrev  0x000000000000246a      0x1fc mem/mem.o
 
-.debug_line     0x0000000000000000     0x364f
+.debug_line     0x0000000000000000     0x36fb
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x0000000000000000      0xc57 kernel_main.o
  .debug_line    0x0000000000000c57      0x546 hd.o
@@ -845,12 +846,12 @@ LOAD mem/mem.o
  .debug_line    0x000000000000300a       0xe4 mm/main.o
  .debug_line    0x00000000000030ee      0x1df mm/exec.o
  .debug_line    0x00000000000032cd      0x202 mm/forkexit.o
- .debug_line    0x00000000000034cf      0x180 mem/mem.o
+ .debug_line    0x00000000000034cf      0x22c mem/mem.o
 
 .debug_frame
  *(.debug_frame)
 
-.debug_str      0x0000000000000000     0x14cb
+.debug_str      0x0000000000000000     0x1502
  *(.debug_str)
  .debug_str     0x0000000000000000      0x799 kernel_main.o
                                         0x85b (size before relaxing)
@@ -892,8 +893,8 @@ LOAD mem/mem.o
                                         0x56c (size before relaxing)
  .debug_str     0x000000000000136c       0xb8 mm/forkexit.o
                                         0x4aa (size before relaxing)
- .debug_str     0x0000000000001424       0xa7 mem/mem.o
-                                        0x4bd (size before relaxing)
+ .debug_str     0x0000000000001424       0xde mem/mem.o
+                                        0x51c (size before relaxing)
 
 .debug_loc
  *(.debug_loc)

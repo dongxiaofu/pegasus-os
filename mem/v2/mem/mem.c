@@ -12,14 +12,29 @@
 
 int test_bit_val(Bitmap map, int idx)
 {
-	
-	return 0;
+	int byte_idx = idx / 8;
+	int bit_idx = idx % 8;	
+	char val = map->bits[byte_idx];
+	int bit_val = (val & (1 << bit_idx)) >> bit_idx;
+
+	return (bit_val > 0 ? 1 : 0);
 }
 
 int set_bit_val(Bitmap map, int idx, int val)
 {
+	// TODO 要判断val。它只能是0或1。
 	// TODO 判断idx
+	int byte_idx = idx / 8;
+	int bit_idx = idx % 8;	
+	char byte_val = map->bits[byte_idx];
 	
+	if(val >  0){
+		byte_val = byte_val | (1 << bit_idx);	
+	}else{
+		byte_val = byte_val & (~(1 << bit_idx));
+	}
+	
+	// TODO 在这个函数需要返回值吗？
 	return 1;
 }
 
@@ -28,12 +43,61 @@ int set_bits(Bitmap map, int idx, int val, int cnt)
 	for(int i = 0; i < cnt; i++){
 		set_bit_val(map, idx++, val);
 	}
+
+	// TODO 在这个函数需要返回值吗？
+	return 1;
+}
+
+int get_first_free_bit(Bitmap map, int idx)
+{
+	int length = map->length * 8;
+
+	for(int i = idx; i < length; i++){
+		if(test_bit_val(map, i) == 0){
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 int get_bits(Bitmap map, int cnt)
 {
+	int first_free_bit = get_first_free_bit(map, 0);
+	if(first_free_bit == -1){
+		// TODO 错误处理。
+	}
+
+	int length = map->length * 8;
+	int loop_cnt = cnt - 1;
+
+	int start_idx = first_free_bit + 1;
+	int end_idx = first_free_bit;
+	while(loop_cnt-- > 0){
+		if(test_bit_val(map, start_idx) == 0){
+			start_idx++;
+			end_idx++;
+		}else{
+			first_free_bit = get_first_free_bit(map, 0) + 1;
+			// TODO 错误处理。
+			start_idx = first_free_bit + 1;
+			end_idx = start_idx;
+			loop_cnt = cnt - 1; 
+		}
+
+		if(end_idx >= length){
+			end_idx = -1;
+			break;
+		}
+	}
+
+	if(end_idx == -1){
+		// TODO 错误处理。
+	}
+
+	start_idx = end_idx - cnt + 1;
 	
-	return 0;
+	return start_idx;
 }
 
 // 申请一个物理页框
