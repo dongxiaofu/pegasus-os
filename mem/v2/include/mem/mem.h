@@ -37,6 +37,10 @@ int get_a_page(int type, MemPool pool);
 // cnt是页框数量
 // 每个进程的虚拟内存地址池不同，是不是要指定进程？
 int get_virtual_address(Bitmap map, int cnt);
+// void *ptr_pde(int vaddr);
+// void *ptr_pte(int vaddr);
+int *ptr_pde(int vaddr);
+int *ptr_pte(int vaddr);
 // 增加映射条目
 void add_map_entry(int vaddr, int phy_addr);
 // 申请内存，返回内存空间的虚拟地址
