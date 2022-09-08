@@ -345,25 +345,92 @@ void kernel_main()
 	
 	init();
 
-	char *ptr = alloc_memory(1, KERNEL);
-	Strcpy(ptr,"How are you?"); 
-	char *ptr2 = alloc_memory(1, KERNEL);
-	Strcpy(ptr2,"KO"); 
-	char *ptr3 = alloc_memory(1, KERNEL);
-	Strcpy(ptr3,"UK"); 
-	char *ptr4 = alloc_memory(1, KERNEL);
-	Strcpy(ptr4,"MV"); 
-	disp_str(ptr);
-	disp_str("\n");
-	disp_str(ptr2);
-	disp_str("\n");
-	disp_str(ptr3);
-	disp_str("\n");
-	disp_str(ptr4);
-	disp_str("\n");
-	
-	disp_int(7);
-	disp_str("Hello,World3");
+	/*******************start************************/
+    ticks = 0;
+    counter = 0;
+    // 在这个项目的C代码中，全局变量如此赋值才有效。原因未知，实践要求如此。
+    //k_reenter = -1;
+    k_reenter = 0;
+    Proc *proc;
+    Task *task;
+    unsigned int eflags;
+    unsigned char rpl;
+    unsigned char dpl;
+    char *p_task_stack = proc_stack + STACK_SIZE;
+    // todo 测试需要，去掉用户进程USER_PROC_NUM。
+    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; i++)
+    {
+        proc = proc_table + i;
+        proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
+        proc->pid = i;
+        if (i >= TASK_PROC_NUM + USER_PROC_NUM)
+        {
+            proc->p_flag = FREE_SLOT;
+            continue;
+        }
+        proc->p_flag = 0;
+        if (i < TASK_PROC_NUM)
+        {
+            task = sys_task_table + i;
+            eflags = 0x1202;
+            rpl = 1;
+            dpl = 1;
+            proc->ticks = proc->priority = 15;
+            proc->tty_index = 1;
+        }
+        else
+        {
+            task = user_task_table + i - TASK_PROC_NUM;
+            eflags = 0x202;
+            rpl = 3;
+            dpl = 3;
+            proc->ticks = proc->priority = 5;
+            proc->tty_index = 1; //i - TASK_PROC_NUM;
+        }
+
+        // 进程名
+        Strcpy(proc->name, task->name);
+        Memcpy(&proc->ldts[0], &gdt[CS_SELECTOR_INDEX], sizeof(Descriptor));
+        proc->ldts[0].seg_attr1 = 0x9a | (dpl << 5); // 1001	1010
+        Memcpy(&proc->ldts[1], &gdt[DS_SELECTOR_INDEX], sizeof(Descriptor));
+        proc->ldts[1].seg_attr1 = 0x92 | (dpl << 5); // 1001 0010
+
+        if (strcmp(proc->name, "INIT") == 0)
+        {
+           	int init_image_size = (0x1000 + 1024 * 1024);
+            int cs_attribute = 0xcfa; //0x8000 | 0x4000 | 0x98 | (3 <<  5);
+            InitDescriptor(&(proc_table[i].ldts[0]), 0, (init_image_size - 1) >> 12, cs_attribute);
+            int ds_attribute = 0xcf2; //0x8000 | 0x4000 | 0x92 | (3 << 5);
+            InitDescriptor(&(proc_table[i].ldts[1]), 0, (init_image_size - 1) >> 12, ds_attribute);
+        }
+
+        unsigned short cs = 0x4 | rpl;
+        unsigned short ds = 0xC | rpl;
+        proc->s_reg.cs = cs;
+        proc->s_reg.ds = ds;
+        proc->s_reg.fs = ds;
+        proc->s_reg.es = ds;
+        proc->s_reg.ss = ds; // 000 1100
+        proc->s_reg.gs = GS_SELECTOR & (0xFFF9);
+        proc->s_reg.eip = (int)task->func_name;
+        if (strcmp(proc->name, "INIT") == 0){
+        	proc->s_reg.esp = (int)(p_task_stack);
+        }else{
+        	proc->s_reg.esp = (int)(p_task_stack);
+        }
+		p_task_stack -= task->stack_size;
+        proc->s_reg.eflags = eflags;
+
+        proc->has_int_msg = 0;
+        proc->q_sending = 0;
+        proc->q_next = 0;
+        proc->p_receive_from = NO_TASK;
+        proc->p_send_to = NO_TASK;
+        proc->p_msg = 0;
+    }
+    proc_ready_table = proc_table;
+
+	/*******************end************************/
 
     while (1);
 }
