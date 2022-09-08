@@ -33,6 +33,8 @@ int set_bit_val(Bitmap *map, int idx, int val)
 	}else{
 		byte_val = byte_val & (~(1 << bit_idx));
 	}
+
+	map->bits[byte_idx] = byte_val;
 	
 	// TODO 在这个函数需要返回值吗？
 	return 1;
@@ -138,7 +140,7 @@ int get_virtual_address(int cnt, MEMORY_POOL_TYPE pool_type)
 	Bitmap map = pool.map;
 
 	int index = get_bits(&map, cnt);
-	int addr = PAGE_SIZE * index;
+	int addr = pool.start_addr + PAGE_SIZE * index;
 	set_bits(&map, index, 1, cnt);
 
 	return addr;
@@ -207,11 +209,13 @@ void add_map_entry(int vaddr, int phy_addr)
 int alloc_memory(int cnt, MEMORY_POOL_TYPE pool_type)
 {
 	int vaddr = get_virtual_address(cnt, pool_type);
+	vaddr -= PAGE_SIZE;
 
 	while(cnt--){
+		vaddr += PAGE_SIZE;
 		int phy_addr = get_a_page(pool_type);
 		add_map_entry(vaddr, phy_addr);
-		vaddr += PAGE_SIZE;
+		// vaddr += PAGE_SIZE;
 	}
 
 	return vaddr;
@@ -224,7 +228,11 @@ void init_memory()
 	KernelPool.start_addr = 0x100000 + 0x2000;
 	total_memory = total_memory - KernelPool.start_addr;
 	KernelPool.length = total_memory / 2;	
+	disp_int(KernelPool.length);
 	UserPool.length = total_memory - KernelPool.length;
+	disp_str("\n");
+	disp_int(UserPool.length);
+	disp_str("\n");
 	// 设置内核内存池的位图。
 	// 用户内存池池有多少个页？
 	// int page_cnt = (KernelPool.length + PAGE_SIZE - 1)/ PAGE_SIZE;
@@ -233,7 +241,6 @@ void init_memory()
 	// 位图的初始地址怎么确定？
 	KernelPool.map.bits = (char *)(KernelPool.start_addr);
 	// 初始化内核的位图。
-	asm ("xchgw %bx, %bx");
 	Memset(KernelPool.map.bits, 0, KernelPool.map.length);
 	// 位图放在内核内存池。更新内核内存池的初始化地址。
 	// KernelPool.start_addr += KernelPool.map.length;
@@ -241,7 +248,6 @@ void init_memory()
 	// 内核内存池的位图占用多少个扇区？
 	int bitmap_page_cnt = ROUND_UP(KernelPool.map.length, PAGE_SIZE);	
 	int userPoolMapBitIdx = bitmap_page_cnt;
-	asm ("xchgw %bx, %bx");
 	set_bits(&KernelPool.map, 0, 1, bitmap_page_cnt);
 
 	// 处理物理内存池
@@ -250,11 +256,9 @@ void init_memory()
 	// 用户内存池的位图的初始地址 = 内核内存池的初始地址 + 内核内存池的位图的长度。
 	UserPool.map.bits = (char *)(KernelPool.start_addr + KernelPool.map.length);
 	// 初始化用户内存池的位图。
-	asm ("xchgw %bx, %bx");
 	Memset(UserPool.map.bits, 0, UserPool.map.length);
 	bitmap_page_cnt = ROUND_UP(UserPool.map.length, PAGE_SIZE);
 	int bit_idx = userPoolMapBitIdx; 
-	asm ("xchgw %bx, %bx");
 	set_bits(&KernelPool.map, bit_idx, 1, bitmap_page_cnt);
 
 	// 初始化内核的虚拟内存池
@@ -268,11 +272,13 @@ void init_memory()
 	KernelVirtualMemory.map.length = ROUND_UP(page_cnt, 8);	
 	// 初始化内核的虚拟内存池的位图。
 	KernelVirtualMemory.map.bits = (char *)(KernelPool.start_addr + KernelPool.map.length + UserPool.map.length);
-	asm ("xchgw %bx, %bx");
 	Memset(KernelVirtualMemory.map.bits, 0, KernelVirtualMemory.map.length);
 	// 把虚拟内存池的位图占用的内核内存标记为已经使用。
 	bit_idx = userPoolMapBitIdx + bitmap_page_cnt;
-	asm ("xchgw %bx, %bx");
-	set_bits(&KernelPool.map, bit_idx, 1, page_cnt);
+	bitmap_page_cnt = ROUND_UP(KernelVirtualMemory.map.length, PAGE_SIZE);
+	set_bits(&KernelPool.map, bit_idx, 1, bitmap_page_cnt);
+
+	KernelVirtualMemory.start_addr = (bit_idx + bitmap_page_cnt) * 0x1000;
 	
+	asm ("xchgw %bx, %bx");
 }

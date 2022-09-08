@@ -335,9 +335,7 @@ void init()
 {
 //	asm ("xchgw %bx, %bx");
 	init_keyboard();
-	asm ("xchgw %bx, %bx");
 	init_memory();
-	asm ("xchgw %bx, %bx");
 }
 
 void kernel_main()
@@ -346,9 +344,26 @@ void kernel_main()
 	disp_str("Hello,World");
 	
 	init();
+
+	char *ptr = alloc_memory(1, KERNEL);
+	Strcpy(ptr,"How are you?"); 
+	char *ptr2 = alloc_memory(1, KERNEL);
+	Strcpy(ptr2,"KO"); 
+	char *ptr3 = alloc_memory(1, KERNEL);
+	Strcpy(ptr3,"UK"); 
+	char *ptr4 = alloc_memory(1, KERNEL);
+	Strcpy(ptr4,"MV"); 
+	disp_str(ptr);
+	disp_str("\n");
+	disp_str(ptr2);
+	disp_str("\n");
+	disp_str(ptr3);
+	disp_str("\n");
+	disp_str(ptr4);
+	disp_str("\n");
 	
 	disp_int(7);
-	disp_str("Hello,World");
+	disp_str("Hello,World3");
 
     while (1);
 }
