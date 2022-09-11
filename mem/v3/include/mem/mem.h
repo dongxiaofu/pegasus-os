@@ -23,7 +23,7 @@ typedef struct _Bitmap
 typedef struct _MemPool
 {
 	Bitmap map;
-	int start_addr;
+	unsigned int start_addr;
 	int length;
 }* MemPool;
 
@@ -31,7 +31,7 @@ typedef struct _MemPool
 typedef struct _VirtualMemoryAddress
 {
 	Bitmap map;
-	int start_addr;
+	unsigned start_addr;
 }VirtualMemoryAddress;
 
 // 内核内存池
@@ -52,21 +52,25 @@ int get_first_free_bit(Bitmap *map, int idx);
 int get_bits(Bitmap *map, int cnt);
 
 // 分配内存
+int get_a_page2(int vaddr, MEMORY_POOL_TYPE pool_type);
 // 申请一个物理页框
-int get_a_page(MEMORY_POOL_TYPE pool_type);
+unsigned int get_a_page(MEMORY_POOL_TYPE pool_type);
 // 申请一个虚拟内存地址
 // cnt是页框数量
 // 每个进程的虚拟内存地址池不同，是不是要指定进程？
-int get_virtual_address(int cnt, MEMORY_POOL_TYPE pool_type);
+unsigned int get_virtual_address(unsigned int cnt, MEMORY_POOL_TYPE pool_type);
 // void *ptr_pde(int vaddr);
 // void *ptr_pte(int vaddr);
-int *ptr_pde(int vaddr);
-int *ptr_pte(int vaddr);
+unsigned int *ptr_pde(unsigned int vaddr);
+unsigned int *ptr_pte(unsigned int vaddr);
 // 增加映射条目
-void add_map_entry(int vaddr, int phy_addr);
+void add_map_entry(unsigned int vaddr, unsigned int phy_addr);
+// 获取虚拟地址对应的物理地址
+unsigned int get_physical_address(unsigned int vaddr);
 // 申请内存，返回内存空间的虚拟地址
-int alloc_memory(int cnt, MEMORY_POOL_TYPE pool_type);
+unsigned int alloc_memory(unsigned int cnt, MEMORY_POOL_TYPE pool_type);
 // 初始化内存管理模块
-void init_memory();
+void init_memory2();
+void init_memory(int total_memory);
 #endif
 

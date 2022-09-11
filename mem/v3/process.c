@@ -65,11 +65,16 @@ void schedule_process()
         }
     }
 
-    if (proc_ready_table->pid == 7)
-    {
-
-        int a = 8;
-    }
+	// 进程，切换页目录表。
+	int page_directory = 0x100000;
+	if(proc_ready_table->page_directory != 0x0){
+//		proc_ready_table->page_directory = 0x100000;
+		// asm ("xchgw %bx, %bx");
+		asm volatile ("movl %0, %%cr3" : : "r" (proc_ready_table->page_directory) : "memory");
+	}else{
+//		page_directory = 0x100000 + 0x2000;
+		asm volatile ("movl %0, %%cr3" : : "r" (page_directory) : "memory");
+	}
 }
 
 void clock_handler()

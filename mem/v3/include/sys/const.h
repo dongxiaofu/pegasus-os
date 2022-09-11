@@ -266,9 +266,9 @@
 // 分页
 #define PG_P_NO		0
 #define PG_P_YES	1
-#define PG_RW_R		00b 
-#define PG_RW_RW	10b 
-#define PG_US_SUPER	000b	
-#define PG_US_USER	100b
+#define PG_RW_R		0		// 00b 
+#define PG_RW_RW	2		// 10b 
+#define PG_US_SUPER	4		// 000b	
+#define PG_US_USER	4		// 100b
 
 #endif

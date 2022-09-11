@@ -65,7 +65,9 @@ int get_first_free_bit(Bitmap *map, int idx)
 
 int get_bits(Bitmap *map, int cnt)
 {
-	int first_free_bit = get_first_free_bit(map, 0);
+	// int first_free_bit = get_first_free_bit(map, 0);
+	int tmp = ROUND_UP(0x100000 + 0x2000, PAGE_SIZE);
+	int first_free_bit = get_first_free_bit(map, tmp);
 	if(first_free_bit == -1){
 		// TODO 错误处理。
 	}
@@ -102,8 +104,16 @@ int get_bits(Bitmap *map, int cnt)
 	return start_idx;
 }
 
+int get_a_page2(int vaddr, MEMORY_POOL_TYPE pool_type)
+{
+	int phy_addr = get_a_page(pool_type);
+	add_map_entry(vaddr, phy_addr);
+
+	return vaddr;
+}
+
 // 申请一个物理页框
-int get_a_page(MEMORY_POOL_TYPE pool_type)
+unsigned int get_a_page(MEMORY_POOL_TYPE pool_type)
 {
 	struct _MemPool pool;
 	
@@ -117,7 +127,7 @@ int get_a_page(MEMORY_POOL_TYPE pool_type)
 	Bitmap map = pool.map;
 	int index = get_bits(&map, 1);
 	// TODO 内存不足，无法分配。
-	int addr = pool.start_addr + PAGE_SIZE * index;
+	unsigned int addr = pool.start_addr + PAGE_SIZE * index;
 	// 把第index个bit设置成1。
 	set_bit_val(&map, index, 1);
 
@@ -127,7 +137,7 @@ int get_a_page(MEMORY_POOL_TYPE pool_type)
 // 申请一个虚拟内存地址
 // cnt是页框数量
 // 每个进程的虚拟内存地址池不同，是不是要指定进程？
-int get_virtual_address(int cnt, MEMORY_POOL_TYPE pool_type)
+unsigned int get_virtual_address(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
 {
 	VirtualMemoryAddress pool;
 
@@ -140,32 +150,44 @@ int get_virtual_address(int cnt, MEMORY_POOL_TYPE pool_type)
 	Bitmap map = pool.map;
 
 	int index = get_bits(&map, cnt);
-	int addr = pool.start_addr + PAGE_SIZE * index;
+	// int addr = pool.start_addr + PAGE_SIZE * index;
+	// unsigned int addr = pool.start_addr + PAGE_SIZE * cnt;
+	unsigned int addr = pool.start_addr + PAGE_SIZE * (cnt - 1);
 	set_bits(&map, index, 1, cnt);
 
 	return addr;
 }
 
-int *ptr_pde(int vaddr)
+unsigned int *ptr_pde(unsigned int vaddr)
 {
-	// return ((1023 << 22) + (1023 << 12) + (vaddr >> 22) * 4);
-	return (int *)((1023 << 22) + (1023 << 12) + (vaddr >> 22) * 4);
+	return (unsigned int)((1023 << 22) + (1023 << 12) + (vaddr >> 22) * 4);
+	// return (int *)((1023 << 22) + (1023 << 12) + (vaddr >> 22) * 4);
+	// return (int *)((0xffc0000) + (0x3ff000) + (vaddr >> 22) * 4);
+//	return (int *)((0xffc00000) + (0x3ff000) + ((vaddr & 0xffc00000) >> 22) * 4);
+//	return (int *)((0xffc0000) + (0x3ff000) + ((vaddr & 0x3ff00000) >> 22) * 4);
+//	uint32_t* pde = (uint32_t*)((0xfffff000) + PDE_IDX(vaddr) * 4);
+//	return (int *)(0xfffff000 + ((vaddr & 0x3ff00000) >> 22) * 4);
 }
 
-int *ptr_pte(int vaddr)
+unsigned int *ptr_pte(unsigned int vaddr)
 {
 	// 00000000001111111111000000000000 是 0x3ff000。
-	return (int *)((1023 << 22) + (vaddr >> 22) << 12 + ((vaddr & 0x3ff000) >> 12) * 4);
+	// return (int *)((1023 << 22) + (vaddr >> 22) << 12 + ((vaddr & 0x3ff000) >> 12) * 4);
+	// return (int *)((0xffc0000) + (vaddr >> 22) << 12 + ((vaddr & 0x3ff000) >> 12) * 4);
+	// return (unsigned int *)((0xffc00000) + (vaddr & 0x3ff00000) >> 10 + ((vaddr & 0x3ff000) >> 12) * 4);
+	// return (unsigned int *)((0xffc00000) + (vaddr & 0xffc00000) >> 10 + ((vaddr & 0x3ff000) >> 12) * 4);
+	return (unsigned int *)((0xffc00000) + ((vaddr & 0xffc00000) >> 10) + ((vaddr & 0x3ff000) >> 12) * 4);
 }
 // 增加映射条目
-void add_map_entry(int vaddr, int phy_addr)
+void add_map_entry(unsigned int vaddr, unsigned int phy_addr)
 {
 	// 获取PDE的虚拟地址
 	// void *pde = ptr_pde(vaddr);
-	int *pde = ptr_pde(vaddr);
+	asm ("xchgw %bx, %bx");
+	unsigned int *pde = ptr_pde(vaddr);
 	// 获取PTE的虚拟地址
 	// void *pte = ptr_pte(vaddr);
-	int *pte = ptr_pte(vaddr);
+	unsigned int *pte = ptr_pte(vaddr);
 	
 	if(*pde & PG_P_YES){
 		if(*pte & PG_P_YES){
@@ -179,18 +201,23 @@ void add_map_entry(int vaddr, int phy_addr)
 //			MemPool pool = 0x0;
 //			int *addr = get_a_page(type, pool);
 			// TODO 页框的物理地址存储在PTE中。但PTE中的值除了物理地址，还有P位等属性，怎么设置？
-			// *pte = addr;
-			*pte = phy_addr;
+			asm ("xchgw %bx, %bx");
+//			*pte = phy_addr;
+		    *pte = phy_addr | PG_P_YES |  PG_RW_RW |  PG_US_SUPER;;
+		//	asm volatile ("movl %0, %1" : : "r" (phy_addr), "m" (*pte) : "memory");
 		}
 	}else{
 			// TODO 内存池没有规划好，只能先这样。
-			int addr = get_a_page(KERNEL);
+			unsigned int addr = get_a_page(KERNEL);
 		// 要把这个页框初始化。
-		*pde = addr;
-		Memset(pde, 0, PAGE_SIZE);
+		*pde = addr | PG_P_YES |  PG_RW_RW |  PG_US_SUPER;
+		// Memset(pde, 0, PAGE_SIZE);
+		// Memset(pde, 0, PAGE_SIZE);
+//		Memset(pde, 0, PAGE_SIZE);
+		Memset((void*)((int)pte & 0xfffff000), 0, PAGE_SIZE);
 
 		// TODO 这样写，就可以了吗？
-		*pte = phy_addr;
+		*pte = phy_addr | PG_P_YES |  PG_RW_RW |  PG_US_SUPER;
 
 		// 绝对不存在下面的情况。页表都不存在，里面的PTE没有任何意义。
 //		if(*pte & PG_P_YES){
@@ -206,26 +233,42 @@ void add_map_entry(int vaddr, int phy_addr)
 	}
 }
 
-int alloc_memory(int cnt, MEMORY_POOL_TYPE pool_type)
+// 获取虚拟地址对应的物理地址
+unsigned int get_physical_address(unsigned int vaddr)
 {
-	int vaddr = get_virtual_address(cnt, pool_type);
-	vaddr -= PAGE_SIZE;
+	unsigned int *pte = ptr_pte(vaddr);
+	unsigned int phy_addr = (int)(*pte & 0xFFFFF000) + (vaddr & 0xFFF);
+
+	return phy_addr;
+}
+
+unsigned int alloc_memory(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
+{
+	unsigned int vaddr = get_virtual_address(cnt, pool_type);
+	unsigned int vaddr_temp = vaddr - PAGE_SIZE;
 
 	while(cnt--){
-		vaddr += PAGE_SIZE;
-		int phy_addr = get_a_page(pool_type);
-		add_map_entry(vaddr, phy_addr);
+		vaddr_temp += PAGE_SIZE;
+		unsigned int phy_addr = get_a_page(pool_type);
+		add_map_entry(vaddr_temp, phy_addr);
 		// vaddr += PAGE_SIZE;
 	}
 
+//	int page_directory = 0x100000;
+//	asm volatile ("movl %0, %%cr3" : : "r" (page_directory) : "memory");
 	return vaddr;
 }
 
-void init_memory()
+void init_memory2()
 {
+	// asm ("xchgw %bx, %bx");
 	int total_memory = 32 * 1024 * 1024;
 	// 低端1MB和紧随其后的两个页框被内核、页目录表、页表使用。
-	KernelPool.start_addr = 0x100000 + 0x2000;
+	int used_memory = 0x100000 + 0x2000;
+	KernelPool.start_addr = used_memory;
+	// KernelPool.start_addr = 0x100000 + 0x4000;
+	// KernelPool.start_addr = 0x100000 + 0x4000;
+	// KernelPool.start_addr = 0x100000 + (0x1000 + 0x1000 + 0x1000 + 0x1000);
 	total_memory = total_memory - KernelPool.start_addr;
 	KernelPool.length = total_memory / 2;	
 	disp_int(KernelPool.length);
@@ -239,7 +282,7 @@ void init_memory()
 	int page_cnt = ROUND_UP(KernelPool.length, PAGE_SIZE);
 	KernelPool.map.length = ROUND_UP(page_cnt, 8);	
 	// 位图的初始地址怎么确定？
-	KernelPool.map.bits = (char *)(KernelPool.start_addr);
+	KernelPool.map.bits = (char *)(KernelPool.start_addr + 0xc0000000);
 	// 初始化内核的位图。
 	Memset(KernelPool.map.bits, 0, KernelPool.map.length);
 	// 位图放在内核内存池。更新内核内存池的初始化地址。
@@ -277,8 +320,48 @@ void init_memory()
 	bit_idx = userPoolMapBitIdx + bitmap_page_cnt;
 	bitmap_page_cnt = ROUND_UP(KernelVirtualMemory.map.length, PAGE_SIZE);
 	set_bits(&KernelPool.map, bit_idx, 1, bitmap_page_cnt);
-
 	KernelVirtualMemory.start_addr = (bit_idx + bitmap_page_cnt) * 0x1000;
+	// KernelVirtualMemory.start_addr = KernelPool.start_addr + (bit_idx + bitmap_page_cnt) * 0x1000;
+	KernelVirtualMemory.start_addr = used_memory + (1 + 1 + bitmap_page_cnt) * 0x1000;
+	int a = 5;
+	int b = a;
 	
-	asm ("xchgw %bx, %bx");
+}
+
+void init_memory(int total_memory)
+{
+	// int map_base_addr = 0xC009F000;
+	
+	int map_base_addr = 0xC009A000;
+	// 					0xc0100000;
+	int k_v_addr 	  = 0xc0100000;
+	
+
+	int page_table_size = PAGE_SIZE * 256;
+	int used_memory = 0x100000 + page_table_size;	
+
+	int all_free_page_cnt = (total_memory - used_memory) / PAGE_SIZE;
+	int kernel_pool_free_pages = all_free_page_cnt / 2;
+	int user_pool_free_pages = all_free_page_cnt - kernel_pool_free_pages;
+
+	int kbm_length = kernel_pool_free_pages / 8;
+	int ubm_length = user_pool_free_pages / 8;
+
+	KernelPool.start_addr = used_memory;
+	UserPool.start_addr = KernelPool.start_addr + PAGE_SIZE * kernel_pool_free_pages;
+
+	// 位图
+	KernelPool.map.bits = (char *)map_base_addr;
+	KernelPool.map.length = kbm_length;
+	// Memset(&KernelPool.map.bits, 0, kbm_length);
+	Memset(KernelPool.map.bits, 0, kbm_length);
+
+	UserPool.map.bits = (char *)(map_base_addr + kbm_length);
+	UserPool.map.length = ubm_length;
+	Memset(UserPool.map.bits, 0, ubm_length);
+
+	KernelVirtualMemory.map.length = kbm_length;
+	KernelVirtualMemory.map.bits = (char *)(map_base_addr + kbm_length + ubm_length);
+	KernelVirtualMemory.start_addr = k_v_addr;
+	Memset(KernelVirtualMemory.map.bits, 0, kbm_length);
 }
