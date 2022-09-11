@@ -64,6 +64,9 @@ typedef struct proc{
 	// struct filp filp_table[FILE_TABLE_SIZE];	
 	// struct file_desc filp_table[FILP_TABLE_SIZE];	
 	struct file_desc *filp[FILP_TABLE_SIZE];	
+
+		unsigned int page_directory;
+		unsigned int user_virtual_memory_address;
 	
         // ipc start
         char p_flag;           // 进程的状态：RUNNING等

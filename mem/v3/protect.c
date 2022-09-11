@@ -111,7 +111,9 @@ void init_propt()
         InitDescriptor(&gdt[LDT_FIRST_SELECTOR_INDEX + i], ldt_base, ldt_size - 1, ldt_attribute);
     }
     // gs
-    InitDescriptor(&gdt[7], 0xb8000, 0x0FFFF, 0x0F2);
+    // InitDescriptor(&gdt[7], 0xb8000, 0x0FFFF, 0x0F2);
+	unsigned int video_base = 0xc000000 + 0xb8000;
+    InitDescriptor(&gdt[7], video_base, 0x0FFFF, 0x0F2);
 }
 
 void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type)
