@@ -36,8 +36,8 @@ void enable_int();
 
 
 void InterruptTest();
-void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags);
-
+void do_page_fault();
+void exception_handler(unsigned int vec_no, unsigned int error_no, unsigned int eip, int cs, int eflags);
 void test();
 
 void spurious_irq(int irq);

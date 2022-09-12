@@ -41,12 +41,21 @@ struct MsgSender
         struct MsgSender *next;
 };
 
+typedef struct _thread_stack
+{
+	unsigned int eip;
+	unsigned int esi;
+	unsigned int edi;
+	unsigned int ebx;
+	unsigned int ebp;
+} ThreadStack;
+
 #define FILP_TABLE_SIZE 64
 #define FILE_TABLE_SIZE 64
 
 // 进程表
 typedef struct proc{
-        Regs s_reg;
+		unsigned int *stack;
         // ldt选择子
         unsigned short ldt_selector;
         // ldt
@@ -84,6 +93,9 @@ typedef struct proc{
 	int exit_status;	// wait、exit系列中的退出状态码
 	
         // ipc end
+        
+		// 为了兼容，先保留这个成员。
+		Regs s_reg;
 }Proc;
 
 typedef struct{
@@ -92,5 +104,6 @@ typedef struct{
         unsigned short stack_size;
 }Task;
 
+void switch_to(Proc *next);
 
 #endif

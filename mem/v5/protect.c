@@ -84,32 +84,13 @@ void init_propt()
     tss.ss0 = DS_SELECTOR;
     int ds_phy_addr = Seg2PhyAddr(DS_SELECTOR);
     // int tss_base = VirAddr2PhyAddr(ds_phy_addr, tss);
-    int tss_base = VirAddr2PhyAddr(ds_phy_addr, &tss);
+    int tss_base = &tss; 
     // int tss_attribute = 0x0c92;		// todo tss的属性怎么确定？
     // 难点。抄的于上神的。
     // 改成0x889也行。
     int tss_attribute = 0x89; // todo tss的属性怎么确定？
     InitDescriptor(&gdt[TSS_SELECTOR_INDEX], tss_base, tss_size - 1, tss_attribute);
-    //for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++) {
-    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; i++)
-    {
-        // 初始化LDT
-        int ldt_size = 2 * sizeof(Descriptor);
-        // int ldt_attribute = 0x0c92;          // todo ldt的属性怎么确定？
-        // LDT描述符的属性是在GDT中的描述符的属性，图示：
-        // L->DPL，E->TYPE
-        //  7 6 5 4 3 2 1 0
-        // |P|L|L|S|E|E|E|E|
-        // 0x82：1000 0010
-        // 改成0x882也可以。
-        // 这并不是最终的属性，在初始化进程时，会修改。
-        int ldt_attribute = 0x82; // todo ldt的属性怎么确定？
-        // int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[0].ldts);
-        //int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table.ldts);
-        int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[i].ldts);
-        // todo 尝试把任务进程放到内核内存之外。
-        InitDescriptor(&gdt[LDT_FIRST_SELECTOR_INDEX + i], ldt_base, ldt_size - 1, ldt_attribute);
-    }
+
     // gs
     // InitDescriptor(&gdt[7], 0xb8000, 0x0FFFF, 0x0F2);
 	unsigned int video_base = 0xc000000 + 0xb8000;

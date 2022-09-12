@@ -22,7 +22,8 @@ OBJS	=	kernel_sub.o kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o glo
 		open.o	read.o	write.o	close.o \
 		wait.o  exit.o 	fork.o	 getpid.o exec.o \
 		mm/main.o mm/exec.o mm/forkexit.o	\
-		mem/mem.o
+		mem/mem.o \
+		switch_to.o
 	#	wait.o	exit.o	fork.o	unlink.o getpid.o
 
 LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
@@ -81,6 +82,9 @@ kernel_sub.o:kernel_sub.asm
 
 # string.o:string.asm  include/main.h include/string.h
 string.o:string.asm
+	${ASM} ${ASKFLAGS} -o $@ $<
+
+switch_to.o:switch_to.asm
 	${ASM} ${ASKFLAGS} -o $@ $<
 
 #syscall.o:syscall.asm  include/main.h include/string.h

@@ -165,6 +165,8 @@ void disp_int(int num)
 
 void do_page_fault()
 {
+    // 这个值是第2个终端的显存初始处。
+    dis_pos = 12000 - 128 + 10;
 	unsigned int cr2;
 
 	asm volatile ("movl %%cr2, %%eax":"=a"(cr2):);
