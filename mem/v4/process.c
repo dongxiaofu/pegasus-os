@@ -33,9 +33,12 @@ void check()
 // 进程调度次数
 void schedule_process()
 {
+	Proc *next;
     Proc *p;
     unsigned int greatest_ticks = 0;
-    while (!greatest_ticks)
+	proc_ready_table = proc_table2[k_reenter % 2];
+//    while (!greatest_ticks)
+	while(0)
     {
         // todo 测试需要，去掉用户进程USER_PROC_NUM。
         //for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
@@ -65,6 +68,10 @@ void schedule_process()
         }
     }
 
+	next = proc_ready_table;
+
+//	switch_to(next);
+
 	// 进程，切换页目录表。
 	int page_directory = 0x100000;
 	if(proc_ready_table->page_directory != 0x0){
@@ -79,6 +86,7 @@ void schedule_process()
 
 void clock_handler()
 {
+    schedule_process();
     if (proc_ready_table->p_flag == RECEIVING || proc_ready_table->p_flag == SENDING)
     {
         //	schedule_process();

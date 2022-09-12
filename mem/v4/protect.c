@@ -75,7 +75,7 @@ void init_propt()
     InitInterruptDesc(INIT_SLAVE_VEC_NO + 6, hwint14, 0x08, 0x0E);
 
     // Memset(proc_table, 0, sizeof(proc_table));
-    Memset(proc_table, 0, sizeof(Proc) * (TASK_PROC_NUM + USER_PROC_NUM));
+    Memset(proc_table, 0, sizeof(Proc) * (TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM));
 
     // 初始化tss
     int tss_size = sizeof(TSS);
@@ -83,33 +83,17 @@ void init_propt()
     tss.iobase = tss_size;
     tss.ss0 = DS_SELECTOR;
     int ds_phy_addr = Seg2PhyAddr(DS_SELECTOR);
-    // int tss_base = VirAddr2PhyAddr(ds_phy_addr, tss);
-    int tss_base = VirAddr2PhyAddr(ds_phy_addr, &tss);
+//    int tss_base = VirAddr2PhyAddr(ds_phy_addr, &tss);
+	unsigned int tss_base = &tss;
     // int tss_attribute = 0x0c92;		// todo tss的属性怎么确定？
     // 难点。抄的于上神的。
     // 改成0x889也行。
     int tss_attribute = 0x89; // todo tss的属性怎么确定？
     InitDescriptor(&gdt[TSS_SELECTOR_INDEX], tss_base, tss_size - 1, tss_attribute);
+	int ldt_index = -1;
     //for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM; i++) {
-    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; i++)
-    {
-        // 初始化LDT
-        int ldt_size = 2 * sizeof(Descriptor);
-        // int ldt_attribute = 0x0c92;          // todo ldt的属性怎么确定？
-        // LDT描述符的属性是在GDT中的描述符的属性，图示：
-        // L->DPL，E->TYPE
-        //  7 6 5 4 3 2 1 0
-        // |P|L|L|S|E|E|E|E|
-        // 0x82：1000 0010
-        // 改成0x882也可以。
-        // 这并不是最终的属性，在初始化进程时，会修改。
-        int ldt_attribute = 0x82; // todo ldt的属性怎么确定？
-        // int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[0].ldts);
-        //int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table.ldts);
-        int ldt_base = VirAddr2PhyAddr(ds_phy_addr, proc_table[i].ldts);
-        // todo 尝试把任务进程放到内核内存之外。
-        InitDescriptor(&gdt[LDT_FIRST_SELECTOR_INDEX + i], ldt_base, ldt_size - 1, ldt_attribute);
-    }
+   // for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; i++)
+//    for (int i = TASK_PROC_NUM; i < TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; i++)
     // gs
     // InitDescriptor(&gdt[7], 0xb8000, 0x0FFFF, 0x0F2);
 	unsigned int video_base = 0xc000000 + 0xb8000;
@@ -130,7 +114,7 @@ void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type)
 
     gate->paramCount = 0;
     // gate->offset_below = offset;
-    int base = (int)offset;
+    unsigned int base = (unsigned int)offset;
     gate->offset_below = base & 0xffff;
     gate->selector = 0x8;
     gate->offset_high = base >> 16;
@@ -142,20 +126,20 @@ void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type)
 void ReloadGDT()
 {
     Memcpy(&gdt,
-           (void *)(*((int *)(&gdt_ptr[2]))),
+           (void *)(*((unsigned int *)(&gdt_ptr[2]))),
            *((short *)(&gdt_ptr[0])));
     short *pm_gdt_limit = (short *)(&gdt_ptr[0]);
-    int *pm_gdt_base = (int *)(&gdt_ptr[2]);
+    unsigned int *pm_gdt_base = (unsigned int *)(&gdt_ptr[2]);
 
     //*pm_gdt_limit = 128 * sizeof(Descriptor) * 64 - 1;
     *pm_gdt_limit = 128 * sizeof(Descriptor) - 1;
-    *pm_gdt_base = (int)&gdt;
+    *pm_gdt_base = (unsigned int)&gdt;
 
     // 修改idt_ptr
     short *pm_idt_limit = (short *)(&idt_ptr[0]);
-    int *pm_idt_base = (int *)(&idt_ptr[2]);
+    unsigned int *pm_idt_base = (unsigned int *)(&idt_ptr[2]);
     *pm_idt_limit = 256 * sizeof(Gate) - 1;
-    *pm_idt_base = (int)&idt;
+    *pm_idt_base = (unsigned int)&idt;
 
     //for(int i = 0; i < 10; i++){
     //	for(int j = 0; j < 160; j++){

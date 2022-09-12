@@ -7,12 +7,12 @@ CC	=	gcc
 LD	=	ld
 ASKFLAGS=	-I include/ -f elf
 CFLAGS	=	-I include/ -I include/sys -I include/mem \
-			-g -c -fno-builtin -m32	
+			-c -fno-builtin -m32 -O0	
 # CFLAGS	=	-I include/ -I include/sys -c -fno-builtin -m32	
 # LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker /lib/ld-linux.so.2 -lc
 # LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386
 # LDFLAGS		= -Ttext 0x1000 -Map krnl.map -m elf_i386
-LDFLAGS		= -Ttext 0xc0001500 -Map krnl.map -m elf_i386
+LDFLAGS		= -Ttext 0xc0001000 -Map krnl.map -m elf_i386
 #LDFLAGS	=	-s -Ttext 0x30400 -m elf_i386
 
 BOOT = loader.bin boot.bin
@@ -22,7 +22,8 @@ OBJS	=	kernel_sub.o kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o glo
 		open.o	read.o	write.o	close.o \
 		wait.o  exit.o 	fork.o	 getpid.o exec.o \
 		mm/main.o mm/exec.o mm/forkexit.o	\
-		mem/mem.o
+		mem/mem.o	\
+		switch_to.o
 	#	wait.o	exit.o	fork.o	unlink.o getpid.o
 
 LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
@@ -81,6 +82,9 @@ kernel_sub.o:kernel_sub.asm
 
 # string.o:string.asm  include/main.h include/string.h
 string.o:string.asm
+	${ASM} ${ASKFLAGS} -o $@ $<
+
+switch_to.o:switch_to.asm
 	${ASM} ${ASKFLAGS} -o $@ $<
 
 #syscall.o:syscall.asm  include/main.h include/string.h

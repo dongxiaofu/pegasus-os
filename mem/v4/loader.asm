@@ -322,7 +322,7 @@ READ_FILE:
 	push bx
 	;;;;xhcg bx, bx
 	call GetFATEntry
-	;;;;xchg	bx,	bx
+	;;;;;xchg	bx,	bx
 	pop bx
 	push ax
 	cmp ax, 0xFF8
@@ -350,7 +350,7 @@ READ_FILE_OVER:
 	;分页
 	;call SetupPage
 
-	;;;xchg	bx, bx
+	;;;;xchg	bx, bx
 	;mov al, 'O'
 	;mov ah, 0Dh
 	;mov [gs:(80 * 23 + 33) * 2], ax
@@ -475,7 +475,7 @@ _RamSize		equ		RamSize + BaseOfLoaderPhyAddr
 _MemCheckBuf	equ		MemCheckBuf + BaseOfLoaderPhyAddr
 
 ;分页
-PageDirectoryTablePhysicalAddress		equ			0x100000
+PageDirectoryTablePhysicalAddress		equ			0x200000
 PageTablePhysicalAddress				equ		    PageDirectoryTablePhysicalAddress + 4096	
 ;PageDirectoryTablePhysicalAddress		equ			0x100000
 UserPageDirectoryTablePhysicalAddress	equ			(0x100000 + 0x2000)
@@ -662,7 +662,7 @@ LABEL_PM_START:
 	; 跳入16位模式（保护模式)
 	;jmp word SelectFlatX_16:0
 	;分页
-	xchg bx, bx
+	;xchg bx, bx
 	call SetupPage
 	;call SetupUserPage
 	;开启分页
@@ -672,13 +672,13 @@ LABEL_PM_START:
 ;	mov cr3, eax
 ;
 ;	;设置cr0的PG位
-;	;xchg bx, bx
+;	;;xchg bx, bx
 ;	mov eax, cr0
 ;	or eax, 0x80000000
 ;	mov cr0, eax
 	
 
-	;xchg bx, bx
+	;;xchg bx, bx
 	; --------------------获取物理内存容量start--------------------------
 	push esi
 	push ecx
@@ -718,7 +718,7 @@ LABEL_PM_START:
 	add edx, 20
 	loop .DispMem
 	mov eax, [_RamSize]
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	pop eax
 	pop ebx
 	pop edi
@@ -727,13 +727,13 @@ LABEL_PM_START:
 	; --------------------获取物理内存容量end--------------------------
 
 
-	;xchg bx, bx	
+	;;xchg bx, bx	
 	call Init_8259A
 	call Init8253
 
 	;;xhcg bx, bx
 	call InitKernel
-	;xchg bx, bx	
+	;;xchg bx, bx	
 
 	;mov gs, ax
 	mov al, 'J'
@@ -743,7 +743,8 @@ LABEL_PM_START:
 	xchg bx, bx
 	;jmp SelectFlatX:0x30400
 	;jmp SelectFlatX:0x1000
-	jmp SelectFlatX:0xc0001500
+	mov esp,0xc00ff000
+	jmp SelectFlatX:0xc0001000
 	jmp $
 	jmp $
 	jmp $
@@ -970,8 +971,8 @@ SetupPage:
 	;mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], PageTablePhysicalAddress
 
 	;设置第一个页表的前256个PTE
-	mov ecx, 256
-	;mov ecx, 1024
+	;mov ecx, 256
+	mov ecx, 512
 	;mov esi, 0
 	xor esi, esi
 	xor eax, eax
@@ -1003,7 +1004,7 @@ SetupPage:
 	add eax, 4096
 	inc esi
 	loop .SetHigh1GBMemPDE
-	;;xchg bx, bx
+	;;;xchg bx, bx
 
 	pop esp
 	pop edi
@@ -1078,7 +1079,7 @@ OpenPaging:
 	push edi
 	push esp
 
-	xchg bx, bx
+	;xchg bx, bx
 	sgdt [GdtPtr]             ; 存储到原来gdt所有的位置
 ;	add dword [GdtPtr + 2], 0xc0000000
 
@@ -1102,7 +1103,7 @@ OpenPaging:
 ;	and eax, 0xFFFF
 ;	mov ebx, 2
 ;
-;	xchg bx, bx
+;	;xchg bx, bx
 ;	mov eax, [GdtPtr + 2]
 ;	add eax, 56
 ;	mov ebx, 0xb800
@@ -1134,7 +1135,7 @@ OpenPaging:
 	mov cr3, eax
 
 	;设置cr0的PG位
-	xchg bx, bx
+	;xchg bx, bx
 	mov eax, cr0
 	or eax, 0x80000000
 	mov cr0, eax

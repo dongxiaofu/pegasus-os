@@ -32,6 +32,15 @@ typedef struct{
         unsigned int esp;       // 漏掉了这个。iretd会出栈更新esp。
         unsigned int ss;
 }Regs;
+
+typedef struct _thread_stack
+{
+	unsigned int eip;
+	unsigned int esi;
+	unsigned int edi;
+	unsigned int ebx;
+	unsigned int ebp;
+} ThreadStack;
 // 发送消息的进程队列的成员的数据类型
 struct MsgSender
 {
@@ -41,12 +50,12 @@ struct MsgSender
         struct MsgSender *next;
 };
 
-#define FILP_TABLE_SIZE 64
+#define FILP_TABLE_SIZE 1
 #define FILE_TABLE_SIZE 64
 
 // 进程表
 typedef struct proc{
-        Regs s_reg;
+		unsigned int *stack;
         // ldt选择子
         unsigned short ldt_selector;
         // ldt
@@ -83,7 +92,11 @@ typedef struct proc{
 	int parent_pid;
 	int exit_status;	// wait、exit系列中的退出状态码
 	
+		// 为了兼容，先保留这个成员。
+		Regs s_reg;
         // ipc end
+//       ThreadStack thread_stack;
+//       Regs proc_stack;
 }Proc;
 
 typedef struct{
@@ -92,5 +105,7 @@ typedef struct{
         unsigned short stack_size;
 }Task;
 
+
+void switch_to(Proc *next);
 
 #endif

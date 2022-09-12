@@ -472,7 +472,7 @@ sys_call:
 	mov es, dx	
 	mov fs, dx
 	
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	inc dword [k_reenter]
 	cmp dword [k_reenter], 0
 	jne .2
@@ -490,7 +490,7 @@ sys_call:
 	push dword [proc_ready_table]
 	push ebx
 	push ecx
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	call [sys_call_table + 4 * eax]
 	; 修改请求系统调用的进程的进程表中的堆栈
 	; 获取堆栈中的eax是个难题：
@@ -503,7 +503,7 @@ sys_call:
 	mov [esi + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
 	;pop esi
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	;cli
 	; 恢复进程。不能使用restart，因为，不能使用proc_ready_table
 	; jmp restart	
@@ -547,7 +547,7 @@ sys_call:
 ; 系统调用中断 end
 
 ; 启动进程
-restart:
+restart2:
 	;mov esp, [proc_table]
 	;mov eax, proc_table
 	;mov esp, eax
@@ -556,9 +556,14 @@ restart:
 	;lldt [proc_table + 64]
 	;lldt [proc_table + 68]
 	; 不能放到前面
+	mov eax, 48
 	dec dword [k_reenter]
 	mov esp, [proc_ready_table]
+	;处理线程启动的临时方式
+	cmp [esp + 68], 0x0
+	jz	.notLoadLDT
 	lldt [esp + 68]
+;.notLoadLDT:
 	;lldt [proc_table + 56]
 	; 设置tss.esp0
 	;lea eax, [proc_table + 52]
@@ -566,13 +571,14 @@ restart:
 	;lea eax, [proc_table + 68]
 	lea eax, [esp + 68]
 	mov [tss + 4], eax 
+.notLoadLDT:
 	; 出栈 	
 	pop gs
 	pop fs
 	pop es
 	pop ds
 
-	popad
+;	popad
 	iretd
 
 ; 恢复进程
@@ -590,6 +596,11 @@ restore:
 	; 能放到前dword 面，和其他函数在形式上比较相似
 	;dec dword [k_reenter]
 	mov esp, [proc_ready_table]
+	;处理线程启动的临时方式
+	;cmp [esp + 68], 0x0
+	;je	.notLoadLDT2
+	cmp [esp + 68], 0x0
+	jz	.notLoadLDT2
 	lldt [esp + 68]
 	;lldt [proc_table + 56]
 	; 设置tss.esp0
@@ -598,6 +609,7 @@ restore:
 	;lea eax, [proc_table + 68]
 	lea eax, [esp + 68]
 	mov dword [tss + 4], eax 
+.notLoadLDT2
 reenter_restore:
 	dec dword [k_reenter]
 	; 出栈 	
@@ -606,9 +618,9 @@ reenter_restore:
 	pop es
 	pop ds
 
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	popad
-	;;;xchg bx, bx
+	;;;;xchg bx, bx
 	iretd
 
 in_byte:

@@ -63,8 +63,8 @@ Disassembly of section .text:
  80483aa:	c3                   	ret    
 
 080483ab <.annobin_init.c>:
- 80483ab:	66 90                	;xchg   %ax,%ax
- 80483ad:	66 90                	;xchg   %ax,%ax
+ 80483ab:	66 90                	;;xchg   %ax,%ax
+ 80483ad:	66 90                	;;xchg   %ax,%ax
  80483af:	90                   	nop
 
 080483b0 <_dl_relocate_static_pie>:
@@ -72,22 +72,22 @@ Disassembly of section .text:
  80483b4:	c3                   	ret    
 
 080483b5 <.annobin__dl_relocate_static_pie.end>:
- 80483b5:	66 90                	;xchg   %ax,%ax
- 80483b7:	66 90                	;xchg   %ax,%ax
- 80483b9:	66 90                	;xchg   %ax,%ax
- 80483bb:	66 90                	;xchg   %ax,%ax
- 80483bd:	66 90                	;xchg   %ax,%ax
+ 80483b5:	66 90                	;;xchg   %ax,%ax
+ 80483b7:	66 90                	;;xchg   %ax,%ax
+ 80483b9:	66 90                	;;xchg   %ax,%ax
+ 80483bb:	66 90                	;;xchg   %ax,%ax
+ 80483bd:	66 90                	;;xchg   %ax,%ax
  80483bf:	90                   	nop
 
 080483c0 <__x86.get_pc_thunk.bx>:
  80483c0:	8b 1c 24             	mov    (%esp),%ebx
  80483c3:	c3                   	ret    
- 80483c4:	66 90                	;xchg   %ax,%ax
- 80483c6:	66 90                	;xchg   %ax,%ax
- 80483c8:	66 90                	;xchg   %ax,%ax
- 80483ca:	66 90                	;xchg   %ax,%ax
- 80483cc:	66 90                	;xchg   %ax,%ax
- 80483ce:	66 90                	;xchg   %ax,%ax
+ 80483c4:	66 90                	;;xchg   %ax,%ax
+ 80483c6:	66 90                	;;xchg   %ax,%ax
+ 80483c8:	66 90                	;;xchg   %ax,%ax
+ 80483ca:	66 90                	;;xchg   %ax,%ax
+ 80483cc:	66 90                	;;xchg   %ax,%ax
+ 80483ce:	66 90                	;;xchg   %ax,%ax
 
 080483d0 <deregister_tm_clones>:
  80483d0:	e8 d4 00 00 00       	call   80484a9 <__x86.get_pc_thunk.dx>
@@ -226,13 +226,13 @@ Disassembly of section .text:
  804853d:	c9                   	leave  
  804853e:	8d 61 fc             	lea    -0x4(%ecx),%esp
  8048541:	c3                   	ret    
- 8048542:	66 90                	;xchg   %ax,%ax
- 8048544:	66 90                	;xchg   %ax,%ax
- 8048546:	66 90                	;xchg   %ax,%ax
- 8048548:	66 90                	;xchg   %ax,%ax
- 804854a:	66 90                	;xchg   %ax,%ax
- 804854c:	66 90                	;xchg   %ax,%ax
- 804854e:	66 90                	;xchg   %ax,%ax
+ 8048542:	66 90                	;;xchg   %ax,%ax
+ 8048544:	66 90                	;;xchg   %ax,%ax
+ 8048546:	66 90                	;;xchg   %ax,%ax
+ 8048548:	66 90                	;;xchg   %ax,%ax
+ 804854a:	66 90                	;;xchg   %ax,%ax
+ 804854c:	66 90                	;;xchg   %ax,%ax
+ 804854e:	66 90                	;;xchg   %ax,%ax
 
 08048550 <__libc_csu_init>:
  8048550:	f3 0f 1e fb          	endbr32 

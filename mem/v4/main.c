@@ -163,8 +163,52 @@ void disp_int(int num)
     //return;
 }
 
-void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags)
+void do_page_fault()
 {
+	unsigned int cr2;
+
+	asm volatile ("movl %%cr2, %%eax":"=a"(cr2):);
+
+	disp_str("do_page_fault\n");
+	disp_str("cr2:");
+	disp_int(cr2);
+	disp_str("\n");
+	
+	unsigned int *pde = ptr_pde(cr2);
+	unsigned int *pte = ptr_pte(cr2);
+
+	disp_str("pde:");
+	disp_int(pde);
+	disp_str("===*pde:");
+	disp_int(*pde);
+	disp_str("\n");
+	disp_str("pte:");
+	disp_int(pte);
+	disp_str("===*pte:");
+	disp_int(*pte);
+	disp_str("\n");
+
+	unsigned int page_vaddr = cr2 & 0xFFFFF000;
+	unsigned int page_paddr = get_a_page(KERNEL);
+	add_map_entry(page_vaddr, page_paddr);
+
+//	asm volatile ("invlpg %0"::"m" (page_vaddr):"memory");    //更新tlb
+	unsigned int page_directory  = 0x000000100000;
+	asm volatile ("movl %0, %%cr3" : : "r" (page_directory) : "memory");
+
+	int a;
+	if(*pte & PG_P_YES){
+		a = 1;
+	}else{
+		a = 0;
+	}
+
+	// asm volatile ("movl %%eax, 4(%%ebp)" : "a"(eip)  :);
+}
+
+void exception_handler(unsigned int vec_no, unsigned int error_no, unsigned int eip, int cs, int eflags)
+{
+//	asm volatile ("movl %%eax, 16(%%ebp)" : "a"(eip)  :);
     char *msg[] = {
         "# Divide by zero:",
         "# Single step:",
@@ -188,48 +232,59 @@ void exception_handler(int vec_no, int error_no, int eip, int cs, int eflags)
         "#MC :",
         "#XF :",
     };
-    // 这个值是第2个终端的显存初始处。
-    dis_pos = 12000 - 128 + 10;
-    // 清屏
+	// 清屏
+	if(dis_pos > 800){
+ //   	dis_pos -= 600;
+	}
     for (int i = 0; i < 80 * 25 * 2; i++)
     {
-        disp_str(" ");
+    //    disp_str(" ");
     }
-
-    dis_pos = 12000 - 128 + 10;
     // int colour = 0x74;
+    disp_str("\n\nfault msg\n\n");
     int colour = 0x0A;
     char *error_msg = msg[vec_no];
     //	Printf("error:%s\n", error_msg);
-    disp_str_colour(error_msg, colour);
+    // disp_str_colour(error_msg, colour);
+    disp_str(error_msg);
     disp_str("\n\n");
-    disp_str_colour("vec_no:", colour);
+    disp_str("vec_no:");
     disp_int(vec_no);
     disp_str("\n\n");
 
     if (error_no != 0xFFFFFFFF)
     {
-        disp_str_colour("error_no:", colour);
-        disp_str_colour("error_no:", colour);
+        disp_str("error_no:");
         disp_int(error_no);
         // Printf("error_no:%x\n", error_no);
         disp_str("\n\n");
     }
 
-    disp_str_colour("cs:", colour);
+    disp_str("cs:");
     disp_int(cs);
     //Printf("cs:%x\n", cs);
     disp_str("\n\n");
 
-    disp_str_colour("eip:", colour);
+    disp_str("eip:");
+		
     disp_int(eip);
     //Printf("eip:%x\n", eip);
     disp_str("\n\n");
 
-    disp_str_colour("eflags:", colour);
+    disp_str("eflags:");
     disp_int(eflags);
     disp_str("\n\n");
+	disp_str("return from exception_handler\n");
 
+	// asm ("xchgw %bx, %bx");
+
+	do_page_fault();
+
+	asm volatile("nop;nop;nop;");
+	asm volatile ("movl %%eax, 4(%%ebp)" : :"a"(eip));
+	asm ("sti;");
+
+	asm ("xchgw %bx, %bx");
     return;
 }
 
@@ -325,7 +380,8 @@ void init_keyboard()
     {
         disp_str(" ");
     }
-    dis_pos = 0;
+//    dis_pos = 0x0c0b8000;
+	dis_pos = 0;
 
     init_keyboard_handler();
 
@@ -347,6 +403,10 @@ void init()
 
 void kernel_main()
 {
+	int a = 5;
+	int b = 4;
+	int c;
+	c = a - b;
 //	asm ("xchgw %bx, %bx");
 	disp_str("Hello,World");
 	
@@ -367,8 +427,13 @@ void kernel_main()
     // todo 测试需要，去掉用户进程USER_PROC_NUM。
     for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; i++)
     {
-        proc = proc_table + i;
-        proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
+		// proc_table2[i] = (Proc *)alloc_memory(1, KERNEL);
+		// proc = (Proc *)proc_table2[i];
+		proc = (Proc *)alloc_memory(2, KERNEL);
+		Memset(proc, 0, sizeof(*proc));
+		proc->stack = (unsigned int *)((unsigned int)proc + PAGE_SIZE);
+        // proc->ldt_selector = LDT_FIRST_SELECTOR + 8 * i;
+        proc->ldt_selector = 0;
         proc->pid = i;
 		proc->page_directory = 0x0;
         if (i >= TASK_PROC_NUM + USER_PROC_NUM)
@@ -380,73 +445,28 @@ void kernel_main()
         if (i < TASK_PROC_NUM)
         {
             task = sys_task_table + i;
-            eflags = 0x1202;
-            rpl = 1;
-            dpl = 1;
-            proc->ticks = proc->priority = 15;
-            proc->tty_index = 1;
-//    	    proc->s_reg.esp = (int)(get_a_page2(0x1000000 - 0x1000, KERNEL) + PAGE_SIZE);
-			proc->s_reg.esp = p_task_stack;
-			p_task_stack -= PROC_STACK_SIZE;
-        }
-        else
-        {
-            task = user_task_table + i - TASK_PROC_NUM;
-            eflags = 0x202;
-            rpl = 3;
-            dpl = 3;
-            proc->ticks = proc->priority = 5;
-            proc->tty_index = 0; //i - TASK_PROC_NUM;
-			// proc->s_reg.esp = (int)(get_a_page(KERNEL) + PAGE_SIZE);
-   // 	    proc->s_reg.esp = (int)(get_a_page2(0xc0000000 - 0x1000, KERNEL) + PAGE_SIZE);
-
-			unsigned int page_dir_vaddr = alloc_memory(1, KERNEL);
-			// 用户进程的虚拟地址空间
-			int page_cnt = 1;
-			proc->user_virtual_memory_address = (VirtualMemoryAddress *)alloc_memory(page_cnt, KERNEL);
-			// 用户进程的页表
-			// int page_dir_vaddr = alloc_memory(1, KERNEL);
-			unsigned int pte = (0x101000 + 256 * 4);
-			unsigned int phy_addr = (3153920 | PG_P_YES |  PG_RW_RW |  PG_US_SUPER);
-
-//			asm volatile ("movl %0, %1" : : "r" (phy_addr), "m" (pte) : "memory");
-//			Memset((void *)page_dir_vaddr, 0, 4096*1);
-			// 复制内核的页目录和页表。
-//			char *str = "How";
-	//		asm ("xchgw %bx, %bx");
-//			Memcpy((void *)page_dir_vaddr, str, 3);
-//			asm ("xchgw %bx, %bx");
-//			Memcpy((void *)page_dir_vaddr, (void *)(0x100000), 0x2000); 
-//			// c0000000
-			// Memcpy((void *)(page_dir_vaddr + 0x300 * 4), (void *)(0x100000 + 0x300 * 4), 1024); 
-			// Memcpy((void *)(page_dir_vaddr + 0x300 * 4), (void *)(0xc0100000 + 0x300 * 4), 1024); 
-			Memcpy((void *)(page_dir_vaddr + 0x300 * 4), (void *)(0xfffff000 + 0x300 * 4), 1024); 
-			unsigned int page_dir_phy_addr = get_physical_address(page_dir_vaddr);
-//			asm ("xchgw %bx, %bx");
-			// 修改用户进程的页目录表的第0个、第1023个PDE的值。
-		//	(int *)page_dir_vaddr = 0;
-		//	(int *)(page_dir_vaddr + 1023) = page_dir_phy_addr;
-			int tmp = 0  | PG_P_YES |  PG_RW_RW |  PG_US_SUPER;
-//			Memset((void *)page_dir_vaddr, tmp, 4);
-			unsigned int *ptr1 = (unsigned int *)(page_dir_vaddr + 1023*4);
-			// int *ptr1 = (int *)page_dir_vaddr + 1023;
-			*ptr1 = page_dir_phy_addr;
-//			*ptr1 = page_dir_vaddr | PG_P_YES |  PG_RW_RW |  PG_US_SUPER;
+		//	proc->stack -= sizeof(Regs);
+		//	proc->stack -= sizeof(ThreadStack);
+			proc->stack = (unsigned int *)((unsigned int)(proc->stack) - 68);
+			proc->stack = (unsigned int *)((unsigned int)(proc->stack) - 20);
+			// ThreadStack *thread_stack = (ThreadStack *)(proc->stack - sizeof(ThreadStack));
+			asm ("xchgw %bx, %bx");
+			ThreadStack *thread_stack = (ThreadStack *)proc->stack;
+//			ThreadStack *thread_stack = (ThreadStack *)alloc_memory(1, KERNEL);
+//			Memset(thread_stack, 0, sizeof(ThreadStack));
 			
-			// 用户进程的第0个页表和内核的第0个页表相同。
-
-			proc->page_directory = page_dir_phy_addr;
-			// proc->page_directory = page_dir_vaddr;
-
-			proc->s_reg.esp = (unsigned int)(get_a_page(KERNEL) + PAGE_SIZE);
+			asm ("xchgw %bx, %bx");
+			// thread_stack->eip = (unsigned int)task->func_name;
+			thread_stack->eip = 8;//TaskSys; 
+//			while(1);
+			thread_stack->ebp = thread_stack->ebx = thread_stack->edi = thread_stack->esi = 0;
+//			Memcpy((unsigned int *)proc->stack, thread_stack, sizeof(ThreadStack));
+			// asm ("xchgw %bx, %bx");
+			
         }
 
         // 进程名
         Strcpy(proc->name, task->name);
-        Memcpy(&proc->ldts[0], &gdt[CS_SELECTOR_INDEX], sizeof(Descriptor));
-        proc->ldts[0].seg_attr1 = 0x9a | (dpl << 5); // 1001	1010
-        Memcpy(&proc->ldts[1], &gdt[DS_SELECTOR_INDEX], sizeof(Descriptor));
-        proc->ldts[1].seg_attr1 = 0x92 | (dpl << 5); // 1001 0010
 
         unsigned short cs = 0x4 | rpl;
         unsigned short ds = 0xC | rpl;
@@ -467,11 +487,15 @@ void kernel_main()
         proc->p_send_to = NO_TASK;
         proc->p_msg = 0;
     }
-    proc_ready_table = &proc_table[1];
+    // proc_ready_table = &proc_table2[0];
+    proc_ready_table = proc;
+    //proc_ready_table = &proc_table[TASK_PROC_NUM];
 
 	/*******************end************************/
-	restart();
+//	restart();
 
+	asm ("xchgw %bx, %bx");
+	asm ("sti;");
     while (1);
 }
 
@@ -978,6 +1002,7 @@ void milli_delay(unsigned int milli_sec)
 
 void TaskSys()
 {
+	asm ("xchgw %bx, %bx");
 	disp_str("TaskSys\n");
 
     while (1)

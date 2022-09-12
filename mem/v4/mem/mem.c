@@ -10,6 +10,9 @@
 #include "proto.h"
 #include "global.h"
 
+#define PTE_IDX(addr) ((addr & 0x003ff000) >> 12)
+#define PDE_IDX(addr) ((addr & 0xffc00000) >> 22)
+
 int test_bit_val(Bitmap *map, int idx)
 {
 	int byte_idx = idx / 8;
@@ -67,6 +70,7 @@ int get_bits(Bitmap *map, int cnt)
 {
 	// int first_free_bit = get_first_free_bit(map, 0);
 	int tmp = ROUND_UP(0x100000 + 0x2000, PAGE_SIZE);
+	tmp = 0;
 	int first_free_bit = get_first_free_bit(map, tmp);
 	if(first_free_bit == -1){
 		// TODO 错误处理。
@@ -153,14 +157,22 @@ unsigned int get_virtual_address(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
 	// int addr = pool.start_addr + PAGE_SIZE * index;
 	// unsigned int addr = pool.start_addr + PAGE_SIZE * cnt;
 	unsigned int addr = pool.start_addr + PAGE_SIZE * (cnt - 1);
+	if(addr == 0xC0203EA0){
+		disp_str("get_virtual_address\n");
+		while(1);
+	}
 	set_bits(&map, index, 1, cnt);
 
 	return addr;
 }
 
-unsigned int *ptr_pde(unsigned int vaddr)
+unsigned int *ptr_pte(unsigned int vaddr)
 {
-	return (unsigned int)((1023 << 22) + (1023 << 12) + (vaddr >> 22) * 4);
+	unsigned int* pte = (unsigned int*)(0xffc00000 + \
+			((vaddr & 0xffc00000) >> 10) + \
+			PTE_IDX(vaddr) * 4);
+	return pte;
+//	return (unsigned int)((1023 << 22) + (1023 << 12) + (vaddr >> 22) * 4);
 	// return (int *)((1023 << 22) + (1023 << 12) + (vaddr >> 22) * 4);
 	// return (int *)((0xffc0000) + (0x3ff000) + (vaddr >> 22) * 4);
 //	return (int *)((0xffc00000) + (0x3ff000) + ((vaddr & 0xffc00000) >> 22) * 4);
@@ -169,21 +181,23 @@ unsigned int *ptr_pde(unsigned int vaddr)
 //	return (int *)(0xfffff000 + ((vaddr & 0x3ff00000) >> 22) * 4);
 }
 
-unsigned int *ptr_pte(unsigned int vaddr)
+unsigned int *ptr_pde(unsigned int vaddr)
 {
+	unsigned int* pde = (unsigned int*)((0xfffff000) + PDE_IDX(vaddr) * 4);
+	return pde;
 	// 00000000001111111111000000000000 是 0x3ff000。
 	// return (int *)((1023 << 22) + (vaddr >> 22) << 12 + ((vaddr & 0x3ff000) >> 12) * 4);
 	// return (int *)((0xffc0000) + (vaddr >> 22) << 12 + ((vaddr & 0x3ff000) >> 12) * 4);
 	// return (unsigned int *)((0xffc00000) + (vaddr & 0x3ff00000) >> 10 + ((vaddr & 0x3ff000) >> 12) * 4);
 	// return (unsigned int *)((0xffc00000) + (vaddr & 0xffc00000) >> 10 + ((vaddr & 0x3ff000) >> 12) * 4);
-	return (unsigned int *)((0xffc00000) + ((vaddr & 0xffc00000) >> 10) + ((vaddr & 0x3ff000) >> 12) * 4);
+//	return (unsigned int *)((0xffc00000) + ((vaddr & 0xffc00000) >> 10) + ((vaddr & 0x3ff000) >> 12) * 4);
 }
 // 增加映射条目
 void add_map_entry(unsigned int vaddr, unsigned int phy_addr)
 {
 	// 获取PDE的虚拟地址
 	// void *pde = ptr_pde(vaddr);
-	asm ("xchgw %bx, %bx");
+//	asm ("xchgw %bx, %bx");
 	unsigned int *pde = ptr_pde(vaddr);
 	// 获取PTE的虚拟地址
 	// void *pte = ptr_pte(vaddr);
@@ -201,7 +215,7 @@ void add_map_entry(unsigned int vaddr, unsigned int phy_addr)
 //			MemPool pool = 0x0;
 //			int *addr = get_a_page(type, pool);
 			// TODO 页框的物理地址存储在PTE中。但PTE中的值除了物理地址，还有P位等属性，怎么设置？
-			asm ("xchgw %bx, %bx");
+		//	asm ("xchgw %bx, %bx");
 //			*pte = phy_addr;
 		    *pte = phy_addr | PG_P_YES |  PG_RW_RW |  PG_US_SUPER;;
 		//	asm volatile ("movl %0, %1" : : "r" (phy_addr), "m" (*pte) : "memory");
@@ -332,13 +346,14 @@ void init_memory(int total_memory)
 {
 	// int map_base_addr = 0xC009F000;
 	
-	int map_base_addr = 0xC009A000;
+	// int map_base_addr = 0xC009A000;
+	int map_base_addr = 0xC00fa000;
 	// 					0xc0100000;
-	int k_v_addr 	  = 0xc0100000;
+	int k_v_addr 	  = 0xc0200000;
 	
 
 	int page_table_size = PAGE_SIZE * 256;
-	int used_memory = 0x100000 + page_table_size;	
+	int used_memory = 0x200000 + page_table_size;	
 
 	int all_free_page_cnt = (total_memory - used_memory) / PAGE_SIZE;
 	int kernel_pool_free_pages = all_free_page_cnt / 2;
@@ -364,4 +379,5 @@ void init_memory(int total_memory)
 	KernelVirtualMemory.map.bits = (char *)(map_base_addr + kbm_length + ubm_length);
 	KernelVirtualMemory.start_addr = k_v_addr;
 	Memset(KernelVirtualMemory.map.bits, 0, kbm_length);
+	asm ("xchgw %bx, %bx");
 }

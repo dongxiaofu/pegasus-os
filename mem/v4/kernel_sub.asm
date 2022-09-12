@@ -1,5 +1,5 @@
 [section .bss]
-Stack	resb	1024*2
+Stack	resb	1024
 ;Stack	resb	1024*1024
 ;Stack	resb	1024*1024*16
 ;Stack	resb	1024*2
@@ -35,7 +35,7 @@ _start:
 	;jmp $
 	;jmp $
 	;jmp $
-	;xchg bx, bx	
+	;;xchg bx, bx	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
 	mov ah, 0Bh
@@ -44,7 +44,7 @@ _start:
 	
 	mov esp, StackTop
 	mov word [dis_pos], 0
-	;xchg bx, bx
+	;;xchg bx, bx
 	sgdt [gdt_ptr]
 	call ReloadGDT
 	lgdt [gdt_ptr]
@@ -61,7 +61,7 @@ csinit:
 	xor eax, eax
 	mov ax, TSS_SELECTOR
 	ltr ax
-	xchg bx, bx
+	;xchg bx, bx
 	jmp kernel_main
 	hlt
 	jmp $	

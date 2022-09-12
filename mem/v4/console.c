@@ -419,6 +419,8 @@ void TaskTTY() {
     ////out_byte(0x3D5, (VM_BASE_ADDR + dis_pos)/2);
     //out_byte(0x3D5, VM_BASE_ADDR);
 
+	
+	disp_str("TaskTTY\n");
 
     init_tty();
     select_console(1);
