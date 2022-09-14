@@ -2,6 +2,7 @@
 #include "string.h"
 #include "const.h"
 #include "type.h"
+#include "double_link_list.h"
 #include "protect.h"
 #include "process.h"
 #include "keyboard.h"
@@ -33,85 +34,39 @@ void check()
 // 进程调度次数
 void schedule_process()
 {
-    Proc *p;
-    unsigned int greatest_ticks = 0;
-    while (!greatest_ticks)
-    {
-        // todo 测试需要，去掉用户进程USER_PROC_NUM。
-        //for(p = proc_table; p < proc_table + USER_PROC_NUM; p++){
-        for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; p++)
-        {
-            // for (p = proc_table; p < proc_table + TASK_PROC_NUM; p++) {
-            if (p->p_flag == RUNNING && p->ticks > greatest_ticks)
-            {
-                greatest_ticks = p->ticks;
-                proc_ready_table = p;
-            }
-        }
+    Proc *next, *cur;
+	
+	cur = proc_ready_table;
 
-        //p_flag需要参与运算吗？目前，是否参与都行，看具体需求。
-        //while(!greatest_ticks){
-        if (!greatest_ticks)
-        {
-            // for (p = proc_table; p < proc_table + TASK_PROC_NUM; p++) {
-            // todo 测试需要，去掉用户进程USER_PROC_NUM。
-            for (p = proc_table; p < proc_table + TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; p++)
-            {
-                if (p->p_flag == RUNNING)
-                {
-                    p->ticks = p->priority;
-                }
-            }
-        }
-    }
+	if(isListEmpty(pcb_list) == 1){
+		disp_str("switch_to?No\n");
+	}else{
+		disp_str("switch_to?Yes\n");
+		Proc *tmp = (Proc *)popFromDoubleLinkList(pcb_list);
+		if(tmp != 0x0)	proc_ready_table = tmp;
+	}
 
 	// 进程，切换页目录表。
 	int page_directory = 0x100000;
 	if(proc_ready_table->page_directory != 0x0){
-//		proc_ready_table->page_directory = 0x100000;
-		// asm ("xchgw %bx, %bx");
-		asm volatile ("movl %0, %%cr3" : : "r" (proc_ready_table->page_directory) : "memory");
+		//asm volatile ("movl %0, %%cr3" : : "r" (proc_ready_table->page_directory) : "memory");
 	}else{
-//		page_directory = 0x100000 + 0x2000;
-		asm volatile ("movl %0, %%cr3" : : "r" (page_directory) : "memory");
+		//asm volatile ("movl %0, %%cr3" : : "r" (page_directory) : "memory");
 	}
+	
+	next = proc_ready_table;
+	disp_str("no switch_to\n");
+	switch_to(cur, next);
+	disp_str("no switch_to 2\n");
 }
 
 void clock_handler()
 {
-    if (proc_ready_table->p_flag == RECEIVING || proc_ready_table->p_flag == SENDING)
-    {
-        //	schedule_process();
-        //	return;
-    }
-    //	check();
-    if (++ticks >= MAX_TICKS)
-    {
-        ticks = 0;
-    }
-    if (proc_ready_table->ticks > 0)
-    {
-        proc_ready_table->ticks--;
-    }
-
-    if (key_pressed)
-    {
-        inform_int(0);
-    }
-
-    if (k_reenter != 0)
-    {
-        //return proc_ready_tab
-        return;
-    }
-
-    if (proc_ready_table->ticks > 0)
-    {
-        return;
-    }
-
     // 调度进程
     schedule_process();
+	disp_str("clock_handler:");
+	disp_int(ticks);
+	disp_str("\n");
 }
 
 Proc *pid2proc(int pid)

@@ -23,7 +23,8 @@ OBJS	=	kernel_sub.o kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o glo
 		wait.o  exit.o 	fork.o	 getpid.o exec.o \
 		mm/main.o mm/exec.o mm/forkexit.o	\
 		mem/mem.o \
-		switch_to.o
+		kernel_main_old.o \
+		switch_to.o	double_link_list.o thread.o
 	#	wait.o	exit.o	fork.o	unlink.o getpid.o
 
 LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
@@ -96,6 +97,8 @@ hd_rdwt.o:hd/hd_rdwt.asm
 
 kernel_main.o:main.c
 	${CC} ${CFLAGS} -o $@ $<
+kernel_main_old.o:20220913-main.c
+	${CC} ${CFLAGS} -o $@ $<
 
 process.o:process.c
 	${CC} ${CFLAGS} -o $@ $<
@@ -160,6 +163,13 @@ exec.o:lib/exec.c
 # 内存管理
 mem.o:mem/mem.c
 	${CC} ${CFLAGS} -o $@ $<
+
+# 重构时写的代码start
+double_link_list.o:double_link_list.c
+	${CC} ${CFLAGS} -o $@ $<
+thread.o:thread.c
+	${CC} ${CFLAGS} -o $@ $<
+# 重构时写的代码end
 
 # 生成CRT，C语言运行时环境
 ${LOBJS}:${LOBJS2}

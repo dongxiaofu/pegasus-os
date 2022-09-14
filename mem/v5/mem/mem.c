@@ -150,9 +150,11 @@ unsigned int get_virtual_address(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
 	Bitmap map = pool.map;
 
 	int index = get_bits(&map, cnt);
+	
 	// int addr = pool.start_addr + PAGE_SIZE * index;
 	// unsigned int addr = pool.start_addr + PAGE_SIZE * cnt;
-	unsigned int addr = pool.start_addr + PAGE_SIZE * (cnt - 1);
+	// unsigned int addr = pool.start_addr + PAGE_SIZE * (cnt - 1);
+	unsigned int addr = pool.start_addr + PAGE_SIZE * (index - 1);
 	set_bits(&map, index, 1, cnt);
 
 	return addr;
@@ -183,7 +185,6 @@ void add_map_entry(unsigned int vaddr, unsigned int phy_addr)
 {
 	// 获取PDE的虚拟地址
 	// void *pde = ptr_pde(vaddr);
-	asm ("xchgw %bx, %bx");
 	unsigned int *pde = ptr_pde(vaddr);
 	// 获取PTE的虚拟地址
 	// void *pte = ptr_pte(vaddr);
@@ -201,7 +202,6 @@ void add_map_entry(unsigned int vaddr, unsigned int phy_addr)
 //			MemPool pool = 0x0;
 //			int *addr = get_a_page(type, pool);
 			// TODO 页框的物理地址存储在PTE中。但PTE中的值除了物理地址，还有P位等属性，怎么设置？
-			asm ("xchgw %bx, %bx");
 //			*pte = phy_addr;
 		    *pte = phy_addr | PG_P_YES |  PG_RW_RW |  PG_US_SUPER;;
 		//	asm volatile ("movl %0, %1" : : "r" (phy_addr), "m" (*pte) : "memory");

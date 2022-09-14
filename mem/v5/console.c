@@ -401,6 +401,8 @@ void init_tty() {
 }
 
 void TaskTTY() {
+	disp_str("TASK_TTY\n");
+	while(1);
     //keyboard_buffer.buf[0] = 0x1E;
     //keyboard_buffer.buf[1] = 0x30;
     //keyboard_buffer.buf[2] = 0x2E;

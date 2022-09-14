@@ -7,6 +7,9 @@ typedef void *system_call;
 
 typedef void (*int_handle)();
 
+typedef void (*thread_function)(void *);
+typedef void (*starter)(thread_function, void *);
+
 typedef struct {
     unsigned int m40;
     unsigned int m41;

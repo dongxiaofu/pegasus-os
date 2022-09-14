@@ -35,7 +35,7 @@ _start:
 	;jmp $
 	;jmp $
 	;jmp $
-	;xchg bx, bx	
+	;;xchg bx, bx	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
 	mov ah, 0Bh
@@ -44,7 +44,7 @@ _start:
 	
 	mov esp, StackTop
 	mov word [dis_pos], 0
-	;xchg bx, bx
+	;;xchg bx, bx
 	sgdt [gdt_ptr]
 	call ReloadGDT
 	lgdt [gdt_ptr]
@@ -58,10 +58,10 @@ csinit:
 	; 怎么使用C代码中的常量？
 	; ltr TSS_SELECTOR
 	;ltr [TSS_SELECTOR]
-	xor eax, eax
-	mov ax, TSS_SELECTOR
-	ltr ax
-	xchg bx, bx
+	;xor eax, eax
+	;mov ax, TSS_SELECTOR
+	;ltr ax
+	;xchg bx, bx
 	jmp kernel_main
 	hlt
 	jmp $	

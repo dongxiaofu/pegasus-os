@@ -179,6 +179,13 @@ void ReloadGDT();
 
 void init_keyboard();
 void init();
+
+/****************************************thread start***************************************/
+void kernel_thread(thread_function func, void *arg);
+Proc *thread_create(thread_function func, char *thread_arg);
+void thread_start(thread_function func, char *thread_arg);
+/****************************************thread end*****************************************/
+
 // 内核的入口函数
 void kernel_main();
 

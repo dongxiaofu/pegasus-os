@@ -5,6 +5,21 @@
 #define EXTERN
 //#endif
 
+typedef struct _ListElement{
+  	struct _ListElement *prev;
+  	struct _ListElement *next;
+  	void *val;
+} *ListElement;
+
+typedef struct _DoubleLinkList{
+  	ListElement head;
+  	ListElement tail;
+} *DoubleLinkList;
+
+DoubleLinkList initDoubleLinkList();
+void appendToDoubleLinkList(DoubleLinkList list, void *value);
+void insertToDoubleLinkList(DoubleLinkList list, void *value);
+void *popFromDoubleLinkList(DoubleLinkList list);
 
 // 全局相关 start
 EXTERN int dis_pos;
@@ -19,6 +34,7 @@ EXTERN unsigned int key_pressed;
 // 即将或正在执行的进程的进程表
 EXTERN Proc *proc_ready_table;
 EXTERN Proc *pcaller;
+EXTERN DoubleLinkList pcb_list;
 // 系统任何和用户进程的进程表都存储在这个数组中
 extern struct proc proc_table[];
 // 用户进程元数据

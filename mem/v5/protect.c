@@ -93,7 +93,8 @@ void init_propt()
 
     // gs
     // InitDescriptor(&gdt[7], 0xb8000, 0x0FFFF, 0x0F2);
-	unsigned int video_base = 0xc000000 + 0xb8000;
+	// unsigned int video_base = 0xc000000 + 0xb8000; 	// 错误的
+	unsigned int video_base = 0xc0000000 + 0xb8000;
     InitDescriptor(&gdt[7], video_base, 0x0FFFF, 0x0F2);
 }
 

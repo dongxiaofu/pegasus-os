@@ -43,11 +43,19 @@ struct MsgSender
 
 typedef struct _thread_stack
 {
-	unsigned int eip;
+	// unsigned int eip;
+	//void (*eip)(void *);
 	unsigned int esi;
 	unsigned int edi;
 	unsigned int ebx;
 	unsigned int ebp;
+	starter eip2;
+	unsigned int unused_retaddr;
+	thread_function func_name;
+	void *func_arg;
+	Func eip;
+	//void (*eip)(void *);
+//	void (*unused_retaddr);
 } ThreadStack;
 
 #define FILP_TABLE_SIZE 64
@@ -104,6 +112,6 @@ typedef struct{
         unsigned short stack_size;
 }Task;
 
-void switch_to(Proc *next);
+void switch_to(Proc *cur, Proc *next);
 
 #endif
