@@ -60,7 +60,7 @@ void kernel_thread_a(void *msg)
 	int a = 0;
 	while(1){
 		dis_pos = b;
-		disp_str("still b:");
+		disp_str("still a:");
 		disp_int(a++);
 		disp_str("\n");
 	}
@@ -69,7 +69,14 @@ void kernel_thread_a(void *msg)
 void kernel_thread_b(void *msg)
 {
 	disp_str(msg);
-	while(1);
+	int b = dis_pos;
+	int a = 0;
+	while(1){
+		dis_pos = b;
+		disp_str("still b:");
+		disp_int(a++);
+		disp_str("\n");
+	}
 }
 
 void kernel_thread_c(void *msg)

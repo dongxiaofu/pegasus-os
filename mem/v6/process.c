@@ -46,10 +46,16 @@ void schedule_process()
 //		disp_str("switch_to?No2\n");
 	}else{
 //		disp_str("switch_to?Yes\n");
-		Proc *tmp = (Proc *)popFromDoubleLinkList(&pcb_list);
+		// unsigned int element = (unsigned int)popFromDoubleLinkList(&pcb_list);
+		unsigned int element = (unsigned int)popFromDoubleLinkList(&pcb_list);
+		Proc *tmp = (Proc *)(element & 0xFFFFF000);
 		if(tmp != 0x0){
 			next = tmp;
-			// appendToDoubleLinkList(&pcb_list, next);
+			disp_str("insertToDoubleLinkList:");
+			disp_int((unsigned int)next);
+			disp_str("\n");
+			// appendToDoubleLinkList(&pcb_list, &next->tag);
+			insertToDoubleLinkList(&pcb_list, &next->tag);
 		}
 //		disp_str("switch_to?Yes2\n");
 	}

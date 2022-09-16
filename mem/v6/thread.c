@@ -53,5 +53,5 @@ void thread_start(thread_function func, char *thread_arg)
 	thread_stack->func_arg = thread_arg;
 	thread_stack->ebp = thread_stack->ebx = thread_stack->edi = thread_stack->esi = 0;
 	// 加入链表，在调度模块中处理
-	appendToDoubleLinkList(&pcb_list, (void *)thread);	
+	appendToDoubleLinkList(&pcb_list, (ListElement *)(&thread->tag));	
 }

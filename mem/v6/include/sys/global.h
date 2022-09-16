@@ -8,7 +8,6 @@
 typedef struct _ListElement{
   	struct _ListElement *prev;
   	struct _ListElement *next;
-  	void *val;
 } ListElement;
 
 typedef struct _DoubleLinkList{
@@ -18,8 +17,10 @@ typedef struct _DoubleLinkList{
 
 void initDoubleLinkList();
 char isListEmpty(DoubleLinkList *list);
-void appendToDoubleLinkList(DoubleLinkList *list, void *value);
-void insertToDoubleLinkList(DoubleLinkList *list, void *value);
+void appendToDoubleLinkList(DoubleLinkList *list, void *element);
+void insertToDoubleLinkList(DoubleLinkList *list, void *element);
+// void appendToDoubleLinkList(DoubleLinkList *list, void *value);
+// void insertToDoubleLinkList(DoubleLinkList *list, void *value);
 void *popFromDoubleLinkList(DoubleLinkList *list);
 
 // 全局相关 start

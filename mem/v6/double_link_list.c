@@ -88,10 +88,11 @@ char isListEmpty(DoubleLinkList *list)
 
 void appendToDoubleLinkList(DoubleLinkList *list, void *value)
 {
-	ListElement *element = (ListElement *)MALLOC(sizeof(struct _ListElement));
-	Memset(element, 0, sizeof(struct _ListElement));
-	element->val = value;
-
+//	ListElement *element = (ListElement *)MALLOC(sizeof(struct _ListElement));
+//	Memset(element, 0, sizeof(struct _ListElement));
+//	element->val = value;
+	// (ListElement *) element = (ListElement *)value;
+	ListElement *element = (ListElement *)value;
 	element->prev = list->tail.prev;
 	if(list->tail.prev != 0x0)	list->tail.prev->next = element;
 	list->tail.prev = element;
@@ -100,9 +101,11 @@ void appendToDoubleLinkList(DoubleLinkList *list, void *value)
 
 void insertToDoubleLinkList(DoubleLinkList *list, void *value) 
 {
-	ListElement *element = (ListElement *)MALLOC(sizeof(struct _ListElement));
-	element->val = value;
+//	ListElement *element = (ListElement *)MALLOC(sizeof(struct _ListElement));
+//	element->val = value;
 
+	// (ListElement *) element = (ListElement *)value;
+	ListElement *element = (ListElement *)value;
 	element->next = list->head.next;
 	if(list->head.next != 0x0)	list->head.next->prev = element;
 	list->head.next = element;
@@ -119,5 +122,6 @@ void *popFromDoubleLinkList(DoubleLinkList *list)
 	if(list->tail.prev->prev != 0x0)	list->tail.prev->prev->next = &list->tail;
 	list->tail.prev = list->tail.prev->prev;
 
-	return element->val;
+	return element;
+//	return element->val;
 }

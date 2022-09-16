@@ -68,6 +68,8 @@ typedef struct proc{
 		unsigned int *stack;
 		unsigned int page_directory;
 		unsigned int user_virtual_memory_address;
+//		ListElement tag;
+		char tag[8];
         // ldt选择子
         unsigned short ldt_selector;
         // ldt
