@@ -6,6 +6,7 @@ Stack	resb	1024*2
 StackTop:
 ; TSS选择子
 TSS_SELECTOR	equ	0x40
+GS_SELECTOR		equ	0x3b
 [section .data]
 msg1	db	"esp:", "$"
 msg2	db	"tss.esp0:", "$"
@@ -42,14 +43,16 @@ _start:
 	mov al, 'L'
 	mov [gs:(80 * 20 + 40) * 2], ax
 	
-	mov esp, StackTop
+	;mov esp, StackTop
 	mov word [dis_pos], 0
 	;;xchg bx, bx
 	sgdt [gdt_ptr]
 	call ReloadGDT
 	lgdt [gdt_ptr]
 	lidt [idt_ptr]
-	jmp 0x8:csinit
+	push gs
+	pop gs
+	jmp dword 0x8:csinit
 	;;;;;;xhcg bx, bx
 	;jmp $
 csinit:
@@ -58,9 +61,11 @@ csinit:
 	; 怎么使用C代码中的常量？
 	; ltr TSS_SELECTOR
 	;ltr [TSS_SELECTOR]
-	;xor eax, eax
-	;mov ax, TSS_SELECTOR
-	;ltr ax
+	xor eax, eax
+	mov ax, TSS_SELECTOR
+	ltr ax
+	xor eax, eax
+	
 	;xchg bx, bx
 	jmp kernel_main
 	hlt

@@ -2,6 +2,7 @@
 #include "string.h"
 #include "const.h"
 #include "type.h"
+#include "mem.h"
 #include "protect.h"
 #include "process.h"
 #include "keyboard.h"
@@ -96,6 +97,15 @@ void init_propt()
 	// unsigned int video_base = 0xc000000 + 0xb8000; 	// 错误的
 	unsigned int video_base = 0xc0000000 + 0xb8000;
     InitDescriptor(&gdt[7], video_base, 0x0FFFF, 0x0F2);
+
+	// 1特权级描述符
+	unsigned int es_attribute = 0xcb2;
+	unsigned int cs_attribute = 0x0c9a;//0x0cba;
+	unsigned int limit = 0xffffffff;
+	// es
+	InitDescriptor(&gdt[9], 0, limit, es_attribute);
+	// cs
+  	InitDescriptor(&gdt[10], 0, limit, cs_attribute);
 }
 
 void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type)

@@ -5,7 +5,6 @@
 #include "protect.h"
 #include "process.h"
 #include "console.h"
-#include "proto.h"
 #include "global.h"
 
 void cleanup(Proc *proc);

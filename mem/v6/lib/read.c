@@ -6,7 +6,6 @@
 #include "process.h"
 #include "keyboard.h"
 #include "console.h"
-#include "proto.h"
 #include "global.h"
 
 int read(int fd, void *buf, int count) {

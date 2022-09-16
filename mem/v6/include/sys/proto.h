@@ -44,7 +44,7 @@ void spurious_irq(int irq);
 
 
 // 启动进程
-void restart();
+void restart(unsigned int esp);
 void delay(int time);
 
 
@@ -182,8 +182,15 @@ void init();
 
 /****************************************thread start***************************************/
 void kernel_thread(thread_function func, void *arg);
-Proc *thread_create(thread_function func, char *thread_arg);
+Proc *thread_init();
+void thread_create(Proc *proc);
 void thread_start(thread_function func, char *thread_arg);
+
+// 进程
+VirtualMemoryAddress *create_user_process_address_space();
+void user_process(Func func, void *arg);
+void process_execute(Func func, char *thread_arg);
+
 /****************************************thread end*****************************************/
 
 // 内核的入口函数
@@ -194,5 +201,9 @@ void hwint0();
 void hwint1();
 void hwint14();
 // 外部中断 end
+
+void update_cr3(unsigned int page_dir_table_phy_addr);
+void update_tss(unsigned int esp);
+unsigned int get_running_thread_pcb();
 
 #endif

@@ -6,6 +6,7 @@
 #include "const.h"
 #include "type.h"
 #include "double_link_list.h"
+#include "mem.h"
 #include "protect.h"
 #include "process.h"
 #include "keyboard.h"

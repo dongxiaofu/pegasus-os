@@ -627,7 +627,8 @@ ReadSector2:
 ; 3>BaseOfKernel 和 0x30000 之间呢？
 ; 3>0x30000 这个数值，是 Makefile 中编译时设置的：ld -s -Ttext 0x30400  -o kernel.bin  kernel.o -m elf_i386 
 ;BaseOfKernel	equ	0x8000
-BaseOfKernel	equ	0x6000
+;BaseOfKernel	equ	0x6000
+BaseOfKernel	equ	0x5000
 BaseOfKernel2	equ	0x6000
 BaseOfKernel3	equ	0x0
 OffSetOfLoader	equ	0x0
@@ -672,13 +673,11 @@ LABEL_PM_START:
 ;	mov cr3, eax
 ;
 ;	;设置cr0的PG位
-;	;;xchg bx, bx
 ;	mov eax, cr0
 ;	or eax, 0x80000000
 ;	mov cr0, eax
 	
 
-	;;xchg bx, bx
 	; --------------------获取物理内存容量start--------------------------
 	push esi
 	push ecx
@@ -731,6 +730,7 @@ LABEL_PM_START:
 	call Init_8259A
 	call Init8253
 
+	mov esp, 0xc009f000
 	;;xhcg bx, bx
 	call InitKernel
 	;;xchg bx, bx	
@@ -1134,7 +1134,7 @@ OpenPaging:
 	mov cr3, eax
 
 	;设置cr0的PG位
-	;xchg bx, bx
+	xchg bx, bx
 	mov eax, cr0
 	or eax, 0x80000000
 	mov cr0, eax

@@ -21,15 +21,20 @@ void kernel_thread_b(void *msg);
 void kernel_thread_c(void *msg);
 void kernel_thread_d(void *msg);
 
+void user_proc_a();
+void user_proc_b();
+
 void kernel_main()
 {
 	init();
 
 	disp_str("main start\n");
+	process_execute(user_proc_a, "user_proc_a\n");
 	thread_start(kernel_thread_a, "thread a\n");
 	thread_start(kernel_thread_b, "thread b\n");
 	thread_start(kernel_thread_c, "thread c\n");
 	thread_start(kernel_thread_d, "thread d\n");
+	process_execute(user_proc_b, "user_proc_b\n");
 	disp_str("main end\n");
 
 	asm volatile ("sti");
@@ -45,7 +50,7 @@ void init()
 	init_memory(32*1024*1024);
 
 	// 初始化PCB链表
-	pcb_list = initDoubleLinkList();
+	initDoubleLinkList();
 }
 
 void kernel_thread_a(void *msg)
@@ -76,5 +81,17 @@ void kernel_thread_c(void *msg)
 void kernel_thread_d(void *msg)
 {
 	disp_str(msg);
+	while(1);
+}
+
+void user_proc_a()
+{
+	disp_str("I am user_proc_a\n");
+	while(1);
+}
+
+void user_proc_b()
+{
+	disp_str("I am user_proc_b\n");
 	while(1);
 }

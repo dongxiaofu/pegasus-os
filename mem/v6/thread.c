@@ -18,24 +18,34 @@ void kernel_thread(thread_function func, void *arg)
 	func(arg);
 }
 
-Proc *thread_create(thread_function func, char *thread_arg)
+Proc *thread_init()
 {
 	Proc *proc = (Proc *)alloc_memory(1, KERNEL);
-	Memset(proc, 0, sizeof(*proc));
+	// Memset(proc, 0, sizeof(*proc));
+	Memset(proc, 0, PAGE_SIZE);
 	proc->stack = (unsigned int *)((unsigned int)proc + PAGE_SIZE);
 	proc->page_directory = 0x0;
+
+	return proc;
+}
+
+void thread_create(Proc *proc)
+{
+//	Proc *proc = (Proc *)alloc_memory(1, KERNEL);
+//	Memset(proc, 0, sizeof(*proc));
+//	proc->stack = (unsigned int *)((unsigned int)proc + PAGE_SIZE);
+//	proc->page_directory = 0x0;
 
 	unsigned int proc_stack_size = sizeof(Regs);	
 	unsigned int thread_stack_size = sizeof(ThreadStack);	
 	proc->stack = (unsigned int *)((unsigned int)(proc->stack) - proc_stack_size);
 	proc->stack = (unsigned int *)((unsigned int)(proc->stack) - thread_stack_size);
-
-	return proc;
 }
 
 void thread_start(thread_function func, char *thread_arg)
 {
-	Proc *thread = thread_create(func, thread_arg);
+	Proc *thread = thread_init();
+ 	thread_create(thread);
 
 	ThreadStack *thread_stack = (ThreadStack *)thread->stack;
 	thread_stack->eip2 = kernel_thread;
@@ -43,5 +53,5 @@ void thread_start(thread_function func, char *thread_arg)
 	thread_stack->func_arg = thread_arg;
 	thread_stack->ebp = thread_stack->ebx = thread_stack->edi = thread_stack->esi = 0;
 	// 加入链表，在调度模块中处理
-	appendToDoubleLinkList(pcb_list, (void *)thread);	
+	appendToDoubleLinkList(&pcb_list, (void *)thread);	
 }

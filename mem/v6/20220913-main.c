@@ -169,7 +169,7 @@ void do_page_fault()
 {
 	unsigned int cr2;
 
-	//asm volatile ("movl %%cr2, %%eax":"=a"(cr2):);
+	asm volatile ("movl %%cr2, %%eax":"=a"(cr2):);
 
 	disp_str("do_page_fault\n");
 	disp_str("cr2:");
@@ -190,9 +190,9 @@ void do_page_fault()
 	disp_int(*pte);
 	disp_str("\n");
 
-	unsigned int page_vaddr = cr2 & 0xFFFFF000;
-	unsigned int page_paddr = get_a_page(KERNEL);
-	add_map_entry(page_vaddr, page_paddr);
+//	unsigned int page_vaddr = cr2 & 0xFFFFF000;
+//	unsigned int page_paddr = get_a_page(KERNEL);
+//	add_map_entry(page_vaddr, page_paddr);
 
 //	//asm volatile ("invlpg %0"::"m" (page_vaddr):"memory");    //更新tlb
 	unsigned int page_directory  = 0x000000100000;
@@ -279,7 +279,16 @@ void exception_handler(unsigned int vec_no, unsigned int error_no, unsigned int 
 	disp_str("return from exception_handler\n");
 
 	// //asm ("xchgw %bx, %bx");
-	if(vec_no == 14)	do_page_fault();
+//	if(vec_no == 14)	do_page_fault();
+	if(vec_no == 14){
+		unsigned int cr2;
+
+		asm volatile ("movl %%cr2, %%eax":"=a"(cr2):);
+		disp_str("page_fault\n");
+		disp_str("cr2:");
+		disp_int(cr2);
+		disp_str("\n");
+	}
 
 	//asm volatile("nop;nop;nop;");
 	//asm volatile ("movl %%eax, 4(%%ebp)" : :"a"(eip));

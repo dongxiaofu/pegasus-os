@@ -3,6 +3,7 @@
 #include "const.h"
 #include "type.h"
 #include "double_link_list.h"
+#include "mem.h"
 #include "protect.h"
 #include "process.h"
 #include "keyboard.h"
@@ -36,37 +37,51 @@ void schedule_process()
 {
     Proc *next, *cur;
 	
-	cur = proc_ready_table;
+	// 脏数据太多，怎么办？
+	cur = (Proc *)get_running_thread_pcb();
 
-	if(isListEmpty(pcb_list) == 1){
-		disp_str("switch_to?No\n");
+	if(isListEmpty(&pcb_list) == 1){
+//		disp_str("switch_to?No\n");
+		next = cur;
+//		disp_str("switch_to?No2\n");
 	}else{
-		disp_str("switch_to?Yes\n");
-		Proc *tmp = (Proc *)popFromDoubleLinkList(pcb_list);
-		if(tmp != 0x0)	proc_ready_table = tmp;
+//		disp_str("switch_to?Yes\n");
+		Proc *tmp = (Proc *)popFromDoubleLinkList(&pcb_list);
+		if(tmp != 0x0){
+			next = tmp;
+			// appendToDoubleLinkList(&pcb_list, next);
+		}
+//		disp_str("switch_to?Yes2\n");
 	}
 
+//	disp_str("switch_to?No3\n");
 	// 进程，切换页目录表。
 	int page_directory = 0x100000;
-	if(proc_ready_table->page_directory != 0x0){
-		//asm volatile ("movl %0, %%cr3" : : "r" (proc_ready_table->page_directory) : "memory");
+	if(next->page_directory != 0x0){
+//		disp_str("update_tss\n");
+		update_tss((unsigned int)next + PAGE_SIZE);
+//		disp_str("update_cr3\n");
+		update_cr3((unsigned int)next->page_directory);
+//		disp_str("update_cr3 end\n");
 	}else{
+//		disp_str("switch_to?No4\n");
 		//asm volatile ("movl %0, %%cr3" : : "r" (page_directory) : "memory");
+		update_cr3(page_directory);
+//		disp_str("switch_to?No5\n");
 	}
 	
-	next = proc_ready_table;
-	disp_str("no switch_to\n");
+//	disp_str("switch_to\n");
 	switch_to(cur, next);
-	disp_str("no switch_to 2\n");
+//	disp_str("switch_to 2\n");
 }
 
 void clock_handler()
 {
     // 调度进程
     schedule_process();
-	disp_str("clock_handler:");
-	disp_int(ticks);
-	disp_str("\n");
+//	disp_str("clock_handler:");
+//	disp_int(ticks);
+//	disp_str("\n");
 }
 
 Proc *pid2proc(int pid)

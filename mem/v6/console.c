@@ -2,6 +2,7 @@
 #include "string.h"
 #include "const.h"
 #include "type.h"
+#include "mem.h"
 #include "protect.h"
 #include "process.h"
 //#include "keymap.h"

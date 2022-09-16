@@ -5,7 +5,6 @@
 #include "protect.h"
 #include "process.h"
 #include "console.h"
-#include "proto.h"
 #include "global.h"
 
 //int do_exec(Message *msg);

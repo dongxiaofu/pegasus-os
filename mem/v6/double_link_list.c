@@ -66,65 +66,58 @@
 // }
 /**************************************test case end****************************/
 
-DoubleLinkList initDoubleLinkList()
+void initDoubleLinkList()
 {
-	// DoubleLinkList list = (DoubleLinkList)MALLOC(sizeof(struct _DoubleLinkList));
-	DoubleLinkList list = (DoubleLinkList)alloc_memory(1, KERNEL);
-	Memset(list, 0, sizeof(struct _DoubleLinkList));
-
-	list->head = (DoubleLinkList)alloc_memory(1, KERNEL);
-	Memset(list->head, 0, sizeof(struct _ListElement));
-	list->tail = (DoubleLinkList)alloc_memory(1, KERNEL);
-	Memset(list->tail, 0, sizeof(struct _ListElement));
-
-	list->head->next = list->tail;
-	list->tail->prev = list->head;
-
-	return list;
+	pcb_list.head.prev = 0x0;
+	pcb_list.tail.next = 0x0;
+	pcb_list.head.next = &pcb_list.tail;
+	pcb_list.tail.prev = &pcb_list.head;
 }
 
-char isListEmpty(DoubleLinkList list)
+// char isListEmpty(DoubleLinkList list)
+char isListEmpty(DoubleLinkList *list)
 {
 	// return list->head->next == list->tail;
-	if(list->head->next == list->tail && list->tail->prev == list->head){
+	// if(list.head.next == &list.tail && list.tail.prev == &list.head){
+	if(list->head.next == &list->tail){
 		return 1;
 	}else{
 		return 0;
 	}
 }
 
-void appendToDoubleLinkList(DoubleLinkList list, void *value)
+void appendToDoubleLinkList(DoubleLinkList *list, void *value)
 {
-	ListElement element = (ListElement)MALLOC(sizeof(struct _ListElement));
+	ListElement *element = (ListElement *)MALLOC(sizeof(struct _ListElement));
 	Memset(element, 0, sizeof(struct _ListElement));
 	element->val = value;
 
-	element->prev = list->tail->prev;
-	if(list->tail->prev != 0x0)	list->tail->prev->next = element;
-	list->tail->prev = element;
-	element->next = list->tail;
+	element->prev = list->tail.prev;
+	if(list->tail.prev != 0x0)	list->tail.prev->next = element;
+	list->tail.prev = element;
+	element->next = &list->tail;
 }
 
-void insertToDoubleLinkList(DoubleLinkList list, void *value) 
+void insertToDoubleLinkList(DoubleLinkList *list, void *value) 
 {
-	ListElement element = (ListElement)MALLOC(sizeof(struct _ListElement));
+	ListElement *element = (ListElement *)MALLOC(sizeof(struct _ListElement));
 	element->val = value;
 
-	element->next = list->head->next;
-	if(list->head->next != 0x0)	list->head->next->prev = element;
-	list->head->next = element;
-	element->prev = list->head;
+	element->next = list->head.next;
+	if(list->head.next != 0x0)	list->head.next->prev = element;
+	list->head.next = element;
+	element->prev = &list->head;
 }
 
 // ListElement popFromDoubleLinkList(DoubleLinkList list)
-void *popFromDoubleLinkList(DoubleLinkList list)
+void *popFromDoubleLinkList(DoubleLinkList *list)
 {
 	if(isListEmpty(list) == 1)	return 0x0;
 
-	ListElement element = list->tail->prev;
+	ListElement *element = list->tail.prev;
 
-	if(list->tail->prev->prev != 0x0)	list->tail->prev->prev->next = list->tail;
-	list->tail->prev = list->tail->prev->prev;
+	if(list->tail.prev->prev != 0x0)	list->tail.prev->prev->next = &list->tail;
+	list->tail.prev = list->tail.prev->prev;
 
 	return element->val;
 }

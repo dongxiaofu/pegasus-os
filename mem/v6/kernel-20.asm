@@ -85,6 +85,10 @@ global enable_8259A_slave_winchester_irq
 ; 关闭8259A的从片的硬盘中断
 global disable_8259A_slave_winchester_irq
 
+global update_cr3
+global update_tss
+global get_running_thread_pcb
+
 ; 中断例程
 InterruptTest:
 	mov ah, 0Dh
@@ -323,6 +327,8 @@ hwint0:
 .1:
 	;mov esp, StackTop
 .2:
+;	push 0x100000
+;	call update_cr3
 	;sti
 	call clock_handler
 	;mov al, 11111000b
@@ -557,15 +563,16 @@ restart:
 	;lldt [proc_table + 68]
 	; 不能放到前面
 	dec dword [k_reenter]
-	mov esp, [proc_ready_table]
-	lldt [esp + 68]
+	mov ebp, esp
+	mov esp, [ebp+4]
+	;lldt [esp + 68]
 	;lldt [proc_table + 56]
 	; 设置tss.esp0
 	;lea eax, [proc_table + 52]
 	;lea eax, [proc_table + 56]
 	;lea eax, [proc_table + 68]
-	lea eax, [esp + 68]
-	mov [tss + 4], eax 
+	;lea eax, [esp + 68]
+	;mov [tss + 4], eax 
 	; 出栈 	
 	pop gs
 	pop fs
@@ -829,4 +836,32 @@ disable_8259A_slave_winchester_irq:
 	out 0xA1, al
 
 	popf; ax
+	ret
+
+update_cr3:
+	push ebp
+	mov ebp, esp
+
+	mov eax, [ebp+8]
+	mov cr3, eax
+	
+	mov esp, ebp
+	pop ebp
+	ret
+
+update_tss:
+	push ebp
+	mov ebp, esp
+
+	mov eax, [ebp+8]
+	mov [tss+4], eax
+	
+	mov esp, ebp
+	pop ebp
+	ret
+
+get_running_thread_pcb:
+	mov eax, esp
+	and eax, 0xFFFFF000
+
 	ret

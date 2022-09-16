@@ -10,6 +10,11 @@
 #include "proto.h"
 #include "global.h"
 
+void init_bitmap(Bitmap *map)
+{
+	Memset(map->bits, 0, map->length);
+}
+
 int test_bit_val(Bitmap *map, int idx)
 {
 	int byte_idx = idx / 8;
@@ -66,7 +71,8 @@ int get_first_free_bit(Bitmap *map, int idx)
 int get_bits(Bitmap *map, int cnt)
 {
 	// int first_free_bit = get_first_free_bit(map, 0);
-	int tmp = ROUND_UP(0x100000 + 0x2000, PAGE_SIZE);
+//	int tmp = ROUND_UP(0x100000 + 0x2000, PAGE_SIZE);
+	int tmp = 0;
 	int first_free_bit = get_first_free_bit(map, tmp);
 	if(first_free_bit == -1){
 		// TODO 错误处理。
@@ -74,6 +80,7 @@ int get_bits(Bitmap *map, int cnt)
 
 	int length = map->length * 8;
 	int loop_cnt = cnt - 1;
+	if(loop_cnt == 0)	return first_free_bit;
 
 	int start_idx = first_free_bit + 1;
 	int end_idx = first_free_bit;
@@ -154,7 +161,8 @@ unsigned int get_virtual_address(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
 	// int addr = pool.start_addr + PAGE_SIZE * index;
 	// unsigned int addr = pool.start_addr + PAGE_SIZE * cnt;
 	// unsigned int addr = pool.start_addr + PAGE_SIZE * (cnt - 1);
-	unsigned int addr = pool.start_addr + PAGE_SIZE * (index - 1);
+	// unsigned int addr = pool.start_addr + PAGE_SIZE * (index - 1);
+	unsigned int addr = pool.start_addr + PAGE_SIZE * index;
 	set_bits(&map, index, 1, cnt);
 
 	return addr;
@@ -259,6 +267,16 @@ unsigned int alloc_memory(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
 	return vaddr;
 }
 
+unsigned int get_a_virtual_page(MEMORY_POOL_TYPE pool_type, unsigned int vaddr)
+{
+	unsigned int phy_addr = get_a_page(pool_type);
+	add_map_entry(vaddr, phy_addr);
+
+	return vaddr;
+}
+
+
+
 void init_memory2()
 {
 	// asm ("xchgw %bx, %bx");
@@ -362,6 +380,6 @@ void init_memory(int total_memory)
 
 	KernelVirtualMemory.map.length = kbm_length;
 	KernelVirtualMemory.map.bits = (char *)(map_base_addr + kbm_length + ubm_length);
-	KernelVirtualMemory.start_addr = k_v_addr;
+	KernelVirtualMemory.start_addr = k_v_addr + 1024 * 1024;
 	Memset(KernelVirtualMemory.map.bits, 0, kbm_length);
 }

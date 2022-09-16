@@ -1,6 +1,7 @@
 #include "const.h"
 #include "stdio.h"
 #include "type.h"
+#include "mem.h"
 #include "protect.h"
 #include "console.h"
 #include "process.h"
