@@ -291,7 +291,6 @@ unsigned int sys_malloc(unsigned int size)
 {
 	unsigned int addr = 0x0;
 	MEMORY_POOL_TYPE pool_type;
-	unsigned int cnt = ROUND_UP(size, PAGE_SIZE);
 	mem_block_desc *desc_array;
 
 	Proc *current_thread = (Proc *)get_running_thread_pcb();
@@ -303,6 +302,7 @@ unsigned int sys_malloc(unsigned int size)
 	}
 
 	if(size > 1024){
+		unsigned int cnt = ROUND_UP(size + sizeof(arena), PAGE_SIZE);
 		unsigned int page_addr = alloc_memory(cnt, pool_type);
 		// 有必要增加元数据吗？
 		arena *a = (arena *)page_addr;
@@ -343,6 +343,82 @@ unsigned int sys_malloc(unsigned int size)
 	}
 
 	return addr;
+}
+
+void remove_map_entry(unsigned int vaddr)
+{
+	unsigned int *pte = ptr_pte(vaddr);
+	*pte |= PG_P_NO;
+}
+
+void free_a_page(unsigned int vaddr, MEMORY_POOL_TYPE pool_type)
+{
+	VirtualMemoryAddress vm;
+	MemPool pool;
+	
+	if(pool_type == KERNEL){
+		vm = KernelVirtualMemory;
+		pool = &KernelPool;
+	}else{
+		// TODO 当前进程的虚拟地址池
+		vm = KernelVirtualMemory;
+		pool = &UserPool;
+	}
+
+	// 释放虚拟内存
+	int virtual_page_index = vaddr / PAGE_SIZE;
+	set_bit_val(&vm.map, virtual_page_index, 0);
+	// 释放物理内存
+	int phy_addr = get_physical_address(vaddr);
+	int phy_page_index = phy_addr / PAGE_SIZE;
+	set_bit_val(&pool->map, phy_page_index, 0);
+	// 释放页表	
+	remove_map_entry(vaddr);
+}
+
+void sys_free(unsigned int addr, unsigned int size)
+{
+	Proc *current_thread = (Proc *)get_running_thread_pcb();
+	MEMORY_POOL_TYPE pool_type;
+	
+	if(current_thread->page_directory == 0x0){
+		pool_type = KERNEL;
+	}else{
+		pool_type = USER;
+	}	
+
+	if(size > 1024){
+		unsigned int page_addr = addr - sizeof(arena);
+		size += sizeof(arena);
+		unsigned int page_cnt = ROUND_UP(size, PAGE_SIZE);
+		for(int i = 0; i < page_cnt; i++){
+			free_a_page(page_addr, pool_type);
+			page_addr += PAGE_SIZE;
+		}
+	}else{
+		unsigned int index = 0;
+		for(int i = 0; i < MEM_BLOCK_DESC_KIND_NUM; i++){
+			if(kernel_mem_block_decs_array[i].size >= size){
+				index = i;
+				break;
+			}
+		}
+
+		mem_block_desc desc = kernel_mem_block_decs_array[index];
+		mem_block *block = (mem_block *)addr;
+		arena *a = block2arena(block);
+		appendToDoubleLinkList(&desc.free_list, (void *)block); 
+		a->cnt++;
+		// 当一个内存元仓库中的所有小内存块都是空闲状态时，释放这个内存元仓库。
+		// 我不理解这样做的原因。
+		if(a->cnt == desc.cnt){
+			for(int i = 0; i < desc.cnt; i++){
+				popFromDoubleLinkList(&desc.free_list);
+			}
+
+			free_a_page((unsigned int)a, pool_type);
+		}
+	}
 }
 
 void init_memory2()
