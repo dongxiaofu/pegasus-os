@@ -10,6 +10,11 @@
 #include "proto.h"
 #include "global.h"
 
+// 内存管理
+// 内核的内存块描述符
+// 2kb、4KB、8KB、16KB、32KB、64KB、128KB、256KB、512KB、1024KB
+mem_block_desc kernel_mem_block_decs_array[MEM_BLOCK_DESC_KIND_NUM];
+
 void init_bitmap(Bitmap *map)
 {
 	Memset(map->bits, 0, map->length);
@@ -275,7 +280,70 @@ unsigned int get_a_virtual_page(MEMORY_POOL_TYPE pool_type, unsigned int vaddr)
 	return vaddr;
 }
 
+arena *block2arena(mem_block *block)
+{
+	arena *a = (arena *)((unsigned int)block & 0xFFFFF000);
 
+	return a;
+}
+
+unsigned int sys_malloc(unsigned int size)
+{
+	unsigned int addr = 0x0;
+	MEMORY_POOL_TYPE pool_type;
+	unsigned int cnt = ROUND_UP(size, PAGE_SIZE);
+	mem_block_desc *desc_array;
+
+	Proc *current_thread = (Proc *)get_running_thread_pcb();
+	if(current_thread->page_directory == 0x0){
+		pool_type = KERNEL;
+		desc_array = kernel_mem_block_decs_array;
+	}else{
+		pool_type = USER;
+	}
+
+	if(size > 1024){
+		unsigned int page_addr = alloc_memory(cnt, pool_type);
+		// 有必要增加元数据吗？
+		arena *a = (arena *)page_addr;
+		a->desc = (mem_block_desc *)0x0;
+		a->cnt = 1;
+		a->large = 1;
+		addr = (unsigned int)(a + 1);
+	}else{
+		// 从小往大，开始寻找大于size的内存块。
+		unsigned int index = 0;
+		for(int i = 0; i < MEM_BLOCK_DESC_KIND_NUM; i++){
+			if(desc_array[i].size == size){
+				index = i;
+				break;
+			}
+		}
+
+		unsigned int block_addr;
+		mem_block_desc desc = desc_array[index];
+		if(isListEmpty(&desc.free_list) == 1){
+			unsigned int page_addr = alloc_memory(1, pool_type);
+			// TODO 没有做容错处理。
+			unsigned int arena_size = sizeof(arena);
+			unsigned int cnt = (PAGE_SIZE - arena_size) / arena_size; 
+			unsigned int start_addr = page_addr + arena_size;
+			unsigned int mem_block_size = desc.size;
+			for(int i = 0; i < cnt; i++){
+				block_addr = start_addr + mem_block_size * i; 
+				appendToDoubleLinkList(&desc.free_list, block);
+			}
+		}
+
+		block_addr = (unsigned int)popFromDoubleLinkList(&desc.free_list);
+		addr = block_addr;
+		
+		arena *a = block2arena((mem_block *)block_addr);
+		a->cnt--;
+	}
+
+	return addr;
+}
 
 void init_memory2()
 {

@@ -15,6 +15,26 @@ typedef struct _DoubleLinkList{
   	ListElement tail;
 } DoubleLinkList;
 
+// 内存块描述符
+typedef struct _mem_block_desc
+{
+	int size;
+	int cnt;
+	DoubleLinkList free_list;
+} mem_block_desc;
+
+typedef struct _mem_block
+{ 
+	ListElement element;
+} mem_block;
+
+typedef struct _arena
+{
+	mem_block_desc *desc;
+	int cnt;
+	char large;
+}arena;
+
 void initDoubleLinkList();
 char isListEmpty(DoubleLinkList *list);
 void appendToDoubleLinkList(DoubleLinkList *list, void *element);
@@ -52,6 +72,10 @@ extern int proc_stack[STACK_SIZE];
 extern int_handle sys_call_table[];
 
 // 进程相关 end
+
+arena *block2arena(mem_block *block);
+unsigned int sys_malloc(unsigned int size);
+
 
 // 保护模式相关 start
 EXTERN Descriptor gdt[128];
@@ -110,5 +134,7 @@ EXTERN TSS tss;
 
 // todo fork创建的进程的内存空间的初始地址
 #define USER_PROC_MEM_BASE	0xA00000
+// 内存块种类数量
+#define MEM_BLOCK_DESC_KIND_NUM	10
 
 #endif

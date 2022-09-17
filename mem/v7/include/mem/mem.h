@@ -71,6 +71,7 @@ unsigned int get_physical_address(unsigned int vaddr);
 // 申请内存，返回内存空间的虚拟地址
 unsigned int alloc_memory(unsigned int cnt, MEMORY_POOL_TYPE pool_type);
 unsigned int get_a_virtual_page(MEMORY_POOL_TYPE pool_type, unsigned int vaddr);
+
 // 初始化内存管理模块
 void init_memory2();
 void init_memory(int total_memory);

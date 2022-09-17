@@ -51,6 +51,11 @@ int_handle sys_call_table[SYS_CALL_FUNCTION_NUM] = {
         (int_handle) sys_receive_msg
 };
 
+// 内存管理
+// 内核的内存块描述符
+// 2kb、4KB、8KB、16KB、32KB、64KB、128KB、256KB、512KB、1024KB
+mem_block_desc kernel_mem_block_decs_array[MEM_BLOCK_DESC_KIND_NUM];
+
 // 进程相关 end
 
 // 根目录的inode
