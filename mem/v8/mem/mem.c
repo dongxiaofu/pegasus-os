@@ -132,7 +132,6 @@ unsigned int get_a_page(MEMORY_POOL_TYPE pool_type)
 	if(pool_type == KERNEL){
 		pool = KernelPool;
 	}else{
-		// TODO 某个用户进程的虚拟地址池
 		pool = UserPool;
 	}
 	// 找到位图中的空闲bit，返回它的索引。
@@ -152,11 +151,14 @@ unsigned int get_a_page(MEMORY_POOL_TYPE pool_type)
 unsigned int get_virtual_address(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
 {
 	VirtualMemoryAddress pool;
+	Proc *current_thread = (Proc *)get_running_thread_pcb();
 
 	if(pool_type == KERNEL){
 		pool = KernelVirtualMemory;
 	}else{
 		// TODO 某个用户进程的虚拟地址池
+		// pool = (VirtualMemoryAddress)current_thread->user_virtual_memory_address;
+		Memcpy(&pool, current_thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
 	}
 	
 	Bitmap map = pool.map;
@@ -216,7 +218,7 @@ void add_map_entry(unsigned int vaddr, unsigned int phy_addr)
 //			int *addr = get_a_page(type, pool);
 			// TODO 页框的物理地址存储在PTE中。但PTE中的值除了物理地址，还有P位等属性，怎么设置？
 //			*pte = phy_addr;
-		    *pte = phy_addr | PG_P_YES |  PG_RW_RW |  PG_US_SUPER;;
+		    *pte = phy_addr | PG_P_YES |  PG_RW_RW |  PG_US_SUPER;
 		//	asm volatile ("movl %0, %1" : : "r" (phy_addr), "m" (*pte) : "memory");
 		}
 	}else{
@@ -244,6 +246,22 @@ void add_map_entry(unsigned int vaddr, unsigned int phy_addr)
 //			*pte = addr;
 //		}
 	}
+}
+
+unsigned int alloc_virtual_memory(unsigned int phy_addr, unsigned int size)
+{
+	int page_cnt = ROUND_UP(size, PAGE_SIZE);
+	MEMORY_POOL_TYPE pool_type;	
+	Proc *proc = (Proc *)get_running_thread_pcb();
+	if(proc->page_directory == 0x0){
+		pool_type = KERNEL;
+	}else{
+		pool_type = USER;
+	}
+	unsigned int vaddr = get_virtual_address(page_cnt, pool_type);
+	add_map_entry(vaddr, phy_addr);
+
+	return (vaddr + (phy_addr & 0xFFF));
 }
 
 // 获取虚拟地址对应的物理地址
@@ -299,7 +317,9 @@ unsigned int sys_malloc(unsigned int size)
 		desc_array = kernel_mem_block_decs_array;
 	}else{
 		pool_type = USER;
+		desc_array = current_thread->mem_block_desc_array;
 	}
+
 
 	if(size > 1024){
 		unsigned int cnt = ROUND_UP(size + sizeof(arena), PAGE_SIZE);
@@ -314,28 +334,33 @@ unsigned int sys_malloc(unsigned int size)
 		// 从小往大，开始寻找大于size的内存块。
 		unsigned int index = 0;
 		for(int i = 0; i < MEM_BLOCK_DESC_KIND_NUM; i++){
-			if(desc_array[i].size == size){
+			if(desc_array[i].size >= size){
 				index = i;
 				break;
 			}
 		}
 
 		unsigned int block_addr;
-		mem_block_desc desc = desc_array[index];
-		if(isListEmpty(&desc.free_list) == 1){
+//		mem_block_desc desc = desc_array[index];
+		mem_block_desc *desc = (mem_block_desc *)alloc_memory(1,pool_type);
+		Memcpy(desc,desc_array + index, sizeof(mem_block_desc)); 
+		// if(isListEmpty(&desc->free_list) == 1){
+		if(isListEmpty(&(desc_array[index].free_list)) == 1){
 			unsigned int page_addr = alloc_memory(1, pool_type);
 			// TODO 没有做容错处理。
+			unsigned int mem_block_size = desc->size;
 			unsigned int arena_size = sizeof(arena);
-			unsigned int cnt = (PAGE_SIZE - arena_size) / arena_size; 
+			// unsigned int cnt = (PAGE_SIZE - arena_size) / arena_size; 
+			unsigned int cnt = (PAGE_SIZE - arena_size) / mem_block_size; 
 			unsigned int start_addr = page_addr + arena_size;
-			unsigned int mem_block_size = desc.size;
+
 			for(int i = 0; i < cnt; i++){
 				block_addr = start_addr + mem_block_size * i; 
-				appendToDoubleLinkList(&desc.free_list, block);
+				appendToDoubleLinkList(&(desc_array[index].free_list), (void *)block_addr);
 			}
 		}
 
-		block_addr = (unsigned int)popFromDoubleLinkList(&desc.free_list);
+		block_addr = (unsigned int)popFromDoubleLinkList(&(desc_array[index].free_list));
 		addr = block_addr;
 		
 		arena *a = block2arena((mem_block *)block_addr);
@@ -419,6 +444,19 @@ void sys_free(unsigned int addr, unsigned int size)
 			free_a_page((unsigned int)a, pool_type);
 		}
 	}
+}
+
+void init_memory_block_desc(mem_block_desc *mem_block_decs_array)
+{
+	for(int i = 0; i < MEM_BLOCK_DESC_KIND_NUM; i++){
+		if(i == 0){
+			mem_block_decs_array[i].size = 2;
+		}else{
+			mem_block_decs_array[i].size = mem_block_decs_array[i-1].size * 2;
+		}
+		mem_block_decs_array[i].cnt = (PAGE_SIZE - sizeof(arena)) / mem_block_decs_array[i].size;
+		initDoubleLinkList(&(mem_block_decs_array[i].free_list));
+	} 
 }
 
 void init_memory2()
@@ -526,4 +564,6 @@ void init_memory(int total_memory)
 	KernelVirtualMemory.map.bits = (char *)(map_base_addr + kbm_length + ubm_length);
 	KernelVirtualMemory.start_addr = k_v_addr + 1024 * 1024;
 	Memset(KernelVirtualMemory.map.bits, 0, kbm_length);
+
+	init_memory_block_desc(kernel_mem_block_decs_array);	
 }

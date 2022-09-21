@@ -51,13 +51,27 @@ void schedule_process()
 		Proc *tmp = (Proc *)(element & 0xFFFFF000);
 		if(tmp != 0x0){
 			next = tmp;
-			disp_str("insertToDoubleLinkList:");
-			disp_int((unsigned int)next);
-			disp_str("\n");
-			// appendToDoubleLinkList(&pcb_list, &next->tag);
-			insertToDoubleLinkList(&pcb_list, &next->tag);
+			next->p_flag = RUNNING;
+			if(strcmp(next->name, "task_fs") == 0){
+		//		disp_str("next:");
+		//		disp_int(6);
+		//		disp_str(next->name);
+		//	//	disp_int((unsigned int)next);
+		//		disp_str("\n");
+			}
+//			disp_int((unsigned int)next);
+//			disp_str("\n");
 		}
 //		disp_str("switch_to?Yes2\n");
+	}
+
+	if(cur->p_flag == RUNNING){
+		insertToDoubleLinkList(&pcb_list, &cur->tag);
+//		disp_str("insertToDoubleLinkList:");
+//		disp_int((unsigned int)cur);
+//		disp_str("\n");
+//		disp_str(cur->name);
+//		disp_str("\n");
 	}
 
 //	disp_str("switch_to?No3\n");
@@ -75,7 +89,10 @@ void schedule_process()
 		update_cr3(page_directory);
 //		disp_str("switch_to?No5\n");
 	}
-	
+
+	proc_ready_table = next;	
+
+
 //	disp_str("switch_to\n");
 	switch_to(cur, next);
 //	disp_str("switch_to 2\n");
@@ -92,15 +109,26 @@ void clock_handler()
 
 Proc *pid2proc(int pid)
 {
-    Proc *proc = proc_table + pid;
-    // todo 用局部变量当返回值，曾经遇到过出错。要当心。
-    return proc;
+	Proc *proc = 0x0;
+	ListElement head = all_pcb_list.head;
+	ListElement tail = all_pcb_list.tail;
+	// ListElement *cur = head.next;
+	ListElement *cur = all_pcb_list.head.next;
+	while(cur != &all_pcb_list.tail){
+		proc = (Proc *)((unsigned int)cur & 0xFFFFF000);
+		if(proc->pid == pid){
+			return proc;
+		}
+		cur = cur->next;
+	}
+
+	return proc;
 }
 
 int proc2pid(Proc *proc)
 {
-    int pid = proc - proc_table;
-    return pid;
+	unsigned int pid = proc->pid;
+	return pid;
 }
 
 //unsigned int v2l(int pid, void *offset)

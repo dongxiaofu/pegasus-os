@@ -84,22 +84,31 @@ int c = 0;
 
 void task_fs()
 {
-    ////Printf("%s\n", "FS is running");
-    init_fs();
+	disp_str("TASK_FS:");
+    Proc *cur = get_running_thread_pcb();
+    disp_str("[");
+    disp_int((unsigned int)cur->pid);
+    disp_str("]");
+    disp_str("\n");    ////Printf("%s\n", "FS is running");
+    // init_fs();
+
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+    Message *fs_msg  = (Message *)sys_malloc(sizeof(Message));
+
     while (1)
     {
 //	dis_pos = 12000 - 128 + 180 * 9 - 120;
 //	disp_str_colour("type-1 = ", 0x0E);
 //	disp_int(c);
-        Message msg;
-        Memset(&msg, 0, sizeof(Message));
-        send_rec(RECEIVE, &msg, ANY);
+        Memset(msg, 0, sizeof(Message));
+        send_rec(RECEIVE, msg, ANY);
+		disp_str("task_fs is running again\n");
 	////Printf("Enter FS\n");
-        int type = msg.TYPE;
-        int source = msg.source;
-        int fd = msg.FD;
+        int type = msg->TYPE;
+        int source = msg->source;
+        int fd = msg->FD;
 	// todo 很辛苦才找到的错误。
-	int proc_who_want_to_rdwt = msg.PROCNR;
+	int proc_who_want_to_rdwt = msg->PROCNR;
 //	dis_pos = 12000 - 128 + 180 * 10 - 120;
 //	disp_str_colour("type0 = ", 0x0E);
 //	disp_int(type);
@@ -110,13 +119,13 @@ void task_fs()
 	////Printf("0 fs type = %d, source = %d\n", type, source);
         //assert(source == TASK_TTY || source == TASK_SYS || source == TASK_HD || source == TASK_FS || source == ANY || source == INTERRUPT || source == PROC_A || source == INIT_PID);
 	//assert(source == TASK_HD || source == INIT_PID);
-	if(msg.source == INIT_PID){
+	if(msg->source == INIT_PID){
 		//Printf("INIT is calling\n");
 	}
         // 不知道为何会发送来source为0、type为0的消息，不处理吧。
         // todo 耗费了好多好多好多好多时间才发现，原来是这里阻止了TTY通过FS唤醒INIT进程。
         // 我的调试能力，太差了。
-        if (msg.source == 0)
+        if (msg->source == 0)
         {
             //continue;
             int t = 5;
@@ -126,28 +135,33 @@ void task_fs()
         // open
         pcaller = &proc_table[source];
 
-        Message fs_msg;
         //        fs_msg.type = SYSCALL_RET;
         //        send_rec(SEND, &fs_msg, source);
         //	return;
         // 已经写入获取读取的数据的长度。
+		disp_str("task_fs is running again2\n");
+		disp_str("type = ");
+		disp_str("[");
+		disp_int(type);
+		disp_str("]");
+		disp_str("\n");
 	int byte_rdwt = 0;
         switch (type)
         {
         case OPEN:
             // fs_msg.FD = do_open(pathname, oflags);
-            fs_msg.FD = do_open(&msg);
+            fs_msg->FD = do_open(msg);
             break;
         case READ:
         case WRITE:
-           byte_rdwt =  do_rdwt(&msg);
+           byte_rdwt =  do_rdwt(msg);
             break;
         case CLOSE:
             //	int fd = msg.FD;
             do_close(fd);
             break;
         default:
-//            panic("FS Unknown message");
+            panic("FS Unknown message");
             break;
         }
 
@@ -162,7 +176,7 @@ void task_fs()
 //	disp_int(source);
 //	disp_str_colour(" , c = ", 0x0F);
 //	disp_int(c);
-	if(msg.TYPE ==	SUPEND_PROC){
+	if(msg->TYPE ==	SUPEND_PROC){
 		//Printf("fs type = %d, do nothing\n", type);
 	//	assert(type != READ);
 	//	assert(( type == WRITE && msg.TYPE == RESUME_PROC) || type == OPEN );
@@ -175,12 +189,12 @@ void task_fs()
 		}
 //		assert(type != OPEN);
 		//assert(( type == WRITE && msg.TYPE == RESUME_PROC) || type == OPEN );
-		fs_msg.TYPE = SYSCALL_RET;
+		fs_msg->TYPE = SYSCALL_RET;
 		// todo 又一个刻骨铭心的的错误！此处，应该发送给用户进程INIT。
 		// 可是，source，是什么？是TTY进程啊！如何能唤醒INIT进程！
 		// send_rec(SEND, &fs_msg, source);
-		fs_msg.CNT = byte_rdwt;
-		send_rec(SEND, &fs_msg, dest);
+		fs_msg->CNT = byte_rdwt;
+		send_rec(SEND, fs_msg, dest);
 //	dis_pos = 12000 - 128 + 180 * 11 - 120;
 //	disp_str_colour("type = ", 0x0F);
 //	disp_int(type);
@@ -455,7 +469,9 @@ int do_open(Message *msg)
 	Memset(pathname, 0, 12);
     // FILENAME的长度包含末尾的'0'吗？
 //    int p_source = 0xA00000 + msg.PATHNAME;
-    phycopy(v2l(TASK_FS, pathname), v2l(msg->source, msg->PATHNAME), msg->NAME_LEN);
+	unsigned int phy_pathname = msg->PATHNAME;
+	unsigned int vaddr_pathname = alloc_virtual_memory(phy_pathname, sizeof(pathname));
+	phycopy(pathname, vaddr_pathname, msg->NAME_LEN);
 	pathname[msg->NAME_LEN] = 0;
 	int oflag = msg->FLAGS;
 	////Printf("Enter fs open\n");

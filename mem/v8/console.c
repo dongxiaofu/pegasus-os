@@ -402,8 +402,13 @@ void init_tty() {
 }
 
 void TaskTTY() {
-	disp_str("TASK_TTY\n");
-	while(1);
+	disp_str("TASK_TTY:");
+	Proc *cur = get_running_thread_pcb();
+	disp_str("[");
+	disp_int(cur->pid);
+	disp_str("]");
+	disp_str("\n");
+//	while(1);
     //keyboard_buffer.buf[0] = 0x1E;
     //keyboard_buffer.buf[1] = 0x30;
     //keyboard_buffer.buf[2] = 0x2E;
@@ -424,10 +429,11 @@ void TaskTTY() {
 
 
     init_tty();
-    select_console(1);
+    select_console(0);
     ////Printf("T:%x", 3);
     int m = 0;
 	int d = 0;
+        Message *msg = (Message *)sys_malloc(sizeof(Message));
     while (1) {
         for (TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++) {
             do {
@@ -440,16 +446,15 @@ void TaskTTY() {
 //	disp_str_colour("Enter tty:", 0x0D);
 //	m++;
 //	disp_int(m);
-        Message msg;
-        send_rec(RECEIVE, &msg, ANY);
-        int type = msg.TYPE;
+        send_rec(RECEIVE, msg, ANY);
+        int type = msg->TYPE;
 //	dis_pos = 12000 - 128 + 180 * 15 - 40;
 //	disp_str_colour("Enter tty after type", 0x0D);
 //	disp_int(type);
 //	dis_pos = 12000 + 180 * 16;
 //	disp_str_colour("0-tty->left_cnt:", 0x0D);
 	
-	if(msg.source == TASK_FS){
+	if(msg->source == TASK_FS){
 	//	//Printf("FS is calling\n");
 	}
 
@@ -461,10 +466,10 @@ void TaskTTY() {
                 // 我以为，没必要实现。
                 break;
             case DEV_READ:
-                tty_do_read(current_tty, &msg);
+                tty_do_read(current_tty, msg);
                 break;
             case DEV_WRITE:
-                tty_do_write(current_tty, &msg);
+                tty_do_write(current_tty, msg);
                 break;
 		case HARD_INT:
 			key_pressed = 0;

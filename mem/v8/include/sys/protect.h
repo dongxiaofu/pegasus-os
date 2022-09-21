@@ -53,4 +53,45 @@ typedef struct{
         unsigned int iobase;
 }TSS;
 
+typedef struct _ListElement{
+  	struct _ListElement *prev;
+  	struct _ListElement *next;
+} ListElement;
+
+typedef struct _DoubleLinkList{
+  	ListElement head;
+  	ListElement tail;
+} DoubleLinkList;
+
+// 内存块描述符
+typedef struct _mem_block_desc
+{
+	int size;
+	int cnt;
+	DoubleLinkList free_list;
+} mem_block_desc;
+
+typedef struct _mem_block
+{ 
+	ListElement element;
+} mem_block;
+
+typedef struct _arena
+{
+	mem_block_desc *desc;
+	int cnt;
+	char large;
+}arena;
+
+void initDoubleLinkList(DoubleLinkList *list);
+char isListEmpty(DoubleLinkList *list);
+void appendToDoubleLinkList(DoubleLinkList *list, void *element);
+void insertToDoubleLinkList(DoubleLinkList *list, void *element);
+// void appendToDoubleLinkList(DoubleLinkList *list, void *value);
+// void insertToDoubleLinkList(DoubleLinkList *list, void *value);
+void *popFromDoubleLinkList(DoubleLinkList *list);
+
+// 内存块种类数量
+#define MEM_BLOCK_DESC_KIND_NUM	10
+
 #endif

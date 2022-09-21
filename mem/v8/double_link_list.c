@@ -66,12 +66,12 @@
 // }
 /**************************************test case end****************************/
 
-void initDoubleLinkList()
+void initDoubleLinkList(DoubleLinkList *list)
 {
-	pcb_list.head.prev = 0x0;
-	pcb_list.tail.next = 0x0;
-	pcb_list.head.next = &pcb_list.tail;
-	pcb_list.tail.prev = &pcb_list.head;
+	list->head.prev = 0x0;
+	list->tail.next = 0x0;
+	list->head.next = &list->tail;
+	list->tail.prev = &list->head;
 }
 
 // char isListEmpty(DoubleLinkList list)

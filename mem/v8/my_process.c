@@ -57,10 +57,11 @@ void user_process(Func func, void *arg)
 	restart((unsigned int)process_stack);
 }
 
-void process_execute(Func func, char *thread_arg)
+void process_execute(Func func, char *thread_arg, char *process_name)
 {
 	Proc *process = thread_init();
 	thread_create(process);
+	Strcpy(process->name, process_name);
 
 	// 建立进程的页表
 	unsigned int page_dir_vaddr = alloc_memory(1, KERNEL);
@@ -69,8 +70,10 @@ void process_execute(Func func, char *thread_arg)
 	Memcpy((void *)(page_dir_vaddr + 0x300 * 4), (void *)(0xFFFFF000 + 0x300 * 4), 1024); 
 	unsigned int page_dir_phy_addr = get_physical_address(page_dir_vaddr);
 	unsigned int *ptr1 = (unsigned int *)(page_dir_vaddr + 1023*4);
-	*ptr1 = page_dir_phy_addr;
+	// *ptr1 = page_dir_phy_addr;
+	*ptr1 = page_dir_phy_addr | PG_P_YES | PG_RW_RW | PG_US_SUPER;
 	process->page_directory = page_dir_phy_addr;
+	init_memory_block_desc(process->mem_block_desc_array);
 
 	// 用户进程的虚拟地址空间
 	// TODO 
@@ -86,4 +89,5 @@ void process_execute(Func func, char *thread_arg)
 	thread_stack->ebp = thread_stack->ebx = thread_stack->edi = thread_stack->esi = 0;
 	// 加入链表，在调度模块中处理
 	appendToDoubleLinkList(&pcb_list, (ListElement *)(&process->tag));	
+	appendToDoubleLinkList(&all_pcb_list, (ListElement *)(&process->all_tag));	
 }

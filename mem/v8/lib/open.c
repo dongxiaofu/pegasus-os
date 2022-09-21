@@ -9,17 +9,18 @@
 #include "global.h"
 
 int open(char *pathname, int flags) {
-    Message msg;
-	Memset(&msg, 0, sizeof(Message));
-    msg.TYPE = OPEN;//OPEN;
-    msg.PATHNAME = (void *) pathname;
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+	Memset(msg, 0, sizeof(Message));
+    msg->TYPE = OPEN;//OPEN;
+	unsigned int phy_pathname = get_physical_address(pathname);
+    msg->PATHNAME =  phy_pathname;
     // todo FLAGS FD定义了吗？
-    msg.FLAGS = flags;
-    msg.NAME_LEN = Strlen(pathname);
+    msg->FLAGS = flags;
+    msg->NAME_LEN = Strlen(pathname);
 
-    send_rec(BOTH, &msg, TASK_FS);
+    send_rec(BOTH, msg, TASK_FS);
 
     //assert(msg.type == SYSCALL_RET);
 
-    return msg.FD;
+    return msg->FD;
 }

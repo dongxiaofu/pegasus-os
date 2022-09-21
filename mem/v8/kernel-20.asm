@@ -371,7 +371,7 @@ hwint1:
 	cmp dword [k_reenter], 0
 	jne .2
 .1:
-	mov esp, StackTop
+	;mov esp, StackTop
 .2:
 	sti	
 	;inc dword [k_reenter]
@@ -483,7 +483,7 @@ sys_call:
 	cmp dword [k_reenter], 0
 	jne .2
 .1:
-	mov esp, StackTop 
+;	mov esp, StackTop 
 .2:
 	sti
 	;inc dword [k_reenter]

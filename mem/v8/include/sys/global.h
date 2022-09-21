@@ -5,43 +5,43 @@
 #define EXTERN
 //#endif
 
-typedef struct _ListElement{
-  	struct _ListElement *prev;
-  	struct _ListElement *next;
-} ListElement;
-
-typedef struct _DoubleLinkList{
-  	ListElement head;
-  	ListElement tail;
-} DoubleLinkList;
-
-// 内存块描述符
-typedef struct _mem_block_desc
-{
-	int size;
-	int cnt;
-	DoubleLinkList free_list;
-} mem_block_desc;
-
-typedef struct _mem_block
-{ 
-	ListElement element;
-} mem_block;
-
-typedef struct _arena
-{
-	mem_block_desc *desc;
-	int cnt;
-	char large;
-}arena;
-
-void initDoubleLinkList();
-char isListEmpty(DoubleLinkList *list);
-void appendToDoubleLinkList(DoubleLinkList *list, void *element);
-void insertToDoubleLinkList(DoubleLinkList *list, void *element);
-// void appendToDoubleLinkList(DoubleLinkList *list, void *value);
-// void insertToDoubleLinkList(DoubleLinkList *list, void *value);
-void *popFromDoubleLinkList(DoubleLinkList *list);
+// typedef struct _ListElement{
+//   	struct _ListElement *prev;
+//   	struct _ListElement *next;
+// } ListElement;
+// 
+// typedef struct _DoubleLinkList{
+//   	ListElement head;
+//   	ListElement tail;
+// } DoubleLinkList;
+// 
+// // 内存块描述符
+// typedef struct _mem_block_desc
+// {
+// 	int size;
+// 	int cnt;
+// 	DoubleLinkList free_list;
+// } mem_block_desc;
+// 
+// typedef struct _mem_block
+// { 
+// 	ListElement element;
+// } mem_block;
+// 
+// typedef struct _arena
+// {
+// 	mem_block_desc *desc;
+// 	int cnt;
+// 	char large;
+// }arena;
+// 
+// void initDoubleLinkList(DoubleLinkList *list);
+// char isListEmpty(DoubleLinkList *list);
+// void appendToDoubleLinkList(DoubleLinkList *list, void *element);
+// void insertToDoubleLinkList(DoubleLinkList *list, void *element);
+// // void appendToDoubleLinkList(DoubleLinkList *list, void *value);
+// // void insertToDoubleLinkList(DoubleLinkList *list, void *value);
+// void *popFromDoubleLinkList(DoubleLinkList *list);
 
 // 全局相关 start
 EXTERN int dis_pos;
@@ -49,6 +49,7 @@ EXTERN unsigned int ticks;
 EXTERN unsigned int k_reenter;
 EXTERN unsigned int counter;
 EXTERN unsigned int key_pressed;
+EXTERN unsigned int pid;
 
 // 全局相关 end
 
@@ -57,6 +58,7 @@ EXTERN unsigned int key_pressed;
 EXTERN Proc *proc_ready_table;
 EXTERN Proc *pcaller;
 EXTERN DoubleLinkList pcb_list;
+EXTERN DoubleLinkList all_pcb_list;
 // 系统任何和用户进程的进程表都存储在这个数组中
 extern struct proc proc_table[];
 // 用户进程元数据
@@ -91,11 +93,12 @@ EXTERN TSS tss;
 
 // 系统进程的PID
 // 顺序和初始值由kernel_main决定
-#define TASK_TTY 0
-#define TASK_SYS 1
-#define TASK_HD  2
-#define TASK_FS  3
-#define TASK_MM  4
+#define START_PID 1
+#define TASK_TTY 2	//(START_PID + 1)
+#define TASK_SYS (TASK_TTY + 1)
+#define TASK_HD  (TASK_SYS + 1)
+#define TASK_FS  3//  (TASK_HD + 1) 
+#define TASK_MM  (TASK_FS + 1)
 #define INIT_PID  6
 
 #define PROC_A	5
@@ -135,6 +138,6 @@ EXTERN TSS tss;
 // todo fork创建的进程的内存空间的初始地址
 #define USER_PROC_MEM_BASE	0xA00000
 // 内存块种类数量
-#define MEM_BLOCK_DESC_KIND_NUM	10
+// #define MEM_BLOCK_DESC_KIND_NUM	10
 
 #endif

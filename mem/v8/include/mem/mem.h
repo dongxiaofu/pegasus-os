@@ -66,6 +66,7 @@ unsigned int *ptr_pde(unsigned int vaddr);
 unsigned int *ptr_pte(unsigned int vaddr);
 // 增加映射条目
 void add_map_entry(unsigned int vaddr, unsigned int phy_addr);
+unsigned int alloc_virtual_memory(unsigned int phy_addr, unsigned int size);
 // 获取虚拟地址对应的物理地址
 unsigned int get_physical_address(unsigned int vaddr);
 void remove_map_entry(unsigned int vaddr);

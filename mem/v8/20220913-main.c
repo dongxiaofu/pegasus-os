@@ -578,11 +578,12 @@ void kernel_main2()
 // 测试文件系统
 void TestFS()
 {
+	disp_str("TestFS\n");
 	char tty1[10] = "dev_tty1";
 	int fd_stdout = open(tty1, O_RDWR);
-//	while(1){}
 	int fd_stdin = open(tty1, O_RDWR);
     Printf("TestA is running\n");
+	return 0;
     char filename[5] = "AC";
     char filename2[5] = "cAB";
     char filename3[10] = "INTERRUPT";
@@ -1076,11 +1077,14 @@ void milli_delay(unsigned int milli_sec)
 
 void TaskSys()
 {
-	disp_str("TaskSys0\n");
-	disp_str("TaskSys2\n");
-	disp_str("TaskSys3\n");
-	//asm ("sti;");
 	while(1);
+	disp_str("TaskSys:");
+Proc *cur = get_running_thread_pcb();
+disp_str("[");
+    disp_int(cur->pid);
+    disp_str("]");
+    disp_str("\n");
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
 
     while (1)
     {
@@ -1091,21 +1095,20 @@ void TaskSys()
         //Printf("receive_from:%x--,", proc_table[1].p_receive_from);
         //Printf("%c", '\n');
         //return;
-        Message msg;
-        Memset(&msg, 0, sizeof(Message));
-        int ret = receive_msg(&msg, ANY);
+        Memset(msg, 0, sizeof(Message));
+        int ret = receive_msg(msg, ANY);
         if (ret != 0)
         {
             return;
         }
         //int type = msg.type;
-        int type = msg.TYPE;
-        int source = msg.source;
+        int type = msg->TYPE;
+        int source = msg->source;
         switch (type)
         {
         case TICKS_TASK_SYS_TYPE:
-            msg.val = ticks;
-            ret = send_msg(&msg, source);
+            msg->val = ticks;
+            ret = send_msg(msg, source);
             break;
         default:
 
@@ -1297,7 +1300,10 @@ void spin(char *error_msg)
 
 void panic(char *error_msg)
 {
-    printx("%c%s\n", PANIC_MAGIC, error_msg);
+//	disp_str(error_msg);
+//	disp_str("\n");
+
+   printx("%c%s\n", PANIC_MAGIC, error_msg);
     //Printf("%c%s\n", PANIC_MAGIC, error_msg);
 }
 
@@ -1358,8 +1364,9 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
     int sender_pid = proc2pid(sender);
         // 计算msg的线性地址
         int ds = sender->s_reg.ds;
-        int base = Seg2PhyAddrLDT(ds, sender);
-        int msg_line_addr = base + (int)msg;
+        int base = 0;//Seg2PhyAddrLDT(ds, sender);
+		// msg是一个物理地址，在内核中把一个虚拟地址映射到这个物理地址。
+        int msg_line_addr = alloc_virtual_memory((unsigned int)msg, sizeof(Message));
         int msg_size = sizeof(Message);
 	Message *msg_tmp =  (Message *)msg_line_addr;
 	msg_tmp->source = sender_pid;
@@ -1380,7 +1387,8 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 
         int ds2 = receiver->s_reg.ds;
         int base2 = Seg2PhyAddrLDT(ds2, receiver);
-        int msg_line_addr2 = base2 + (int)(receiver->p_msg);
+        // int msg_line_addr2 = base2 + (int)(receiver->p_msg);
+        int msg_line_addr2 = alloc_virtual_memory((receiver->p_msg), sizeof(Message));
         // 从sender中把消息复制到receiver
         //    phycopy(receiver->p_msg, msg_line_addr, msg_size);
         phycopy(msg_line_addr2, msg_line_addr, msg_size);
@@ -1391,6 +1399,8 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
         receiver->p_msg = 0;
         receiver->p_flag = RUNNING;
         receiver->p_receive_from = NO_TASK;
+
+		sender->p_send_to = NO_TASK;
 
         // 解除receiver的阻塞。
         unblock(receiver);
@@ -1456,32 +1466,6 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
     Proc *sender = pid2proc(sender_pid);
     int receiver_pid = proc2pid(receiver);
 
-    //	dis_pos = (1024*12 + 0);
-    //	dis_pos = (1024*12 + 0);
-    //	dis_pos = 12000 - 128 + 10 + 320;
-    //	//dis_pos += 160;
-    //	disp_str_colour("sender0:", 0x0C);
-    //	disp_int(sender_pid);
-    //	disp_str("#");
-    //	disp_str_colour("pid:", 0x0B);
-    //	disp_int(proc_ready_table->pid);
-    //	disp_str("#");
-
-    //	disp_str_colour("sender:", 0x0B);
-    //	dis_pos += Strlen("sender:");
-    //	disp_int(sender_pid);
-    //
-    //	disp_str_colour("receiver:", 0x0B);
-    //	dis_pos += Strlen("receiver:");
-    //	disp_int(receiver_pid);
-    if (DEBUG == 1)
-    {
-        Printf("sender = %x, receiver = %x\n", sender_pid, receiver_pid);
-
-        assert((sender_pid == 1) || (sender_pid == 2) || (sender_pid == 3) || (sender_pid == 15));
-        assert((receiver_pid == 1) || (receiver_pid == 2) || (receiver_pid == 3) || (receiver_pid == 15));
-    }
-
 	int int_flag = 0;
     if (receiver->has_int_msg && (sender_pid == ANY || sender_pid == INTERRUPT))
     {
@@ -1491,8 +1475,9 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
         m.source = INTERRUPT;
         m.TYPE = HARD_INT;
 
-        phycopy(v2l(receiver_pid, msg), &m,
-                sizeof(Message));
+        // phycopy(v2l(receiver_pid, msg), &m,
+         //       sizeof(Message));
+        phycopy(msg, &m, sizeof(Message));
 
         receiver->has_int_msg = 0;
         receiver->p_receive_from = NO_TASK;
@@ -1516,20 +1501,7 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
     {
         if (receiver->q_sending)
         {
-            // Printf("sending id:%x\n", receiver->q_sending->pid);
-            //	dis_pos = 12000 - 128 + 10 + 160;
-            //	disp_str_colour("send-id:", 0x0C);
-            //	disp_int(receiver->q_sending->pid);
-            //	disp_str("#");
-            //	disp_str_colour("receiver-id:", 0x0C);
-            //	disp_int(receiver->pid);
             p_from = receiver->q_sending;
-            //	disp_str_colour("rpfrom-id:", 0x0C);
-            //	disp_int(p_from->pid);
-            //	disp_str("#");
-            //	disp_str_colour("type:", 0x0C);
-            //	disp_int(p_from->pid);
-            //	disp_str("#");
             copy_ok = 1;
         }
     }
@@ -1555,26 +1527,14 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
     {
         Proc *p_from_proc = p_from;
         // 计算msg的线性地址
-        int ds = receiver->s_reg.ds;
-        int base = Seg2PhyAddrLDT(ds, receiver);
-        void *msg_line_addr = (void *)(base + (int)msg);
-        int msg_size = sizeof(Message);
-
-        int ds2 = receiver->s_reg.ds;
-        int base2 = Seg2PhyAddrLDT(ds2, p_from_proc);
-        void *msg_line_addr2 = (void *)(base2 + (int)(p_from_proc->p_msg));
+        void *msg_line_addr = (void *)alloc_virtual_memory((unsigned int)msg, sizeof(Message));
+		// PCB中的p_msg是一个物理地址。要使用它，必须分配一个虚拟地址。
+//        void *msg_line_addr2 = (void *)((int)(p_from_proc->p_msg));
+		void *msg_line_addr2 = (void *)alloc_virtual_memory((unsigned int)p_from_proc->p_msg, sizeof(Message));
 
         // 从receiver中把消息复制到sender
-        // phycopy(msg_line_addr, p_from_proc->p_msg, msg_size);
-        phycopy(msg_line_addr, msg_line_addr2, msg_size);
+        phycopy(msg_line_addr, msg_line_addr2, sizeof(Message));
         Message *m = (Message *)msg_line_addr;
-        //	dis_pos = 12000 - 128 + 10 + 320;
-        //	disp_str_colour("current-id:", 0x0C);
-        //	disp_int(proc_ready_table->pid);
-        //	disp_str("#");
-        //	disp_str_colour("from-id:", 0x0C);
-        //	disp_int(p_from_proc->pid);
-        //	assert(p_from_proc->p_msg->TYPE != 0);
 
         if (sender_pid == 4)
         {
@@ -1592,10 +1552,6 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
             pre->q_next = p_from->q_next;
             p_from->q_next = 0;
         }
-        //	dis_pos = (dis_pos / 160 + 1) * 160;
-        //	disp_str_colour("sender33:", 0x0C);
-        //	disp_int(sender_pid);
-        //dis_pos -= Strlen("sender33:");
 
         // 重置sender
         p_from_proc->p_msg = 0;
@@ -1622,13 +1578,8 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
     }
     else
     {
-        //	dis_pos = (dis_pos / 160 + 1) * 160;
-        //	disp_str_colour("sender3:", 0x0C);
-        //	disp_int(sender_pid);
-        //	disp_str("#");
         receiver->p_flag = RECEIVING;
         receiver->p_msg = msg;
-        // receiver->p_msg = 0;
 
         if (sender_pid == ANY)
         {
@@ -1638,42 +1589,8 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
         {
             receiver->p_receive_from = sender_pid;
         }
-        //	sender_pid = 3;
 
-        //	dis_pos = (80 * 80 + 0)*2;
-        //	dis_pos = 1024 * (10 +1) + 160;
-
-        //	dis_pos = (1024*12 + 0);
-        dis_pos = (dis_pos / 160 + 1) * 160;
-        //	disp_str_colour("sender4:", 0x0C);
-        //	disp_int(sender_pid);
-        //	disp_str("#");
-        //	disp_str_colour("type:", 0x0B);
-        //	disp_int(msg->TYPE);
-        //	disp_str("#");
-        //	disp_str_colour("copy_ok:", 0x0B);
-        //	disp_int(copy_ok);
-        //	disp_str("#");
-        //	disp_str_colour("type2:", 0x0B);
-        //	disp_int(msg->TYPE);
-        //	disp_str("#");
-        //
-        //	dis_pos = (dis_pos / 160 + 1) * 160;
-        //	disp_str_colour("receiver2:", 0x0B);
-        //	//dis_pos += Strlen("receiver2:");
-        //	disp_int(receiver_pid);
-        // 调试函数
-        //        assert(sender_pid == TASK_TTY || sender_pid == TASK_SYS || sender_pid == TASK_HD
-        //                 || sender_pid == TASK_FS || sender_pid == ANY || sender_pid == INTERRUPT
-        //                 || sender_pid == PROC_A || sender_pid == TASK_MM || sender_pid == INIT_PID);
-
-        //	dis_pos = (dis_pos / 160 + 1) * 160;
-        //	disp_str_colour("receiver flag:", 0x0C);
-        //	disp_int(receiver->p_flag);
-        //assert(receiver->p_flag == RECEIVING || receiver->p_flag == RUNNING);
         assert(receiver->p_flag == RECEIVING);
-        //assert(receiver->p_msg == 0);
-        //assert(receiver->p_receive_from == sender_pid || receiver->p_receive_from == ANY);
 
         block(receiver);
     }
@@ -1699,23 +1616,14 @@ void disp_str_colour_debug(char *strr)
 
 // send_rec封装send_msg和receive_msg，直接被外部使用
 // function：选择发送还是接收还是其他;pid，sender或receiver的进程id
-int send_rec(int function, Message *msg, int pid)
+int send_rec(int function, Message *msg_vaddr, int pid)
 {
+	unsigned int msg = get_physical_address((unsigned int)msg_vaddr);
 
-    // todo 调试
-//    	dis_pos = 12000 - 128 + 10 + 320;
-//    	//dis_pos += 160;
-//    	disp_str_colour("send_rec pid:", 0x0C);
-//    	disp_int(function);
-
-    //	assert(pid == TASK_TTY || pid == TASK_SYS || pid == TASK_HD
-    //                 || pid == TASK_FS || pid == ANY || pid == INTERRUPT || pid == PROC_A
-    //		 || pid == TASK_MM
-    //		);
     assert(function == SEND || function == RECEIVE || function == BOTH);
 	
 	if(function == RECEIVE){
-		Memset(msg, 0, sizeof(Message));
+		Memset(msg_vaddr, 0, sizeof(Message));
 	}
 
     int ret;
@@ -1742,7 +1650,7 @@ int send_rec(int function, Message *msg, int pid)
         //assert(proc_table[1].p_flag == RUNNING);
         if (ret == 0)
         {
-		Memset(msg, 0, sizeof(Message));
+		Memset(msg_vaddr, 0, sizeof(Message));
             ret = receive_msg(msg, pid); // pid是sender
             // assert(msg->val != 0);
         }
@@ -1759,7 +1667,7 @@ int block(Proc *proc)
 {
     // 判断，调试函数
     // todo 需要再验证。在运行过程中，确实出现了进程状态不是RUNNING的情况。
-//    assert(proc->p_flag != RUNNING);
+    assert(proc->p_flag != RUNNING);
     schedule_process();
     return 0;
 }
@@ -1769,6 +1677,8 @@ int unblock(Proc *proc)
 {
     // do nothing
     assert(proc->p_flag == RUNNING);
+	
+	insertToDoubleLinkList(&pcb_list, &proc->tag);
 
     return 0;
 }

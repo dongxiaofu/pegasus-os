@@ -25,6 +25,7 @@ Proc *thread_init()
 	Memset(proc, 0, PAGE_SIZE);
 	proc->stack = (unsigned int *)((unsigned int)proc + PAGE_SIZE);
 	proc->page_directory = 0x0;
+	proc->pid = ++pid;
 
 	return proc;
 }
@@ -42,10 +43,11 @@ void thread_create(Proc *proc)
 	proc->stack = (unsigned int *)((unsigned int)(proc->stack) - thread_stack_size);
 }
 
-void thread_start(thread_function func, char *thread_arg)
+void thread_start(thread_function func, char *thread_arg, char *thread_name)
 {
 	Proc *thread = thread_init();
  	thread_create(thread);
+	Strcpy(thread->name, thread_name);
 
 	ThreadStack *thread_stack = (ThreadStack *)thread->stack;
 	thread_stack->eip2 = kernel_thread;
@@ -54,4 +56,5 @@ void thread_start(thread_function func, char *thread_arg)
 	thread_stack->ebp = thread_stack->ebx = thread_stack->edi = thread_stack->esi = 0;
 	// 加入链表，在调度模块中处理
 	appendToDoubleLinkList(&pcb_list, (ListElement *)(&thread->tag));	
+	appendToDoubleLinkList(&all_pcb_list, (ListElement *)(&thread->all_tag));	
 }

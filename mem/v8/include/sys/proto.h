@@ -151,7 +151,7 @@ void enable_8259A_slave_winchester_irq();
 void inform_int(int task_nr);
 
 // 硬盘驱动
-void hd_handle();
+void hd_handle(Message *msg);
 void hd_handler();
 // hd.c end
 
@@ -167,7 +167,7 @@ void TaskSys();
 // 硬盘驱动
 void TaskHD();
 // 文件系统
-void task_fs();
+extern void task_fs();
 // 内存管理
 void TaskMM();
 // INIT进程
@@ -184,12 +184,12 @@ void init();
 void kernel_thread(thread_function func, void *arg);
 Proc *thread_init();
 void thread_create(Proc *proc);
-void thread_start(thread_function func, char *thread_arg);
+void thread_start(thread_function func, char *thread_arg, char *thread_name);
 
 // 进程
 VirtualMemoryAddress *create_user_process_address_space();
 void user_process(Func func, void *arg);
-void process_execute(Func func, char *thread_arg);
+void process_execute(Func func, char *thread_arg, char *process_name);
 
 /****************************************thread end*****************************************/
 

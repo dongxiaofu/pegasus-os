@@ -62,11 +62,19 @@ int get_hd_ioctl(int device);
 
 // 硬盘驱动
 void TaskHD() {
-    //Printf("%s\n", "HD driver is running!");
+	while(1);
+    // Printf("%s\n", "HD driver is running!\n");
+    disp_str("TaskHD:");
+Proc *cur = get_running_thread_pcb();
+disp_str("[");
+    disp_int(cur->pid);
+    disp_str("]");
+    disp_str("\n");
     // 初始硬盘
  init_hd();
+	Message *msg = (Message *)sys_malloc(sizeof(Message));
     while (1) {
-        hd_handle();
+        hd_handle(msg);
     }
 }
 
@@ -81,27 +89,15 @@ void init_hd() {
     enable_8259A_slave_winchester_irq();
 }
 
-void hd_handle() {
-//    //Printf("%s\n", "HD handle is running!");
-    Message msg;
-    //send_rec(RECEIVE, &msg, ANY);
-    //send_rec(RECEIVE, &msg, task_fs);
-    //send_rec(RECEIVE, &msg, TaskHD);
-    // 这个不起眼的小错误，耗费了几个小时才找出来！
-    //send_rec(RECEIVE, &msg, TASK_FS);
-    //send_rec(RECEIVE, &msg, 3);
-    send_rec(RECEIVE, &msg, ANY);
-    unsigned int type = msg.TYPE;
+void hd_handle(Message *msg) {
+    send_rec(RECEIVE, msg, ANY);
+    unsigned int type = msg->TYPE;
 	// 硬盘中断通过inform会产生许多type是0的消息。
-	//
 	if(type == 0)	{
 		return;
 	}
- unsigned int source = msg.source;
+ unsigned int source = msg->source;
 
-//	msg.val = 0;
-//    send_rec(SEND, &msg, 3);
-//return;
     switch (type) {
         case OPEN:
             //           //Printf("%s:%d\n", "Open HD", source);
@@ -111,7 +107,7 @@ void hd_handle() {
         case READ:
         case WRITE:
             //Printf("%s:%d\n", "RD/WT HD", source);
-            hd_rdwt(&msg);
+            hd_rdwt(msg);
             break;
         case GET_HD_IOCTL:
             get_hd_ioctl(0);
@@ -122,12 +118,12 @@ void hd_handle() {
             break;
     }
 
-	Memset(&msg, 0, sizeof(Message));
-	msg.TYPE = 100;	// todo 调试，无实际作用。
-    msg.val = 0;
+	Memset(msg, 0, sizeof(Message));
+	msg->TYPE = 100;	// todo 调试，无实际作用。
+    msg->val = 0;
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
     // todo 向文件系统发送消息，暂时使用硬编码。
-    send_rec(SEND, &msg, 3);
+    send_rec(SEND, msg, 3);
     //Printf("%s\n", "Msg from HD");
 }
 

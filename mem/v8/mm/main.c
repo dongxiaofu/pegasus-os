@@ -22,15 +22,25 @@ int do_exec(Message *msg);
 void TaskMM();
 
 void TaskMM(){
-//	Printf("MM is running\n");
+	while(1);
+	disp_str("MM:");
+	Proc *cur = get_running_thread_pcb();
+	disp_str("[");
+	disp_int((unsigned int)cur->pid);
+	disp_str("]");
+	disp_str("\n");
 
+		Message *msg = sys_malloc(sizeof(Message));
+		Message *m = (Message *)sys_malloc(sizeof(Message));
+//	Message *msg;
 	while(1){
-		Message msg;
+		// Message *msg = sys_malloc(sizeof(Message));
+		disp_str("MM is sending\n");
+		send_rec(RECEIVE, msg, ANY);
+		disp_str("MM is running again\n");
 
-		send_rec(RECEIVE, &msg, ANY);
-
-		int type = msg.TYPE;
-		int source = msg.source;
+		int type = msg->TYPE;
+		int source = msg->source;
 		int reply = 1;
 //		Printf("source = %d\n", source);
 
@@ -42,27 +52,24 @@ void TaskMM(){
 		
 		int *data;		
 		int pid;
-		Message m;
-    m.TYPE = SYSCALL_RET;
-	m.RETVAL = 0;
-
-	char *t = (char *)(0x0006d073+0xA00000);
+    m->TYPE = SYSCALL_RET;
+	m->RETVAL = 0;
 
 		switch(type){
 			case FORK:
-				m.PID = do_fork(&msg);
+				m->PID = do_fork(msg);
 				break;
 		case EXEC:
 			reply = 0;
-			do_exec(&msg);
+			do_exec(msg);
 			break;
 		case EXIT:
 			reply = 0;
-			do_exit(&msg, data);
+			do_exit(msg, data);
 			break;
 		case WAIT:
 			reply = 0;
-			do_wait(&msg);
+			do_wait(msg);
 				break;
 			default:
 				panic("MM unknown type\n");
@@ -70,7 +77,7 @@ void TaskMM(){
 		}
 
 		if(reply){
-    			send_rec(SEND, &m, source);
+    			send_rec(SEND, m, source);
 		}
 	}
 }

@@ -165,7 +165,7 @@
 // 一行的宽度
 #define SCREEN_WIDTH 80
 // 显存的初始地址
-#define VM_BASE_ADDR 0xb8000
+#define VM_BASE_ADDR 0xc00b8000
 // 显存的总大小
 #define VM_TOTAL (0xBFFFF - 0xb8000)
 // 打印字符的默认颜色
