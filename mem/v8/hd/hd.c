@@ -102,6 +102,8 @@ void hd_handle(Message *msg) {
 	}
  unsigned int source = msg->source;
 
+	assert(type == OPEN || type == READ || type == WRITE || type == GET_HD_IOCTL);
+
     switch (type) {
         case OPEN:
             //           //Printf("%s:%d\n", "Open HD", source);
@@ -126,7 +128,6 @@ void hd_handle(Message *msg) {
 	msg->TYPE = 100;	// todo 调试，无实际作用。
     msg->val = 0;
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
-    // todo 向文件系统发送消息，暂时使用硬编码。
     send_rec(SEND, msg, TASK_FS);
     //Printf("%s\n", "Msg from HD");
 }
@@ -362,7 +363,8 @@ int get_hd_ioctl(int device) {
 
 
 void wait_for() {
-    if (!waitfor(0x8, 0x8, 1000000))
+	// 经过测试，小于10000会出现hd writing error
+    if (!waitfor(0x8, 0x8, 10000))
         panic("hd writing error.");
 }
 

@@ -1295,6 +1295,8 @@ void sys_printx(char *error_msg, int len, Proc *proc)
 
 void spin(char *error_msg)
 {
+	disp_str(error_msg);
+	disp_str("\n");
     while (1)
     {
     }

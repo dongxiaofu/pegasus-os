@@ -218,6 +218,8 @@ void rd_wt(int pos, int device, char *buf, int len, int type)
     assert(type == READ || type == WRITE);
     assert(msg->TYPE == READ || msg->TYPE == WRITE);
     send_rec(BOTH, msg, TASK_HD);
+
+	sys_free(msg, sizeof(Message));
 }
 
 void mkfs()
@@ -334,12 +336,14 @@ Memset(fsbuf+1, 0x0, SECTOR_SIZE-1);
     //        WT_SECT(ROOT_DEV, pos + 1);
     // 写入sector-map的剩余扇区
     int rest_sects = sp2.cnt_of_sector_map_sect - 2;
-	rest_sects = 3;
+//	rest_sects = 3;
 	// todo 不是非常确定此处是否应该加1。
     for (int i = 2; i <= rest_sects + 1; i++)
     {
-       Memset(fsbuf, 0x0, SECTOR_SIZE);
-       WT_SECT(ROOT_DEV, pos + i);
+	// 多次执行Memset，会导致段错误。
+ //      Memset(fsbuf, 0x0, SECTOR_SIZE);
+ //      多次执行WT_SECT，会导致TASK_HD接收到非法type操作。原因未知。
+//       WT_SECT(ROOT_DEV, pos + i);
     }
     //return;
     // 写入inode-array
@@ -460,6 +464,8 @@ void init_fs()
     driver_msg->DEVICE = 32;
     send_rec(BOTH, driver_msg, TASK_HD);
     mkfs();
+
+	sys_free(driver_msg, sizeof(Message));
 }
 
 // int do_open(char *pathname, int oflag)
