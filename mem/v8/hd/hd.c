@@ -411,8 +411,7 @@ void hd_rdwt(Message *msg) {
     // 这个内存地址存储了要写入硬盘的数据，	或用来存储从硬盘中读取到的数据。
     unsigned int phy_hdbuf = msg->BUF;
     int source = msg->source;
-    // 计算出hdbuf的物理地址。
-	char *vaddr_hdbuf = (char *)alloc_virtual_memory(phy_hdbuf, SECTOR_SIZE);
+	char *vaddr_hdbuf = (char *)alloc_virtual_memory(phy_hdbuf, len);
 
     int type = msg->TYPE;
     assert(type == READ || type == WRITE);
@@ -429,13 +428,17 @@ void hd_rdwt(Message *msg) {
     // cmd.device = MAKE_DEVICE_REGISTER(nr_sects, 0);
     cmd.command = type == READ ? ATA_READ : ATA_WRITE;
 
-//	cmd.feature = 0;
-//	//	cmd.sector_count = 1;
-//	cmd.lba_low = 0;
-//	cmd.lba_mid = 79;
-//	cmd.lba_high = 0;
-//	cmd.device = 224;
-//	cmd.command = 48;
+	assert(cmd.command == ATA_READ || cmd.command == ATA_WRITE);
+
+	if(cmd.command == ATA_READ && 1 == 0){
+	cmd.feature = 0;
+	cmd.sector_count = 1;
+	cmd.lba_low = 0;
+	cmd.lba_mid = 79;
+	cmd.lba_high = 0;
+	cmd.device = 224;
+	cmd.command = 20;
+}
 
 
 //	if(type == READ && nr_sects == 26626){

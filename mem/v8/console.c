@@ -328,12 +328,12 @@ void tty_do_write(TTY *tty, Message *msg) {
 	// 从本次字符串的4开始读取字符，自然读取不到数据。
 	tty->tran_cnt = 0;
 
+	unsigned int vaddr_buf = alloc_virtual_memory(msg->BUF, cnt);
+
     // 把用户进程的数据复制到TTY进程，然后输出。
     while (cnt) {
         int bytes = MIN(cnt, TTY_WRITE_BUF_SIZE);
-        // in expansion of macro 'BUF'
-        // phycopy(buf, v2l(msg->PROCNR, msg->BUF) + tty->tran_cnt, bytes);
-        phycopy(buf, v2l(msg->PROCNR, (char *) msg->BUF) + tty->tran_cnt, bytes);
+        phycopy(buf, vaddr_buf + tty->tran_cnt, bytes);
         cnt -= bytes;
         tty->tran_cnt += bytes;
         int i = 0;
@@ -402,12 +402,12 @@ void init_tty() {
 }
 
 void TaskTTY() {
-	disp_str("TASK_TTY:");
-	Proc *cur = get_running_thread_pcb();
-	disp_str("[");
-	disp_int(cur->pid);
-	disp_str("]");
-	disp_str("\n");
+//	disp_str("TASK_TTY:");
+//	Proc *cur = get_running_thread_pcb();
+//	disp_str("[");
+//	disp_int(cur->pid);
+//	disp_str("]");
+//	disp_str("\n");
 //	while(1);
     //keyboard_buffer.buf[0] = 0x1E;
     //keyboard_buffer.buf[1] = 0x30;

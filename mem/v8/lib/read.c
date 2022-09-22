@@ -9,15 +9,20 @@
 #include "global.h"
 
 int read(int fd, void *buf, int count) {
-    Message msg;
+	unsigned int msg_size = sizeof(Message);
+    Message *msg = (Message *)sys_malloc(msg_size);
 
-    msg.TYPE = READ;
-    msg.FD = fd;
-    msg.BUF = buf;
-    msg.CNT = count;
-	
+	unsigned int phy_buf = get_physical_address(buf);
 
-    send_rec(BOTH, &msg, TASK_FS);
+    msg->TYPE = READ;
+    msg->FD = fd;
+    msg->BUF = phy_buf;
+    msg->CNT = count;
 
-    return msg.CNT;
+    send_rec(BOTH, msg, TASK_FS);
+
+//	sys_free(msg, msg_size);
+	unsigned int cnt = msg->CNT;
+
+    return cnt;
 }

@@ -9,14 +9,22 @@
 #include "global.h"
 
 int write(int fd, const void *buf, int count) {
-    Message *msg = (Message *)sys_malloc(sizeof(Message));
+	unsigned int msg_size = sizeof(Message);
+    Message *msg = (Message *)sys_malloc(msg_size);
+
+	unsigned int phy_buf = get_physical_address(buf);
+	// unsigned int phy_buf = buf;
 
     msg->TYPE = WRITE;
     msg->FD = fd;
-    msg->BUF = buf;
+    msg->BUF = phy_buf;
     msg->CNT = count;
 
     send_rec(BOTH, msg, TASK_FS);
 
-    return msg->CNT;
+	unsigned int cnt = msg->CNT;
+
+	// sys_free(msg, msg_size);
+
+    return cnt;
 }

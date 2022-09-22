@@ -584,12 +584,12 @@ void TestFS()
 	char tty1[10] = "dev_tty1";
 	int fd_stdout = open(tty1, O_RDWR);
 	int fd_stdin = open(tty1, O_RDWR);
-    Printf("TestA is running\n");
+    // Printf("TestA is running\n");
     char filename[5] = "AC";
     char filename2[5] = "cAB";
     char filename3[10] = "INTERRUPT";
     int flag = 1;
-    Printf("TestA is running again\n");
+    // Printf("TestA is running again\n");
     while (1)
     {
         if (flag == 1)

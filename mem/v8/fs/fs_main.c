@@ -1194,7 +1194,7 @@ int do_rdwt(Message *msg)
     // 调用文件系统的进程PID。
     int sender = msg->source;
     // 把数据读取到buf中；把buf中的数据写入硬盘。
-    int buf = msg->BUF;
+    unsigned int buf = msg->BUF;
     // todo 下面获取inode的方法正确吗？
     int fd = msg->FD;
 	// todo 大错特错！
@@ -1262,7 +1262,8 @@ int do_rdwt(Message *msg)
 
 	// 读写了多少数据
 	if (hd_operate_type == READ && pos == file_size){
-		return 0;
+	// 为什么会写出这种愚蠢的代码？
+	//	return 0;
 	}
 
 	
@@ -1276,6 +1277,7 @@ int do_rdwt(Message *msg)
     int pos_end;
     if (hd_operate_type == READ)
     {
+		pos = 0;
 
         pos_end = MIN(pos + len, file_size);
     }
@@ -1304,16 +1306,23 @@ int do_rdwt(Message *msg)
 
     for (int i = start_sect; i <= start_end && byte_left; i += chunk)
     {
+//		Printf(" i = %d, hd_operate_type = %d\n", i, hd_operate_type);
+//		disp_str(" i=");
+//		disp_int(i);
+//		disp_str("]======[");
+//		disp_int(hd_operate_type);
+//		disp_str("]");
+//		disp_str("\n");
         int byte = MIN(byte_left, chunk * SECTOR_SIZE - offset);
         // device是什么？是分区号。
         // 是安装了文件系统的那个分区的分区号吗？是的。
         // 耗费了非常多时间才想明白这个device的值是多少。
         // todo hd2a 定义在 hd.c中，如何才能在这个文件中使用hd.h中的数据呢？
         int device = ROOT_DEV;
-        rd_wt(i, device, fsbuf, SECTOR_SIZE * chunk, READ);
 
         if (hd_operate_type == READ)
         {
+        	rd_wt(i, device, phy_fsbuf, SECTOR_SIZE * chunk, READ);
             // 把数据从fsbuf中复制到buf中
             phycopy(buf_line_addr + byte_wt, fsbuf + offset, byte);
             // 文件的大小不会改变
@@ -1323,7 +1332,7 @@ int do_rdwt(Message *msg)
             // 把数据从buf中复制到fsbuf中
             phycopy(fsbuf + offset, buf_line_addr + byte_wt, byte);
             // 把fsbuf中的数据写入硬盘
-            rd_wt(i, device, fsbuf, SECTOR_SIZE * chunk, WRITE);
+            rd_wt(i, device, phy_fsbuf, SECTOR_SIZE * chunk, WRITE);
             // 文件的大小会改变
         }
         byte_left -= byte;
