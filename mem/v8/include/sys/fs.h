@@ -115,18 +115,22 @@ struct inode inode_table[INODE_TABLE_SIZE];
 // 我本想按照上面的定义来修改，因为需要修改的地方太多太多，放弃了。
 // char *fsbuf = (char *)0x1000000;
 // char *fsbuf = (char *)0x700000;
-char *fsbuf = (char *)0x200000;
+// char *fsbuf = (char *)0x200000;
+char *fsbuf;
+unsigned int phy_fsbuf;
 const int FSBUF_SIZE = 1024 * 1024;
 
 //char *super_block_buf = (char *)0x900000;
 // struct super_block *super_block_buf = (char *)0x900000;
-struct super_block *super_block_buf = (char *)0x300000;
+// struct super_block *super_block_buf = (char *)0x300000;
+struct super_block *super_block_buf;
+unsigned int phy_super_block_buf;
 
 // 读写硬盘，单位是扇区
 //#define RD_SECT(device, pos)	rd_wt(pos * SECTOR_SIZE, device, fsbuf, SECTOR_SIZE, READ)
 //#define WT_SECT(device, pos)	rd_wt(pos * SECTOR_SIZE, device, fsbuf, SECTOR_SIZE, WRITE)
-#define RD_SECT(device, pos)	rd_wt(pos, device, fsbuf, SECTOR_SIZE, READ)
-#define WT_SECT(device, pos)	rd_wt(pos, device, fsbuf, SECTOR_SIZE, WRITE)
+#define RD_SECT(device, pos)	rd_wt(pos, device, phy_fsbuf, SECTOR_SIZE, READ)
+#define WT_SECT(device, pos)	rd_wt(pos, device, phy_fsbuf, SECTOR_SIZE, WRITE)
 
 // 安装文件系统的分区的次设备号。
 // 次设备号应该是多少？

@@ -171,6 +171,7 @@ void do_page_fault()
 
 	asm volatile ("movl %%cr2, %%eax":"=a"(cr2):);
 
+	dis_pos = 0;
 	disp_str("do_page_fault\n");
 	disp_str("cr2:");
 	disp_int(cr2);
@@ -243,6 +244,7 @@ void exception_handler(unsigned int vec_no, unsigned int error_no, unsigned int 
     //    disp_str(" ");
     }
     // int colour = 0x74;
+	dis_pos = 0;
     disp_str("\n\nfault msg\n\n");
     int colour = 0x0A;
     char *error_msg = msg[vec_no];
@@ -583,11 +585,11 @@ void TestFS()
 	int fd_stdout = open(tty1, O_RDWR);
 	int fd_stdin = open(tty1, O_RDWR);
     Printf("TestA is running\n");
-	return 0;
     char filename[5] = "AC";
     char filename2[5] = "cAB";
     char filename3[10] = "INTERRUPT";
     int flag = 1;
+    Printf("TestA is running again\n");
     while (1)
     {
         if (flag == 1)
@@ -1406,7 +1408,7 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
         unblock(receiver);
 
         // 调试函数
-        assert(sender->p_msg == 0);
+//        assert(sender->p_msg == 0);
         assert(sender->p_flag == 0);
         assert(sender->p_send_to == NO_TASK);
         //assert(sender->p_receive_from == NO_TASK);
@@ -1470,14 +1472,16 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
     if (receiver->has_int_msg && (sender_pid == ANY || sender_pid == INTERRUPT))
     {
 
-        Message m;
-        Memset(&m, 0, sizeof(Message));
-        m.source = INTERRUPT;
-        m.TYPE = HARD_INT;
+		unsigned int msg_size = sizeof(Message);
+        Message *m = (Message *)sys_malloc(msg_size);;
+        Memset(m, 0, msg_size);
+        m->source = INTERRUPT;
+        m->TYPE = HARD_INT;
 
+		unsigned int vaddr_msg = alloc_virtual_memory(msg, msg_size);
         // phycopy(v2l(receiver_pid, msg), &m,
          //       sizeof(Message));
-        phycopy(msg, &m, sizeof(Message));
+        phycopy(vaddr_msg, m, msg_size);
 
         receiver->has_int_msg = 0;
         receiver->p_receive_from = NO_TASK;
@@ -1485,6 +1489,8 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
         receiver->p_flag = RUNNING;
 
 	int_flag = 1;
+		
+		sys_free(m, msg_size);
 	
        // return 0;
     }
@@ -1749,19 +1755,22 @@ void inform_int(int task_nr)
         if (current->p_receive_from == INTERRUPT || current->p_receive_from == ANY)
         {
 
-		// todo 我并不理解把current的p_msg设置成这两个值在哪里会被用到。
-		current->p_msg->source = INTERRUPT;
-		current->p_msg->TYPE = HARD_INT;
+		unsigned int msg_size = sizeof(Message);
+		Message *vaddr_msg = (Message *)alloc_virtual_memory(current->p_msg, msg_size);
+
+		vaddr_msg->source = INTERRUPT;
+		vaddr_msg->TYPE = HARD_INT;
 		// todo 怎么往进程中塞进去一个变量？此处使用了未声明的变量msg，行不通。
-//		phycopy(v2l(current, msg), &msg2tty, sizeof(Message));
+		//      phycopy(v2l(current, msg), &msg2tty, sizeof(Message));
 		// 只有一个办法通知TTY，接收到识别不了的TYPE，不终止进程。
-            current->has_int_msg = 0;
+		current->has_int_msg = 0;
 		// todo 想不到更好的方法，只能这样做。
-            // current->p_receive_from = NO_TASK;
-            current->p_receive_from = NO_TASK;
-            current->p_msg = 0;
-            current->p_flag = RUNNING;
-            unblock(current);
+		// current->p_receive_from = NO_TASK;
+		current->p_receive_from = NO_TASK;
+		vaddr_msg = 0;
+		current->p_flag = RUNNING;
+
+        unblock(current);
         }
     } else
     {

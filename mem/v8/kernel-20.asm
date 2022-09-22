@@ -431,7 +431,7 @@ hwint14:
 	cmp dword [k_reenter], 0
 	jne .2
 .1:
-	mov esp, StackTop
+	;mov esp, StackTop
 .2:
 	sti	
 	; 调用硬盘中断

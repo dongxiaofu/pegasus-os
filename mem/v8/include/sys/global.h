@@ -96,8 +96,8 @@ EXTERN TSS tss;
 #define START_PID 1
 #define TASK_TTY 2	//(START_PID + 1)
 #define TASK_SYS (TASK_TTY + 1)
-#define TASK_HD  (TASK_SYS + 1)
-#define TASK_FS  3//  (TASK_HD + 1) 
+#define TASK_HD  3	//(TASK_SYS + 1)
+#define TASK_FS  4//  (TASK_HD + 1) 
 #define TASK_MM  (TASK_FS + 1)
 #define INIT_PID  6
 

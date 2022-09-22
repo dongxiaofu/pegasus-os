@@ -62,14 +62,13 @@ int get_hd_ioctl(int device);
 
 // 硬盘驱动
 void TaskHD() {
-	while(1);
     // Printf("%s\n", "HD driver is running!\n");
-    disp_str("TaskHD:");
+//    disp_str("TaskHD:");
 Proc *cur = get_running_thread_pcb();
-disp_str("[");
-    disp_int(cur->pid);
-    disp_str("]");
-    disp_str("\n");
+//disp_str("[");
+//    disp_int(cur->pid);
+//    disp_str("]");
+//    disp_str("\n");
     // 初始硬盘
  init_hd();
 	Message *msg = (Message *)sys_malloc(sizeof(Message));
@@ -92,6 +91,11 @@ void init_hd() {
 void hd_handle(Message *msg) {
     send_rec(RECEIVE, msg, ANY);
     unsigned int type = msg->TYPE;
+//	disp_str("hd type = ");
+//	disp_str("[");
+//    disp_int(type);
+//    disp_str("]");
+//    disp_str("\n");
 	// 硬盘中断通过inform会产生许多type是0的消息。
 	if(type == 0)	{
 		return;
@@ -123,14 +127,14 @@ void hd_handle(Message *msg) {
     msg->val = 0;
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
     // todo 向文件系统发送消息，暂时使用硬编码。
-    send_rec(SEND, msg, 3);
+    send_rec(SEND, msg, TASK_FS);
     //Printf("%s\n", "Msg from HD");
 }
 
 
 // void hd_cmd_out(unsigned char driver_number, int command, unsigned int lba, unsigned sector_count)
 void hd_cmd_out(struct hd_cmd *cmd) {
-    if (!waitfor(0x80, 0, 15000))
+    if (!waitfor(0x80, 0, 95000))
         panic("hd error.");
 //    while (in_byte(0x1F7) & 0x80 != 0) {
 //        int t = in_byte(0x1F7);
@@ -363,9 +367,11 @@ void wait_for() {
 }
 
 void interrupt_wait() {
-    Message msg;
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+	Memset(msg, 0, sizeof(Message));
     // todo INTERRUPT 拼写正确吗？
-    send_rec(RECEIVING, &msg, INTERRUPT);
+    send_rec(RECEIVING, msg, INTERRUPT);
+	sys_free(msg, sizeof(Message));
 }
 
 
@@ -403,10 +409,10 @@ void hd_rdwt(Message *msg) {
     int bytes_left = len;
     // 从msg中获取内存地址。
     // 这个内存地址存储了要写入硬盘的数据，	或用来存储从硬盘中读取到的数据。
-    char *hdbuf = (char *) msg->BUF;
+    unsigned int phy_hdbuf = msg->BUF;
     int source = msg->source;
     // 计算出hdbuf的物理地址。
-    char *phy_hdbuf = (char *) v2l(source, hdbuf);
+	char *vaddr_hdbuf = (char *)alloc_virtual_memory(phy_hdbuf, SECTOR_SIZE);
 
     int type = msg->TYPE;
     assert(type == READ || type == WRITE);
@@ -462,35 +468,39 @@ void hd_rdwt(Message *msg) {
             // 从REG_DATA端口读取数据存储到phy_hdbuf中
             Memset(hd_cache, 0, bytes);
             read_port(PRIMARY_CMD_DATA_REGISTER, hd_cache, SECTOR_SIZE);
-		phycopy(phy_hdbuf, hd_cache, bytes);	
+		phycopy(vaddr_hdbuf, hd_cache, bytes);	
         } else if (type == WRITE) {
             // 写
             wait_for();
             // 把数据从phy_hdbuf写入到REG_DATA端口
             // Memset(phy_hdbuf, 0x0, 512);
             // write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, SECTOR_SIZE);
-         // if(is_empty(phy_hdbuf, bytes) == 0){ 
-        	    write_port(PRIMARY_CMD_DATA_REGISTER, phy_hdbuf, bytes);
+         // if(is_empty(phy_hdbuf, bytes) == 0){TASK_HD
+        	    write_port(PRIMARY_CMD_DATA_REGISTER, vaddr_hdbuf, bytes);
             		interrupt_wait();
 	//	}
         }
         bytes_left -= bytes;
-        phy_hdbuf += bytes;
+        vaddr_hdbuf += bytes;
     }
 }
 
 
 void hd_handler() {
     int t = in_byte(0x1F7);
-    inform_int(2);
+    inform_int(TASK_HD);
 }
 
 int waitfor(int mask, int val, int timeout) {
-    int t = get_ticks_ipc();
+//    int t = get_ticks_ipc();
+	int n = 0;
 
-    while (((get_ticks_ipc() - t) * 1000 / 100) < timeout)
+//    while (((get_ticks_ipc() - t) * 1000 / 100) < timeout)
+	 while(n < timeout){
         if ((in_byte(0x1F7) & mask) == val)
             return 1;
+		n++;
+	}
 
     return 0;
 }

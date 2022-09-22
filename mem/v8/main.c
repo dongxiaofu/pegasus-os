@@ -29,7 +29,7 @@ void kernel_main()
 	process_execute(user_proc_a, "user_proc_a\n", "process_a");
 	process_execute(TaskTTY, "task_tty\n", "TaskTTY");
 //	process_execute(TaskSys, "task_sys\n", "TaskSys");
-//	process_execute(TaskHD, "task_hd\n", "TaskHD");
+	process_execute(TaskHD, "task_hd\n", "TaskHD");
 	process_execute(task_fs, "task_fs\n", "task_fs");
 //	process_execute(TaskMM, "task_mm\n", "TaskMM");
 //	thread_start(kernel_thread_a, "thread a\n");

@@ -84,13 +84,8 @@ int c = 0;
 
 void task_fs()
 {
-	disp_str("TASK_FS:");
     Proc *cur = get_running_thread_pcb();
-    disp_str("[");
-    disp_int((unsigned int)cur->pid);
-    disp_str("]");
-    disp_str("\n");    ////Printf("%s\n", "FS is running");
-    // init_fs();
+    init_fs();
 
     Message *msg = (Message *)sys_malloc(sizeof(Message));
     Message *fs_msg  = (Message *)sys_malloc(sizeof(Message));
@@ -102,7 +97,6 @@ void task_fs()
 //	disp_int(c);
         Memset(msg, 0, sizeof(Message));
         send_rec(RECEIVE, msg, ANY);
-		disp_str("task_fs is running again\n");
 	////Printf("Enter FS\n");
         int type = msg->TYPE;
         int source = msg->source;
@@ -133,18 +127,18 @@ void task_fs()
         //assert(type == OPEN || type == READ || type == WRITE || type == CLOSE);
 
         // open
-        pcaller = &proc_table[source];
+        pcaller = pid2proc(source);
 
         //        fs_msg.type = SYSCALL_RET;
         //        send_rec(SEND, &fs_msg, source);
         //	return;
         // 已经写入获取读取的数据的长度。
-		disp_str("task_fs is running again2\n");
-		disp_str("type = ");
-		disp_str("[");
-		disp_int(type);
-		disp_str("]");
-		disp_str("\n");
+//		disp_str("task_fs is running again2\n");
+//		disp_str("type = ");
+//		disp_str("[");
+//		disp_int(type);
+//		disp_str("]");
+//		disp_str("\n");
 	int byte_rdwt = 0;
         switch (type)
         {
@@ -211,19 +205,19 @@ void task_fs()
 void rd_wt(int pos, int device, char *buf, int len, int type)
 {
 //	////Printf("enter fs rd_wt\n");
-    Message msg;
-    Memset(&msg, 0, sizeof(Message));
-    msg.TYPE = type;
-    msg.DEVICE = device;
-    msg.BUF = buf;
-    msg.LEN = len;
-    msg.POSITION = pos * SECTOR_SIZE;
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+    Memset(msg, 0, sizeof(Message));
+    msg->TYPE = type;
+    msg->DEVICE = device;
+    msg->BUF = buf;
+    msg->LEN = len;
+    msg->POSITION = pos * SECTOR_SIZE;
     //   msg.POSITION = pos;// * SECTOR_SIZE;
     // 文件系统的PID
     // msg.source = TASK_FS;
     assert(type == READ || type == WRITE);
-    assert(msg.TYPE == READ || msg.TYPE == WRITE);
-    send_rec(BOTH, &msg, TASK_HD);
+    assert(msg->TYPE == READ || msg->TYPE == WRITE);
+    send_rec(BOTH, msg, TASK_HD);
 }
 
 void mkfs()
@@ -239,6 +233,12 @@ void mkfs()
     //    ////Printf("fsbuf = %s\n", fsbuf);
     //    return;
     // 写入超级块
+    // fsbuf = (char *)sys_malloc(sizeof(SECTOR_SIZE));
+    fsbuf = (char *)sys_malloc(ONE_MB);
+	super_block_buf = (struct super_block *)sys_malloc(sizeof(struct super_block)); 
+
+	phy_fsbuf = get_physical_address((unsigned int)fsbuf);
+	phy_super_block_buf = get_physical_address((unsigned int)super_block_buf);
 
     // 写入超级块
     Memset(fsbuf, 0x0, 512);
@@ -334,11 +334,12 @@ Memset(fsbuf+1, 0x0, SECTOR_SIZE-1);
     //        WT_SECT(ROOT_DEV, pos + 1);
     // 写入sector-map的剩余扇区
     int rest_sects = sp2.cnt_of_sector_map_sect - 2;
+	rest_sects = 3;
 	// todo 不是非常确定此处是否应该加1。
     for (int i = 2; i <= rest_sects + 1; i++)
     {
-        Memset(fsbuf, 0x0, SECTOR_SIZE);
-        WT_SECT(ROOT_DEV, pos + i);
+       Memset(fsbuf, 0x0, SECTOR_SIZE);
+       WT_SECT(ROOT_DEV, pos + i);
     }
     //return;
     // 写入inode-array
@@ -453,11 +454,11 @@ Memset(fsbuf+1, 0x0, SECTOR_SIZE-1);
 void init_fs()
 {
 
-    Message driver_msg;
-    driver_msg.TYPE = OPEN;
+    Message *driver_msg = (Message *)sys_malloc(sizeof(Message));
+    driver_msg->TYPE = OPEN;
     // todo 暂时使用硬编码。
-    driver_msg.DEVICE = 32;
-    send_rec(BOTH, &driver_msg, TASK_HD);
+    driver_msg->DEVICE = 32;
+    send_rec(BOTH, driver_msg, TASK_HD);
     mkfs();
 }
 
@@ -1200,7 +1201,8 @@ int do_rdwt(Message *msg)
 //    int pos = msg->POS;
     //struct inode *inode = proc_table[sender].filp[fd]->inode;
     // todo 在任务进程中直接这样获取proc_table是否合适？
-    struct file_desc *file_desc = proc_table[sender].filp[fd];
+    Proc *sender_thread = pid2proc(sender);
+    struct file_desc *file_desc = sender_thread->filp[fd];
     int nr_inode = file_desc->nr_inode;
 	int source = msg->source;
     //	assert(fd == 0);
@@ -1298,9 +1300,7 @@ int do_rdwt(Message *msg)
     // 计算buf的线性地址
     // 怎么确定sender？
     Proc *sender_proc = pid2proc(msg->source);
-    int ds = sender_proc->s_reg.ds;
-    int base = Seg2PhyAddrLDT(ds, sender_proc);
-    int buf_line_addr = base + buf;
+    int buf_line_addr = alloc_virtual_memory(buf, len);
 
     for (int i = start_sect; i <= start_end && byte_left; i += chunk)
     {

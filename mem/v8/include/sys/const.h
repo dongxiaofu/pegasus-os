@@ -252,6 +252,7 @@
  #define PROC_IMAGE_DEFAULT_SIZE (0x1000 + 1024*1024)	// todo 这是我随便设置的值
 #define PROC_STACK_SIZE (1024 * 32)			// 1kb，不清楚为什么需要设置这个值，借用于上神的。
 #define SECTOR_SIZE	512
+#define ONE_MB	(1024*1024/32)
 
 #define HD_DEV_READ 1
 #define HD_DEV_WRITE 2

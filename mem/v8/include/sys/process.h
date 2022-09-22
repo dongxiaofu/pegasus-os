@@ -60,7 +60,7 @@ typedef struct _thread_stack
 //	void (*unused_retaddr);
 } ThreadStack;
 
-#define FILP_TABLE_SIZE 1
+#define FILP_TABLE_SIZE 64
 #define FILE_TABLE_SIZE 64
 
 // 进程表

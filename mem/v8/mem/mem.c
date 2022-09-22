@@ -354,7 +354,8 @@ unsigned int sys_malloc(unsigned int size)
 			unsigned int cnt = (PAGE_SIZE - arena_size) / mem_block_size; 
 			unsigned int start_addr = page_addr + arena_size;
 
-			for(int i = 0; i < cnt; i++){
+			// for(int i = 0; i < cnt; i++){
+			for(int i = 0; i < cnt - 1; i++){
 				block_addr = start_addr + mem_block_size * i; 
 				appendToDoubleLinkList(&(desc_array[index].free_list), (void *)block_addr);
 			}
