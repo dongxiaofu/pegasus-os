@@ -23,6 +23,8 @@ typedef struct {
     unsigned int left_cnt;
     // 已经传输了多少字符。
     unsigned int tran_cnt;
+	// 需要传输多少字符。
+    unsigned int want_cnt;
     // 接收字符的变量的线性地址。
     unsigned int req_buf;
     // 向TTY发送IPC请求的进程的pid。

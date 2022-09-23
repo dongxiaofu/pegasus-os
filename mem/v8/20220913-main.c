@@ -577,6 +577,26 @@ void kernel_main2()
 #define B_PRINT_NUM 3
 #define C_PRINT_NUM 3
 
+// 测试终端
+void TestTTY()
+{
+	char tty1[10] = "dev_tty1";
+	int fd_stdout = open(tty1, O_RDWR);
+	int fd_stdin = open(tty1, O_RDWR);
+    Printf("TestA is running\n");
+//    Printf("TestA is running\n");
+//	for(int i = 0; i < 10; i++){
+//    	Printf("TestA is running\n");
+//		delay(10);
+//	}
+	char *buf = (char *)sys_malloc(10);
+	while(1){
+		Memset(buf, 0, 10);
+		int cnt = read(fd_stdin, buf, 10);
+		Printf("buf = %s\n", buf);
+	}
+}
+
 // 测试文件系统
 void TestFS()
 {
@@ -584,7 +604,8 @@ void TestFS()
 	char tty1[10] = "dev_tty1";
 	int fd_stdout = open(tty1, O_RDWR);
 	int fd_stdin = open(tty1, O_RDWR);
-    // Printf("TestA is running\n");
+    Printf("TestA is running\n");
+	return;
     char filename[5] = "AC";
     char filename2[5] = "cAB";
     char filename3[10] = "INTERRUPT";
@@ -1543,11 +1564,6 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
         // 从receiver中把消息复制到sender
         phycopy(msg_line_addr, msg_line_addr2, sizeof(Message));
         Message *m = (Message *)msg_line_addr;
-
-        if (sender_pid == 4)
-        {
-            assert(msg->TYPE == OPEN);
-        }
 
         // 移除已经处理过的消息。
         if (p_from == receiver->q_sending)

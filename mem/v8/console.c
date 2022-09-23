@@ -223,23 +223,18 @@ void tty_dev_read(TTY *tty) {
 ======================================================*/
 void tty_dev_write(TTY *tty) {
 	int req_cnt = tty->left_cnt; 
+	int flag = 0;
     while (tty->counter > 0) {
 	//int req_cnt = tty->left_cnt; 
         unsigned char key = *(tty->tail);
         //key = 'F';
         tty->tail++;
         tty->counter--;
+        tty->tran_cnt++;
         if (tty->tail == tty->buf + KEYBOARD_BUF_SIZE) {
             tty->tail = tty->buf;
         }
-// todo 调试使用，等全部功能结束后，可能要注释掉。
-//        out_char(tty, key);
 
-	//dis_pos = 12000 + 160 * 20;
-//	dis_pos = 12000 - 128 + 180 * 13;
-//	disp_str_colour("tty->left_cnt:", 0x0D);
-//	disp_int(tty->left_cnt);
-//	//Printf("tty->left_cnt = %d\n", tty->left_cnt);
         // 把数据从终端缓冲区读取到用户进程
         if (tty->left_cnt) {
             // 是可打印字符
@@ -248,64 +243,56 @@ void tty_dev_write(TTY *tty) {
             if (('!' <= key && key <= '~') || (key == ' ' || key == 0)) {
                 // 复制数据
                 // phycopy(tty->req_buf + tty->tran_cnt, key, 1);
-                phycopy(tty->req_buf + tty->tran_cnt, v2l(TASK_TTY, &key), 1);
+                phycopy(tty->req_buf + (tty->tran_cnt - 1), &key, 1);
                 tty->left_cnt--;
-                tty->tran_cnt++;
 
                 //key = 'B';
                 out_char(tty, key);
             } else if (key == 8) {// 是退格符
                 tty->left_cnt++;
-                tty->tran_cnt--;
+                tty->tran_cnt -= 2;
 
                 // 对缓冲区有没有影响？
 
                 out_char(tty, key);
-            } else if (key == '\n' || tty->tran_cnt == req_cnt) {// 是换行符或达到需要的长度
-
-	//	char end_flag = 0;
-        //        phycopy(tty->req_buf + tty->tran_cnt, v2l(TASK_TTY, &end_flag), 1);
-        //        tty->left_cnt--;
-        //        tty->tran_cnt++;
-		//Printf("tty resume, pcaller = %x \n", tty->pcaller);
+           // } else if (key == '\n' || tty->tran_cnt == tty->want_cnt) {// 是换行符或达到需要的长度
+            } else if (key == '\n') {
                 out_char(tty, key);
-//                tty->left_cnt = 0;
-//                tty->tran_cnt = 0;
-
-                // IPC返回
-                // todo 这里，需要补充，把tty的req_buf中存储的数据放到msg中，然后发送给用户进程。
-                Message msg;
-                msg.TYPE = RESUME_PROC;
-                // 能用msg.RETVAL = tty->tran_cnt 吗?
-                msg.CNT = tty->tran_cnt;
-                msg.PROCNR = tty->procnr;
-                msg.BUF = tty->req_buf;
-
-                tty->left_cnt = 0;
-                tty->tran_cnt = 0;
-
-
-                send_rec(SEND, &msg, tty->pcaller);
-
-		// todo	本次读操作结束。
-		return;
+				tty->left_cnt = 0;
+				// tty->tran_cnt = 0;
+				flag = 1;
             }
+
+			if(tty->tran_cnt == tty->want_cnt)	flag = 1;
         }
     }
+
+	if(flag == 0)	return;
+	// IPC返回
+	// todo 这里，需要补充，把tty的req_buf中存储的数据放到msg中，然后发送给用户进程。
+	unsigned int msg_size = sizeof(Message);
+	Message *msg = (Message *)sys_malloc(msg_size);
+	msg->TYPE = RESUME_PROC;
+	// 能用msg.RETVAL = tty->tran_cnt 吗?
+	msg->CNT = tty->tran_cnt;
+	msg->PROCNR = tty->procnr;
+//	msg->BUF = get_physical_address(tty->req_buf);
+	
+	// send_rec(SEND, msg, tty->procnr);
+	send_rec(SEND, msg, tty->pcaller);
 }
 
 void tty_do_read(TTY *tty, Message *msg) {
-
     // 设置tty的一些成员变量
     tty->tran_cnt = 0;
     tty->procnr = msg->PROCNR;
     tty->pcaller = msg->source;
     tty->left_cnt = msg->CNT;
-	//Memset(tty->req_buf, 0, Strlen(tty->req_buf));
+    tty->want_cnt = msg->CNT;
 	// todo 似乎行不通。用户进程，例如INIT的msg并没有通过FS传递给本进程。
-    tty->req_buf = v2l(tty->procnr, msg->BUF);
+    tty->req_buf = alloc_virtual_memory(msg->BUF, tty->left_cnt);
 
-	//Printf("\tty read %d return\n", tty->left_cnt);
+	assert(tty->pcaller == TASK_FS);
     // IPC返回
     msg->TYPE = SUPEND_PROC;
     send_rec(SEND, msg, tty->pcaller);
@@ -345,10 +332,12 @@ void tty_do_write(TTY *tty, Message *msg) {
     }
     // IPC返回
     // todo 能沿用上面的msg吗？
-    Message msg2FS;
-    msg2FS.TYPE = SYSCALL_RET;
-    msg2FS.RETVAL = tty->tran_cnt;
-    send_rec(SEND, &msg2FS, msg->source);
+    Message *msg2FS = (Message *)sys_malloc(sizeof(Message));
+    msg2FS->TYPE = SYSCALL_RET;
+    msg2FS->RETVAL = tty->tran_cnt;
+    send_rec(SEND, msg2FS, msg->source);
+
+	sys_free(msg2FS, sizeof(Message));
 }
 
 /*====================================================
@@ -388,6 +377,7 @@ void init_screen(TTY *tty) {
 void init_tty() {
     for (TTY *tty = tty_table; tty < tty_table + TTY_NUM; tty++) {
         // 初始化缓冲区
+        Memset(tty, 0, sizeof(TTY));
         tty->head = tty->tail = tty->buf;
         tty->counter = 0;
         // 初始化console
@@ -402,32 +392,6 @@ void init_tty() {
 }
 
 void TaskTTY() {
-//	disp_str("TASK_TTY:");
-//	Proc *cur = get_running_thread_pcb();
-//	disp_str("[");
-//	disp_int(cur->pid);
-//	disp_str("]");
-//	disp_str("\n");
-//	while(1);
-    //keyboard_buffer.buf[0] = 0x1E;
-    //keyboard_buffer.buf[1] = 0x30;
-    //keyboard_buffer.buf[2] = 0x2E;
-    //keyboard_buffer.buf[3] = 0x20;
-    //keyboard_buffer.buf[4] = 0x12;
-    //keyboard_buffer.tail = keyboard_buffer.head = keyboard_buffer.buf;
-    //keyboard_buffer.counter = 5;
-
-    // // 设置光标位置
-    // Cursor Location High Register
-    //out_byte(0x3D4, 0x0E);
-    ////out_byte(0x3D5, ((VM_BASE_ADDR + dis_pos)/2) >> 8);
-    //out_byte(0x3D5, (VM_BASE_ADDR) >> 8);
-    //// Cursor Location Low Register
-    //out_byte(0x3D4, 0xF);
-    ////out_byte(0x3D5, (VM_BASE_ADDR + dis_pos)/2);
-    //out_byte(0x3D5, VM_BASE_ADDR);
-
-
     init_tty();
     select_console(0);
     ////Printf("T:%x", 3);
@@ -442,25 +406,9 @@ void TaskTTY() {
             } while (tty->counter);
         }
 
-//	dis_pos = 12000 - 128 + 360 * 7;
-//	disp_str_colour("Enter tty:", 0x0D);
-//	m++;
-//	disp_int(m);
         send_rec(RECEIVE, msg, ANY);
         int type = msg->TYPE;
-//	dis_pos = 12000 - 128 + 180 * 15 - 40;
-//	disp_str_colour("Enter tty after type", 0x0D);
-//	disp_int(type);
-//	dis_pos = 12000 + 180 * 16;
-//	disp_str_colour("0-tty->left_cnt:", 0x0D);
 	
-	if(msg->source == TASK_FS){
-	//	//Printf("FS is calling\n");
-	}
-
-        //int type = msg.TYPE;
-//	//Printf("tty type===%d\n", type);
-
         switch (type) {
             case DEV_OPEN:
                 // 我以为，没必要实现。
@@ -474,12 +422,11 @@ void TaskTTY() {
 		case HARD_INT:
 			key_pressed = 0;
 			continue;
-            default:
-               //Printf("Unknown tty message type");
-               // 当接收到clock_handler中发送的通知时，需要继续运行本进程，所以，此处
-               // 不能终止。
-               continue;
-               // break;
+        default:
+            //Printf("Unknown tty message type");
+            // 当接收到clock_handler中发送的通知时，需要继续运行本进程，所以，此处
+            // 不能终止。
+            continue;
         }
     }
 }

@@ -19,53 +19,51 @@ void keyboard_handler()
 	//char scan_code = in_byte(0x60);
 	//disp_int(scan_code);
 	int port = 0x60;
-	if(keyboard_buffer.counter < KEYBOARD_BUF_SIZE){
-		//unsigned char scan_code = 0x9E;//in_byte(port);
-		disable_int();
-		// 耗费了巨量时间
-		unsigned char scan_code = in_byte(port);
-		//scan_code = scan_code;
-		//disp_int(scan_code);
-		*(keyboard_buffer.head) = scan_code;//in_byte(port);
-		keyboard_buffer.head++;
-		keyboard_buffer.counter++;
-		//if(keyboard_buffer.counter == KEYBOARD_BUF_SIZE){
-		//if(keyboard_buffer.head > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
-		if(keyboard_buffer.head >= keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
-			keyboard_buffer.head = keyboard_buffer.buf;
-		}
-		enable_int();
+	if(keyboard_buffer.counter >= KEYBOARD_BUF_SIZE)	return;
+	//unsigned char scan_code = 0x9E;//in_byte(port);
+	disable_int();
+	// 耗费了巨量时间
+	unsigned char scan_code = in_byte(port);
+	//scan_code = scan_code;
+	//disp_int(scan_code);
+	*(keyboard_buffer.head) = scan_code;//in_byte(port);
+	keyboard_buffer.head++;
+	keyboard_buffer.counter++;
+	//if(keyboard_buffer.counter == KEYBOARD_BUF_SIZE){
+	//if(keyboard_buffer.head > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
+	if(keyboard_buffer.head >= keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
+		keyboard_buffer.head = keyboard_buffer.buf;
 	}
+	enable_int();
 }
 
 unsigned char read_from_keyboard_buf()
-//void keyboard_read()
 {
 	unsigned char scan_code = 0;
-	if(keyboard_buffer.counter > 0){
-		disable_int();
-		//char scan_code = *(keyboard_buffer.tail);
-		scan_code = *(keyboard_buffer.tail);
+	if(keyboard_buffer.counter <= 0)	return scan_code;
 
-		//disp_int(scan_code);
+	disable_int();
+	//char scan_code = *(keyboard_buffer.tail);
+	scan_code = *(keyboard_buffer.tail);
 
-		keyboard_buffer.tail++;
-		keyboard_buffer.counter--;
-		//if(keyboard_buffer.counter == 0){
-		//if(keyboard_buffer.tail > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
-		if(keyboard_buffer.tail >= keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
-			keyboard_buffer.tail = keyboard_buffer.buf;
-		}
-		enable_int();
+	//disp_int(scan_code);
+
+	keyboard_buffer.tail++;
+	keyboard_buffer.counter--;
+	//if(keyboard_buffer.counter == 0){
+	//if(keyboard_buffer.tail > keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
+	if(keyboard_buffer.tail >= keyboard_buffer.buf + KEYBOARD_BUF_SIZE){
+		keyboard_buffer.tail = keyboard_buffer.buf;
 	}
+	enable_int();
 	
 	return scan_code;
 }
 
 void keyboard_read(TTY *tty)
 {
-	while(keyboard_buffer.counter <= 0){
-	}
+	while(keyboard_buffer.counter <= 0);
+
 	unsigned char scan_code = read_from_keyboard_buf();
 	// 从映射数组中解析出来的值
 	unsigned int key = 0;
@@ -113,7 +111,6 @@ void keyboard_read(TTY *tty)
 	}
 
 	if(key != PAUSE && key  != PRINT_SCREEN){
-
 		if(scan_code == SHIFT_R1 | scan_code == SHIFT_L1){
 			is_shift = 1;
 		}
@@ -175,22 +172,8 @@ void in_process(TTY *tty, unsigned int key)
 	unsigned char ch[2];
 	Memset(ch, 0, 2);
 	if(!(key & FLAG_EXT)){
-		// ch[0] = key;
-		// out_char(tty->console, key);
 		put_key(tty, key);
 
-		// disp_str(ch);
-		
-		// //disp_str("pos:");
-		// //disp_int(dis_pos);
-		// // 设置光标位置
-		// // Cursor Location High Register
-		// out_byte(0x3D4, 0x0E);
-		// out_byte(0x3D5, (dis_pos/2) >> 8);
-		// // Cursor Location Low Register
-		// out_byte(0x3D4, 0xF);
-		// out_byte(0x3D5, dis_pos/2);
-		
 		// 没有想到更好的方法，只能放到这个函数中，下策。
 		is_e0 = 0;
 		is_shift = 0;

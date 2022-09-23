@@ -100,11 +100,11 @@ void schedule_process()
 
 void clock_handler()
 {
+	if(key_pressed){
+		inform_int(TASK_TTY);
+	}
     // 调度进程
     schedule_process();
-//	disp_str("clock_handler:");
-//	disp_int(ticks);
-//	disp_str("\n");
 }
 
 Proc *pid2proc(int pid)
@@ -130,12 +130,3 @@ int proc2pid(Proc *proc)
 	unsigned int pid = proc->pid;
 	return pid;
 }
-
-//unsigned int v2l(int pid, void *offset)
-//{
-//	Proc *proc = pid2proc(pid);
-//	int ds = proc->s_reg.ds;
-//	int base = Seg2PhyAddrLDT(ds, proc);
-//	int line_addr = base + offset;
-//	return line_addr;
-//}

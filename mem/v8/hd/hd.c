@@ -364,7 +364,7 @@ int get_hd_ioctl(int device) {
 
 void wait_for() {
 	// 经过测试，小于10000会出现hd writing error
-    if (!waitfor(0x8, 0x8, 10000))
+    if (!waitfor(0x8, 0x8, 20000))
         panic("hd writing error.");
 }
 

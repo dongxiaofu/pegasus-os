@@ -91,6 +91,8 @@ void insertToDoubleLinkList(DoubleLinkList *list, void *element);
 // void insertToDoubleLinkList(DoubleLinkList *list, void *value);
 void *popFromDoubleLinkList(DoubleLinkList *list);
 
+void init_memory_block_desc(mem_block_desc *mem_block_decs_array);
+
 // 内存块种类数量
 #define MEM_BLOCK_DESC_KIND_NUM	10
 

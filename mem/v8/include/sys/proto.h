@@ -206,4 +206,6 @@ void update_cr3(unsigned int page_dir_table_phy_addr);
 void update_tss(unsigned int esp);
 unsigned int get_running_thread_pcb();
 
+// 测试数据
+void TestTTY();
 #endif
