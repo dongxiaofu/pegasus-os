@@ -22,7 +22,6 @@ int do_exec(Message *msg);
 void TaskMM();
 
 void TaskMM(){
-	while(1);
 	disp_str("MM:");
 	Proc *cur = get_running_thread_pcb();
 	disp_str("[");

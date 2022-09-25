@@ -105,7 +105,7 @@ void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int bu
 	// int bit_idx = 15;
 	int bit_idx = 0;
 	int k = 0;
-	//		disable_int();
+	disable_int();
 	for(int i = 0; i < map_length; i++){
 		char one_byte = bits[i];
 		for(int j = 0; j < 8; j++){
@@ -146,7 +146,7 @@ void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int bu
 	disp_str("k = ");
 	disp_int(k);
 	disp_str("\n");
-	//		enable_int();
+	enable_int();
 }
 
 // 不理解这个函数中的代码。
