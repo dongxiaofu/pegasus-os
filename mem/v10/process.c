@@ -93,8 +93,8 @@ void schedule_process()
 	proc_ready_table = next;	
 
 	if(next->pid == 6){
-//		dis_pos = 0;
-		disp_str(next->pid);
+		dis_pos = 0;
+		disp_int(next->pid);
 	}
 
 //	disp_str("switch_to\n");
