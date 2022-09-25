@@ -114,6 +114,12 @@ void task_fs()
 		int byte_rdwt = 0;
         // open
         pcaller = pid2proc(source);
+	
+		if(!(type == 0 || type == RESUME_PROC || type == OPEN || type == READ || type == WRITE || type == CLOSE)){
+
+			dis_pos = 0;
+			disp_int(type);
+		}
 
 		assert(type == 0 || type == RESUME_PROC || type == OPEN || type == READ || type == WRITE || type == CLOSE);
         switch (type)
