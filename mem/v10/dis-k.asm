@@ -4539,7 +4539,7 @@ c00049ca:	8b 45 f4             	mov    -0xc(%ebp),%eax
 c00049cd:	8b 80 20 01 00 00    	mov    0x120(%eax),%eax
 c00049d3:	83 ec 0c             	sub    $0xc,%esp
 c00049d6:	50                   	push   %eax
-c00049d7:	e8 b0 cb ff ff       	call   c000158c <disp_str>
+c00049d7:	e8 66 30 00 00       	call   c0007a42 <disp_int>
 c00049dc:	83 c4 10             	add    $0x10,%esp
 c00049df:	83 ec 08             	sub    $0x8,%esp
 c00049e2:	ff 75 f4             	pushl  -0xc(%ebp)
@@ -11695,7 +11695,7 @@ c000a249:	8b 10                	mov    (%eax),%edx
 c000a24b:	8b 45 f4             	mov    -0xc(%ebp),%eax
 c000a24e:	89 10                	mov    %edx,(%eax)
 c000a250:	8b 45 08             	mov    0x8(%ebp),%eax
-c000a253:	8b 55 fc             	mov    -0x4(%ebp),%edx
+c000a253:	8b 55 e8             	mov    -0x18(%ebp),%edx
 c000a256:	89 10                	mov    %edx,(%eax)
 c000a258:	90                   	nop
 c000a259:	c9                   	leave  

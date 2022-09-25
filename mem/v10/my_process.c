@@ -167,7 +167,8 @@ void build_process_kernel_stack(Proc *process)
 	*esi_in_thread_stack = *edi_in_thread_stack = \
 	*ebx_in_thread_stack = *ebp_in_thread_stack = 0;
 
-	process->stack = stack;
+	//process->stack = stack;
+	process->stack = ebp_in_thread_stack;
 }
 
 Proc *fork_process(unsigned int parent_pid)
