@@ -43,6 +43,7 @@ void test();
 void spurious_irq(int irq);
 
 
+void fork_restart();
 // 启动进程
 void restart(unsigned int esp);
 void delay(int time);
