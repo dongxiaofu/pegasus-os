@@ -162,7 +162,7 @@ void build_process_kernel_stack(Proc *process)
 	unsigned int *ebx_in_thread_stack = stack - 3;
 	unsigned int *ebp_in_thread_stack = stack - 4;
 
-	*eip_in_thread_stack = restart;
+	*eip_in_thread_stack = fork_restart;
 
 	*esi_in_thread_stack = *edi_in_thread_stack = \
 	*ebx_in_thread_stack = *ebp_in_thread_stack = 0;
