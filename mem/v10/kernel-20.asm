@@ -39,6 +39,7 @@ extern hd_handler
 global disp_str
 global disp_str_colour
 global InterruptTest
+global fork_restart
 global restart
 global in_byte
 global out_byte
@@ -551,6 +552,17 @@ sys_call:
 	;iretd
 
 ; 系统调用中断 end
+
+; 启动子进程时使用
+fork_restart:
+	; 出栈 	
+	pop gs
+	pop fs
+	pop es
+	pop ds
+
+	popad
+	iretd
 
 ; 启动进程
 restart:
