@@ -1585,7 +1585,9 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
     else
     {
         receiver->p_flag = RECEIVING;
+        assert(receiver->p_flag == RECEIVING);
         receiver->p_msg = msg;
+        assert(receiver->p_flag == RECEIVING);
 
         if (sender_pid == ANY)
         {
