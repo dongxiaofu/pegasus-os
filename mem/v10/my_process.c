@@ -64,8 +64,8 @@ Proc *clone_pcb(Proc *parent_process)
 
 	process->pid = ++pid;
 	process->parent_pid = parent_process->parent_pid;
-	unsigned int stack_offset = (unsigned int)(parent_process + PAGE_SIZE) - (unsigned int)parent_process->stack;
-	process->stack = (unsigned int)(process + PAGE_SIZE) - stack_offset;
+//	unsigned int stack_offset = (unsigned int)(parent_process + PAGE_SIZE) - (unsigned int)parent_process->stack;
+//	process->stack = (unsigned int)(process + PAGE_SIZE) - stack_offset;
 
 	// 子进程必须有独立的页表和虚拟地址空间
 	// 建立进程的页表
