@@ -76,7 +76,7 @@ void TaskMM(){
 		}
 
 		if(reply){
-    	//		send_rec(SEND, m, source);
+    			send_rec(SEND, m, source);
 		}
 	}
 }
