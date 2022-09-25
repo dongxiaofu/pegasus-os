@@ -98,7 +98,8 @@ void kernel_thread_d(void *msg)
 void user_proc_a()
 {
 	disp_str("I am user_proc_a\n");
-	TestTTY();
+	INIT_fork();
+//	TestTTY();
 	// TestFS();
 	while(1);
 }
