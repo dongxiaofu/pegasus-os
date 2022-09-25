@@ -152,8 +152,8 @@ void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int bu
 // 不理解这个函数中的代码。
 void build_process_kernel_stack(Proc *process)
 {
-	unsigned int *stack = (unsigned int *)(process + PAGE_SIZE - sizeof(Regs));
-//	unsigned int *stack = (unsigned int *)((unsigned int)process + PAGE_SIZE - sizeof(Regs));
+//	unsigned int *stack = (unsigned int *)(process + PAGE_SIZE - sizeof(Regs));
+	unsigned int *stack = (unsigned int *)((unsigned int)process + PAGE_SIZE - sizeof(Regs));
 	
 	// 这种corner case，我不喜欢处理。
 	unsigned int *eip_in_thread_stack = stack - 0;
