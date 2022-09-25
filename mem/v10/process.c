@@ -94,7 +94,7 @@ void schedule_process()
 
 	if(next->pid == 6){
 //		dis_pos = 0;
-//		disp_str(next->pid);
+		disp_str(next->pid);
 	}
 
 //	disp_str("switch_to\n");
