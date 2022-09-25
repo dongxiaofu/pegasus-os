@@ -709,7 +709,7 @@ void INIT_fork()
 	if(pid > 0){
 		j++;
 		char buf1[40] = "Parent\n";
-	//	write(fd_stdout, buf1, Strlen(buf1));			
+		write(fd_stdout, buf1, Strlen(buf1));			
 //		write(fd_stdout, buf1, Strlen(buf1));			
 //		write(fd_stdout, buf1, Strlen(buf1));			
 		for(int i = 0; i < 5; i++){
