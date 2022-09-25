@@ -189,6 +189,10 @@ void thread_start(thread_function func, char *thread_arg, char *thread_name);
 // 进程
 VirtualMemoryAddress *create_user_process_address_space();
 void user_process(Func func, void *arg);
+Proc *clone_pcb(Proc *parent_process);
+void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int buf);
+void build_process_kernel_stack(Proc *process);
+Proc *fork_process(unsigned int parent_pid);
 void process_execute(Func func, char *thread_arg, char *process_name);
 
 /****************************************thread end*****************************************/

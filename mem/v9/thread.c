@@ -26,6 +26,8 @@ Proc *thread_init()
 	proc->stack = (unsigned int *)((unsigned int)proc + PAGE_SIZE);
 	proc->page_directory = 0x0;
 	proc->pid = ++pid;
+	proc->parent_pid = -1;
+	proc->p_flag = RUNNING;
 
 	return proc;
 }

@@ -31,7 +31,7 @@ void kernel_main()
 //	process_execute(TaskSys, "task_sys\n", "TaskSys");
 	process_execute(TaskHD, "task_hd\n", "TaskHD");
 	process_execute(task_fs, "task_fs\n", "task_fs");
-//	process_execute(TaskMM, "task_mm\n", "TaskMM");
+	process_execute(TaskMM, "task_mm\n", "TaskMM");
 //	thread_start(kernel_thread_a, "thread a\n");
 //	thread_start(kernel_thread_b, "thread b\n");
 //	thread_start(kernel_thread_c, "thread c\n");
@@ -98,6 +98,7 @@ void kernel_thread_d(void *msg)
 void user_proc_a()
 {
 	disp_str("I am user_proc_a\n");
+//	INIT_fork();
 	TestTTY();
 	// TestFS();
 	while(1);

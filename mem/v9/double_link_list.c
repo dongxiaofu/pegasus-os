@@ -125,3 +125,15 @@ void *popFromDoubleLinkList(DoubleLinkList *list)
 	return element;
 //	return element->val;
 }
+
+unsigned char findElementInList(void *element, DoubleLinkList list)
+{
+	ListElement *cur = list.head.next;
+	while(cur != &list.tail){
+		if((unsigned int)cur == (unsigned int)element){
+			return 1;
+		}
+	}
+
+	return 0;
+}

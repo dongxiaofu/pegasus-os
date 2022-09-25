@@ -90,6 +90,7 @@ void insertToDoubleLinkList(DoubleLinkList *list, void *element);
 // void appendToDoubleLinkList(DoubleLinkList *list, void *value);
 // void insertToDoubleLinkList(DoubleLinkList *list, void *value);
 void *popFromDoubleLinkList(DoubleLinkList *list);
+unsigned char findElementInList(void *element, DoubleLinkList list);
 
 void init_memory_block_desc(mem_block_desc *mem_block_decs_array);
 

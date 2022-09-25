@@ -85,7 +85,7 @@ int c = 0;
 void task_fs()
 {
     Proc *cur = get_running_thread_pcb();
-    init_fs();
+//    init_fs();
 
     Message *msg = (Message *)sys_malloc(sizeof(Message));
     Message *fs_msg  = (Message *)sys_malloc(sizeof(Message));

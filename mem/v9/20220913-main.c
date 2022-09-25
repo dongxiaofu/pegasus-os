@@ -696,56 +696,39 @@ void INIT_fork()
 	int fd_stdin = open(tty1, O_RDWR);
 //	int fd_stdout = 0;
 	char buf[40] = "INIT is running\n";
+	Printf(buf);
 	Memset(buf, 0, Strlen(buf));
-	//Printf("fd_stdout = %d\n", fd_stdout);
-	//Printf("fd_stdout = %d\n", fd_stdout);
-	//Printf("fd_stdin = %d\n", fd_stdin);
-//	while(1){}
-//	write(fd_stdout, buf, 40);
-//	write(fd_stdout, "\n", 1);
-//	write(fd_stdout, "T", 1);
-//	dis_pos = 12000 - 128 + 180 * 1 + 60;
-//	disp_str_colour("read over2\n", 0x0E);
 	read(fd_stdin, buf, 40);
-//	dis_pos = 12000 - 128 + 180 * 1 + 60;
-//	disp_str_colour("read over\n", 0x0E);
-	write(fd_stdout, buf, 40);
-//	while(1){};
-int j = 0;
-			int pid = fork();
-		
-			if(pid > 0){
-				j++;
-				char buf1[40] = "Parent\n";
-				write(fd_stdout, buf1, Strlen(buf1));			
-		write(fd_stdout, buf1, Strlen(buf1));			
-		write(fd_stdout, buf1, Strlen(buf1));			
-				for(int i = 0; i < 5; i++){
-					j++;
-					//write(fd_stdout, buf1, Strlen(buf1));			
-				}
-				//spin("parent\n");
-			}else{	
-			j++;		//	spin("child");
-			j += 2;
-		//		int fd2 = open("dev_tty0", O_RDWR);
-				char buf2[40] = "Child\n";
-			write(fd_stdout, buf2, Strlen(buf2));			
-			write(fd_stdout, buf2, Strlen(buf2));			
-			write(fd_stdout, buf2, Strlen(buf2));			
-//		dis_pos = 12000 - 128 + 10 + 160 * 8;
-//		disp_str_colour("j = ", 0x0C);
-//		disp_int(j);
-		char buf4[] = "Child j = ";
-//		
-		write(fd_stdout, buf4, Strlen(buf4));
-				spin("child\n");
-			}
+	Printf(buf);
 
-//		dis_pos = 12000 - 128 + 10 + 160 * 7;
-//		disp_str_colour("j = ", 0x0C);
-//		disp_int(j);
-				spin("parent\n");
+//	write(fd_stdout, buf, 40);
+
+	int j = 0;
+	int pid = fork();
+
+	if(pid > 0){
+		j++;
+		char buf1[40] = "Parent\n";
+	//	write(fd_stdout, buf1, Strlen(buf1));			
+//		write(fd_stdout, buf1, Strlen(buf1));			
+//		write(fd_stdout, buf1, Strlen(buf1));			
+		for(int i = 0; i < 5; i++){
+			j++;
+			//write(fd_stdout, buf1, Strlen(buf1));			
+		}
+		//spin("parent\n");
+	}else{	
+		delay(10);
+		j++;		//	spin("child");
+		j += 2;
+//		int fd2 = open("dev_tty0", O_RDWR);
+		char buf2[40] = "Child\n";
+		write(fd_stdout, buf2, Strlen(buf2));			
+	//	write(fd_stdout, buf2, Strlen(buf2));			
+	//	write(fd_stdout, buf2, Strlen(buf2));			
+	}
+
+//	spin("parent\n");
 }
 
 
@@ -1702,6 +1685,7 @@ int unblock(Proc *proc)
     // do nothing
     assert(proc->p_flag == RUNNING);
 	
+//	if(findElementInList(&proc->tag, pcb_list) == 1)	return 0;
 	insertToDoubleLinkList(&pcb_list, &proc->tag);
 
     return 0;

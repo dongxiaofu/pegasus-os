@@ -31,7 +31,7 @@ typedef struct _MemPool
 typedef struct _VirtualMemoryAddress
 {
 	Bitmap map;
-	unsigned start_addr;
+	unsigned int start_addr;
 }VirtualMemoryAddress;
 
 // 内核内存池

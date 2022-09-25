@@ -41,61 +41,31 @@ void schedule_process()
 	cur = (Proc *)get_running_thread_pcb();
 
 	if(isListEmpty(&pcb_list) == 1){
-//		disp_str("switch_to?No\n");
 		next = cur;
-//		disp_str("switch_to?No2\n");
 	}else{
-//		disp_str("switch_to?Yes\n");
-		// unsigned int element = (unsigned int)popFromDoubleLinkList(&pcb_list);
 		unsigned int element = (unsigned int)popFromDoubleLinkList(&pcb_list);
 		Proc *tmp = (Proc *)(element & 0xFFFFF000);
 		if(tmp != 0x0){
 			next = tmp;
 			next->p_flag = RUNNING;
-			if(strcmp(next->name, "task_fs") == 0){
-		//		disp_str("next:");
-		//		disp_int(6);
-		//		disp_str(next->name);
-		//	//	disp_int((unsigned int)next);
-		//		disp_str("\n");
-			}
-//			disp_int((unsigned int)next);
-//			disp_str("\n");
 		}
-//		disp_str("switch_to?Yes2\n");
 	}
 
 	if(cur->p_flag == RUNNING){
 		insertToDoubleLinkList(&pcb_list, &cur->tag);
-//		disp_str("insertToDoubleLinkList:");
-//		disp_int((unsigned int)cur);
-//		disp_str("\n");
-//		disp_str(cur->name);
-//		disp_str("\n");
 	}
 
-//	disp_str("switch_to?No3\n");
 	// 进程，切换页目录表。
 	int page_directory = 0x100000;
 	if(next->page_directory != 0x0){
-//		disp_str("update_tss\n");
 		update_tss((unsigned int)next + PAGE_SIZE);
-//		disp_str("update_cr3\n");
 		update_cr3((unsigned int)next->page_directory);
-//		disp_str("update_cr3 end\n");
 	}else{
-//		disp_str("switch_to?No4\n");
-		//asm volatile ("movl %0, %%cr3" : : "r" (page_directory) : "memory");
 		update_cr3(page_directory);
-//		disp_str("switch_to?No5\n");
 	}
 
 	proc_ready_table = next;	
-
-
-//	disp_str("switch_to\n");
 	switch_to(cur, next);
-//	disp_str("switch_to 2\n");
 }
 
 void clock_handler()
