@@ -60,6 +60,7 @@ void user_process(Func func, void *arg)
 Proc *clone_pcb(Proc *parent_process)
 {
 	Proc *process = alloc_memory(1, KERNEL);
+	Memset(process, 0, PAGE_SIZE);
 	// Memcpy(process, parent_process, sizeof(Proc));
 	Memcpy(process, parent_process, PAGE_SIZE);
 
