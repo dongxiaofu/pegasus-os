@@ -710,11 +710,11 @@ void INIT_fork()
 		j++;
 		char buf1[40] = "Parent\n";
 		write(fd_stdout, buf1, Strlen(buf1));			
-//		write(fd_stdout, buf1, Strlen(buf1));			
-//		write(fd_stdout, buf1, Strlen(buf1));			
+		write(fd_stdout, buf1, Strlen(buf1));			
+		write(fd_stdout, buf1, Strlen(buf1));			
 		for(int i = 0; i < 5; i++){
 			j++;
-			//write(fd_stdout, buf1, Strlen(buf1));			
+			write(fd_stdout, buf1, Strlen(buf1));			
 		}
 		//spin("parent\n");
 	}else{	

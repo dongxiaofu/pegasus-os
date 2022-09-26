@@ -12,7 +12,9 @@
 int do_fork(Message *msg)
 {
 	int parent_pid = msg->source;
+	disable_int();
 	Proc *child_process = fork_process(parent_pid);
+	enable_int();
 	unsigned int child_pid = child_process->pid;
 
     // 把子进程的pid返回给父进程

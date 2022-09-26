@@ -34,7 +34,9 @@ void user_process(Func func, void *arg)
 {
 	Proc *process = (Proc *)get_running_thread_pcb();
 	process->stack = (unsigned int *)((unsigned int)process + PAGE_SIZE);
-	process->stack -= sizeof(Regs);
+	// 费了很大劲才找出的错误。
+	// process->stack -= sizeof(Regs);
+	process->stack = (unsigned int *)(((unsigned int)process->stack) - sizeof(Regs));
 	Regs *process_stack = (Regs *)process->stack;
 	// 为进程第一次启动准备数据
 	unsigned char rpl = 0;
@@ -107,7 +109,7 @@ void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int bu
 	// int bit_idx = 15;
 	int bit_idx = 0;
 	int k = 0;
-	disable_int();
+//	disable_int();
 	for(int i = 0; i < map_length; i++){
 		char one_byte = bits[i];
 		for(int j = 0; j < 8; j++){
@@ -148,7 +150,7 @@ void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int bu
 	disp_str("k = ");
 	disp_int(k);
 	disp_str("\n");
-	enable_int();
+//	enable_int();
 }
 
 // 不理解这个函数中的代码。

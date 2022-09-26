@@ -79,7 +79,8 @@ void schedule_process()
 	int page_directory = 0x100000;
 	if(next->page_directory != 0x0){
 //		disp_str("update_tss\n");
-		update_tss((unsigned int)next + PAGE_SIZE);
+		// update_tss((unsigned int)next + PAGE_SIZE);
+		update_tss((unsigned int)next);
 //		disp_str("update_cr3\n");
 		update_cr3((unsigned int)next->page_directory);
 //		disp_str("update_cr3 end\n");

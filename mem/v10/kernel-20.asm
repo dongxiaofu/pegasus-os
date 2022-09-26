@@ -866,6 +866,7 @@ update_tss:
 	mov ebp, esp
 
 	mov eax, [ebp+8]
+	mov eax, [eax]
 	mov [tss+4], eax
 	
 	mov esp, ebp
