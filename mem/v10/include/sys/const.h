@@ -176,9 +176,9 @@
 
 // 进程相关 start
 // 用户进程的数量
-#define USER_PROC_NUM 2
+#define USER_PROC_NUM 4
 // 系统任务的数量
-#define TASK_PROC_NUM 2
+#define TASK_PROC_NUM 4
 // 用fork创建的用户进程的数量
 // todo 设置成32，合适吗？
 #define FORKED_USER_PROC_NUM 0

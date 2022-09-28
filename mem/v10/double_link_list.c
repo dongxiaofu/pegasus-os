@@ -77,13 +77,32 @@ void initDoubleLinkList(DoubleLinkList *list)
 // char isListEmpty(DoubleLinkList list)
 char isListEmpty(DoubleLinkList *list)
 {
+	unsigned int data;
+	Memcpy(&data, ((unsigned int)(&(list->head))) + 4, 4);
+	if(data == 12){
+		asm ("xchgw %bx, %bx");
+	}
 	// return list->head->next == list->tail;
 	// if(list.head.next == &list.tail && list.tail.prev == &list.head){
-	if(list->head.next == &list->tail){
+	if((list->head).next == &list->tail){
 		return 1;
 	}else{
 		return 0;
 	}
+}
+
+char findElementInList(DoubleLinkList *list, void *value)
+{
+	ListElement *cur = &list->head;
+	ListElement *target = (ListElement *)value;
+	while(cur != &list->tail){
+		if(target == cur){
+			return 1;
+		}
+		cur = cur->next;
+	}
+
+	return 0;
 }
 
 void appendToDoubleLinkList(DoubleLinkList *list, void *value)
@@ -103,6 +122,8 @@ void insertToDoubleLinkList(DoubleLinkList *list, void *value)
 {
 //	ListElement *element = (ListElement *)MALLOC(sizeof(struct _ListElement));
 //	element->val = value;
+	
+	if(findElementInList(list, value) == 1)	return;
 
 	// (ListElement *) element = (ListElement *)value;
 	ListElement *element = (ListElement *)value;
@@ -118,6 +139,8 @@ void *popFromDoubleLinkList(DoubleLinkList *list)
 	if(isListEmpty(list) == 1)	return 0x0;
 
 	ListElement *element = list->tail.prev;
+	
+	if(list->tail.prev == 0x0)	return 0x0;
 
 	if(list->tail.prev->prev != 0x0)	list->tail.prev->prev->next = &list->tail;
 	list->tail.prev = list->tail.prev->prev;

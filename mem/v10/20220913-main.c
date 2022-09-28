@@ -705,25 +705,38 @@ void INIT_fork()
 
 	int j = 0;
 	int pid = fork();
+	delay(1);
+//	pid = 0;
+//	Printf("pid\n");
 
 	if(pid > 0){
+	Printf("pid0\n");
+		asm ("xchgw %bx, %bx");		
+//		while(1);
+	delay(10);
 		j++;
 		char buf1[40] = "Parent\n";
 		write(fd_stdout, buf1, Strlen(buf1));			
-		write(fd_stdout, buf1, Strlen(buf1));			
-		write(fd_stdout, buf1, Strlen(buf1));			
-		for(int i = 0; i < 5; i++){
-			j++;
-			write(fd_stdout, buf1, Strlen(buf1));			
-		}
+		while(1);
+//		write(fd_stdout, buf1, Strlen(buf1));			
+//		write(fd_stdout, buf1, Strlen(buf1));			
+//		for(int i = 0; i < 5; i++){
+//			j++;
+//			write(fd_stdout, buf1, Strlen(buf1));			
+//		}
 		//spin("parent\n");
 	}else{	
-		delay(10);
+		asm ("xchgw %bx, %bx");		
+	disp_str("pid01\n");
+//	Printf("pid1\n");
+	//	delay(10);
 		j++;		//	spin("child");
 		j += 2;
 //		int fd2 = open("dev_tty0", O_RDWR);
 		char buf2[40] = "Child\n";
+		asm ("xchgw %bx, %bx");		
 		write(fd_stdout, buf2, Strlen(buf2));			
+		while(1);
 	//	write(fd_stdout, buf2, Strlen(buf2));			
 	//	write(fd_stdout, buf2, Strlen(buf2));			
 	}
@@ -1367,6 +1380,9 @@ int dead_lock(int src, int dest)
 // send_msg 通过sys_call调用
 int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 {
+	if(receiver_pid == 6){
+		disp_int(receiver_pid);
+	}
     Proc *receiver = pid2proc(receiver_pid);
     int sender_pid = proc2pid(sender);
         // 计算msg的线性地址
@@ -1683,6 +1699,9 @@ int block(Proc *proc)
 // 解除阻塞
 int unblock(Proc *proc)
 {
+	if(proc->pid == 6){
+		disp_int(6);
+	}
     // do nothing
     assert(proc->p_flag == RUNNING);
 	

@@ -36,7 +36,7 @@ void check()
 void schedule_process()
 {
     Proc *next, *cur;
-	
+
 	// 脏数据太多，怎么办？
 	cur = (Proc *)get_running_thread_pcb();
 
@@ -52,10 +52,10 @@ void schedule_process()
 		if(tmp != 0x0){
 			next = tmp;
 			next->p_flag = RUNNING;
-			if(strcmp(next->name, "task_fs") == 0){
+				if(next->pid == 6){
 		//		disp_str("next:");
 		//		disp_int(6);
-		//		disp_str(next->name);
+				disp_str(next->name);
 		//	//	disp_int((unsigned int)next);
 		//		disp_str("\n");
 			}
@@ -127,7 +127,7 @@ Proc *pid2proc(int pid)
 		cur = cur->next;
 	}
 
-	return proc;
+	return 0x0;
 }
 
 int proc2pid(Proc *proc)

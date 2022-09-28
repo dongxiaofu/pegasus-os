@@ -158,7 +158,9 @@ unsigned int get_virtual_address(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
 	}else{
 		// TODO 某个用户进程的虚拟地址池
 		// pool = (VirtualMemoryAddress)current_thread->user_virtual_memory_address;
-		Memcpy(&pool, current_thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
+//		Memcpy(&pool, current_thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
+		pool = *((VirtualMemoryAddress *)current_thread->user_virtual_memory_address);
+		
 	}
 	
 	Bitmap map = pool.map;
@@ -345,6 +347,9 @@ unsigned int sys_malloc(unsigned int size)
 		mem_block_desc *desc = (mem_block_desc *)alloc_memory(1,pool_type);
 		Memcpy(desc,desc_array + index, sizeof(mem_block_desc)); 
 		// if(isListEmpty(&desc->free_list) == 1){
+		if(&(desc_array[index].free_list) == 8){
+			disp_int(&(desc_array[index].free_list));
+		}
 		if(isListEmpty(&(desc_array[index].free_list)) == 1){
 			unsigned int page_addr = alloc_memory(1, pool_type);
 			// TODO 没有做容错处理。
@@ -363,6 +368,8 @@ unsigned int sys_malloc(unsigned int size)
 
 		block_addr = (unsigned int)popFromDoubleLinkList(&(desc_array[index].free_list));
 		addr = block_addr;
+	
+		assert(block_addr != 0x0);
 		
 		arena *a = block2arena((mem_block *)block_addr);
 		a->cnt--;
@@ -399,8 +406,7 @@ void free_a_page(unsigned int vaddr, MEMORY_POOL_TYPE pool_type)
 	int phy_page_index = phy_addr / PAGE_SIZE;
 	set_bit_val(&pool->map, phy_page_index, 0);
 	// 释放页表	
-	remove_map_entry(vaddr);
-}
+	remove_map_entry(vaddr); }
 
 void sys_free(unsigned int addr, unsigned int size)
 {

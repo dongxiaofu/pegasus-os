@@ -45,7 +45,9 @@
 
 // 全局相关 start
 EXTERN int dis_pos;
-EXTERN unsigned int ticks;
+EXTERN unsigned long long int ticks;
+// TODO 测试用，要删除
+EXTERN unsigned int test_ticks;
 EXTERN unsigned int k_reenter;
 EXTERN unsigned int counter;
 EXTERN unsigned int key_pressed;

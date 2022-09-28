@@ -55,6 +55,7 @@ void user_process(Func func, void *arg)
 	process_stack->gs = gs;//GS_SELECTOR & (0xFFF9);
 	process_stack->eip = func;
 	process_stack->eflags = eflags;	
+	process_stack->esp = (0xC0000000 - 0x400 * 0x400);
 	// 第一次启动进程
 	restart((unsigned int)process_stack);
 }
@@ -109,7 +110,7 @@ void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int bu
 	// int bit_idx = 15;
 	int bit_idx = 0;
 	int k = 0;
-//	disable_int();
+	disable_int();
 	for(int i = 0; i < map_length; i++){
 		char one_byte = bits[i];
 		for(int j = 0; j < 8; j++){
@@ -150,26 +151,44 @@ void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int bu
 	disp_str("k = ");
 	disp_int(k);
 	disp_str("\n");
-//	enable_int();
+	enable_int();
 }
 
 // 不理解这个函数中的代码。
 void build_process_kernel_stack(Proc *process)
 {
+	unsigned int *stack = (unsigned int *)((unsigned int)process + PAGE_SIZE);
+	while(1){
+		if(*stack == 0x38){
+			break;
+		}
+
+		stack--;
+	}
+
+	// 设置tss.esp0
+	process->tss_esp0 = stack;
+
 //	unsigned int *stack = (unsigned int *)(process + PAGE_SIZE - sizeof(Regs));
-	unsigned int *stack = (unsigned int *)((unsigned int)process + PAGE_SIZE - sizeof(Regs));
+//	unsigned int *stack = (unsigned int *)((unsigned int)process + PAGE_SIZE - sizeof(Regs));
+//	stack = (unsigned int *)((unsigned int)process + PAGE_SIZE - sizeof(Regs));
+	unsigned int *eax_in_process_stack = stack + 11;
 	
 	// 这种corner case，我不喜欢处理。
-	unsigned int *eip_in_thread_stack = stack - 0;
-	unsigned int *esi_in_thread_stack = stack - 1;
-	unsigned int *edi_in_thread_stack = stack - 2;
-	unsigned int *ebx_in_thread_stack = stack - 3;
-	unsigned int *ebp_in_thread_stack = stack - 4;
+	unsigned int *eip_in_thread_stack = stack - 1;
+	unsigned int *esi_in_thread_stack = stack - 2;
+	unsigned int *edi_in_thread_stack = stack - 3;
+	unsigned int *ebx_in_thread_stack = stack - 4;
+	unsigned int *ebp_in_thread_stack = stack - 5;
 
 	*eip_in_thread_stack = fork_restart;
 
 	*esi_in_thread_stack = *edi_in_thread_stack = \
 	*ebx_in_thread_stack = *ebp_in_thread_stack = 0;
+
+	*eax_in_process_stack = 0;
+
+	
 
 	//process->stack = stack;
 	process->stack = ebp_in_thread_stack;
@@ -184,10 +203,10 @@ Proc *fork_process(unsigned int parent_pid)
 	build_process_kernel_stack(child_process);
 
 	// 加入链表，在调度模块中处理
-	if(child_process->p_flag == RUNNING){
+//	if(child_process->p_flag == RUNNING){
 		Memset(&child_process->tag, 0, sizeof(child_process->tag));
-		appendToDoubleLinkList(&pcb_list, (ListElement *)(&child_process->tag));	
-	}
+//		appendToDoubleLinkList(&pcb_list, (ListElement *)(&child_process->tag));	
+//	}
 
 	Memset(&child_process->all_tag, 0, sizeof(child_process->all_tag));
 	appendToDoubleLinkList(&all_pcb_list, (ListElement *)(&child_process->all_tag));	
@@ -226,6 +245,11 @@ void process_execute(Func func, char *thread_arg, char *process_name)
 	thread_stack->func_arg = thread_arg;
 	thread_stack->pcb_addr = (unsigned int)process;
 	thread_stack->ebp = thread_stack->ebx = thread_stack->edi = thread_stack->esi = 0;
+	if(isListEmpty(&pcb_list) == 1){
+//		Proc *kernel_thread = (Proc *)0xc009f000;
+//		appendToDoubleLinkList(&pcb_list, (ListElement *)(&kernel_thread->tag));	
+//		appendToDoubleLinkList(&all_pcb_list, (ListElement *)(&kernel_thread->all_tag));	
+	}
 	// 加入链表，在调度模块中处理
 	appendToDoubleLinkList(&pcb_list, (ListElement *)(&process->tag));	
 	appendToDoubleLinkList(&all_pcb_list, (ListElement *)(&process->all_tag));	

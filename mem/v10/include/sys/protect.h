@@ -85,6 +85,7 @@ typedef struct _arena
 
 void initDoubleLinkList(DoubleLinkList *list);
 char isListEmpty(DoubleLinkList *list);
+char findElementInList(DoubleLinkList *list, void *value);
 void appendToDoubleLinkList(DoubleLinkList *list, void *element);
 void insertToDoubleLinkList(DoubleLinkList *list, void *element);
 // void appendToDoubleLinkList(DoubleLinkList *list, void *value);

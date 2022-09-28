@@ -573,6 +573,7 @@ restart:
 	pop ds
 
 	popad
+	xhcg bx, bx
 	iretd
 
 ; 恢复进程

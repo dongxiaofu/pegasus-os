@@ -66,6 +66,7 @@ typedef struct _thread_stack
 // 进程表
 typedef struct proc{
 		unsigned int *stack;
+		unsigned int *tss_esp0;		// fork出来的子进程需要用这个。
 		unsigned int page_directory;
 		unsigned int user_virtual_memory_address;
 		mem_block_desc mem_block_desc_array[MEM_BLOCK_DESC_KIND_NUM];

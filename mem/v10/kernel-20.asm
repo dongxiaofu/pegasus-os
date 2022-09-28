@@ -311,6 +311,8 @@ hwint0:
 	push fs
 	push gs
 
+	;inc qword [ticks]
+
 	mov dx, ss
 	mov ds, dx
 	mov es, dx
@@ -334,7 +336,7 @@ hwint0:
 	call clock_handler
 	;mov al, 11111000b
 	;out 21h, al
-	cli	
+	;cli	
 	;cmp dword [k_reenter], 0
 	;jne reenter_restore
 	jmp restore
@@ -374,7 +376,7 @@ hwint1:
 .1:
 	;mov esp, StackTop
 .2:
-	sti	
+	;sti	
 	;inc dword [k_reenter]
 	; 中间代码
 	;mov esp, StackTop
@@ -383,7 +385,7 @@ hwint1:
 	;;;;;xhcg bx, bx
 	mov al, 11111000b
 	out 21h, al
-	cli
+	;cli
 	;dec dword [k_reenter]
 	;;;;;xhcg bx, bx
 	; 没有比较，为啥用jne？因为这是修改之前的代码后遗漏的地方.
@@ -434,7 +436,7 @@ hwint14:
 .1:
 	;mov esp, StackTop
 .2:
-	sti	
+	;sti	
 	; 调用硬盘中断
 	;call hd_handle
 	call hd_handler
@@ -445,7 +447,7 @@ hwint14:
 	mov al, 10111111b
 	out 0xA1, al	
 
-	cli
+	;cli
 	cmp dword [k_reenter], 0
 	jne reenter_restore
 	jmp restore
@@ -486,7 +488,7 @@ sys_call:
 .1:
 ;	mov esp, StackTop 
 .2:
-	sti
+	;sti
 	;inc dword [k_reenter]
 	; 中间代码
 	; 需要切换到内核栈吗？
@@ -532,7 +534,7 @@ sys_call:
 	; 进程C的进程表。本来想恢复B，却恢复了C。
 	; 8. 我模拟的过程，可能和实际执行情况不同，但足以证明：恢复进程的操作如果不是原子操作，会导致
 	; 非常混乱的执行过程。总之，不是预期的、正确的执行过程。
-	cli
+	;cli
 	cmp dword [k_reenter], 0
 	;je restore
 	jne reenter_restore
@@ -555,6 +557,15 @@ sys_call:
 
 ; 启动子进程时使用
 fork_restart:
+	cli
+	; 修改tss.esp0
+	mov eax, esp
+	and eax, 0xFFFFF000
+	sub esp, 20
+	add eax, 4
+	push eax
+	call update_tss
+	add esp, 24
 	; 出栈 	
 	pop gs
 	pop fs
