@@ -23,8 +23,8 @@ void check()
         if (p->has_int_msg != 0 && p->has_int_msg != 1)
         {
             dis_pos = 10 * 1024 + 2;
-            disp_str_colour("error", 0xA);
-            disp_int(p->p_flag);
+          //  disp_str_colour("error", 0xA);
+           // disp_int(p->p_flag);
             while (1)
             {
             }
@@ -35,48 +35,143 @@ void check()
 // 进程调度次数
 void schedule_process()
 {
+//	test_ticks++;
+//	dis_pos = 0;
+//	for(int i = 0; i < 160; i++){
+//		disp_str(" ");
+//		dis_pos++;
+//	}
+//	
+//	dis_pos = 0;
+//	disp_int(test_ticks);
+//	if(test_ticks == 0x2F){
+//		dis_pos = 0;
+//	}
+
+
+	unsigned int max_pid = 5;
+	int page_directory = 0x100000;
+
     Proc *next, *cur;
+
+	next = 0x0;
 
 	// 脏数据太多，怎么办？
 	cur = (Proc *)get_running_thread_pcb();
 
+	if(cur == 0xc0234000 && cur->parent_pid != -1){
+		int k = 4;
+		int b = k;
+	}
+	// if(cur == 0xc0234000 && cur->wait_status == 66){
+	if(cur == 0xc0234000){
+		int k = 4;
+		int b = k;
+	}
+
 	if(isListEmpty(&pcb_list) == 1){
-//		disp_str("switch_to?No\n");
-		next = cur;
-//		disp_str("switch_to?No2\n");
-	}else{
-//		disp_str("switch_to?Yes\n");
-		// unsigned int element = (unsigned int)popFromDoubleLinkList(&pcb_list);
-		unsigned int element = (unsigned int)popFromDoubleLinkList(&pcb_list);
-		Proc *tmp = (Proc *)(element & 0xFFFFF000);
-		if(tmp != 0x0){
-			next = tmp;
-			next->p_flag = RUNNING;
-				if(next->pid == 6){
-		//		disp_str("next:");
-		//		disp_int(6);
-				disp_str(next->name);
-		//	//	disp_int((unsigned int)next);
-		//		disp_str("\n");
+		if(cur->pid == 0){
+			next = cur;
+			appendToDoubleLinkList(&pcb_list, &cur->tag);
+		}else{
+			if(cur->p_flag == RUNNING){
+				appendToDoubleLinkList(&pcb_list, &cur->tag);
+				unsigned int element = (unsigned int)popFromDoubleLinkList(&pcb_list);
+				Proc *tmp = (Proc *)(element & 0xFFFFF000);
+				if(tmp != 0x0){
+					if(tmp->pid == 0){
+						tmp->p_flag = HANGING;
+						if(isListEmpty(&pcb_list) == 0){
+							element = (unsigned int)popFromDoubleLinkList(&pcb_list);
+							tmp = (Proc *)(element & 0xFFFFF000);
+							if(tmp != 0x0){
+								next = tmp;
+								next->p_flag = RUNNING;
+							}	
+						}else{
+							next = tmp;
+							next->p_flag = RUNNING;
+						}
+					}else{
+						next = tmp;
+						next->p_flag = RUNNING;
+					}
+				}
 			}
-//			disp_int((unsigned int)next);
-//			disp_str("\n");
 		}
-//		disp_str("switch_to?Yes2\n");
+	}else{
+		if(cur->p_flag == RUNNING){
+			appendToDoubleLinkList(&pcb_list, &cur->tag);
+			unsigned int element = (unsigned int)popFromDoubleLinkList(&pcb_list);
+			Proc *tmp = (Proc *)(element & 0xFFFFF000);
+			if(tmp != 0x0){
+				if(tmp->pid == 0){
+					tmp->p_flag = HANGING;
+					if(isListEmpty(&pcb_list) == 0){
+						element = (unsigned int)popFromDoubleLinkList(&pcb_list);
+						tmp = (Proc *)(element & 0xFFFFF000);
+						if(tmp != 0x0){
+							next = tmp;
+							next->p_flag = RUNNING;
+						}	
+					}else{
+						next = tmp;
+						next->p_flag = RUNNING;
+					}
+				}else{
+					next = tmp;
+					next->p_flag = RUNNING;
+				}
+			}
+		}else{
+			unsigned int element = (unsigned int)popFromDoubleLinkList(&pcb_list);
+			Proc *tmp = (Proc *)(element & 0xFFFFF000);
+			if(tmp != 0x0){
+				if(tmp->pid == 0){
+					tmp->p_flag = HANGING;
+					if(isListEmpty(&pcb_list) == 0){
+						element = (unsigned int)popFromDoubleLinkList(&pcb_list);
+						tmp = (Proc *)(element & 0xFFFFF000);
+						if(tmp != 0x0){
+							next = tmp;
+							next->p_flag = RUNNING;
+						}	
+					}else{
+						next = tmp;
+						next->p_flag = RUNNING;
+					}
+				}else{
+					next = tmp;
+					next->p_flag = RUNNING;
+				}
+			}
+		}
 	}
 
-	if(cur->p_flag == RUNNING){
-		insertToDoubleLinkList(&pcb_list, &cur->tag);
-//		disp_str("insertToDoubleLinkList:");
-//		disp_int((unsigned int)cur);
-//		disp_str("\n");
-//		disp_str(cur->name);
-//		disp_str("\n");
+	if(is_init == 0){
+		if(next == 0 || next->pid < max_pid){
+	//		goto _do_not_switch;
+		}else{
+			is_init = 1;
+	//		goto _start_switch;
+		}
 	}
 
+	if(next == 0){
+_do_not_switch:
+		// if(next->pid != 0){ 当next == 0时，next->pid的值是1048576。意外！
+		if(next != 0 && next->pid != 0){
+			appendToDoubleLinkList(&pcb_list, &next->tag);
+		}
+		next = main_thread; 
+		next->p_flag = RUNNING;
+	}
+
+
+_start_switch:
 //	disp_str("switch_to?No3\n");
 	// 进程，切换页目录表。
-	int page_directory = 0x100000;
+//	int page_directory = 0x100000;
 	if(next->page_directory != 0x0){
 //		disp_str("update_tss\n");
 		// update_tss((unsigned int)next + PAGE_SIZE);
@@ -93,14 +188,16 @@ void schedule_process()
 
 	proc_ready_table = next;	
 
-	if(next->pid == 6){
-		dis_pos = 0;
-		disp_int(next->pid);
+	if(next->pid ==  5){
+//		asm ("xchgw %bx, %bx");
 	}
 
-//	disp_str("switch_to\n");
+	if(next == 0xc0234000 && next->parent_pid != -1){
+		int k = 4;
+		int b = k;
+	}
+
 	switch_to(cur, next);
-//	disp_str("switch_to 2\n");
 }
 
 void clock_handler()

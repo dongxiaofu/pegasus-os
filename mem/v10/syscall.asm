@@ -3,6 +3,7 @@ global write2
 global write_debug
 global send_msg
 global receive_msg
+global sys_malloc
 
 [section .data]
 _NR_GET_TICKS	equ	0
@@ -10,6 +11,7 @@ _NR_WRITE	equ	1
 _NR_WRITE_DEBUG	equ	2
 _NR_SEND_MSG	equ		3
 _NR_RECEIVE_MSG	equ		4
+_NR_MALLOC		equ		5
 INT_VECTOR_TICKS	equ	0x90
 
 [section .text]
@@ -122,3 +124,27 @@ receive_msg:
 	pop	ebp
 
 	ret
+
+; unsigned int sys_malloc(unsigned int size);
+sys_malloc:
+	;保存栈
+	push esi
+	push edi
+	push ebx
+	push ebp
+	mov ebp, esp
+
+	mov eax, _NR_MALLOC
+	; 第1个参数
+	mov ecx, [ebp+20]
+
+	int INT_VECTOR_TICKS
+
+	;出栈
+	pop ebp
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+

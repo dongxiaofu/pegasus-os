@@ -98,9 +98,10 @@ void init_propt()
 	unsigned int video_base = 0xc0000000 + 0xb8000;
     InitDescriptor(&gdt[7], video_base, 0x0FFFF, 0x0F2);
 
+// 创建进程时，在user_process中动态创建GDT描述符。
 	// 1特权级描述符
 	unsigned int es_attribute = 0xcb2;
-	unsigned int cs_attribute = 0x0c9a;//0x0cba;
+	unsigned int cs_attribute = 0xcba;
 	unsigned int limit = 0xffffffff;
 	// es
 	InitDescriptor(&gdt[9], 0, limit, es_attribute);
@@ -133,7 +134,7 @@ void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type)
 
 void ReloadGDT()
 {
-    Memcpy(&gdt,
+    Memcpy2(&gdt,
            (void *)(*((int *)(&gdt_ptr[2]))),
            *((short *)(&gdt_ptr[0])));
     short *pm_gdt_limit = (short *)(&gdt_ptr[0]);

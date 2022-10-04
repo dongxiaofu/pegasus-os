@@ -158,8 +158,8 @@ unsigned int get_virtual_address(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
 	}else{
 		// TODO 某个用户进程的虚拟地址池
 		// pool = (VirtualMemoryAddress)current_thread->user_virtual_memory_address;
-//		Memcpy(&pool, current_thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
-		pool = *((VirtualMemoryAddress *)current_thread->user_virtual_memory_address);
+		Memcpy(&pool, current_thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
+	//	pool = *((VirtualMemoryAddress *)current_thread->user_virtual_memory_address);
 		
 	}
 	
@@ -252,7 +252,10 @@ void add_map_entry(unsigned int vaddr, unsigned int phy_addr)
 
 unsigned int alloc_virtual_memory(unsigned int phy_addr, unsigned int size)
 {
-	int page_cnt = ROUND_UP(size, PAGE_SIZE);
+	unsigned int phy_page = phy_addr & 0xFFFFF000;
+	unsigned int new_size = phy_addr - phy_page;
+	new_size = new_size + size;
+	int page_cnt = ROUND_UP(new_size, PAGE_SIZE);
 	MEMORY_POOL_TYPE pool_type;	
 	Proc *proc = (Proc *)get_running_thread_pcb();
 	if(proc->page_directory == 0x0){
@@ -260,8 +263,17 @@ unsigned int alloc_virtual_memory(unsigned int phy_addr, unsigned int size)
 	}else{
 		pool_type = USER;
 	}
-	unsigned int vaddr = get_virtual_address(page_cnt, pool_type);
-	add_map_entry(vaddr, phy_addr);
+	unsigned int vaddr = 0;
+	unsigned int vaddr_page = 0;
+	for(unsigned int i = 0; i < page_cnt; i++){
+		vaddr_page = get_virtual_address(1, pool_type);
+		if(i > 0){
+			phy_page = get_a_page(pool_type);
+		}else{
+			vaddr = vaddr_page;
+		}
+		add_map_entry(vaddr_page, phy_page);
+	}
 
 	return (vaddr + (phy_addr & 0xFFF));
 }
@@ -273,6 +285,33 @@ unsigned int get_physical_address(unsigned int vaddr)
 	unsigned int phy_addr = (int)(*pte & 0xFFFFF000) + (vaddr & 0xFFF);
 
 	return phy_addr;
+}
+
+// 想不到更恰当的名字，就用这个。
+unsigned int alloc_physical_memory(unsigned int vaddr, MEMORY_POOL_TYPE pool_type)
+{
+	unsigned int page_vaddr = vaddr & 0xFFFFF000;
+	VirtualMemoryAddress pool;
+
+	Proc *current_thread = (Proc *)get_running_thread_pcb();
+
+	if(pool_type == KERNEL){
+		pool = KernelVirtualMemory;
+	}else{
+		// TODO 某个用户进程的虚拟地址池
+		Memcpy(&pool, current_thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
+	}
+	
+	Bitmap map = pool.map;
+	unsigned int index = (page_vaddr - pool.start_addr) / PAGE_SIZE;
+	unsigned int addr = pool.start_addr + PAGE_SIZE * index;
+	set_bits(&map, index, 1, 1);
+
+	unsigned int phy_page = get_a_page(pool_type);
+
+	add_map_entry(vaddr, phy_page);
+	
+	return vaddr;
 }
 
 unsigned int alloc_memory(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
@@ -307,7 +346,7 @@ arena *block2arena(mem_block *block)
 	return a;
 }
 
-unsigned int sys_malloc(unsigned int size)
+unsigned int sys_malloc2(unsigned int size)
 {
 	unsigned int addr = 0x0;
 	MEMORY_POOL_TYPE pool_type;
@@ -347,9 +386,8 @@ unsigned int sys_malloc(unsigned int size)
 		mem_block_desc *desc = (mem_block_desc *)alloc_memory(1,pool_type);
 		Memcpy(desc,desc_array + index, sizeof(mem_block_desc)); 
 		// if(isListEmpty(&desc->free_list) == 1){
-		if(&(desc_array[index].free_list) == 8){
-			disp_int(&(desc_array[index].free_list));
-		}
+		
+		enum intr_status old_status = intr_disable();
 		if(isListEmpty(&(desc_array[index].free_list)) == 1){
 			unsigned int page_addr = alloc_memory(1, pool_type);
 			// TODO 没有做容错处理。
@@ -365,6 +403,7 @@ unsigned int sys_malloc(unsigned int size)
 				appendToDoubleLinkList(&(desc_array[index].free_list), (void *)block_addr);
 			}
 		}
+		intr_set_status(old_status);
 
 		block_addr = (unsigned int)popFromDoubleLinkList(&(desc_array[index].free_list));
 		addr = block_addr;
@@ -374,6 +413,8 @@ unsigned int sys_malloc(unsigned int size)
 		arena *a = block2arena((mem_block *)block_addr);
 		a->cnt--;
 	}
+
+	assert(addr != 0x0);
 
 	return addr;
 }
@@ -410,6 +451,7 @@ void free_a_page(unsigned int vaddr, MEMORY_POOL_TYPE pool_type)
 
 void sys_free(unsigned int addr, unsigned int size)
 {
+	return;
 	Proc *current_thread = (Proc *)get_running_thread_pcb();
 	MEMORY_POOL_TYPE pool_type;
 	
@@ -439,13 +481,15 @@ void sys_free(unsigned int addr, unsigned int size)
 		mem_block_desc desc = kernel_mem_block_decs_array[index];
 		mem_block *block = (mem_block *)addr;
 		arena *a = block2arena(block);
-		appendToDoubleLinkList(&desc.free_list, (void *)block); 
+		// appendToDoubleLinkList(&desc.free_list, (void *)block); 
+		appendToDoubleLinkList(&(kernel_mem_block_decs_array[index].free_list), (void *)block);
 		a->cnt++;
 		// 当一个内存元仓库中的所有小内存块都是空闲状态时，释放这个内存元仓库。
 		// 我不理解这样做的原因。
 		if(a->cnt == desc.cnt){
 			for(int i = 0; i < desc.cnt; i++){
-				popFromDoubleLinkList(&desc.free_list);
+//				popFromDoubleLinkList(&desc.free_list);
+				popFromDoubleLinkList(&(kernel_mem_block_decs_array[index].free_list));
 			}
 
 			free_a_page((unsigned int)a, pool_type);
@@ -572,5 +616,6 @@ void init_memory(int total_memory)
 	KernelVirtualMemory.start_addr = k_v_addr + 1024 * 1024;
 	Memset(KernelVirtualMemory.map.bits, 0, kbm_length);
 
+	Memset(kernel_mem_block_decs_array, 0, sizeof(mem_block_desc) * MEM_BLOCK_DESC_KIND_NUM); 
 	init_memory_block_desc(kernel_mem_block_decs_array);	
 }

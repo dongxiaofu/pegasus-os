@@ -22,21 +22,12 @@ int do_exec(Message *msg);
 void TaskMM();
 
 void TaskMM(){
-	disp_str("MM:");
-	Proc *cur = get_running_thread_pcb();
-	disp_str("[");
-	disp_int((unsigned int)cur->pid);
-	disp_str("]");
-	disp_str("\n");
 
 		Message *msg = sys_malloc(sizeof(Message));
 		Message *m = (Message *)sys_malloc(sizeof(Message));
 //	Message *msg;
 	while(1){
-		// Message *msg = sys_malloc(sizeof(Message));
-		disp_str("MM is sending\n");
 		send_rec(RECEIVE, msg, ANY);
-		disp_str("MM is running again\n");
 
 		int type = msg->TYPE;
 		int source = msg->source;
@@ -77,7 +68,7 @@ void TaskMM(){
 
 		if(reply){
 				delay(10);
-    			send_rec(SEND, m, source);
+   // 			send_rec(SEND, m, source);
 		}
 	}
 }

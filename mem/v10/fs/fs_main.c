@@ -84,7 +84,6 @@ int c = 0;
 
 void task_fs()
 {
-    Proc *cur = get_running_thread_pcb();
     init_fs();
 
     Message *msg = (Message *)sys_malloc(sizeof(Message));
@@ -115,10 +114,9 @@ void task_fs()
         // open
         pcaller = pid2proc(source);
 	
+		// 测试用
 		if(!(type == 0 || type == RESUME_PROC || type == OPEN || type == READ || type == WRITE || type == CLOSE)){
 
-			dis_pos = 0;
-			disp_int(type);
 		}
 
 		assert(type == 0 || type == RESUME_PROC || type == OPEN || type == READ || type == WRITE || type == CLOSE);
@@ -406,7 +404,6 @@ Memset(fsbuf+1, 0x0, SECTOR_SIZE-1);
 
 void init_fs()
 {
-
     Message *driver_msg = (Message *)sys_malloc(sizeof(Message));
     driver_msg->TYPE = OPEN;
     // todo 暂时使用硬编码。

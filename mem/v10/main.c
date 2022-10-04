@@ -26,12 +26,20 @@ void kernel_main()
 {
 	init();
 
-	process_execute(user_proc_a, "user_proc_a\n", "process_a");
-	process_execute(TaskTTY, "task_tty\n", "TaskTTY");
-//	process_execute(TaskSys, "task_sys\n", "TaskSys");
-	process_execute(TaskHD, "task_hd\n", "TaskHD");
-	process_execute(task_fs, "task_fs\n", "task_fs");
+//	disable_int();
+	
+	main_thread = get_running_thread_pcb();
+	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->tag));
+	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->all_tag));
+
+
 	process_execute(TaskMM, "task_mm\n", "TaskMM");
+	process_execute(task_fs, "task_fs\n", "task_fs");
+	process_execute(TaskHD, "task_hd\n", "TaskHD");
+	process_execute(TaskTTY, "task_tty\n", "TaskTTY");
+	process_execute(user_proc_a, "user_proc_a\n", "process_a");
+
+//	enable_int();
 //	thread_start(kernel_thread_a, "thread a\n");
 //	thread_start(kernel_thread_b, "thread b\n");
 //	thread_start(kernel_thread_c, "thread c\n");
@@ -47,6 +55,7 @@ void init()
 {
 	dis_pos = 0;
 	pid = 0;
+	gdt_index = 9;
 
 	disp_str("init\n");
 	init_keyboard();
@@ -55,6 +64,14 @@ void init()
 	// 初始化PCB链表
 	initDoubleLinkList(&pcb_list);
 	initDoubleLinkList(&all_pcb_list);
+
+	// 清屏
+	dis_pos = 0;
+	for(int i = 0; i < 80*25*2; i++){
+		disp_str("");
+	}
+
+	dis_pos = 0;
 }
 
 void kernel_thread_a(void *msg)
@@ -65,7 +82,6 @@ void kernel_thread_a(void *msg)
 	while(1){
 		dis_pos = b;
 		disp_str("still a:");
-		disp_int(a++);
 		disp_str("\n");
 	}
 }
@@ -78,7 +94,6 @@ void kernel_thread_b(void *msg)
 	while(1){
 		dis_pos = b;
 		disp_str("still b:");
-		disp_int(a++);
 		disp_str("\n");
 	}
 }

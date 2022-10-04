@@ -142,6 +142,21 @@ void scroll_down(TTY *tty) {
 void out_char(TTY *tty, unsigned char key)
 //void out_char(CONSOLE *console, unsigned char key)
 {
+//	test_ticks++;
+//	dis_pos = 0;
+//	for(int i = 0; i < 160; i++){
+//		disp_str(" ");
+//		dis_pos += 2;
+//	}
+//	
+//	dis_pos = 0;
+//	disp_int(test_ticks);
+//	if(test_ticks == 0x1){
+//		dis_pos = 0;
+//	}
+
+	enum intr_status old_status = intr_disable();
+//	disable_int();
     // unsigned int addr_in_vm = VM_BASE_ADDR + tty->console->cursor * 2;
     //(unsigned char*) addr_in_vm = (unsigned char *)(VM_BASE_ADDR + tty->console->cursor * 2);
     //unsigned char* addr_in_vm = (unsigned char *)(VM_BASE_ADDR + console->cursor * 2);
@@ -203,6 +218,9 @@ void out_char(TTY *tty, unsigned char key)
     }
 
     flush(tty);
+
+//	enable_int();
+	intr_set_status(old_status);
 }
 
 /*====================================================

@@ -52,6 +52,8 @@ EXTERN unsigned int k_reenter;
 EXTERN unsigned int counter;
 EXTERN unsigned int key_pressed;
 EXTERN unsigned int pid;
+EXTERN unsigned char is_init;
+EXTERN unsigned int gdt_index;
 
 // 全局相关 end
 
@@ -61,6 +63,7 @@ EXTERN Proc *proc_ready_table;
 EXTERN Proc *pcaller;
 EXTERN DoubleLinkList pcb_list;
 EXTERN DoubleLinkList all_pcb_list;
+EXTERN Proc *main_thread;
 // 系统任何和用户进程的进程表都存储在这个数组中
 extern struct proc proc_table[];
 // 用户进程元数据
@@ -78,6 +81,7 @@ extern int_handle sys_call_table[];
 // 进程相关 end
 
 arena *block2arena(mem_block *block);
+unsigned int sys_malloc2(unsigned int size);
 unsigned int sys_malloc(unsigned int size);
 
 
@@ -96,11 +100,11 @@ EXTERN TSS tss;
 // 系统进程的PID
 // 顺序和初始值由kernel_main决定
 #define START_PID 1
-#define TASK_TTY 2	//(START_PID + 1)
+#define TASK_TTY 4	//(START_PID + 1)
 #define TASK_SYS (TASK_TTY + 1)
 #define TASK_HD  3	//(TASK_SYS + 1)
-#define TASK_FS  4//  (TASK_HD + 1) 
-#define TASK_MM  (TASK_FS + 1)
+#define TASK_FS  2//  (TASK_HD + 1) 
+#define TASK_MM  1	//(TASK_FS + 1)
 #define INIT_PID  6
 
 #define PROC_A	5

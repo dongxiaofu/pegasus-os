@@ -1,11 +1,11 @@
 [SECTION .txt]
 
-global Memcpy
+global Memcpy2
 global Memset
 global Strcpy
 global Strlen
 
-Memcpy:
+Memcpy2:
 	push ebp
 	mov ebp, esp
 	push eax
@@ -72,6 +72,7 @@ Memset:
 	mov esi, [ebp + 8]	; dest
 	mov byte al, [ebp + 12]	; character	
 
+	;cli
 .1:
 	cmp ecx, 0
 	jz .2
@@ -81,6 +82,8 @@ Memset:
 	inc esi		
 	jmp .1
 .2:
+
+	;sti
 	;;;;;;;;;;xhcg bx, bx
 	pop ecx
 	pop esi
@@ -99,6 +102,7 @@ Strcpy:
 	mov esi, [ebp + 12]
 	mov edi, [ebp + 8]
 
+	;cli
 .1:
 	mov byte al, [esi]
 	inc esi
@@ -112,6 +116,7 @@ Strcpy:
 	jmp .1
 
 .2:
+	;sti
 	; 返回值
 	mov eax, [ebp + 8]
 	
@@ -127,6 +132,7 @@ Strlen:
 	mov ecx, 0
 	mov esi, [ebp + 8]
 	
+	;cli
 .1:
 	mov byte al, [esi]
 	;cmp al, 0
@@ -139,6 +145,7 @@ Strlen:
 	inc ecx
 	jmp .1
 .2:
+	;sti
 	mov eax, ecx
 	pop ecx
 	pop ebp

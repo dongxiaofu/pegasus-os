@@ -32,6 +32,26 @@ VirtualMemoryAddress *create_user_process_address_space()
 
 void user_process(Func func, void *arg)
 {
+	unsigned short es;	// = 0x49;
+	// unsigned short cs = 0x50;
+	unsigned short cs; 	// = 0x51;
+	// 1特权级描述符
+	unsigned int es_attribute = 0xcb2;
+	unsigned int cs_attribute = 0xcba;
+	unsigned int limit = 0xffffffff;
+	es = 0x49;
+	cs = 0x51;
+	// es
+//	gdt_index = 9;
+//	es = gdt_index * 8 + 1;
+//	InitDescriptor(&gdt[gdt_index], 0, limit, es_attribute);
+//	gdt_index++;
+//	// cs
+//	gdt_index = 10;
+//	cs = gdt_index * 8 + 1;
+//  	InitDescriptor(&gdt[gdt_index], 0, limit, cs_attribute);
+//	gdt_index++;
+
 	Proc *process = (Proc *)get_running_thread_pcb();
 	process->stack = (unsigned int *)((unsigned int)process + PAGE_SIZE);
 	// 费了很大劲才找出的错误。
@@ -41,8 +61,6 @@ void user_process(Func func, void *arg)
 	// 为进程第一次启动准备数据
 	unsigned char rpl = 0;
 	unsigned short eflags = 0x1202;
-	unsigned short es = 0x48;
-	unsigned short cs = 0x50;
 	unsigned short ss = es;
 	unsigned short ds = es;
 	unsigned short fs = es;
@@ -55,7 +73,9 @@ void user_process(Func func, void *arg)
 	process_stack->gs = gs;//GS_SELECTOR & (0xFFF9);
 	process_stack->eip = func;
 	process_stack->eflags = eflags;	
-	process_stack->esp = (0xC0000000 - 0x400 * 0x400);
+	// process_stack->esp = (0xC0000000 - 0x1000);
+	process_stack->esp = alloc_physical_memory(0xC0000000 - 0x1000, USER) + PAGE_SIZE;
+//	process_stack->esp = alloc_physical_memory(0xC0000000 - 0x2000, USER) + PAGE_SIZE;
 	// 第一次启动进程
 	restart((unsigned int)process_stack);
 }
@@ -110,7 +130,8 @@ void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int bu
 	// int bit_idx = 15;
 	int bit_idx = 0;
 	int k = 0;
-	disable_int();
+//	disable_int();
+	enum intr_status old_status = intr_disable();
 	for(int i = 0; i < map_length; i++){
 		char one_byte = bits[i];
 		for(int j = 0; j < 8; j++){
@@ -129,9 +150,6 @@ void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int bu
 			// 当前位是1，它对应的虚拟地址被使用，这个虚拟地址对应的物理空间存储了数据。
 			unsigned int vaddr = vaddr_start + bit_idx * PAGE_SIZE; 
 			// unsigned int vaddr = vaddr_start + bit_idx * PAGE_SIZE - 1; 
-			if(vaddr == 0x8056000){
-				disp_int(vaddr);
-			}
 			// 把起点是vaddr的页框中的数据复制到内核的buf中。
 			Memcpy(buf, vaddr, PAGE_SIZE);
 			
@@ -148,15 +166,13 @@ void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int bu
 		}
 	}	
 
-	disp_str("k = ");
-	disp_int(k);
-	disp_str("\n");
-	enable_int();
+	intr_set_status(old_status);
 }
 
 // 不理解这个函数中的代码。
 void build_process_kernel_stack(Proc *process)
 {
+	enum intr_status old_status = intr_disable();
 	unsigned int *stack = (unsigned int *)((unsigned int)process + PAGE_SIZE);
 	while(1){
 		if(*stack == 0x38){
@@ -188,10 +204,10 @@ void build_process_kernel_stack(Proc *process)
 
 	*eax_in_process_stack = 0;
 
-	
-
 	//process->stack = stack;
 	process->stack = ebp_in_thread_stack;
+
+	intr_set_status(old_status);
 }
 
 Proc *fork_process(unsigned int parent_pid)
@@ -250,7 +266,9 @@ void process_execute(Func func, char *thread_arg, char *process_name)
 //		appendToDoubleLinkList(&pcb_list, (ListElement *)(&kernel_thread->tag));	
 //		appendToDoubleLinkList(&all_pcb_list, (ListElement *)(&kernel_thread->all_tag));	
 	}
+	enum intr_status old_status = intr_disable();
 	// 加入链表，在调度模块中处理
 	appendToDoubleLinkList(&pcb_list, (ListElement *)(&process->tag));	
 	appendToDoubleLinkList(&all_pcb_list, (ListElement *)(&process->all_tag));	
+	intr_set_status(old_status);
 }

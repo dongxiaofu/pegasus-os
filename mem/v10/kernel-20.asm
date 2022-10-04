@@ -474,6 +474,7 @@ sys_call:
 	; 从gs到eax，距离是多少个字节？11个	
 	; 中间代码修改eax使用
 	mov esi, esp
+	mov ebp, esp
 	;mov edx, esp
 	
 	mov dx, ss
@@ -509,7 +510,8 @@ sys_call:
 	;pop esi
 	add esp, 12
 	pop esi
-	mov [esi + 11 * 4], eax
+	;mov [esi + 11 * 4], eax
+	mov [ebp + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
 	;pop esi
 	;;;;xchg bx, bx

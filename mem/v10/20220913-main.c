@@ -14,6 +14,52 @@
 
 void u_thread_a();
 
+
+/* 开中断并返回开中断前的状态*/
+enum intr_status intr_enable() {
+   enum intr_status old_status;
+   if (INTR_ON == intr_get_status()) {
+      old_status = INTR_ON;
+      return old_status;
+   } else {
+      old_status = INTR_OFF;
+      asm volatile("sti");	 // 开中断,sti指令将IF位置1
+      return old_status;
+   }
+}
+
+/* 关中断,并且返回关中断前的状态 */
+enum intr_status intr_disable() {     
+   enum intr_status old_status;
+   if (INTR_ON == intr_get_status()) {
+      old_status = INTR_ON;
+      asm volatile("cli" : : : "memory"); // 关中断,cli指令将IF位置0
+      return old_status;
+   } else {
+      old_status = INTR_OFF;
+      return old_status;
+   }
+}
+
+/* 将中断状态设置为status */
+enum intr_status intr_set_status(enum intr_status status) {
+   return status & INTR_ON ? intr_enable() : intr_disable();
+}
+
+/* 获取当前中断状态 */
+enum intr_status intr_get_status() {
+   unsigned int eflags = 0; 
+   GET_EFLAGS(eflags);
+   return (EFLAGS_IF & eflags) ? INTR_ON : INTR_OFF;
+}
+
+void Memcpy(void *dst, void *src, int size)
+{
+	enum intr_status old_status = intr_disable();
+	Memcpy2(dst, src, size);
+	intr_set_status(old_status);
+}
+
 // 解包tar文件
 struct tar_header
 {
@@ -405,7 +451,7 @@ void init_internal_interrupt()
 void test()
 {
     disp_str("A");
-    disp_int(0x6);
+  //  disp_int(0x6);
     disp_str("\n");
     return;
     //disp_str_colour2(0x9988, 0x74);
@@ -707,34 +753,35 @@ void INIT_fork()
 	int pid = fork();
 	delay(1);
 //	pid = 0;
-//	Printf("pid\n");
+//	asm ("xchgw %bx, %bx");
+	Printf("pid = %d\n", pid);
 
 	if(pid > 0){
 	Printf("pid0\n");
-		asm ("xchgw %bx, %bx");		
+//		asm ("xchgw %bx, %bx");		
 //		while(1);
-	delay(10);
+//	delay(1);
 		j++;
 		char buf1[40] = "Parent\n";
 		write(fd_stdout, buf1, Strlen(buf1));			
+//		write(fd_stdout, buf1, Strlen(buf1));			
+//		write(fd_stdout, buf1, Strlen(buf1));			
 		while(1);
-//		write(fd_stdout, buf1, Strlen(buf1));			
-//		write(fd_stdout, buf1, Strlen(buf1));			
 //		for(int i = 0; i < 5; i++){
 //			j++;
 //			write(fd_stdout, buf1, Strlen(buf1));			
 //		}
 		//spin("parent\n");
 	}else{	
-		asm ("xchgw %bx, %bx");		
+//		asm ("xchgw %bx, %bx");		
 	disp_str("pid01\n");
 //	Printf("pid1\n");
-	//	delay(10);
+		delay(1);
 		j++;		//	spin("child");
 		j += 2;
 //		int fd2 = open("dev_tty0", O_RDWR);
 		char buf2[40] = "Child\n";
-		asm ("xchgw %bx, %bx");		
+//		asm ("xchgw %bx, %bx");		
 		write(fd_stdout, buf2, Strlen(buf2));			
 		while(1);
 	//	write(fd_stdout, buf2, Strlen(buf2));			
@@ -986,7 +1033,7 @@ void delay(int time)
     {
         for (int j = 0; j < 10; j++)
         {
-            for (int k = 0; k < 1000; k++)
+            for (int k = 0; k < 10; k++)
             {
             }
         }
@@ -1253,11 +1300,11 @@ void sys_printx(char *error_msg, int len, Proc *proc)
     if (k_reenter == 0)
     {
         int ds = proc->s_reg.ds;
-        base = Seg2PhyAddrLDT(ds, proc);
+        base = 0;// Seg2PhyAddrLDT(ds, proc);
     }
     else if (k_reenter > 0)
     {
-        base = Seg2PhyAddr(DS_SELECTOR);
+        base = 0;// Seg2PhyAddr(DS_SELECTOR);
     }
     // line_addr = base + error_msg;
     // line_addr = base + (int *)error_msg;
@@ -1380,11 +1427,13 @@ int dead_lock(int src, int dest)
 // send_msg 通过sys_call调用
 int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 {
-	if(receiver_pid == 6){
-		disp_int(receiver_pid);
-	}
+//	enum intr_status old_status = intr_disable();	
     Proc *receiver = pid2proc(receiver_pid);
+	if(receiver == 0x0){
+		assert(receiver != 0x0);
+	}
     int sender_pid = proc2pid(sender);
+
         // 计算msg的线性地址
         int ds = sender->s_reg.ds;
         int base = 0;//Seg2PhyAddrLDT(ds, sender);
@@ -1409,15 +1458,15 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
        // int msg_size = sizeof(Message);
 
         int ds2 = receiver->s_reg.ds;
-        int base2 = Seg2PhyAddrLDT(ds2, receiver);
         // int msg_line_addr2 = base2 + (int)(receiver->p_msg);
         int msg_line_addr2 = alloc_virtual_memory((receiver->p_msg), sizeof(Message));
         // 从sender中把消息复制到receiver
         //    phycopy(receiver->p_msg, msg_line_addr, msg_size);
         phycopy(msg_line_addr2, msg_line_addr, msg_size);
         // 重置sender
-        //        sender->p_msg = 0;
-        //        sender->p_send_to = 0;
+        sender->p_msg = 0;
+        sender->p_flag = RUNNING;
+        sender->p_send_to = NO_TASK;
         // 重置receiver
         receiver->p_msg = 0;
         receiver->p_flag = RUNNING;
@@ -1429,7 +1478,7 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
         unblock(receiver);
 
         // 调试函数
-//        assert(sender->p_msg == 0);
+//		assert(sender->p_msg == 0);
         assert(sender->p_flag == 0);
         assert(sender->p_send_to == NO_TASK);
         //assert(sender->p_receive_from == NO_TASK);
@@ -1476,6 +1525,8 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
         block(sender);
     }
 
+//	intr_set_status(old_status);
+
     return 0;
 }
 
@@ -1494,7 +1545,7 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
     {
 
 		unsigned int msg_size = sizeof(Message);
-        Message *m = (Message *)sys_malloc(msg_size);;
+        Message *m = (Message *)sys_malloc(msg_size);
         Memset(m, 0, msg_size);
         m->source = INTERRUPT;
         m->TYPE = HARD_INT;
@@ -1509,9 +1560,11 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
         receiver->p_send_to = NO_TASK;
         receiver->p_flag = RUNNING;
 
-	int_flag = 1;
+		int_flag = 1;
 		
-		sys_free(m, msg_size);
+//		sys_free(m, msg_size);
+
+	//	unblock(receiver);
 	
        // return 0;
     }
@@ -1619,6 +1672,8 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
         block(receiver);
     }
 
+//	intr_set_status(old_status);
+
     return 0;
 }
 
@@ -1699,13 +1754,10 @@ int block(Proc *proc)
 // 解除阻塞
 int unblock(Proc *proc)
 {
-	if(proc->pid == 6){
-		disp_int(6);
-	}
     // do nothing
     assert(proc->p_flag == RUNNING);
 	
-	insertToDoubleLinkList(&pcb_list, &proc->tag);
+	appendToDoubleLinkList(&pcb_list, &proc->tag);
 
     return 0;
 }

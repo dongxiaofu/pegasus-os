@@ -1,7 +1,20 @@
 #ifndef _PEGASUS_OS_PROTO_H
 #define _PEGASUS_OS_PROTO_H
 
+enum intr_status {       // 中断状态
+	INTR_OFF,
+	INTR_ON
+};
 
+#define EFLAGS_IF   0x00000200       // eflags寄存器中的if位为1
+#define GET_EFLAGS(EFLAG_VAR) asm volatile("pushfl; popl %0" : "=g" (EFLAG_VAR))
+
+enum intr_status intr_enable();
+enum intr_status intr_disable(); 
+enum intr_status intr_set_status(enum intr_status status);
+enum intr_status intr_get_status();
+
+// void Memcpy(unsigned int *dst, unsigned int *src, unsigned int size);
 void disp_str(char *str);
 void disp_str_colour2(int str, int colour);
 void disp_str_colour(char *str, int colour);

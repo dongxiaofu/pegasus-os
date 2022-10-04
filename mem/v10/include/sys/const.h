@@ -42,12 +42,13 @@
 
 
 // 系统调用 start
-#define SYS_CALL_FUNCTION_NUM 5
+#define SYS_CALL_FUNCTION_NUM 6
 #define NR_GET_TICKS	0
 #define _NR_WRITE	1
 #define _NR_WRITE_DEBUG	2
 #define _NR_SEND_MSG	3
 #define _NR_RECEIVE_MSG	4
+#define _NR_MALLOC		5
 
 #define INIT_MASTER_VEC_NO 0x20
 #define INIT_SLAVE_VEC_NO 0x28
@@ -158,7 +159,7 @@
 // console相关 start
 //#define TTY_BUF_SIZE 800
 #define TTY_BUF_SIZE 512
-#define TTY_NUM 3
+#define TTY_NUM 1
 // 一屏占用的显存空间。
 // todo 我不确定是不是整个值。
 #define SCREEN_SIZE 80 * 25

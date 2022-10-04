@@ -72,7 +72,11 @@ Proc *cur = get_running_thread_pcb();
     // 初始硬盘
  init_hd();
 	Message *msg = (Message *)sys_malloc(sizeof(Message));
+//	Message msg;
+//	Memset(msg, 0, sizeof(Message));
+
     while (1) {
+		Memset(msg, 0, sizeof(Message));
         hd_handle(msg);
     }
 }
@@ -91,18 +95,18 @@ void init_hd() {
 void hd_handle(Message *msg) {
     send_rec(RECEIVE, msg, ANY);
     unsigned int type = msg->TYPE;
-//	disp_str("hd type = ");
-//	disp_str("[");
-//    disp_int(type);
-//    disp_str("]");
-//    disp_str("\n");
 	// 硬盘中断通过inform会产生许多type是0的消息。
 	if(type == 0)	{
 		return;
 	}
  unsigned int source = msg->source;
 
-	assert(type == OPEN || type == READ || type == WRITE || type == GET_HD_IOCTL);
+	if(!(type == OPEN || type == READ || type == WRITE || type == GET_HD_IOCTL || type == HARD_INT)){
+		int k = 2;
+		int c = k;
+	}
+
+	assert(type == OPEN || type == READ || type == WRITE || type == GET_HD_IOCTL || type == HARD_INT);
 
     switch (type) {
         case OPEN:
@@ -119,17 +123,12 @@ void hd_handle(Message *msg) {
             get_hd_ioctl(0);
             //Printf("%s:%d\n", "GET_HD_IOCTL", source);
             break;
+		case HARD_INT:
+			break;
         default:
             spin("Unknown Operation");
             break;
     }
-
-	Memset(msg, 0, sizeof(Message));
-	msg->TYPE = 100;	// todo 调试，无实际作用。
-    msg->val = 0;
-    // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
-    send_rec(SEND, msg, TASK_FS);
-    //Printf("%s\n", "Msg from HD");
 }
 
 
@@ -352,12 +351,25 @@ void hd_open() {
 //print_hd_info();
     // get_hd_ioctl(2);
     // //Printf("%s\n", "Over");
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+	Memset(msg, 0, sizeof(Message));
+	msg->TYPE = SYSCALL_RET;	// todo 调试，无实际作用。
+    msg->val = 0;
+    // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
+    send_rec(SEND, msg, TASK_FS);
 }
 
 int get_hd_ioctl(int device) {
     int driver = DR_OF_DEV(device);
     int geometry = hd_info[driver].primary_part[device].size;
     //Printf("geometry:%d\n", geometry);
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+	Memset(msg, 0, sizeof(Message));
+	msg->TYPE = SYSCALL_RET;	// todo 调试，无实际作用。
+    msg->val = 0;
+    // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
+    send_rec(SEND, msg, TASK_FS);
+
     return geometry;
 }
 
@@ -488,6 +500,13 @@ void hd_rdwt(Message *msg) {
         bytes_left -= bytes;
         vaddr_hdbuf += bytes;
     }
+
+	Message *msg2 = (Message *)sys_malloc(sizeof(Message));
+	Memset(msg2, 0, sizeof(Message));
+	msg2->TYPE = SYSCALL_RET;	// todo 调试，无实际作用。
+    msg2->val = 0;
+    // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
+    send_rec(SEND, msg2, TASK_FS);
 }
 
 
