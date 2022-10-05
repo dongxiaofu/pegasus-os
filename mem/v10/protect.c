@@ -101,7 +101,7 @@ void init_propt()
 // 创建进程时，在user_process中动态创建GDT描述符。
 	// 1特权级描述符
 	unsigned int es_attribute = 0xcb2;
-	unsigned int cs_attribute = 0xcba;
+	unsigned int cs_attribute = 0xc9a;
 	unsigned int limit = 0xffffffff;
 	// es
 	InitDescriptor(&gdt[9], 0, limit, es_attribute);

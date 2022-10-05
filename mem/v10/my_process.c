@@ -39,8 +39,8 @@ void user_process(Func func, void *arg)
 	unsigned int es_attribute = 0xcb2;
 	unsigned int cs_attribute = 0xcba;
 	unsigned int limit = 0xffffffff;
-	es = 0x49;
-	cs = 0x51;
+	es = 0x48;
+	cs = 0x50;
 	// es
 //	gdt_index = 9;
 //	es = gdt_index * 8 + 1;
