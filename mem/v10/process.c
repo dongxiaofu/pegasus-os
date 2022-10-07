@@ -35,19 +35,6 @@ void check()
 // 进程调度次数
 void schedule_process()
 {
-//	test_ticks++;
-//	dis_pos = 0;
-//	for(int i = 0; i < 160; i++){
-//		disp_str(" ");
-//		dis_pos++;
-//	}
-//	
-//	dis_pos = 0;
-//	disp_int(test_ticks);
-//	if(test_ticks == 0x2F){
-//		dis_pos = 0;
-//	}
-
 
 	unsigned int max_pid = 5;
 	int page_directory = 0x100000;
