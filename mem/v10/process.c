@@ -45,6 +45,12 @@ void schedule_process()
 
 	// 脏数据太多，怎么办？
 	cur = (Proc *)get_running_thread_pcb();
+	if(proc_ready_table != 0x0){
+		if(proc_ready_table->p_flag == RUNNING && proc_ready_table->ticks > 0){
+			next = cur;
+			goto _start_switch;
+		}
+	}
 
 	if(isListEmpty(&pcb_list) == 1){
 		if(cur->pid == 0){
@@ -164,10 +170,6 @@ _start_switch:
 	}
 
 	proc_ready_table = next;	
-
-	if(next->pid ==  5){
-//		asm ("xchgw %bx, %bx");
-	}
 
 	if(next->pid != 0 && next->parent_pid != -1){
     	asm ("xchgw %bx, %bx");

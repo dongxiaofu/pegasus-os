@@ -56,6 +56,7 @@ void init()
 	dis_pos = 0;
 	pid = 0;
 	gdt_index = 9;
+	proc_ready_table = 0x0;
 
 	disp_str("init\n");
 	init_keyboard();
