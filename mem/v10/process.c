@@ -206,6 +206,9 @@ void clock_handler()
 		inform_int(TASK_TTY);
 	}
     // 调度进程
+    if(proc_ready_table != 0x0){
+		proc_ready_table->ticks--;
+	}
     schedule_process();
 }
 
