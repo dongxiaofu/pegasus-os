@@ -192,9 +192,9 @@ _start_switch:
 //		asm ("xchgw %bx, %bx");
 	}
 
-	if(next == 0xc0234000 && next->parent_pid != -1){
-		int k = 4;
-		int b = k;
+	if(next->pid != 0 && next->parent_pid != -1){
+    	asm ("xchgw %bx, %bx");
+    	next = pid2proc(next->parent_pid);
 	}
 
 	switch_to(cur, next);

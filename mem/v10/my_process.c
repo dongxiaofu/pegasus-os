@@ -88,7 +88,7 @@ Proc *clone_pcb(Proc *parent_process)
 	Memcpy(process, parent_process, PAGE_SIZE);
 
 	process->pid = ++pid;
-	process->parent_pid = parent_process->parent_pid;
+	process->parent_pid = parent_process->pid;
 //	unsigned int stack_offset = (unsigned int)(parent_process + PAGE_SIZE) - (unsigned int)parent_process->stack;
 //	process->stack = (unsigned int)(process + PAGE_SIZE) - stack_offset;
 

@@ -754,7 +754,7 @@ void INIT_fork()
 	delay(1);
 //	pid = 0;
 //	asm ("xchgw %bx, %bx");
-	Printf("pid = %d\n", pid);
+//	Printf("pid = %d\n", pid);
 
 	if(pid > 0){
 	Printf("pid0\n");
@@ -774,8 +774,6 @@ void INIT_fork()
 		//spin("parent\n");
 	}else{	
 //		asm ("xchgw %bx, %bx");		
-	disp_str("pid01\n");
-//	Printf("pid1\n");
 		delay(1);
 		j++;		//	spin("child");
 		j += 2;
