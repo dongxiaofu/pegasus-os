@@ -46,16 +46,6 @@ void schedule_process()
 	// 脏数据太多，怎么办？
 	cur = (Proc *)get_running_thread_pcb();
 
-	if(cur == 0xc0234000 && cur->parent_pid != -1){
-		int k = 4;
-		int b = k;
-	}
-	// if(cur == 0xc0234000 && cur->wait_status == 66){
-	if(cur == 0xc0234000){
-		int k = 4;
-		int b = k;
-	}
-
 	if(isListEmpty(&pcb_list) == 1){
 		if(cur->pid == 0){
 			next = cur;
