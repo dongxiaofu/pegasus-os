@@ -273,4 +273,7 @@
 #define PG_US_SUPER	4		// 000b	
 #define PG_US_USER	4		// 100b
 
+
+#define TICKS_NUM	5
+
 #endif

@@ -28,6 +28,7 @@ Proc *thread_init()
 	proc->parent_pid = -1;
 	proc->q_sending = proc->q_next = 0x0;
 	proc->pid = ++pid;
+	proc->ticks = TICKS_NUM;
 
 	return proc;
 }
