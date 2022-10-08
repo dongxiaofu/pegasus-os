@@ -207,7 +207,7 @@ Proc *clone_pcb(Proc *parent_process);
 void build_body_stack(Proc *parent_process, Proc *child_process, unsigned int buf);
 void build_process_kernel_stack(Proc *process);
 Proc *fork_process(unsigned int parent_pid);
-void process_execute(Func func, char *thread_arg, char *process_name);
+void process_execute(Func func, char *thread_arg, char *process_name, unsigned int privilege);
 
 /****************************************thread end*****************************************/
 

@@ -239,7 +239,7 @@ Proc *fork_process(unsigned int parent_pid)
 	return child_process;
 }
 
-void process_execute(Func func, char *thread_arg, char *process_name)
+void process_execute(Func func, char *thread_arg, char *process_name, unsigned int privilege)
 {
 	Proc *process = thread_init();
 	thread_create(process);
