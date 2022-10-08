@@ -54,6 +54,7 @@ typedef struct _thread_stack
 	unsigned int unused_retaddr;
 	thread_function func_name;
 	void *func_arg;
+	unsigned int privilege;
 	unsigned int pcb_addr;
 	Func eip;
 	//void (*eip)(void *);

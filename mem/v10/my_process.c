@@ -267,6 +267,7 @@ void process_execute(Func func, char *thread_arg, char *process_name, unsigned i
 	thread_stack->eip2 = user_process;
 	thread_stack->func_name = func;
 	thread_stack->func_arg = thread_arg;
+	thread_stack->privilege = privilege;
 	thread_stack->pcb_addr = (unsigned int)process;
 	thread_stack->ebp = thread_stack->ebx = thread_stack->edi = thread_stack->esi = 0;
 	if(isListEmpty(&pcb_list) == 1){
