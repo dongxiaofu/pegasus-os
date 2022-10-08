@@ -107,6 +107,11 @@ void init_propt()
 	InitDescriptor(&gdt[9], 0, limit, es_attribute);
 	// cs
   	InitDescriptor(&gdt[10], 0, limit, cs_attribute);
+
+	unsigned int es_attribute_1 = 0xcb2;
+	unsigned int cs_attribute_1 = 0xcba;
+	InitDescriptor(&gdt[11], 0, limit, es_attribute_1);
+  	InitDescriptor(&gdt[12], 0, limit, cs_attribute_1);
 }
 
 void InitInterruptDesc(int vec_no, int_handle offset, int privilege, int type)
