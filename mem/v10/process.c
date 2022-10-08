@@ -84,7 +84,8 @@ void schedule_process()
 		}
 	}else{
 		if(cur->p_flag == RUNNING){
-			appendToDoubleLinkList(&pcb_list, &cur->tag);
+			cur->ticks = TICKS_NUM;
+			insertToDoubleLinkList(&pcb_list, &cur->tag);
 			unsigned int element = (unsigned int)popFromDoubleLinkList(&pcb_list);
 			Proc *tmp = (Proc *)(element & 0xFFFFF000);
 			if(tmp != 0x0){
@@ -197,9 +198,6 @@ void clock_handler()
 		inform_int(TASK_TTY);
 	}
     // 调度进程
-//    if(proc_ready_table != 0x0){
-//		proc_ready_table->ticks--;
-//	}
     schedule_process();
     if(proc_ready_table != 0x0){
 		if(proc_ready_table->ticks > 0){

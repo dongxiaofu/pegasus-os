@@ -67,8 +67,8 @@ void TaskMM(){
 		}
 
 		if(reply){
-				delay(10);
-    			// send_rec(SEND, m, source);
+				delay(3);
+    			send_rec(SEND, m, source);
 		}
 	}
 }
