@@ -30,7 +30,7 @@ VirtualMemoryAddress *create_user_process_address_space()
 	return space;
 }
 
-void user_process(Func func, void *arg)
+void user_process(Func func, void *arg, unsigned int privilege)
 {
 	unsigned short es;	// = 0x49;
 	// unsigned short cs = 0x50;
@@ -39,8 +39,16 @@ void user_process(Func func, void *arg)
 	unsigned int es_attribute = 0xcb2;
 	unsigned int cs_attribute = 0xcba;
 	unsigned int limit = 0xffffffff;
-	es = 0x48;
-	cs = 0x50;
+//	es = 0x48;
+//	cs = 0x50;
+
+	if(privilege == 0){
+		es = 0x48;
+		cs = 0x50;
+	}else{
+		es = 88 + 1;
+		cs = 96 + 1;
+	}
 	// es
 //	gdt_index = 9;
 //	es = gdt_index * 8 + 1;
