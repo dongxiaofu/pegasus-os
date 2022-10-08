@@ -111,6 +111,7 @@ typedef struct proc{
         
 		// 为了兼容，先保留这个成员。
 		Regs s_reg;
+	unsigned int stack_magic;
 }Proc;
 
 typedef struct{

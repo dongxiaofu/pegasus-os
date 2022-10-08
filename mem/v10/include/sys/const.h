@@ -275,5 +275,6 @@
 
 
 #define TICKS_NUM	5
+#define STACK_MAGIC	0x99ABCDE0
 
 #endif

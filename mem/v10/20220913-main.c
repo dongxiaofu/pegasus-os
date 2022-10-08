@@ -751,6 +751,7 @@ void INIT_fork()
 
 	int j = 0;
 	int pid = fork();
+	asm ("xchgw %bx, %bx");		
 	delay(1);
 //	pid = 0;
 //	asm ("xchgw %bx, %bx");
@@ -778,8 +779,8 @@ void INIT_fork()
 		j++;		//	spin("child");
 		j += 2;
 //		int fd2 = open("dev_tty0", O_RDWR);
-		char buf2[40] = "Child\n";
-//		asm ("xchgw %bx, %bx");		
+		char buf2[40] = "Child.See you again\n";
+		asm ("xchgw %bx, %bx");		
 		write(fd_stdout, buf2, Strlen(buf2));			
 		while(1);
 	//	write(fd_stdout, buf2, Strlen(buf2));			

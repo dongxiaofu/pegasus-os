@@ -29,6 +29,7 @@ Proc *thread_init()
 	proc->q_sending = proc->q_next = 0x0;
 	proc->pid = ++pid;
 	proc->ticks = TICKS_NUM;
+	proc->stack_magic = STACK_MAGIC;
 
 	return proc;
 }

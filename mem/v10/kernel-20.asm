@@ -561,13 +561,13 @@ sys_call:
 fork_restart:
 	cli
 	; 修改tss.esp0
-	mov eax, esp
-	and eax, 0xFFFFF000
-	sub esp, 20
-	add eax, 4
-	push eax
-	call update_tss
-	add esp, 24
+;	mov eax, esp
+;	and eax, 0xFFFFF000
+;	sub esp, 20
+;	;add eax, 4
+;;	push eax
+;;	call update_tss
+;	add esp, 24
 	; 出栈 	
 	pop gs
 	pop fs
@@ -879,7 +879,7 @@ update_tss:
 	mov ebp, esp
 
 	mov eax, [ebp+8]
-	mov eax, [eax]
+	;mov eax, [eax]
 	mov [tss+4], eax
 	
 	mov esp, ebp

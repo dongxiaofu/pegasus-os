@@ -182,16 +182,21 @@ void build_process_kernel_stack(Proc *process)
 {
 	enum intr_status old_status = intr_disable();
 	unsigned int *stack = (unsigned int *)((unsigned int)process + PAGE_SIZE);
+	// 设置tss.esp0
+//	process->tss_esp0 = stack;
+//	stack -= sizeof(Regs);
+//	unsigned int stack_magic_offset = &(((Proc *)0x0)->stack_magic);
+//	unsigned int *stack_magic_addr = (unsigned int *)((unsigned int)process + stack_magic_offset);
+//	stack = stack_magic_addr;
 	while(1){
 		if(*stack == 0x38){
 			break;
 		}
-
 		stack--;
 	}
 
 	// 设置tss.esp0
-	process->tss_esp0 = stack;
+	process->tss_esp0 = (unsigned int *)((unsigned int)process + PAGE_SIZE);
 
 //	unsigned int *stack = (unsigned int *)(process + PAGE_SIZE - sizeof(Regs));
 //	unsigned int *stack = (unsigned int *)((unsigned int)process + PAGE_SIZE - sizeof(Regs));

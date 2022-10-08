@@ -145,20 +145,30 @@ _do_not_switch:
 		// if(next->pid != 0){ 当next == 0时，next->pid的值是1048576。意外！
 		if(next != 0 && next->pid != 0){
 			appendToDoubleLinkList(&pcb_list, &next->tag);
+		}else{
+			next = main_thread; 
+			next->p_flag = RUNNING;
 		}
-		next = main_thread; 
-		next->p_flag = RUNNING;
 	}
 
 
 _start_switch:
+	
+	if(next->pid == 6){
+		int a = 8;
+		int k = a;
+		// asm ("xchgw %bx, %bx");
+	}
+
+
 //	disp_str("switch_to?No3\n");
 	// 进程，切换页目录表。
 //	int page_directory = 0x100000;
 	if(next->page_directory != 0x0){
 //		disp_str("update_tss\n");
-		// update_tss((unsigned int)next + PAGE_SIZE);
-		update_tss((unsigned int)next);
+    	// asm ("xchgw %bx, %bx");
+		update_tss((unsigned int)next + PAGE_SIZE);
+		// update_tss((unsigned int)next);
 //		disp_str("update_cr3\n");
 		update_cr3((unsigned int)next->page_directory);
 //		disp_str("update_cr3 end\n");
@@ -171,9 +181,9 @@ _start_switch:
 
 	proc_ready_table = next;	
 
-	if(next->pid != 0 && next->parent_pid != -1){
-    	asm ("xchgw %bx, %bx");
-    	next = pid2proc(next->parent_pid);
+	if(next->pid == 6 && next->parent_pid == 5){
+//    	asm ("xchgw %bx, %bx");
+    	// next = pid2proc(next->parent_pid);
 	}
 
 	switch_to(cur, next);
@@ -181,6 +191,8 @@ _start_switch:
 
 void clock_handler()
 {
+	Proc *cur = get_running_thread_pcb();
+//	assert(cur->stack_magic == STACK_MAGIC);
 	if(key_pressed){
 		inform_int(TASK_TTY);
 	}

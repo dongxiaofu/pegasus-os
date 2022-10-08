@@ -25,7 +25,7 @@ int do_fork(Message *msg)
     m.TYPE = SYSCALL_RET;
     m.RETVAL = 0;
     m.PID = 0;
-   	send_rec(SEND, &m, child_pid);
+    send_rec(SEND, &m, child_pid);
 
     return child_pid;
 }
