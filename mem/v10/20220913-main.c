@@ -763,11 +763,11 @@ void INIT_fork()
 //		while(1);
 //	delay(1);
 		j++;
-		char buf1[40] = "Parent\n";
+		char buf1[40] = "Parent.Nice to meet you!\n";
 		write(fd_stdout, buf1, Strlen(buf1));			
-//		write(fd_stdout, buf1, Strlen(buf1));			
-//		write(fd_stdout, buf1, Strlen(buf1));			
-		while(1);
+		write(fd_stdout, buf1, Strlen(buf1));			
+		write(fd_stdout, buf1, Strlen(buf1));			
+//		while(1);
 //		for(int i = 0; i < 5; i++){
 //			j++;
 //			write(fd_stdout, buf1, Strlen(buf1));			
@@ -782,12 +782,16 @@ void INIT_fork()
 		char buf2[40] = "Child.See you again\n";
 		asm ("xchgw %bx, %bx");		
 		write(fd_stdout, buf2, Strlen(buf2));			
+		write(fd_stdout, buf2, Strlen(buf2));			
+		write(fd_stdout, buf2, Strlen(buf2));			
 		while(1);
-	//	write(fd_stdout, buf2, Strlen(buf2));			
-	//	write(fd_stdout, buf2, Strlen(buf2));			
 	}
 
-//	spin("parent\n");
+	read(fd_stdin, buf, 40);
+	Printf(buf);
+	Printf(buf);
+	Printf(buf);
+	spin("parent\n");
 }
 
 // shell
