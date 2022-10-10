@@ -118,9 +118,10 @@ void user_proc_a()
 //	int b = a;
 //	int c = a;
 //	int d = a;
+	test_shell();
 //	INIT_fork();
 //	TestTTY();
-	TestFS();
+//	TestFS();
 	while(1);
 }
 

@@ -31,7 +31,10 @@ LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
 		hd.o hd_rdwt.o process.o protect.o console.o keyboard.o \
 		open.o	read.o	write.o	close.o \
 		wait.o  exit.o 	fork.o	 getpid.o exec.o \
-		mm/main.o mm/exec.o mm/forkexit.o
+		mm/main.o mm/exec.o mm/forkexit.o \
+		mem/mem.o \
+		kernel_main_old.o my_process.o \
+		switch_to.o	double_link_list.o thread.o
 
 LOBJS	=	lib/pegasus_crt.a
 

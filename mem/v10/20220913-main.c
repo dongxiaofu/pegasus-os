@@ -95,7 +95,7 @@ void untar(const char *filename)
     // todo 怎么获取文件的长度？
     int file_size = 0;
 
-    char buf[SECTOR_SIZE * 16];
+    char buf[SECTOR_SIZE * 4];
     int chunk = sizeof(buf);
 
 	int bytes_read2 = 0;
@@ -106,12 +106,12 @@ void untar(const char *filename)
 	// 跳过上一个文件占用的空间
 	if(bytes_read2 > 0){
 		int sector_count = (bytes_read2 - 1 + SECTOR_SIZE) / SECTOR_SIZE;		
-			Memset(buf, 0, SECTOR_SIZE * 16);
+			Memset(buf, 0, SECTOR_SIZE * 4);
        		 	read(fd, buf, sector_count * SECTOR_SIZE - bytes_read2);
 			bytes_read2 = 0;
 	}
 
-	Memset(buf, 0, SECTOR_SIZE * 16);
+	Memset(buf, 0, SECTOR_SIZE * 4);
         bytes_read = read(fd, buf, SECTOR_SIZE);
         if (bytes_read == 0)
         {
@@ -971,9 +971,9 @@ void test_shell()
 	int fd_stdout = open(tty1, O_RDWR);
 	char filename[20] = "install.tar";
 	untar(filename);
-//		Printf("I am a child\n");
-//		simple_shell();
-//	return;
+		Printf("I am a child\n");
+		simple_shell();
+	return;
 	int pid = fork();
 	if(pid > 0){
 		int s;
