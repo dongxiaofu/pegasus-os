@@ -648,16 +648,22 @@ void TestFS()
 {
 	disp_str("TestFS\n");
 	char tty1[10] = "dev_tty1";
+	asm ("xchgw %bx, %bx");		
 	int fd_stdout = open(tty1, O_RDWR);
+	asm ("xchgw %bx, %bx");		
 	int fd_stdin = open(tty1, O_RDWR);
+	asm ("xchgw %bx, %bx");		
     Printf("TestA is running\n");
-	return;
+	asm ("xchgw %bx, %bx");		
+//	return;
     char filename[5] = "AC";
     char filename2[5] = "cAB";
     char filename3[10] = "INTERRUPT";
+	asm ("xchgw %bx, %bx");		
     int flag = 1;
-    // Printf("TestA is running again\n");
-    while (1)
+	asm ("xchgw %bx, %bx");		
+    Printf("TestA is running again\n");
+//    while (1)
     {
         if (flag == 1)
         {
@@ -670,6 +676,7 @@ void TestFS()
 		Memset(buf2, 0, 20);
             int k = read(fd, buf2, 18);
            Printf("buf2 = %s\n", buf2);
+	asm ("xchgw %bx, %bx");		
             delay(10);
             int fd2 = open(filename2, O_CREAT);
            Printf("fd2 = %x\n", fd2);
@@ -687,7 +694,7 @@ void TestFS()
             char buf5[30] = "I will success at last.";
             write(fd3, buf5, Strlen(buf5));
             char buf6[30];
-		for(int i = 0; i < 6; i++){
+		for(int i = 0; i < 3; i++){
 		Memset(buf6, 0, 30);
             int k3 = read(fd3, buf6, Strlen(buf5));
             Printf("buf6 = %s\n", buf6);
@@ -695,9 +702,9 @@ void TestFS()
 		char file[20] = "install.tar";
             int fd4 = open(file, O_RDONLY);
            Printf("fd4 = %x\n", fd4);
-		char buf7[512];
-		Memset(buf7, 0, 20);
-            int k4 = read(fd4, buf7, 512);
+		char buf7[40];
+		Memset(buf7, 0, 40);
+            int k4 = read(fd4, buf7, 40);
             Printf("buf7 = %s\n", buf7);
         }
     }
@@ -1432,6 +1439,11 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 {
 //	enum intr_status old_status = intr_disable();	
     Proc *receiver = pid2proc(receiver_pid);
+	if(receiver != 0){
+		assert(receiver->stack_magic == STACK_MAGIC);
+	}
+	assert(sender->stack_magic == STACK_MAGIC);
+
 	if(receiver == 0x0){
 		assert(receiver != 0x0);
 	}
@@ -1541,6 +1553,11 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
     Proc *pre;
 
     Proc *sender = pid2proc(sender_pid);
+	if(sender != 0){
+		assert(sender->stack_magic == STACK_MAGIC);
+	}
+	assert(receiver->stack_magic == STACK_MAGIC);
+
     int receiver_pid = proc2pid(receiver);
 
 	int int_flag = 0;

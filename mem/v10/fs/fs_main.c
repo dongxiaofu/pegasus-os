@@ -130,8 +130,15 @@ void task_fs()
             break;
         case READ:
         case WRITE:
-           	byte_rdwt =  do_rdwt(msg);
+			{
+        	   	byte_rdwt =  do_rdwt(msg);
+				if(byte_rdwt != -1){
+        	    	msg->TYPE = SYSCALL_RET;
+        	    	msg->CNT = byte_rdwt;
+					send_rec(SEND, msg, msg->source);
+				}
             break;
+			}
         case CLOSE:
             //	int fd = msg.FD;
             do_close(fd);
@@ -1217,7 +1224,8 @@ int do_rdwt(Message *msg)
 			send_rec(SEND, msg, source);
 		}
 
-        return 0;
+		// 在task_fs根据do_rdwt的返回值决定是否向消息来源发送消息。
+        return -1;
     }
 
 
