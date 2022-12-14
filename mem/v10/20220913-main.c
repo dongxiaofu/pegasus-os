@@ -90,6 +90,7 @@ void untar(const char *filename)
     // 3. 读取文件时，读取单位一定是N个扇区。
     // todo 后续再完善open。
     int fd = open(filename, O_RDONLY);
+	Printf("Start to untar 1\n");
 
     // 获取文件的长度
     // todo 怎么获取文件的长度？
@@ -101,7 +102,8 @@ void untar(const char *filename)
 	int bytes_read2 = 0;
 	int bytes_read = 0;
 
-    while (1)
+	int i = 1;
+    while (i > 0)
     {
 	// 跳过上一个文件占用的空间
 	if(bytes_read2 > 0){
@@ -113,6 +115,7 @@ void untar(const char *filename)
 
 	Memset(buf, 0, SECTOR_SIZE * 4);
         bytes_read = read(fd, buf, SECTOR_SIZE);
+	Printf("Start to untar 2\n");
         if (bytes_read == 0)
         {
             break;
@@ -126,14 +129,17 @@ void untar(const char *filename)
         char *name = tar_header->name;
         // int fdout = open(name, O_WRONLY);
         int fdout = open(name, O_CREAT);
+	Printf("Start to untar 3\n");
         // 计算文件大小
         int len = 0;
         char *size_str = tar_header->size;
 	
 	// 检查有效数据是否已经结束
 	if(Strlen(name) == 0 && Strlen(size_str) == 0){
+		Printf("break\n");
 		break;
 	}
+	Printf("After Strlen\n");
 
         char *p = size_str;
         while (*p)
@@ -142,24 +148,39 @@ void untar(const char *filename)
             p++;
         }
 
+		Printf("After p loop\n");
+
         int bytes_left = len;
 	int chunk = SECTOR_SIZE;
+		Printf("bytes_left = %d\n", bytes_left);
         while (bytes_left)
        {
        int iobytes = MIN(chunk, bytes_left);
-            Memset(buf, 0, SECTOR_SIZE);
+            Memset(buf, 0, iobytes);
+//			Printf("Before read\n");
             bytes_read2 += read(fd, buf, iobytes);
-           write(fdout, buf, iobytes);
+//	Printf("Start to untar 4\n");
+           // write(fdout, buf, iobytes);
             //write(fdout, buf, len);
            bytes_left -= iobytes;
+		   test_ticks++;
+		   if(test_ticks == 104){
+	//			int a = 5;
+			}
         }
 
+		Printf("Before close\n");
         close(fdout);
+		Printf("After close\n");
 
+		i--;
 	
     }
+	Printf("Start to untar 5\n");
+	Printf("I am a child 0\n");
 
-    close(fd);
+	close(fd);
+	Printf("I am a child 0000\n");
 }
 
 void atoi(char *str, int num)
@@ -970,8 +991,10 @@ void test_shell()
 	char tty1[10] = "dev_tty1";
 	int fd_stdout = open(tty1, O_RDWR);
 	char filename[20] = "install.tar";
+	Printf("Start to untar\n");
 	untar(filename);
 		Printf("I am a child\n");
+	return;
 		simple_shell();
 	return;
 	int pid = fork();

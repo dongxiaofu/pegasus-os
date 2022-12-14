@@ -142,6 +142,11 @@ void task_fs()
         case CLOSE:
             //	int fd = msg.FD;
             do_close(fd);
+			{
+        		msg->TYPE = SYSCALL_RET;
+        		msg->RETVAL = 0;
+				send_rec(SEND, msg, msg->source);
+			}
             break;
 		case RESUME_PROC:
 			send_rec(SEND, msg, msg->PROCNR);
@@ -1246,7 +1251,7 @@ int do_rdwt(Message *msg)
     int pos_end;
     if (hd_operate_type == READ)
     {
-		pos = 0;
+		// pos = 0;
         pos_end = MIN(pos + len, file_size);
     }
     else

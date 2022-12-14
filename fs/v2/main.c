@@ -879,9 +879,9 @@ void test_exec()
 
 void INIT()
 {
-	INIT_fork();
+//	INIT_fork();
 //	test_shell();
-//	test_exec();
+	test_exec();
 //	TestFS();
 //	wait_exit();
 	while(1){};
