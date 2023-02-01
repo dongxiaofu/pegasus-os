@@ -39,7 +39,8 @@ int fd_stdout = open(tty1, O_RDONLY);
     // todo 先用硬编码
     int MAX_FILE_SIZE = 148368;
 //    char mmbuf[158368];
-    char mmbuf[1024];
+    // char mmbuf[1024];
+    char mmbuf[212096];
     char filename[12];
 	Memset(filename,0,12);
     // FILENAME的长度包含末尾的'0'吗？
@@ -61,11 +62,13 @@ int fd_stdout = open(tty1, O_RDONLY);
                 if(cnt == 0){
                         break;
                 }
-				if(byte_rdwt >= 530)	break;
+				if(byte_rdwt >= 212096)	break;
         }
 
         close(fd);
 	asm ("xchgw %bx, %bx");
+
+	Proc *source_proc = pid2proc(source);
 
     // 开始解析ELF文件了
     // Elf32_Ehdr、Elf32_Phdr 需要在我的操作系统中定义吗？需要。我的操作系统不使用其他操作系统的库文件。
@@ -79,12 +82,14 @@ int fd_stdout = open(tty1, O_RDONLY);
 //                v2l(TASK_MM, mmbuf + program_header->p_offset),
 //                program_header->p_filesz
 //        );
-//        把program_header->p_vaddr发送给用户进程，用户进程接收到后，做内存地址映射。
+//        // 把program_header->p_vaddr发送给用户进程，用户进程接收到后，做内存地址映射。
 //   		Message m;
 //   		m.TYPE = RESUME_PROC;
 //   		m.PROGRAM_VIRTUAL_ADDR = program_header->p_vaddr;
 ////   		asm ("xchgw %bx, %bx");
 //   		send_rec(SEND, &m, source);
+
+//		alloc_physical_memory_of_proc(program_header->p_vaddr, source_proc);
 
 		// program_header->p_vaddr 这个地址不需要处理吗？
         phycopy(program_header->p_vaddr,
@@ -98,8 +103,7 @@ int fd_stdout = open(tty1, O_RDONLY);
 //   		m5.TYPE = RESUME_PROC;
 //   		m5.PROGRAM_VIRTUAL_ADDR = 0;
 //   		send_rec(SEND, &m5, source);
-//   		asm ("xchgw %bx, %bx");
-	asm ("xchgw %bx, %bx");
+//	asm ("xchgw %bx, %bx");
     //
     //
     //

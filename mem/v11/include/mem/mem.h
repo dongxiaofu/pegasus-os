@@ -72,6 +72,7 @@ unsigned int get_physical_address(unsigned int vaddr);
 void remove_map_entry(unsigned int vaddr);
 void free_a_page(unsigned int vaddr, MEMORY_POOL_TYPE pool_type);
 void sys_free(unsigned int addr, unsigned int size);
+unsigned int alloc_physical_memory_of_proc(unsigned int vaddr, unsigned int pid);
 unsigned int alloc_physical_memory(unsigned int vaddr, MEMORY_POOL_TYPE pool_type);
 // 申请内存，返回内存空间的虚拟地址
 unsigned int alloc_memory(unsigned int cnt, MEMORY_POOL_TYPE pool_type);
