@@ -487,7 +487,7 @@ void hd_rdwt(Message *msg) {
             // 读
             interrupt_wait();
 //			wait_for();
-			disp_str_colour("#", 0x0E);
+//			disp_str_colour("#", 0x0E);
 //	 		 dis_pos = 320 + 40;
 //     		 disp_str_colour("pos:", 0x0C);
 //     		 disp_int(pos);
@@ -510,12 +510,15 @@ void hd_rdwt(Message *msg) {
         vaddr_hdbuf += bytes;
     }
 
-	Message *msg2 = (Message *)sys_malloc(sizeof(Message));
-	Memset(msg2, 0, sizeof(Message));
-	msg2->TYPE = SYSCALL_RET;	// todo 调试，无实际作用。
-    msg2->val = 0;
+	// 使用sys_malloc会导致untar中解压文件失败。硬盘无响应。
+	// Message *msg2 = (Message *)sys_malloc(sizeof(Message));
+	// 改成这样后，能顺利读写打包的文件。
+	Message msg2;
+	Memset(&msg2, 0, sizeof(Message));
+	msg2.TYPE = SYSCALL_RET;	// todo 调试，无实际作用。
+    msg2.val = 0;
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
-    send_rec(SEND, msg2, TASK_FS);
+    send_rec(SEND, &msg2, TASK_FS);
 }
 
 

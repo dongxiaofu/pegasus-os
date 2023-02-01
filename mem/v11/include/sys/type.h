@@ -85,6 +85,7 @@ typedef struct {
 // exec中使用
 #define NAME_LEN u0.u30.m30
 #define PATHNAME  u0.u30.m31
+#define PROGRAM_VIRTUAL_ADDR u0.u30.m32
 
 // 杂项
 #define FD u0.u40.m40

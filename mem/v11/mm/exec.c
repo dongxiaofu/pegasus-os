@@ -71,6 +71,7 @@ int fd_stdout = open(tty1, O_RDONLY);
     // Elf32_Ehdr、Elf32_Phdr 需要在我的操作系统中定义吗？需要。我的操作系统不使用其他操作系统的库文件。
     Elf32_Ehdr *elf_header = (Elf32_Ehdr *) mmbuf;
     for (int i = 0; i < elf_header->e_phnum; i++) {
+//    for (int i = 0; i < 1; i++) {
         Elf32_Phdr *program_header = (Elf32_Phdr * )(mmbuf + elf_header->e_ehsize +
                                                      i * elf_header->e_phentsize);
         // 复制二进制代码
@@ -78,6 +79,12 @@ int fd_stdout = open(tty1, O_RDONLY);
 //                v2l(TASK_MM, mmbuf + program_header->p_offset),
 //                program_header->p_filesz
 //        );
+//        把program_header->p_vaddr发送给用户进程，用户进程接收到后，做内存地址映射。
+//   		Message m;
+//   		m.TYPE = RESUME_PROC;
+//   		m.PROGRAM_VIRTUAL_ADDR = program_header->p_vaddr;
+////   		asm ("xchgw %bx, %bx");
+//   		send_rec(SEND, &m, source);
 
 		// program_header->p_vaddr 这个地址不需要处理吗？
         phycopy(program_header->p_vaddr,
@@ -85,6 +92,13 @@ int fd_stdout = open(tty1, O_RDONLY);
                 program_header->p_filesz
         );
     }
+
+		// 让用户进程知道重新放置ELF文件已经结束了。
+//   		Message m5;
+//   		m5.TYPE = RESUME_PROC;
+//   		m5.PROGRAM_VIRTUAL_ADDR = 0;
+//   		send_rec(SEND, &m5, source);
+//   		asm ("xchgw %bx, %bx");
 	asm ("xchgw %bx, %bx");
     //
     //
@@ -139,7 +153,7 @@ int fd_stdout = open(tty1, O_RDONLY);
 //    // 重新放置二进制代码
 //    // 主要思路：
 //    // 1. 从elf头中找出程序头表项中的表现数量，遍历程序头表。
-//    // 2. 每个表现中，有我需要的数据：二进制代码的虚拟地址、在文件中的偏移量、长度。
+//    // 2. 每个表项中，有我需要的数据：二进制代码的虚拟地址、在文件中的偏移量、长度。
 //    // 3. 对了，要先把文件读到内存中。
 //    //
 //    // 把文件读取到mmbuf中。文件的最大长度是有限制的，因此，可以把mmbuf的长度设置为

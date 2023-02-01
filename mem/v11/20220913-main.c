@@ -151,8 +151,8 @@ void untar(const char *filename)
 		Printf("After p loop\n");
 
         int bytes_left = len;
-		char buf2[SECTOR_SIZE * 2];
-	int chunk = SECTOR_SIZE * 2;
+		char buf2[SECTOR_SIZE * 4];
+	int chunk = SECTOR_SIZE * 4;
 		Printf("bytes_left0 = %d\n", bytes_left);
 //		bytes_left = 1024 * 28;
 //		bytes_left = 211364;
@@ -160,14 +160,19 @@ void untar(const char *filename)
 //		bytes_left = 25608;
 //		bytes_left = 1024*200;
 		Printf("bytes_left1 = %d\n", bytes_left);
+//       int iobytes = MIN(chunk, bytes_left);
+//             bytes_read2 += read(fd, buf2, iobytes);
+//		Printf("bytes_left2 = %d\n", bytes_left);
         // while (bytes_left)
+       int iobytes = MIN(chunk, bytes_left);
         while (1)
        {
-       int iobytes = MIN(chunk, bytes_left);
+//       int iobytes = MIN(chunk, bytes_left);
 //		   iobytes = -1;
  //           Memset(buf, 0, iobytes);
 //			Printf("Before read\n");
-             bytes_read2 += read(fd, buf2, iobytes);
+            bytes_read2 += read(fd, buf2, iobytes);
+//			bytes_read2 += iobytes;
 
 //	Printf("Start to untar 4\n");
 //			Printf("Before write\n");

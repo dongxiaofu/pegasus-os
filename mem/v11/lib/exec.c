@@ -52,7 +52,7 @@ int execv(const char *pathname, char **argv) {
     char **p = (char **) argv;
     int len = 0;
     while (*p) {
-//	Printf("*p0 = %x\n", *p);
+	Printf("*p0 = %x\n", *p);
 //	Printf("*p0_str = %s\n", *p);
         // 第三个难点：应该使用p++还是*p++？
         p++;
@@ -112,7 +112,35 @@ while(*t){
 //    msg.BUF = tmp;
     msg.BUF_LEN = len;
 
+	Printf("before send_rec\n");
     send_rec(BOTH, &msg, TASK_MM);
+//    send_rec(SEND, &msg, TASK_MM);
+	Printf("before send_rec1\n");
+
+//	int counter = 0;
+//	while(1){
+////		Printf("before send_rec22\n");
+//		// 接收mem进程发送过来的用户程序的虚拟地址。
+//	    send_rec(RECEIVE, &msg, TASK_MM);
+//		Printf("before send_rec--%d\n", counter);
+//		unsigned int v_addr = msg.PROGRAM_VIRTUAL_ADDR;
+//		if(v_addr == 0)	break;
+//		// 直接在用户进程中像这样分配内存，究竟是否合适？
+//		// 在本文件使用USER枚举值，报错。
+////		alloc_physical_memory(v_addr, USER);
+//		
+//		// 直接在用户进程中像这样映射内存地址，是否合适？
+//		unsigned int phy_addr = get_physical_address(v_addr);
+//		add_map_entry(v_addr, phy_addr);
+//		Printf("before send_rec--%d--2\n", counter);
+//
+//		counter++;
+//	}
+//
+//	// 再接收一次。
+//    send_rec(RECEIVE, &msg, TASK_MM);
+
+	Printf("after send_rec\n");
 
     assert(msg.TYPE == SYSCALL_RET);
 
