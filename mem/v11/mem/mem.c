@@ -288,27 +288,27 @@ unsigned int get_physical_address(unsigned int vaddr)
 }
 
 // 想不到更恰当的名字，就用这个。
-// unsigned int alloc_physical_memory_of_proc(unsigned int vaddr, unsigned int pid)
-// {
-// 	unsigned int page_vaddr = vaddr & 0xFFFFF000;
-// 	VirtualMemoryAddress pool;
-// 	MEMORY_POOL_TYPE pool_type = USER;
-// 
-// 	Proc *current_thread = proc2pid(pid); 
-// 	// TODO 某个用户进程的虚拟地址池
-// 	Memcpy(&pool, current_thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
-// 
-// 	Bitmap map = pool.map;
-// 	unsigned int index = (page_vaddr - pool.start_addr) / PAGE_SIZE;
-// 	unsigned int addr = pool.start_addr + PAGE_SIZE * index;
-// 	set_bits(&map, index, 1, 1);
-// 
-// 	unsigned int phy_page = get_a_page(pool_type);
-// 
-// 	add_map_entry(vaddr, phy_page);
-// 	
-// 	return vaddr;
-// }
+unsigned int alloc_physical_memory_of_proc(unsigned int vaddr, unsigned int pid)
+{
+	unsigned int page_vaddr = vaddr & 0xFFFFF000;
+	VirtualMemoryAddress pool;
+	MEMORY_POOL_TYPE pool_type = USER;
+
+	Proc *current_thread = pid2proc(pid); 
+	// TODO 某个用户进程的虚拟地址池
+	Memcpy(&pool, current_thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
+
+	Bitmap map = pool.map;
+	unsigned int index = (page_vaddr - pool.start_addr) / PAGE_SIZE;
+	unsigned int addr = pool.start_addr + PAGE_SIZE * index;
+	set_bits(&map, index, 1, 1);
+
+	unsigned int phy_page = get_a_page(pool_type);
+
+	add_map_entry(vaddr, phy_page);
+	
+	return vaddr;
+}
 
 // 想不到更恰当的名字，就用这个。
 unsigned int alloc_physical_memory(unsigned int vaddr, MEMORY_POOL_TYPE pool_type)
