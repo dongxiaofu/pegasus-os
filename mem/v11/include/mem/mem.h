@@ -43,7 +43,7 @@ typedef enum _MEMORY_POOL_TYPE {KERNEL, USER} MEMORY_POOL_TYPE;
 // 内核的虚拟地址池
 VirtualMemoryAddress KernelVirtualMemory;
 // 向上取整
-#define ROUND_UP(length, size)  ((length + size - 1) / size)
+// #define ROUND_UP(length, size)  ((length + size - 1) / size)
 
 void init_bitmap(Bitmap *map);
 int test_bit_val(Bitmap *map, int idx);

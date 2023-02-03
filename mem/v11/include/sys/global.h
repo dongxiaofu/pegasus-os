@@ -146,4 +146,7 @@ EXTERN TSS tss;
 // 内存块种类数量
 // #define MEM_BLOCK_DESC_KIND_NUM	10
 
+// 向上取整
+#define ROUND_UP(length, size)  ((length + size - 1) / size)
+
 #endif

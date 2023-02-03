@@ -307,7 +307,7 @@ unsigned int alloc_physical_memory_of_proc(unsigned int vaddr, unsigned int pid)
 
 	add_map_entry(vaddr, phy_page);
 	
-	return vaddr;
+	return phy_page;
 }
 
 // 想不到更恰当的名字，就用这个。

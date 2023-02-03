@@ -86,22 +86,34 @@ int fd_stdout = open(tty1, O_RDONLY);
 //   		m.PROGRAM_VIRTUAL_ADDR = program_header->p_vaddr;
 ////   		asm ("xchgw %bx, %bx");
 //   		send_rec(SEND, &m, source);
+		unsigned int program_size = program_header->p_filesz;
+		unsigned int page_cnt = ROUND_UP(program_size, PAGE_SIZE);
+		unsigned int p_vaddr = program_header->p_vaddr;
+		unsigned int start_vaddr = 0;
 
-		alloc_physical_memory_of_proc(program_header->p_vaddr, source);
+		// 怎么会有程序段的大小是0呢？
+		// 在测试时，我发现了这种情况。程序段的大小是0，不能做内存地址映射，不能调用下面的phycopy。
+		if(program_size == 0)	continue;
 
-		// program_header->p_vaddr 这个地址不需要处理吗？
-        phycopy(program_header->p_vaddr,
-                mmbuf + program_header->p_offset,
-                program_header->p_filesz
-        );
+		for(int i = 0; i < page_cnt; i++){
+			unsigned int phy_addr = alloc_physical_memory_of_proc(p_vaddr, source);
+			unsigned vaddr = alloc_virtual_memory(phy_addr, PAGE_SIZE);
+			if(start_vaddr == 0)	start_vaddr = vaddr;
+
+			p_vaddr += PAGE_SIZE;
+		}
+
+        phycopy(start_vaddr, mmbuf + program_header->p_offset, program_header->p_filesz);
     }
+
+//	Printf("after reload elf\n");
 
 		// 让用户进程知道重新放置ELF文件已经结束了。
 //   		Message m5;
 //   		m5.TYPE = RESUME_PROC;
 //   		m5.PROGRAM_VIRTUAL_ADDR = 0;
 //   		send_rec(SEND, &m5, source);
-//	asm ("xchgw %bx, %bx");
+	asm ("xchgw %bx, %bx");
     //
     //
     //
