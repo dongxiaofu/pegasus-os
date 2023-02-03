@@ -97,20 +97,11 @@ int fd_stdout = open(tty1, O_RDONLY);
 
 //	Printf("after reload elf\n");
 
-		// 让用户进程知道重新放置ELF文件已经结束了。
-//   		Message m5;
-//   		m5.TYPE = RESUME_PROC;
-//   		m5.PROGRAM_VIRTUAL_ADDR = 0;
-//   		send_rec(SEND, &m5, source);
 	asm ("xchgw %bx, %bx");
-    //
-    //
-    //
     // 调整caller的数据空间的值
     //char *stackcopy = PROC_IMAGE_DEFAULT_SIZE - PROC_STACK_SIZE;
     char stackcopy[PROC_STACK_SIZE];
     // 从caller把arg_stack复制过来
-//    int caller_pid = msg->source;
     // 这样使用指针，正确吗？
     char *buf = msg->BUF;
     int buf_len = msg->BUF_LEN;
@@ -152,39 +143,6 @@ int fd_stdout = open(tty1, O_RDONLY);
 	int source_esp = (unsigned int)proc & 0xFFFFF000;
 	asm ("xchgw %bx, %bx");
     phycopy(origin_stack, stackcopy, buf_len);
-
-//    // 重新放置二进制代码
-//    // 主要思路：
-//    // 1. 从elf头中找出程序头表项中的表现数量，遍历程序头表。
-//    // 2. 每个表项中，有我需要的数据：二进制代码的虚拟地址、在文件中的偏移量、长度。
-//    // 3. 对了，要先把文件读到内存中。
-//    //
-//    // 把文件读取到mmbuf中。文件的最大长度是有限制的，因此，可以把mmbuf的长度设置为
-//    // 大于等于文件的最大长度。
-//    // 我们常用的文件的最大长度似乎没限制，后期，我想想怎么实现这个特性。
-//    // char mmbuf[MAX_FILE_SIZE];
-//    // todo 先用硬编码
-//    int MAX_FILE_SIZE = 148368;
-//    char mmbuf[148368];
-//    char filename[12];
-//    // FILENAME的长度包含末尾的'0'吗？
-//    phycopy(v2l(TASK_MM, filename), v2l(caller_pid, msg->PATHNAME), msg->NAME_LEN);
-//    int fd = open(filename, O_RDONLY);
-//    read(fd, mmbuf, MAX_FILE_SIZE);
-//	close(fd);
-//
-//    // 开始解析ELF文件了
-//    // Elf32_Ehdr、Elf32_Phdr 需要在我的操作系统中定义吗？需要。我的操作系统不使用其他操作系统的库文件。
-//    Elf32_Ehdr *elf_header = (Elf32_Ehdr *) mmbuf;
-//    for (int i = 0; i < elf_header->e_phnum; i++) {
-//        Elf32_Phdr *program_header = (Elf32_Phdr * )(mmbuf + elf_header->e_ehsize +
-//                                                     i * elf_header->e_phentsize);
-//        // 复制二进制代码
-//        phycopy(v2l(caller_pid, program_header->p_vaddr),
-//                v2l(TASK_MM, mmbuf + program_header->p_offset),
-//                program_header->p_filesz
-//        );
-//    }
 
     // 设置eip、esp、eax、ecx
     Regs *stack0 = (Regs *)(proc + PAGE_SIZE - sizeof(Regs));
