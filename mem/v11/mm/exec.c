@@ -72,20 +72,9 @@ int fd_stdout = open(tty1, O_RDONLY);
     // Elf32_Ehdr、Elf32_Phdr 需要在我的操作系统中定义吗？需要。我的操作系统不使用其他操作系统的库文件。
     Elf32_Ehdr *elf_header = (Elf32_Ehdr *) mmbuf;
     for (int i = 0; i < elf_header->e_phnum; i++) {
-//    for (int i = 0; i < 1; i++) {
         Elf32_Phdr *program_header = (Elf32_Phdr * )(mmbuf + elf_header->e_ehsize +
                                                      i * elf_header->e_phentsize);
-        // 复制二进制代码
-//        phycopy(v2l(source, program_header->p_vaddr),
-//                v2l(TASK_MM, mmbuf + program_header->p_offset),
-//                program_header->p_filesz
-//        );
-//        // 把program_header->p_vaddr发送给用户进程，用户进程接收到后，做内存地址映射。
-//   		Message m;
-//   		m.TYPE = RESUME_PROC;
-//   		m.PROGRAM_VIRTUAL_ADDR = program_header->p_vaddr;
-////   		asm ("xchgw %bx, %bx");
-//   		send_rec(SEND, &m, source);
+
 		unsigned int program_size = program_header->p_filesz;
 		unsigned int page_cnt = ROUND_UP(program_size, PAGE_SIZE);
 		unsigned int p_vaddr = program_header->p_vaddr;
