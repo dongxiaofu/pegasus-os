@@ -102,8 +102,10 @@ while(*t){
 
 	char *tmp[10] = {"hello1", "hello2"};
 
+	// 直接在用户进程中获取虚拟地址的物理地址，合适吗？语法上，能这样做。
 	unsigned int phy_pathname = get_physical_address(pathname);
 	unsigned int phy_arg_stack = get_physical_address(arg_stack);
+	unsigned int phy_proc_esp = get_physical_address(0xC0000000 - 0x1000 + PAGE_SIZE);
 
     msg.TYPE = EXEC;
     msg.PATHNAME = phy_pathname;
@@ -111,6 +113,11 @@ while(*t){
     msg.BUF = phy_arg_stack;
 //    msg.BUF = tmp;
     msg.BUF_LEN = len;
+
+	msg.ARG_STACK_VADDR = arg_stack;
+	msg.PHY_PROC_ESP = phy_proc_esp;
+	msg.VADDR_PROC_ESP = 0xC0000000 - 0x1000 + PAGE_SIZE - len;
+	msg.DELTA = 0xC0000000 - 0x1000 + PAGE_SIZE - len - (unsigned int)arg_stack;
 
 	Printf("before send_rec\n");
     send_rec(BOTH, &msg, TASK_MM);

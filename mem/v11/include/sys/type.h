@@ -44,6 +44,10 @@ typedef struct {
     unsigned int m12;
     unsigned int m13;
     unsigned int m14;
+	unsigned int m15;
+	unsigned int m16;
+	unsigned int m17;
+	unsigned int m18;
 } u1;
 
 typedef struct {
@@ -75,6 +79,11 @@ typedef struct {
 #define DEVICE u0.u10.m12
 #define POSITION u0.u10.m13
 #define BUF_LEN u0.u10.m14
+
+#define ARG_STACK_VADDR u0.u10.m15
+#define PHY_PROC_ESP u0.u10.m16
+#define VADDR_PROC_ESP u0.u10.m17
+#define DELTA u0.u10.m18
 
 // do_rdwt中使用
 #define HD_OPERATE_TYPE u0.u20.m20

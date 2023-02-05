@@ -22,7 +22,7 @@ int do_exec(Message *msg) {
     //
     //
 	char tty1[10] = "dev_tty1";
-	asm ("xchgw %bx, %bx");
+//	asm ("xchgw %bx, %bx");
 int fd_stdout = open(tty1, O_RDONLY);
 	int source = msg->source;    
 
@@ -66,7 +66,6 @@ int fd_stdout = open(tty1, O_RDONLY);
         }
 
         close(fd);
-	asm ("xchgw %bx, %bx");
 
     // 开始解析ELF文件了
     // Elf32_Ehdr、Elf32_Phdr 需要在我的操作系统中定义吗？需要。我的操作系统不使用其他操作系统的库文件。
@@ -97,7 +96,6 @@ int fd_stdout = open(tty1, O_RDONLY);
 
 //	Printf("after reload elf\n");
 
-	asm ("xchgw %bx, %bx");
     // 调整caller的数据空间的值
     //char *stackcopy = PROC_IMAGE_DEFAULT_SIZE - PROC_STACK_SIZE;
     char stackcopy[PROC_STACK_SIZE];
@@ -105,15 +103,18 @@ int fd_stdout = open(tty1, O_RDONLY);
     // 这样使用指针，正确吗？
     char *buf = msg->BUF;
     int buf_len = msg->BUF_LEN;
+	unsigned int caller_phy_proc_esp = msg->PHY_PROC_ESP;
 
 	Proc *proc = pid2proc(source);	
-    char *origin_stack = (char *)(proc + PAGE_SIZE - buf_len);
+	// 把局部变量放置在进程栈的这个位置，我不知道为什么要这么做。
+	// char *origin_stack = (char *)(0xC0000000 - 0x1000 + PAGE_SIZE - buf_len);
+	char *origin_stack = alloc_virtual_memory(caller_phy_proc_esp, PAGE_SIZE);
+	origin_stack -= buf_len;
 
     // 把caller的数据空间复制到当前进程，即TASK_MM。
     // 复制函数太难用了。
     unsigned int phy_buf = msg->BUF;
 	unsigned int vaddr_buf = alloc_virtual_memory(phy_buf, buf_len);
-	asm ("xchgw %bx, %bx");
     phycopy(stackcopy, vaddr_buf, buf_len);
 
 	// 打印数据看看
@@ -122,14 +123,14 @@ int fd_stdout = open(tty1, O_RDONLY);
 	int cnt2 = 0;
 	while(*ptr){
 		cnt2++;
-	//	Printf("*ptr = %x\n", *ptr);
+		// Printf("*ptr = %x\n", *ptr);
 		ptr++;
 	}
 	//Printf("cnt2 = %x\n", cnt2);
 
     // 调整caller的数据空间的值
     //int delta = stackcopy - buf;
-    int delta = origin_stack - vaddr_buf;
+    int delta = msg->DELTA;
     int argc = 0;
     char **p = (char **)stackcopy;
     while (*p) {
@@ -141,15 +142,18 @@ int fd_stdout = open(tty1, O_RDONLY);
     // 把重新放置后的数据空间复制到caller的数据空间中。
 	// 在TASK_MM中直接调用pid2proc，合适吗？
 	int source_esp = (unsigned int)proc & 0xFFFFF000;
-	asm ("xchgw %bx, %bx");
+	// asm ("xchgw %bx, %bx");
     phycopy(origin_stack, stackcopy, buf_len);
 
+	unsigned int caller_virtual_proc_esp = msg->VADDR_PROC_ESP;
+
     // 设置eip、esp、eax、ecx
-    Regs *stack0 = (Regs *)(proc + PAGE_SIZE - sizeof(Regs));
-	stack0->eax = origin_stack;
+    // Regs *stack0 = (Regs *)(proc + PAGE_SIZE - sizeof(Regs));
+    Regs *stack0 = (Regs *)(proc->stack);
+	stack0->eax = caller_virtual_proc_esp;
 	stack0->ecx = argc;
 	stack0->eip = elf_header->e_entry;
-	stack0->esp = origin_stack;
+	stack0->esp = caller_virtual_proc_esp;
 
 	proc->p_send_to = NO_TASK;
 
@@ -158,6 +162,6 @@ int fd_stdout = open(tty1, O_RDONLY);
     m.TYPE = SYSCALL_RET;
     m.RETVAL = 0;
     m.PID = 0;
-	asm ("xchgw %bx, %bx");
     send_rec(SEND, &m, source);
+	asm ("xchgw %bx, %bx");
 }
