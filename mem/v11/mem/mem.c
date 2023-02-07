@@ -407,7 +407,7 @@ unsigned int sys_malloc2(unsigned int size)
 		a->desc = (mem_block_desc *)0x0;
 		a->cnt = 1;
 		a->large = 1;
-		addr = (unsigned int)(a + 1);
+		addr = (unsigned int)(a + sizeof(arena));
 	}else{
 		// 从小往大，开始寻找大于size的内存块。
 		unsigned int index = 0;

@@ -39,7 +39,10 @@ int fd_stdout = open(tty1, O_RDONLY);
     // todo 先用硬编码
     int MAX_FILE_SIZE = 148368;
 //    char mmbuf[158368];
-      char mmbuf[1024];
+	  int mmbuf_size = 1124;
+//      char mmbuf[1124];
+	  char *mmbuf = (char *)sys_malloc(mmbuf_size);
+	  Memset(mmbuf, 0, mmbuf_size); 
 //    char mmbuf[212096];
     char filename[12];
 	Memset(filename,0,12);
@@ -62,7 +65,7 @@ int fd_stdout = open(tty1, O_RDONLY);
                 if(cnt == 0){
                         break;
                 }
-				if(byte_rdwt >= 1024)	break;
+				if(byte_rdwt >= mmbuf_size)	break;
         }
 
         close(fd);
