@@ -39,8 +39,8 @@ int fd_stdout = open(tty1, O_RDONLY);
     // todo 先用硬编码
     int MAX_FILE_SIZE = 148368;
 //    char mmbuf[158368];
-	  int mmbuf_size = 213700;
-//	  int mmbuf_size = 1124;
+//	  int mmbuf_size = 213700;
+	  int mmbuf_size = 4096 * 2;
 //      char mmbuf[1124];
 	  char *mmbuf = (char *)sys_malloc(mmbuf_size);
 	  Memset(mmbuf, 0, mmbuf_size); 
@@ -52,6 +52,10 @@ int fd_stdout = open(tty1, O_RDONLY);
 	unsigned int vaddr_pathname = alloc_virtual_memory(phy_pathname, msg->NAME_LEN);
     phycopy(filename, vaddr_pathname, msg->NAME_LEN);
 	filename[msg->NAME_LEN] = 0;
+
+	int test_var = 0;
+	int test_cnt = 0;
+
     int fd = open(filename, O_RDONLY);
 		if(fd == -1){
 			// TODO 这是临时措施。
@@ -61,11 +65,18 @@ int fd_stdout = open(tty1, O_RDONLY);
         int byte_rdwt = 0;
         while(1){
 
+			test_cnt++;
+			if(test_cnt == 9){
+				test_var = 0;
+			}
             int cnt = read(fd, mmbuf + byte_rdwt, 512);
                 byte_rdwt += cnt;
                 if(cnt == 0){
                         break;
                 }
+				if(byte_rdwt != 0 && mmbuf[2] != 'L'){
+					test_var = 0;
+				}
 				if(byte_rdwt >= mmbuf_size)	break;
         }
 
