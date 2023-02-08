@@ -304,10 +304,11 @@ unsigned int alloc_physical_memory_of_proc(unsigned int vaddr, unsigned int pid)
 	set_bits(&map, index, 1, 1);
 
 	unsigned int phy_page = get_a_page(pool_type);
+	unsigned int phy_addr = phy_page + vaddr & 0xFFF;
 
-	add_map_entry(vaddr, phy_page);
+	add_map_entry(vaddr, phy_addr);
 	
-	return phy_page;
+	return phy_addr;
 }
 
 // 想不到更恰当的名字，就用这个。
@@ -331,8 +332,9 @@ unsigned int alloc_physical_memory(unsigned int vaddr, MEMORY_POOL_TYPE pool_typ
 	set_bits(&map, index, 1, 1);
 
 	unsigned int phy_page = get_a_page(pool_type);
+	unsigned int phy_addr = phy_page + vaddr & 0xFFF;
 
-	add_map_entry(vaddr, phy_page);
+	add_map_entry(vaddr, phy_addr);
 	
 	return vaddr;
 }
@@ -499,7 +501,7 @@ void free_a_page(unsigned int vaddr, MEMORY_POOL_TYPE pool_type)
 	remove_map_entry(vaddr); 
 }
 
-void sys_free(unsigned int addr, unsigned int size)
+void sys_free2(unsigned int addr, unsigned int size)
 {
 //	return;	
 	MEMORY_POOL_TYPE pool_type;

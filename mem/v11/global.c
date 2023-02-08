@@ -49,7 +49,8 @@ int_handle sys_call_table[SYS_CALL_FUNCTION_NUM] = {
         (int_handle) sys_printx,
         (int_handle) sys_send_msg,
         (int_handle) sys_receive_msg,
-        (int_handle) sys_malloc2
+        (int_handle) sys_malloc2,
+        (int_handle) sys_free2
 };
 
 // 内存管理

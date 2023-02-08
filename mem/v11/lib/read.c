@@ -21,7 +21,7 @@ int read(int fd, void *buf, int count) {
 
     send_rec(BOTH, msg, TASK_FS);
 
-//	sys_free(msg, msg_size);
+	sys_free(msg, msg_size);
 	unsigned int cnt = msg->CNT;
 
     return cnt;

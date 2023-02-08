@@ -39,6 +39,7 @@ int fd_stdout = open(tty1, O_RDONLY);
     // todo 先用硬编码
     int MAX_FILE_SIZE = 148368;
 //    char mmbuf[158368];
+	  // int mmbuf_size = 213700;
 	  int mmbuf_size = 1124;
 //      char mmbuf[1124];
 	  char *mmbuf = (char *)sys_malloc(mmbuf_size);
