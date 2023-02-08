@@ -101,8 +101,6 @@ int fd_stdout = open(tty1, O_RDONLY);
 //	Printf("after reload elf\n");
 
     // 调整caller的数据空间的值
-    //char *stackcopy = PROC_IMAGE_DEFAULT_SIZE - PROC_STACK_SIZE;
-    char stackcopy[PROC_STACK_SIZE];
     // 从caller把arg_stack复制过来
     // 这样使用指针，正确吗？
     char *buf = msg->BUF;
@@ -119,10 +117,9 @@ int fd_stdout = open(tty1, O_RDONLY);
     // 复制函数太难用了。
     unsigned int phy_buf = msg->BUF;
 	unsigned int vaddr_buf = alloc_virtual_memory(phy_buf, buf_len);
-    phycopy(stackcopy, vaddr_buf, buf_len);
 
 	// 打印数据看看
-	int stackcopy_line_addr = (int)stackcopy;
+	int stackcopy_line_addr = (int)vaddr_buf;
 	char **ptr = (char **)stackcopy_line_addr;
 	int cnt2 = 0;
 	while(*ptr){
@@ -136,7 +133,7 @@ int fd_stdout = open(tty1, O_RDONLY);
     //int delta = stackcopy - buf;
     int delta = msg->DELTA;
     int argc = 0;
-    char **p = (char **)stackcopy;
+    char **p = (char **)vaddr_buf;
     while (*p) {
         argc++;
         *p = *p + delta;
@@ -145,15 +142,13 @@ int fd_stdout = open(tty1, O_RDONLY);
 
     // 把重新放置后的数据空间复制到caller的数据空间中。
 	// 在TASK_MM中直接调用pid2proc，合适吗？
-	int source_esp = (unsigned int)proc & 0xFFFFF000;
-	// asm ("xchgw %bx, %bx");
-    phycopy(origin_stack, stackcopy, buf_len);
 
 	unsigned int caller_virtual_proc_esp = msg->VADDR_PROC_ESP;
+	unsigned int caller_phy_proc = get_physical_address(proc);
+	unsigned int caller_virtual_proc = alloc_virtual_memory(caller_phy_proc, PAGE_SIZE); 
 
     // 设置eip、esp、eax、ecx
-    // Regs *stack0 = (Regs *)(proc + PAGE_SIZE - sizeof(Regs));
-    Regs *stack0 = (Regs *)(proc->stack);
+    Regs *stack0 = (Regs *)(caller_virtual_proc + PAGE_SIZE - sizeof(Regs));
 	stack0->eax = caller_virtual_proc_esp;
 	stack0->ecx = argc;
 	stack0->eip = elf_header->e_entry;
