@@ -743,7 +743,7 @@ LABEL_PM_START:
 	xchg bx, bx
 	;jmp SelectFlatX:0x30400
 	;jmp SelectFlatX:0x1000
-	jmp SelectFlatX:0xc0001500
+	jmp SelectFlatX:0xc0001200
 	jmp $
 	jmp $
 	jmp $
