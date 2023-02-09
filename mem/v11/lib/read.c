@@ -12,6 +12,7 @@ int read(int fd, void *buf, int count) {
 	unsigned int msg_size = sizeof(Message);
     Message *msg = (Message *)sys_malloc(msg_size);
 
+	unsigned int vaddr_page_buf = (unsigned int)buf & 0xFFFFF000;
 	unsigned int phy_buf = get_physical_address(buf);
 	unsigned int phy_buf_page_start = phy_buf & 0xFFFFF000;
 	unsigned int phy_buf_page_end = phy_buf_page_start + PAGE_SIZE - 1;
@@ -37,7 +38,8 @@ int read(int fd, void *buf, int count) {
 			 count = remain_len;
 
 			 phy_buf_page_start += PAGE_SIZE;
-			 phy_buf = phy_buf_page_start;
+			 vaddr_page_buf = vaddr_page_buf + PAGE_SIZE;
+			 phy_buf = get_physical_address(vaddr_page_buf);
 
 		}while(len > 0);
 	}else{
@@ -54,25 +56,6 @@ int read(int fd, void *buf, int count) {
 	}
 
 	sys_free(msg, msg_size);
-
-    return cnt;
-}
-
-int read456(int fd, void *buf, int count) {
-	// Message msg;
-	unsigned int msg_size = sizeof(Message);
-    Message *msg = (Message *)sys_malloc(msg_size);
-
-	unsigned int phy_buf = get_physical_address(buf);
-
-    msg->TYPE = READ;
-    msg->FD = fd;
-    msg->BUF = phy_buf;
-    msg->CNT = count;
-
-    send_rec(BOTH, msg, TASK_FS);
-
-	unsigned int cnt = msg->CNT;
 
     return cnt;
 }

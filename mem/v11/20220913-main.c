@@ -566,20 +566,6 @@ void init_keyboard()
 
 }
 
-void init2()
-{
-	//asm ("xchgw %bx, %bx");
-			// unsigned int *pte = (0x101000 + 257 * 4);
-//			unsigned int *pte = (1024*1024 + 4096 + 256 * 4);
-//			unsigned int phy_addr = (0x1001000 | PG_P_YES |  PG_RW_RW |  PG_US_SUPER);
-//
-//			//asm volatile ("movl %0, %1" : : "r" (phy_addr), "m" (*pte) : "memory");
-	disp_str("init\n");
-//	//asm ("xchgw %bx, %bx");
-	init_keyboard();
-	init_memory(32*1024*1024);
-}
-
 void u_thread_a()
 {
 	disp_str("hi, a thread\n");

@@ -9,6 +9,7 @@
 
 //int do_exec(Message *msg);
 
+	  char *test_str = "HelloWorldHow-are-you?Fine,thank-you.What-a-nice-day!";
 int do_exec2(Message *msg) {
 	int a = 5;
 	return 0;
@@ -40,10 +41,13 @@ int fd_stdout = open(tty1, O_RDONLY);
     int MAX_FILE_SIZE = 148368;
 //    char mmbuf[158368];
 //	  int mmbuf_size = 213700;
-	  int mmbuf_size = 4096 * 2;
+	  int mmbuf_size = 4096 * 4;
 //      char mmbuf[1124];
 	  char *mmbuf = (char *)sys_malloc(mmbuf_size);
-	  Memset(mmbuf, 0, mmbuf_size); 
+	  Memset(mmbuf, 0, mmbuf_size);
+	  Memcpy(mmbuf, test_str, 4096);
+//	  char mmbuf[8192];
+//	  Memset(mmbuf, 0, mmbuf_size); 
 //    char mmbuf[212096];
     char filename[12];
 	Memset(filename,0,12);

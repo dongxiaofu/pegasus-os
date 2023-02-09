@@ -137,6 +137,7 @@ unsigned int get_a_page(MEMORY_POOL_TYPE pool_type)
 	// 找到位图中的空闲bit，返回它的索引。
 	Bitmap map = pool.map;
 	int index = get_bits(&map, 1);
+	assert(index != -1);
 	// TODO 内存不足，无法分配。
 	unsigned int addr = pool.start_addr + PAGE_SIZE * index;
 	// 把第index个bit设置成1。
