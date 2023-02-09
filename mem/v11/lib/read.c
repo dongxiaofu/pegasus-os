@@ -8,7 +8,7 @@
 #include "console.h"
 #include "global.h"
 
-int read456(int fd, void *buf, int count) {
+int read(int fd, void *buf, int count) {
 	unsigned int msg_size = sizeof(Message);
     Message *msg = (Message *)sys_malloc(msg_size);
 
@@ -18,8 +18,10 @@ int read456(int fd, void *buf, int count) {
 
   	unsigned int cnt = 0;
 	unsigned int len = 0;
-	if(phy_buf + count > 4096){
-		len = PAGE_SIZE - phy_buf_page_start;
+	if(phy_buf + count > phy_buf_page_end){
+//		len = PAGE_SIZE - phy_buf_page_start;
+		len = PAGE_SIZE - (phy_buf - phy_buf_page_start);
+		unsigned int remain_len = count;
 		do{
 			 Memset(msg, 0, msg_size);
    			 msg->TYPE = READ;
@@ -29,8 +31,13 @@ int read456(int fd, void *buf, int count) {
 
    			 send_rec(BOTH, msg, TASK_FS);
 			 cnt += msg->CNT;
+			 // TODO 这块逻辑，简单，但我不能快速想出更简洁的写法。不注意的话，会写错。
+			 remain_len -= len;
 			 len = count - len;
+			 count = remain_len;
+
 			 phy_buf_page_start += PAGE_SIZE;
+			 phy_buf = phy_buf_page_start;
 
 		}while(len > 0);
 	}else{
@@ -46,12 +53,12 @@ int read456(int fd, void *buf, int count) {
 		 cnt = msg->CNT;
 	}
 
-//	sys_free(msg, msg_size);
+	sys_free(msg, msg_size);
 
     return cnt;
 }
 
-int read(int fd, void *buf, int count) {
+int read456(int fd, void *buf, int count) {
 	// Message msg;
 	unsigned int msg_size = sizeof(Message);
     Message *msg = (Message *)sys_malloc(msg_size);

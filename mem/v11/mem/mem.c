@@ -265,6 +265,7 @@ unsigned int alloc_virtual_memory(unsigned int phy_addr, unsigned int size)
 	}
 	unsigned int vaddr = 0;
 	unsigned int vaddr_page = 0;
+	page_cnt = 1;
 	for(unsigned int i = 0; i < page_cnt; i++){
 		vaddr_page = get_virtual_address(1, pool_type);
 		if(i > 0){

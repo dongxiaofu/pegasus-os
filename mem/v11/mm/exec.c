@@ -69,7 +69,7 @@ int fd_stdout = open(tty1, O_RDONLY);
 			if(test_cnt == 9){
 				test_var = 0;
 			}
-            int cnt = read(fd, mmbuf + byte_rdwt, 512);
+            int cnt = read(fd, mmbuf + byte_rdwt, 4096);
                 byte_rdwt += cnt;
                 if(cnt == 0){
                         break;
