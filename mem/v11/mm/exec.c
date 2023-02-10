@@ -37,8 +37,8 @@ int fd_stdout = open(tty1, O_RDONLY);
 //    char mmbuf[158368];
 //	  int mmbuf_size = 213700;
 ////////////////	  int mmbuf_size = 4096 * 4;
-//	  int mmbuf_size = 214400;
-	  int mmbuf_size = 4096 * 26;
+	  int mmbuf_size = 214380;
+//	  int mmbuf_size = 4096 * 52;
 //      char mmbuf[1124];
 	  char *mmbuf = (char *)sys_malloc(mmbuf_size);
 	  Memset(mmbuf, 0, mmbuf_size);
@@ -67,17 +67,14 @@ int fd_stdout = open(tty1, O_RDONLY);
         while(1){
 
 			test_cnt++;
-			if(test_cnt == 9){
-				test_var = 0;
+			if(test_cnt == 44){
+				test_var = 1;
 			}
             int cnt = read(fd, mmbuf + byte_rdwt, 4096);
                 byte_rdwt += cnt;
                 if(cnt == 0){
                         break;
                 }
-				if(byte_rdwt != 0 && mmbuf[2] != 'L'){
-					test_var = 0;
-				}
 				if(byte_rdwt >= mmbuf_size)	break;
         }
 
@@ -127,14 +124,14 @@ int fd_stdout = open(tty1, O_RDONLY);
 	unsigned int vaddr_buf = alloc_virtual_memory(phy_buf, buf_len);
 
 	// 打印数据看看
-	int stackcopy_line_addr = (int)vaddr_buf;
-	char **ptr = (char **)stackcopy_line_addr;
-	int cnt2 = 0;
-	while(*ptr){
-		cnt2++;
-		// Printf("*ptr = %x\n", *ptr);
-		ptr++;
-	}
+//	int stackcopy_line_addr = (int)vaddr_buf;
+//	char **ptr = (char **)stackcopy_line_addr;
+//	int cnt2 = 0;
+//	while(*ptr){
+//		cnt2++;
+//		// Printf("*ptr = %x\n", *ptr);
+//		ptr++;
+//	}
 	//Printf("cnt2 = %x\n", cnt2);
 
     // 调整caller的数据空间的值
