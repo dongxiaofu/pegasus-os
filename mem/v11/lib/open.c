@@ -21,6 +21,8 @@ int open(char *pathname, int flags) {
     send_rec(BOTH, msg, TASK_FS);
 
     //assert(msg.type == SYSCALL_RET);
+    //
+    sys_free(msg, sizeof(Message));
 
     return msg->FD;
 }

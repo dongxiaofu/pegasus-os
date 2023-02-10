@@ -60,7 +60,7 @@ void init()
 
 	disp_str("init\n");
 	init_keyboard();
-	init_memory(32*1024*1024);
+	init_memory(64*1024*1024);
 
 	// 初始化PCB链表
 	initDoubleLinkList(&pcb_list);

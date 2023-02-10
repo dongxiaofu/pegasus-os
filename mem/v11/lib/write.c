@@ -29,7 +29,7 @@ int write(int fd, const void *buf, int count) {
 
 	unsigned int cnt = msg->CNT;
 
-//	sys_free(msg, msg_size);
+	sys_free(msg, msg_size);
 
     return cnt;
 }

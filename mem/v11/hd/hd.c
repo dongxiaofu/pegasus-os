@@ -357,6 +357,8 @@ void hd_open() {
     msg->val = 0;
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
     send_rec(SEND, msg, TASK_FS);
+
+	sys_free(msg, sizeof(Message));
 }
 
 int get_hd_ioctl(int device) {
@@ -369,6 +371,8 @@ int get_hd_ioctl(int device) {
     msg->val = 0;
     // ipc存在问题，使用频繁，会导致IPC异常，所以，我暂时注释主句。
     send_rec(SEND, msg, TASK_FS);
+
+	sys_free(msg, sizeof(Message));
 
     return geometry;
 }

@@ -298,6 +298,8 @@ void tty_dev_write(TTY *tty) {
 	
 	// send_rec(SEND, msg, tty->procnr);
 	send_rec(SEND, msg, tty->pcaller);
+
+	sys_free(msg, msg_size);
 }
 
 void tty_do_read(TTY *tty, Message *msg) {

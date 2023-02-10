@@ -47,7 +47,8 @@ int execv(const char *pathname, char **argv) {
     // 是*argv。最后一个元素的值是(char *)0。这是人为设置的。
     // char *p = argv;
     // 必须使用类型转换。
-    char arg_stack[PROC_STACK_SIZE];
+//    char arg_stack[PROC_STACK_SIZE];
+	char *arg_stack = sys_malloc(PROC_STACK_SIZE);
 	Memset(arg_stack, 0, PROC_STACK_SIZE);
     char **p = (char **) argv;
     int len = 0;
@@ -123,6 +124,8 @@ while(*t){
     send_rec(BOTH, &msg, TASK_MM);
 //    send_rec(SEND, &msg, TASK_MM);
 	Printf("before send_rec1\n");
+
+	sys_free(arg_stack, PROC_STACK_SIZE);
 
 //	int counter = 0;
 //	while(1){

@@ -9,11 +9,6 @@
 
 //int do_exec(Message *msg);
 
-	  char *test_str = "HelloWorldHow-are-you?Fine,thank-you.What-a-nice-day!";
-int do_exec2(Message *msg) {
-	int a = 5;
-	return 0;
-}
 int do_exec(Message *msg) {
     // 主要思路：
     // 1. 本函数做的事：设置eip、esp、eax、ecx
@@ -41,11 +36,13 @@ int fd_stdout = open(tty1, O_RDONLY);
     int MAX_FILE_SIZE = 148368;
 //    char mmbuf[158368];
 //	  int mmbuf_size = 213700;
-	  int mmbuf_size = 4096 * 4;
+////////////////	  int mmbuf_size = 4096 * 4;
+//	  int mmbuf_size = 214400;
+	  int mmbuf_size = 4096 * 26;
 //      char mmbuf[1124];
 	  char *mmbuf = (char *)sys_malloc(mmbuf_size);
 	  Memset(mmbuf, 0, mmbuf_size);
-	  Memcpy(mmbuf, test_str, 4096);
+//	  Memcpy(mmbuf, test_str, 4096);
 //	  char mmbuf[8192];
 //	  Memset(mmbuf, 0, mmbuf_size); 
 //    char mmbuf[212096];
@@ -123,10 +120,6 @@ int fd_stdout = open(tty1, O_RDONLY);
 	unsigned int caller_phy_proc_esp = msg->PHY_PROC_ESP;
 
 	Proc *proc = pid2proc(source);	
-	// 把局部变量放置在进程栈的这个位置，我不知道为什么要这么做。
-	// char *origin_stack = (char *)(0xC0000000 - 0x1000 + PAGE_SIZE - buf_len);
-	char *origin_stack = alloc_virtual_memory(caller_phy_proc_esp, PAGE_SIZE);
-	origin_stack -= buf_len;
 
     // 把caller的数据空间复制到当前进程，即TASK_MM。
     // 复制函数太难用了。

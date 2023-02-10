@@ -1672,7 +1672,7 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
 
 		int_flag = 1;
 		
-//		sys_free(m, msg_size);
+		sys_free(m, msg_size);
 
 	//	unblock(receiver);
 	
