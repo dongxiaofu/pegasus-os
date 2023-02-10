@@ -33,11 +33,11 @@ int fd_stdout = open(tty1, O_RDONLY);
     // 我们常用的文件的最大长度似乎没限制，后期，我想想怎么实现这个特性。
     // char mmbuf[MAX_FILE_SIZE];
     // todo 先用硬编码
-    int MAX_FILE_SIZE = 148368;
 //    char mmbuf[158368];
 //	  int mmbuf_size = 213700;
 ////////////////	  int mmbuf_size = 4096 * 4;
-	  int mmbuf_size = 214380;
+//	  int mmbuf_size = 214380;
+	  int mmbuf_size = 208896;
 //	  int mmbuf_size = 4096 * 52;
 //      char mmbuf[1124];
 	  char *mmbuf = (char *)sys_malloc(mmbuf_size);
@@ -54,9 +54,6 @@ int fd_stdout = open(tty1, O_RDONLY);
     phycopy(filename, vaddr_pathname, msg->NAME_LEN);
 	filename[msg->NAME_LEN] = 0;
 
-	int test_var = 0;
-	int test_cnt = 0;
-
     int fd = open(filename, O_RDONLY);
 		if(fd == -1){
 			// TODO 这是临时措施。
@@ -65,11 +62,6 @@ int fd_stdout = open(tty1, O_RDONLY);
 		}
         int byte_rdwt = 0;
         while(1){
-
-			test_cnt++;
-			if(test_cnt == 44){
-				test_var = 1;
-			}
             int cnt = read(fd, mmbuf + byte_rdwt, 4096);
                 byte_rdwt += cnt;
                 if(cnt == 0){
@@ -83,6 +75,8 @@ int fd_stdout = open(tty1, O_RDONLY);
     // 开始解析ELF文件了
     // Elf32_Ehdr、Elf32_Phdr 需要在我的操作系统中定义吗？需要。我的操作系统不使用其他操作系统的库文件。
     Elf32_Ehdr *elf_header = (Elf32_Ehdr *) mmbuf;
+    unsigned int e_entry = elf_header->e_entry;
+
     for (int i = 0; i < elf_header->e_phnum; i++) {
         Elf32_Phdr *program_header = (Elf32_Phdr * )(mmbuf + elf_header->e_ehsize +
                                                      i * elf_header->e_phentsize);
@@ -91,6 +85,10 @@ int fd_stdout = open(tty1, O_RDONLY);
 		unsigned int page_cnt = ROUND_UP(program_size, PAGE_SIZE);
 		unsigned int p_vaddr = program_header->p_vaddr;
 		unsigned int start_vaddr = 0;
+
+		// 程序入口在文件中的偏移量。
+		unsigned int e_entry_offset_in_segment = e_entry - p_vaddr;
+		unsigned int e_entry_offset_in_file = e_entry_offset_in_segment + program_header->p_offset;
 
 		// 怎么会有程序段的大小是0呢？
 		// 在测试时，我发现了这种情况。程序段的大小是0，不能做内存地址映射，不能调用下面的phycopy。
@@ -104,7 +102,10 @@ int fd_stdout = open(tty1, O_RDONLY);
 			p_vaddr += PAGE_SIZE;
 		}
 
-        phycopy(start_vaddr, mmbuf + program_header->p_offset, program_header->p_filesz);
+		asm ("xchgw %bx, %bx");
+        // phycopy(start_vaddr, mmbuf + program_header->p_offset, program_header->p_filesz);
+        phycopy(start_vaddr, mmbuf + e_entry_offset_in_file, program_header->p_filesz);
+		asm ("xchgw %bx, %bx");
     }
 
 //	Printf("after reload elf\n");
@@ -167,5 +168,4 @@ int fd_stdout = open(tty1, O_RDONLY);
     m.RETVAL = 0;
     m.PID = 0;
     send_rec(SEND, &m, source);
-	asm ("xchgw %bx, %bx");
 }
