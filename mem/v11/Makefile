@@ -12,7 +12,7 @@ CFLAGS	=	-I include/ -I include/sys -I include/mem \
 # LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker /lib/ld-linux.so.2 -lc
 # LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386
 # LDFLAGS		= -Ttext 0x1000 -Map krnl.map -m elf_i386
-LDFLAGS		= -Ttext 0xc0001100 -Map krnl.map -m elf_i386
+LDFLAGS		= -Ttext 0xc0001200 -Map krnl.map -m elf_i386
 #LDFLAGS	=	-s -Ttext 0x30400 -m elf_i386
 
 BOOT = loader.bin boot.bin

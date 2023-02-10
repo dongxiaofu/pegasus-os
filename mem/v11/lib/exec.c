@@ -89,11 +89,6 @@ int execv(const char *pathname, char **argv) {
     }
 //Printf("len = %d\n", len);
 //Printf("cnt = %x\n", cnt);
-char **t = (char **)arg_stack;
-while(*t){
-//	Printf("*t = %x\n", *t);
-	t++;
-}
 //	Printf("*t0 = %x\n", *t);
 
 
@@ -101,7 +96,6 @@ while(*t){
 
     Message msg;
 
-	char *tmp[10] = {"hello1", "hello2"};
 
 	// 直接在用户进程中获取虚拟地址的物理地址，合适吗？语法上，能这样做。
 	unsigned int phy_pathname = get_physical_address(pathname);
@@ -112,7 +106,6 @@ while(*t){
     msg.PATHNAME = phy_pathname;
     msg.NAME_LEN = Strlen(pathname);
     msg.BUF = phy_arg_stack;
-//    msg.BUF = tmp;
     msg.BUF_LEN = len;
 
 	msg.ARG_STACK_VADDR = arg_stack;
@@ -120,10 +113,7 @@ while(*t){
 	msg.VADDR_PROC_ESP = 0xC0000000 - 0x1000 + PAGE_SIZE - len;
 	msg.DELTA = 0xC0000000 - 0x1000 + PAGE_SIZE - len - (unsigned int)arg_stack;
 
-	Printf("before send_rec\n");
     send_rec(BOTH, &msg, TASK_MM);
-//    send_rec(SEND, &msg, TASK_MM);
-	Printf("before send_rec1\n");
 
 	sys_free(arg_stack, PROC_STACK_SIZE);
 
@@ -150,7 +140,6 @@ while(*t){
 //	// 再接收一次。
 //    send_rec(RECEIVE, &msg, TASK_MM);
 
-	Printf("after send_rec\n");
 
     assert(msg.TYPE == SYSCALL_RET);
 

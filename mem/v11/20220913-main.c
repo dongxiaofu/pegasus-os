@@ -396,76 +396,6 @@ void exception_handler(unsigned int vec_no, unsigned int error_no, unsigned int 
     return;
 }
 
-void exception_handler2(int vec_no, int error_no, int eip, int cs, int eflags)
-{
-    char *msg[] = {
-        "# Divide by zero:",
-        "# Single step:",
-        "# Non-maskable  (NMI):",
-        "# Breakpoint:",
-        "# Overflow trap:",
-        "# BOUND range exceeded (186,286,386):",
-        "# Invalid opcode (186,286,386):",
-        "# Coprocessor not available (286,386):",
-        "# Double fault exception (286,386):",
-        "# Coprocessor segment overrun (286,386):",
-        "# Invalid task state segment (286,386):",
-        "# Segment not present (286,386):",
-        "# Stack exception (286,386):",
-        "# General protection exception (286,386):",
-        "# Page fault (286,386):",
-        //"# Reserved:",
-        "# Coprocessor error (286,386):",
-
-        "#AC :",
-        "#MC :",
-        "#XF :",
-    };
-    // 这个值是第2个终端的显存初始处。
-    dis_pos = 12000 - 128 + 10;
-    // 清屏
-    for (int i = 0; i < 80 * 25 * 2; i++)
-    {
-        disp_str(" ");
-    }
-
-    dis_pos = 12000 - 128 + 10;
-    // int colour = 0x74;
-    int colour = 0x0A;
-    char *error_msg = msg[vec_no];
-    //	Printf("error:%s\n", error_msg);
-    disp_str_colour(error_msg, colour);
-    disp_str("\n\n");
-    disp_str_colour("vec_no:", colour);
-    disp_int(vec_no);
-    disp_str("\n\n");
-
-    if (error_no != 0xFFFFFFFF)
-    {
-        disp_str_colour("error_no:", colour);
-        disp_str_colour("error_no:", colour);
-        disp_int(error_no);
-        // Printf("error_no:%x\n", error_no);
-        disp_str("\n\n");
-    }
-
-    disp_str_colour("cs:", colour);
-    disp_int(cs);
-    //Printf("cs:%x\n", cs);
-    disp_str("\n\n");
-
-    disp_str_colour("eip:", colour);
-    disp_int(eip);
-    //Printf("eip:%x\n", eip);
-    disp_str("\n\n");
-
-    disp_str_colour("eflags:", colour);
-    disp_int(eflags);
-    disp_str("\n\n");
-
-    return;
-}
-
 void init_internal_interrupt()
 {
     InitInterruptDesc(0, divide_zero_fault, 0x08, 0x0E);
@@ -498,40 +428,6 @@ void init_internal_interrupt()
     // InitInterruptDesc(0x27, sys_call_test, 0x0E, 0x0E);
 //    InitInterruptDesc(0x27, sys_call, 0x0E, 0x0E);
     InitInterruptDesc(0x90, sys_call, 0x0E, 0x0E);
-}
-
-void test()
-{
-    disp_str("A");
-  //  disp_int(0x6);
-    disp_str("\n");
-    return;
-    //disp_str_colour2(0x9988, 0x74);
-    dis_pos = 0;
-    for (int i = 0; i < 80 * 25 * 2; i++)
-    {
-        disp_str(" ");
-    }
-    dis_pos = 0;
-    //return;
-    disp_str_colour("Hello, World!", 0x0F);
-    disp_str("\n");
-    disp_int(0x89);
-    disp_str("\n");
-    disp_str_colour("Hello, World!", 0x0F);
-    disp_str_colour("Hello, World!", 0x74);
-    disp_str("\n");
-    disp_str_colour("Hello, World!===========I am successful!", 0x0F);
-    disp_str("\n=================\n");
-    disp_str("Hello, World!\n");
-    disp_int(23);
-    disp_str("\n");
-    disp_int(0x020A);
-    disp_str("\n");
-}
-
-void disp_str_colour3(char *str, int colour)
-{
 }
 
 void spurious_irq(int irq)
@@ -570,91 +466,6 @@ void u_thread_a()
 {
 	disp_str("hi, a thread\n");
 	while(1);
-}
-
-void kernel_main2()
-{
-//	//asm ("xchgw %bx, %bx");
-	disp_str("Hello,World");
-	
-	init();
-
-	/*******************start************************/
-    ticks = 0;
-    counter = 0;
-    // 在这个项目的C代码中，全局变量如此赋值才有效。原因未知，实践要求如此。
-    //k_reenter = -1;
-    k_reenter = 0;
-    Proc *proc;
-    Task *task;
-    unsigned int eflags;
-    unsigned char rpl;
-    unsigned char dpl;
-    char *p_task_stack = proc_stack + STACK_SIZE;
-    // todo 测试需要，去掉用户进程USER_PROC_NUM。
-    for (int i = 0; i < TASK_PROC_NUM + USER_PROC_NUM + FORKED_USER_PROC_NUM; i++)
-    {
-		proc = (Proc *)alloc_memory(1, KERNEL);
-//		proc_table[i] = *proc;
-		Memset(proc, 0, sizeof(*proc));
-		proc->stack = (unsigned int *)((unsigned int)proc + PAGE_SIZE);
-        proc->ldt_selector = 0;
-        proc->pid = i;
-		proc->page_directory = 0x0;
-        if (i >= TASK_PROC_NUM + USER_PROC_NUM)
-        {
-            proc->p_flag = FREE_SLOT;
-            continue;
-        }
-        proc->p_flag = 0;
-        if (i < TASK_PROC_NUM)
-        {
-//            task = sys_task_table + i;
-			// task = &sys_task_table[0];
-			task = &user_task_table[0];
-			unsigned int proc_stack_size = sizeof(Regs);	
-			unsigned int thread_stack_size = sizeof(ThreadStack);	
-			proc->stack = (unsigned int *)((unsigned int)(proc->stack) - proc_stack_size);
-			proc->stack = (unsigned int *)((unsigned int)(proc->stack) - thread_stack_size);
-			ThreadStack *thread_stack = (ThreadStack *)proc->stack;
-
-			// thread_stack->eip = (unsigned int)TaskSys; 
-			// thread_stack->eip = TaskSys;
-			thread_stack->eip = task->func_name;
-			thread_stack->ebp = thread_stack->ebx = thread_stack->edi = thread_stack->esi = 0;
-        }
-
-        // 进程名
-        Strcpy(proc->name, task->name);
-
-        unsigned short cs = 0x4 | rpl;
-        unsigned short ds = 0xC | rpl;
-        proc->s_reg.cs = cs;
-        proc->s_reg.ds = ds;
-        proc->s_reg.fs = ds;
-        proc->s_reg.es = ds;
-        proc->s_reg.ss = ds; // 000 1100
-        proc->s_reg.gs = GS_SELECTOR & (0xFFF9);
-        proc->s_reg.eip = (int)task->func_name;
-        proc->s_reg.eflags = eflags;
-
-
-        proc->has_int_msg = 0;
-        proc->q_sending = 0;
-        proc->q_next = 0;
-        proc->p_receive_from = NO_TASK;
-        proc->p_send_to = NO_TASK;
-        proc->p_msg = 0;
-		proc_table[i] = *proc;
-    }
-
-//	 proc_ready_table = proc;
-	 proc_ready_table = &proc_table[0];
-
-	/*******************end************************/
-
-	//asm ("sti;");
-    while (1);
 }
 
 #define A_PRINT_NUM 3

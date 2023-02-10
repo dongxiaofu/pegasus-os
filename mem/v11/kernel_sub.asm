@@ -20,7 +20,6 @@ extern proc_table
 extern ReloadGDT
 
 extern dis_pos
-extern test
 extern kernel_main
 
 global _start
@@ -81,7 +80,6 @@ csinit:
 	push 0
 	popfd
 	jmp $	
-	call test
 	;hlt	
 	; 测试resb是否把堆栈初始化成了0
 	push 1
