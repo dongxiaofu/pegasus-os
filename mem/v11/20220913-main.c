@@ -901,7 +901,7 @@ void test_exec()
 	int fd_stdout = open(tty1, O_RDWR);
 	char filename[20] = "install.tar";
 	untar(filename);
-	execl("/echo", "echo", "hello", 0);
+	execl("/echo", "echo", "hello",  "world", "Jim", 0);
 	while(1){};
 
 	int pid = fork();

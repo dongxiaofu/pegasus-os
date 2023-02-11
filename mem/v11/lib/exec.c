@@ -97,10 +97,12 @@ int execv(const char *pathname, char **argv) {
     Message msg;
 
 
+	unsigned int vaddr_proc_esp = 0xC0000000 - 0x1000 + PAGE_SIZE - len;
 	// 直接在用户进程中获取虚拟地址的物理地址，合适吗？语法上，能这样做。
 	unsigned int phy_pathname = get_physical_address(pathname);
 	unsigned int phy_arg_stack = get_physical_address(arg_stack);
-	unsigned int phy_proc_esp = get_physical_address(0xC0000000 - 0x1000 + PAGE_SIZE);
+	// unsigned int phy_proc_esp = get_physical_address(0xC0000000 - 0x1000 + PAGE_SIZE);
+	unsigned int phy_proc_esp = get_physical_address(vaddr_proc_esp);
 //	unsigned int phy_proc = get_physical_address();
 
     msg.TYPE = EXEC;
@@ -111,8 +113,8 @@ int execv(const char *pathname, char **argv) {
 
 	msg.ARG_STACK_VADDR = arg_stack;
 	msg.PHY_PROC_ESP = phy_proc_esp;
-	msg.VADDR_PROC_ESP = 0xC0000000 - 0x1000 + PAGE_SIZE - len;
-	msg.DELTA = 0xC0000000 - 0x1000 + PAGE_SIZE - len - (unsigned int)arg_stack;
+	msg.VADDR_PROC_ESP = vaddr_proc_esp;
+	msg.DELTA = vaddr_proc_esp - (unsigned int)arg_stack;
 
     send_rec(BOTH, &msg, TASK_MM);
 

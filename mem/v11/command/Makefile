@@ -22,6 +22,7 @@ install:
 	tar cvf install.tar echo
 	cp -rvf ../kernel.bin ./
 	dd if=install.tar of=${HD} seek=24578 bs=512 count=1140 conv=notrunc
+	objdump -d echo > test.asm
 
 clean:
 	#rm -rvf *.o

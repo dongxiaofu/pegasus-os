@@ -207,7 +207,7 @@ LOAD thread.o
 .plt.sec
  *(.plt.sec)
 
-.text           0x00000000c0001000     0x9f20
+.text           0x00000000c0001000     0x9f60
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
@@ -374,115 +374,115 @@ LOAD thread.o
  .text          0x00000000c000602c      0x148 mm/main.o
                 0x00000000c000602c                TaskMM
                 0x00000000c0006155                alloc_mem
- .text          0x00000000c0006174      0x3ef mm/exec.o
+ .text          0x00000000c0006174      0x41f mm/exec.o
                 0x00000000c0006174                do_exec
- .text          0x00000000c0006563      0x291 mm/forkexit.o
-                0x00000000c0006563                do_fork
-                0x00000000c00065d1                do_exit
-                0x00000000c00066cd                do_wait
-                0x00000000c000679a                cleanup
- .text          0x00000000c00067f4     0x1266 mem/mem.o
-                0x00000000c00067f4                init_bitmap
-                0x00000000c0006817                test_bit_val
-                0x00000000c0006880                set_bit_val
-                0x00000000c00068fb                set_bits
-                0x00000000c0006935                get_first_free_bit
-                0x00000000c0006979                get_bits
-                0x00000000c0006a41                get_a_page
-                0x00000000c0006af5                get_virtual_address_start_with_addr
-                0x00000000c0006b8f                get_virtual_address
-                0x00000000c0006c1f                ptr_pde
-                0x00000000c0006c32                ptr_pte
-                0x00000000c0006c59                add_map_entry
-                0x00000000c0006cea                alloc_virtual_memory
-                0x00000000c0006db8                get_physical_address_proc
-                0x00000000c0006e34                get_physical_address
-                0x00000000c0006e66                alloc_physical_memory_of_proc
-                0x00000000c0006f55                alloc_physical_memory
-                0x00000000c000701d                alloc_memory
-                0x00000000c000707f                get_a_virtual_page
-                0x00000000c00070b7                block2arena
-                0x00000000c00070cd                sys_malloc2
-                0x00000000c000737e                remove_map_entry
-                0x00000000c000739f                free_a_page
-                0x00000000c0007446                sys_free2
-                0x00000000c00075c9                init_memory_block_desc
-                0x00000000c000769a                init_memory2
-                0x00000000c0007911                init_memory
- .text          0x00000000c0007a5a     0x2918 kernel_main_old.o
-                0x00000000c0007a5a                intr_enable
-                0x00000000c0007a83                intr_disable
-                0x00000000c0007aac                intr_set_status
-                0x00000000c0007aca                intr_get_status
-                0x00000000c0007ae7                Memcpy
-                0x00000000c0007b1a                untar
-                0x00000000c0007e2a                atoi
-                0x00000000c0007ed0                disp_int
-                0x00000000c0007ef9                do_page_fault
-                0x00000000c0008036                exception_handler
-                0x00000000c000821d                init_internal_interrupt
-                0x00000000c0008392                spurious_irq
-                0x00000000c0008420                init_keyboard
-                0x00000000c000848d                u_thread_a
-                0x00000000c00084a5                TestTTY
-                0x00000000c0008544                TestFS
-                0x00000000c000894c                wait_exit
-                0x00000000c0008a1a                INIT_fork
-                0x00000000c0008cfd                simple_shell
-                0x00000000c0008efb                test_split_str
-                0x00000000c0009088                test_shell
-                0x00000000c00090f0                test_exec
-                0x00000000c000918b                INIT
-                0x00000000c0009198                TestA
-                0x00000000c00091cd                delay
-                0x00000000c0009211                TestB
-                0x00000000c0009229                TestC
-                0x00000000c000925c                sys_get_ticks
-                0x00000000c000926c                sys_write
-                0x00000000c00092c0                milli_delay
-                0x00000000c00092fc                TaskSys
-                0x00000000c0009301                Printf
-                0x00000000c000935f                vsprintf
-                0x00000000c000950b                printx
-                0x00000000c000954e                sys_printx
-                0x00000000c000961a                spin
-                0x00000000c0009640                panic
-                0x00000000c000965e                assertion_failure
-                0x00000000c0009695                dead_lock
-                0x00000000c000969f                sys_send_msg
-                0x00000000c0009a86                sys_receive_msg
-                0x00000000c0009f95                disp_str_colour_debug
-                0x00000000c0009f9b                send_rec
-                0x00000000c000a097                block
-                0x00000000c000a0d3                unblock
-                0x00000000c000a123                get_ticks_ipc
-                0x00000000c000a17a                itoa
-                0x00000000c000a1d0                i2a
-                0x00000000c000a236                inform_int
-                0x00000000c000a303                strcmp
- .text          0x00000000c000a372      0x6b5 my_process.o
-                0x00000000c000a372                create_user_process_address_space
-                0x00000000c000a402                user_process
-                0x00000000c000a511                clone_pcb
-                0x00000000c000a615                build_body_stack
-                0x00000000c000a748                build_process_kernel_stack
-                0x00000000c000a80b                fork_process
-                0x00000000c000a8b6                process_execute
- *fill*         0x00000000c000aa27        0x9 
- .text          0x00000000c000aa30       0x15 switch_to.o
-                0x00000000c000aa30                switch_to
- .text          0x00000000c000aa45      0x329 double_link_list.o
-                0x00000000c000aa45                initDoubleLinkList
-                0x00000000c000aa73                isListEmpty
-                0x00000000c000aa94                findElementInList
-                0x00000000c000ab70                appendToDoubleLinkList
-                0x00000000c000ac57                insertToDoubleLinkList
-                0x00000000c000acda                popFromDoubleLinkList
- .text          0x00000000c000ad6e      0x1b2 thread.o
-                0x00000000c000ad6e                kernel_thread
-                0x00000000c000ad86                thread_init
-                0x00000000c000ae33                thread_create
-                0x00000000c000ae68                thread_start
+ .text          0x00000000c0006593      0x291 mm/forkexit.o
+                0x00000000c0006593                do_fork
+                0x00000000c0006601                do_exit
+                0x00000000c00066fd                do_wait
+                0x00000000c00067ca                cleanup
+ .text          0x00000000c0006824     0x1266 mem/mem.o
+                0x00000000c0006824                init_bitmap
+                0x00000000c0006847                test_bit_val
+                0x00000000c00068b0                set_bit_val
+                0x00000000c000692b                set_bits
+                0x00000000c0006965                get_first_free_bit
+                0x00000000c00069a9                get_bits
+                0x00000000c0006a71                get_a_page
+                0x00000000c0006b25                get_virtual_address_start_with_addr
+                0x00000000c0006bbf                get_virtual_address
+                0x00000000c0006c4f                ptr_pde
+                0x00000000c0006c62                ptr_pte
+                0x00000000c0006c89                add_map_entry
+                0x00000000c0006d1a                alloc_virtual_memory
+                0x00000000c0006de8                get_physical_address_proc
+                0x00000000c0006e64                get_physical_address
+                0x00000000c0006e96                alloc_physical_memory_of_proc
+                0x00000000c0006f85                alloc_physical_memory
+                0x00000000c000704d                alloc_memory
+                0x00000000c00070af                get_a_virtual_page
+                0x00000000c00070e7                block2arena
+                0x00000000c00070fd                sys_malloc2
+                0x00000000c00073ae                remove_map_entry
+                0x00000000c00073cf                free_a_page
+                0x00000000c0007476                sys_free2
+                0x00000000c00075f9                init_memory_block_desc
+                0x00000000c00076ca                init_memory2
+                0x00000000c0007941                init_memory
+ .text          0x00000000c0007a8a     0x2925 kernel_main_old.o
+                0x00000000c0007a8a                intr_enable
+                0x00000000c0007ab3                intr_disable
+                0x00000000c0007adc                intr_set_status
+                0x00000000c0007afa                intr_get_status
+                0x00000000c0007b17                Memcpy
+                0x00000000c0007b4a                untar
+                0x00000000c0007e5a                atoi
+                0x00000000c0007f00                disp_int
+                0x00000000c0007f29                do_page_fault
+                0x00000000c0008066                exception_handler
+                0x00000000c000824d                init_internal_interrupt
+                0x00000000c00083c2                spurious_irq
+                0x00000000c0008450                init_keyboard
+                0x00000000c00084bd                u_thread_a
+                0x00000000c00084d5                TestTTY
+                0x00000000c0008574                TestFS
+                0x00000000c000897c                wait_exit
+                0x00000000c0008a4a                INIT_fork
+                0x00000000c0008d2d                simple_shell
+                0x00000000c0008f2b                test_split_str
+                0x00000000c00090b8                test_shell
+                0x00000000c0009120                test_exec
+                0x00000000c00091c8                INIT
+                0x00000000c00091d5                TestA
+                0x00000000c000920a                delay
+                0x00000000c000924e                TestB
+                0x00000000c0009266                TestC
+                0x00000000c0009299                sys_get_ticks
+                0x00000000c00092a9                sys_write
+                0x00000000c00092fd                milli_delay
+                0x00000000c0009339                TaskSys
+                0x00000000c000933e                Printf
+                0x00000000c000939c                vsprintf
+                0x00000000c0009548                printx
+                0x00000000c000958b                sys_printx
+                0x00000000c0009657                spin
+                0x00000000c000967d                panic
+                0x00000000c000969b                assertion_failure
+                0x00000000c00096d2                dead_lock
+                0x00000000c00096dc                sys_send_msg
+                0x00000000c0009ac3                sys_receive_msg
+                0x00000000c0009fd2                disp_str_colour_debug
+                0x00000000c0009fd8                send_rec
+                0x00000000c000a0d4                block
+                0x00000000c000a110                unblock
+                0x00000000c000a160                get_ticks_ipc
+                0x00000000c000a1b7                itoa
+                0x00000000c000a20d                i2a
+                0x00000000c000a273                inform_int
+                0x00000000c000a340                strcmp
+ .text          0x00000000c000a3af      0x6b5 my_process.o
+                0x00000000c000a3af                create_user_process_address_space
+                0x00000000c000a43f                user_process
+                0x00000000c000a54e                clone_pcb
+                0x00000000c000a652                build_body_stack
+                0x00000000c000a785                build_process_kernel_stack
+                0x00000000c000a848                fork_process
+                0x00000000c000a8f3                process_execute
+ *fill*         0x00000000c000aa64        0xc 
+ .text          0x00000000c000aa70       0x15 switch_to.o
+                0x00000000c000aa70                switch_to
+ .text          0x00000000c000aa85      0x329 double_link_list.o
+                0x00000000c000aa85                initDoubleLinkList
+                0x00000000c000aab3                isListEmpty
+                0x00000000c000aad4                findElementInList
+                0x00000000c000abb0                appendToDoubleLinkList
+                0x00000000c000ac97                insertToDoubleLinkList
+                0x00000000c000ad1a                popFromDoubleLinkList
+ .text          0x00000000c000adae      0x1b2 thread.o
+                0x00000000c000adae                kernel_thread
+                0x00000000c000adc6                thread_init
+                0x00000000c000ae73                thread_create
+                0x00000000c000aea8                thread_start
  *(.gnu.warning)
 
 .fini
@@ -491,34 +491,34 @@ LOAD thread.o
                 [!provide]                        PROVIDE (_etext = .)
                 [!provide]                        PROVIDE (etext = .)
 
-.rodata         0x00000000c000af20      0xe29
+.rodata         0x00000000c000af60      0xe31
  *(.rodata .rodata.* .gnu.linkonce.r.*)
- .rodata        0x00000000c000af20       0xa3 kernel_main.o
- *fill*         0x00000000c000afc3        0x1 
- .rodata        0x00000000c000afc4      0x19c hd.o
- .rodata        0x00000000c000b160      0x1eb fs_main.o
-                0x00000000c000b160                FSBUF_SIZE
- .rodata        0x00000000c000b34b       0x26 process.o
- .rodata        0x00000000c000b371       0x22 console.o
- .rodata        0x00000000c000b393       0x24 close.o
- .rodata        0x00000000c000b3b7       0x1b fork.o
- .rodata        0x00000000c000b3d2       0x2d exec.o
- .rodata        0x00000000c000b3ff       0x11 mm/main.o
- .rodata        0x00000000c000b410       0x10 mm/exec.o
- .rodata        0x00000000c000b420       0x41 mem/mem.o
- *fill*         0x00000000c000b461       0x1f 
- .rodata        0x00000000c000b480      0x89d kernel_main_old.o
- .rodata        0x00000000c000bd1d       0x2c double_link_list.o
+ .rodata        0x00000000c000af60       0xa3 kernel_main.o
+ *fill*         0x00000000c000b003        0x1 
+ .rodata        0x00000000c000b004      0x19c hd.o
+ .rodata        0x00000000c000b1a0      0x1eb fs_main.o
+                0x00000000c000b1a0                FSBUF_SIZE
+ .rodata        0x00000000c000b38b       0x26 process.o
+ .rodata        0x00000000c000b3b1       0x22 console.o
+ .rodata        0x00000000c000b3d3       0x24 close.o
+ .rodata        0x00000000c000b3f7       0x1b fork.o
+ .rodata        0x00000000c000b412       0x2d exec.o
+ .rodata        0x00000000c000b43f       0x11 mm/main.o
+ .rodata        0x00000000c000b450       0x10 mm/exec.o
+ .rodata        0x00000000c000b460       0x41 mem/mem.o
+ *fill*         0x00000000c000b4a1       0x1f 
+ .rodata        0x00000000c000b4c0      0x8a5 kernel_main_old.o
+ .rodata        0x00000000c000bd65       0x2c double_link_list.o
 
-.txt            0x00000000c000bd49       0xaa
- .txt           0x00000000c000bd49       0x82 string.o
-                0x00000000c000bd49                Memcpy2
-                0x00000000c000bd77                Memset
-                0x00000000c000bd96                Strcpy
-                0x00000000c000bdb0                Strlen
- .txt           0x00000000c000bdcb       0x28 hd_rdwt.o
-                0x00000000c000bdcb                read_port
-                0x00000000c000bddf                write_port
+.txt            0x00000000c000bd91       0xaa
+ .txt           0x00000000c000bd91       0x82 string.o
+                0x00000000c000bd91                Memcpy2
+                0x00000000c000bdbf                Memset
+                0x00000000c000bdde                Strcpy
+                0x00000000c000bdf8                Strlen
+ .txt           0x00000000c000be13       0x28 hd_rdwt.o
+                0x00000000c000be13                read_port
+                0x00000000c000be27                write_port
 
 .rodata1
  *(.rodata1)
@@ -527,54 +527,54 @@ LOAD thread.o
  *(.eh_frame_hdr)
  *(.eh_frame_entry .eh_frame_entry.*)
 
-.eh_frame       0x00000000c000bdf4     0x17c8
+.eh_frame       0x00000000c000be3c     0x17c8
  *(.eh_frame)
- .eh_frame      0x00000000c000bdf4       0xfc kernel_main.o
- .eh_frame      0x00000000c000bef0      0x244 hd.o
+ .eh_frame      0x00000000c000be3c       0xfc kernel_main.o
+ .eh_frame      0x00000000c000bf38      0x244 hd.o
                                         0x25c (size before relaxing)
- .eh_frame      0x00000000c000c134      0x27c fs_main.o
+ .eh_frame      0x00000000c000c17c      0x27c fs_main.o
                                         0x294 (size before relaxing)
- .eh_frame      0x00000000c000c3b0       0xa0 process.o
+ .eh_frame      0x00000000c000c3f8       0xa0 process.o
                                          0xb8 (size before relaxing)
- .eh_frame      0x00000000c000c450      0x100 protect.o
+ .eh_frame      0x00000000c000c498      0x100 protect.o
                                         0x118 (size before relaxing)
- .eh_frame      0x00000000c000c550      0x1e0 console.o
+ .eh_frame      0x00000000c000c598      0x1e0 console.o
                                         0x1f8 (size before relaxing)
- .eh_frame      0x00000000c000c730       0xa0 keyboard.o
+ .eh_frame      0x00000000c000c778       0xa0 keyboard.o
                                          0xb8 (size before relaxing)
- .eh_frame      0x00000000c000c7d0       0x20 open.o
+ .eh_frame      0x00000000c000c818       0x20 open.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c000c7f0       0x20 read.o
+ .eh_frame      0x00000000c000c838       0x20 read.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c000c810       0x20 write.o
+ .eh_frame      0x00000000c000c858       0x20 write.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c000c830       0x20 close.o
+ .eh_frame      0x00000000c000c878       0x20 close.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c000c850       0x20 wait.o
+ .eh_frame      0x00000000c000c898       0x20 wait.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c000c870       0x20 exit.o
+ .eh_frame      0x00000000c000c8b8       0x20 exit.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c000c890       0x20 fork.o
+ .eh_frame      0x00000000c000c8d8       0x20 fork.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c000c8b0       0x20 getpid.o
+ .eh_frame      0x00000000c000c8f8       0x20 getpid.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c000c8d0       0x60 exec.o
+ .eh_frame      0x00000000c000c918       0x60 exec.o
                                          0x78 (size before relaxing)
- .eh_frame      0x00000000c000c930       0x3c mm/main.o
+ .eh_frame      0x00000000c000c978       0x3c mm/main.o
                                          0x54 (size before relaxing)
- .eh_frame      0x00000000c000c96c       0x20 mm/exec.o
+ .eh_frame      0x00000000c000c9b4       0x20 mm/exec.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c000c98c       0x80 mm/forkexit.o
+ .eh_frame      0x00000000c000c9d4       0x80 mm/forkexit.o
                                          0x98 (size before relaxing)
- .eh_frame      0x00000000c000ca0c      0x364 mem/mem.o
+ .eh_frame      0x00000000c000ca54      0x364 mem/mem.o
                                         0x37c (size before relaxing)
- .eh_frame      0x00000000c000cd70      0x62c kernel_main_old.o
+ .eh_frame      0x00000000c000cdb8      0x62c kernel_main_old.o
                                         0x644 (size before relaxing)
- .eh_frame      0x00000000c000d39c       0xe0 my_process.o
+ .eh_frame      0x00000000c000d3e4       0xe0 my_process.o
                                          0xf8 (size before relaxing)
- .eh_frame      0x00000000c000d47c       0xc0 double_link_list.o
+ .eh_frame      0x00000000c000d4c4       0xc0 double_link_list.o
                                          0xd8 (size before relaxing)
- .eh_frame      0x00000000c000d53c       0x80 thread.o
+ .eh_frame      0x00000000c000d584       0x80 thread.o
                                          0x98 (size before relaxing)
  *(.eh_frame.*)
 
@@ -913,7 +913,7 @@ LOAD thread.o
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x0000000000000000    0x1b036
+.debug_info     0x0000000000000000    0x1b055
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x0000000000000000      0xef5 kernel_main.o
  .debug_info    0x0000000000000ef5     0x1746 hd.o
@@ -931,15 +931,15 @@ LOAD thread.o
  .debug_info    0x000000000000d74d      0xd17 exit.o
  .debug_info    0x000000000000e464      0xd0c fork.o
  .debug_info    0x000000000000f170      0xd0c getpid.o
- .debug_info    0x000000000000fe7c      0xe86 exec.o
- .debug_info    0x0000000000010d02      0xd2a mm/main.o
- .debug_info    0x0000000000011a2c     0x1128 mm/exec.o
- .debug_info    0x0000000000012b54      0xee6 mm/forkexit.o
- .debug_info    0x0000000000013a3a     0x1cb6 mem/mem.o
- .debug_info    0x00000000000156f0     0x2679 kernel_main_old.o
- .debug_info    0x0000000000017d69     0x1365 my_process.o
- .debug_info    0x00000000000190ce      0xfa8 double_link_list.o
- .debug_info    0x000000000001a076      0xfc0 thread.o
+ .debug_info    0x000000000000fe7c      0xe95 exec.o
+ .debug_info    0x0000000000010d11      0xd2a mm/main.o
+ .debug_info    0x0000000000011a3b     0x1138 mm/exec.o
+ .debug_info    0x0000000000012b73      0xee6 mm/forkexit.o
+ .debug_info    0x0000000000013a59     0x1cb6 mem/mem.o
+ .debug_info    0x000000000001570f     0x2679 kernel_main_old.o
+ .debug_info    0x0000000000017d88     0x1365 my_process.o
+ .debug_info    0x00000000000190ed      0xfa8 double_link_list.o
+ .debug_info    0x000000000001a095      0xfc0 thread.o
 
 .debug_abbrev   0x0000000000000000     0x3482
  *(.debug_abbrev)
@@ -969,7 +969,7 @@ LOAD thread.o
  .debug_abbrev  0x000000000000304a      0x216 double_link_list.o
  .debug_abbrev  0x0000000000003260      0x222 thread.o
 
-.debug_line     0x0000000000000000     0x47f4
+.debug_line     0x0000000000000000     0x4802
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x0000000000000000      0x187 kernel_main.o
  .debug_line    0x0000000000000187      0x613 hd.o
@@ -987,20 +987,20 @@ LOAD thread.o
  .debug_line    0x00000000000023e4       0xa0 exit.o
  .debug_line    0x0000000000002484       0xae fork.o
  .debug_line    0x0000000000002532       0xa0 getpid.o
- .debug_line    0x00000000000025d2      0x182 exec.o
- .debug_line    0x0000000000002754       0xec mm/main.o
- .debug_line    0x0000000000002840      0x20c mm/exec.o
- .debug_line    0x0000000000002a4c      0x18a mm/forkexit.o
- .debug_line    0x0000000000002bd6      0x7dd mem/mem.o
- .debug_line    0x00000000000033b3      0xd9b kernel_main_old.o
- .debug_line    0x000000000000414e      0x30e my_process.o
- .debug_line    0x000000000000445c      0x253 double_link_list.o
- .debug_line    0x00000000000046af      0x145 thread.o
+ .debug_line    0x00000000000025d2      0x187 exec.o
+ .debug_line    0x0000000000002759       0xec mm/main.o
+ .debug_line    0x0000000000002845      0x214 mm/exec.o
+ .debug_line    0x0000000000002a59      0x18a mm/forkexit.o
+ .debug_line    0x0000000000002be3      0x7dd mem/mem.o
+ .debug_line    0x00000000000033c0      0xd9c kernel_main_old.o
+ .debug_line    0x000000000000415c      0x30e my_process.o
+ .debug_line    0x000000000000446a      0x253 double_link_list.o
+ .debug_line    0x00000000000046bd      0x145 thread.o
 
 .debug_frame
  *(.debug_frame)
 
-.debug_str      0x0000000000000000     0x1d9e
+.debug_str      0x0000000000000000     0x1dc8
  *(.debug_str)
  .debug_str     0x0000000000000000      0x530 kernel_main.o
                                         0x617 (size before relaxing)
@@ -1034,23 +1034,23 @@ LOAD thread.o
                                         0x534 (size before relaxing)
  .debug_str     0x000000000000105f       0x14 getpid.o
                                         0x538 (size before relaxing)
- .debug_str     0x0000000000001073       0x2f exec.o
-                                        0x5a3 (size before relaxing)
- .debug_str     0x00000000000010a2       0x32 mm/main.o
+ .debug_str     0x0000000000001073       0x3e exec.o
+                                        0x5b2 (size before relaxing)
+ .debug_str     0x00000000000010b1       0x32 mm/main.o
                                         0x52e (size before relaxing)
- .debug_str     0x00000000000010d4      0x271 mm/exec.o
-                                        0x7d9 (size before relaxing)
- .debug_str     0x0000000000001345       0x74 mm/forkexit.o
+ .debug_str     0x00000000000010e3      0x29b mm/exec.o
+                                        0x803 (size before relaxing)
+ .debug_str     0x000000000000137e       0x74 mm/forkexit.o
                                         0x598 (size before relaxing)
- .debug_str     0x00000000000013b9      0x325 mem/mem.o
+ .debug_str     0x00000000000013f2      0x316 mem/mem.o
                                         0xa2e (size before relaxing)
- .debug_str     0x00000000000016de      0x3f1 kernel_main_old.o
+ .debug_str     0x0000000000001708      0x3f1 kernel_main_old.o
                                         0xaaf (size before relaxing)
- .debug_str     0x0000000000001acf      0x1d4 my_process.o
+ .debug_str     0x0000000000001af9      0x1d4 my_process.o
                                         0x858 (size before relaxing)
- .debug_str     0x0000000000001ca3       0x8f double_link_list.o
+ .debug_str     0x0000000000001ccd       0x8f double_link_list.o
                                         0x667 (size before relaxing)
- .debug_str     0x0000000000001d32       0x6c thread.o
+ .debug_str     0x0000000000001d5c       0x6c thread.o
                                         0x6ad (size before relaxing)
 
 .debug_loc

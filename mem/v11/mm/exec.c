@@ -148,7 +148,8 @@ int fd_stdout = open(tty1, O_RDONLY);
     }
 
     // 把重新放置后的数据空间复制到caller的数据空间中。
-	// 在TASK_MM中直接调用pid2proc，合适吗？
+    unsigned int caller_virtual_proc_esp_of_current_thread = alloc_virtual_memory(caller_phy_proc_esp);
+	phycopy(caller_virtual_proc_esp_of_current_thread, vaddr_buf, buf_len);
 
 	unsigned int caller_virtual_proc_esp = msg->VADDR_PROC_ESP;
 	unsigned int caller_phy_proc = get_physical_address_proc(proc, source);
@@ -156,7 +157,8 @@ int fd_stdout = open(tty1, O_RDONLY);
 
     // 设置eip、esp、eax、ecx
     Regs *stack0 = (Regs *)(caller_virtual_proc + PAGE_SIZE - sizeof(Regs));
-	stack0->eax = caller_virtual_proc_esp;
+//	stack0->eax = caller_virtual_proc_esp;
+	stack0->ebx = caller_virtual_proc_esp;
 	stack0->ecx = argc;
 	asm ("xchgw %bx, %bx");
 	stack0->eip = elf_header->e_entry;

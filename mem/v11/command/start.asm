@@ -9,8 +9,10 @@ global _start
 
 
 _start:
+	mov		eax, ebx
 	push	eax
 	push	ecx
+	xchg	bx, bx
 	call	main
 
 	push	eax
