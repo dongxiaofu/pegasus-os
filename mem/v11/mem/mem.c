@@ -292,6 +292,21 @@ unsigned int alloc_virtual_memory(unsigned int phy_addr, unsigned int size)
 	return (vaddr + (phy_addr & 0xFFF));
 }
 
+// 获取某个进程中虚拟地址对应的物理地址
+unsigned int get_physical_address_proc(unsigned int vaddr, int pid)
+{
+	disable_int();
+	Proc *current_thread = get_running_thread_pcb();
+	Proc *target_thread = pid2proc(pid);
+	update_cr3(target_thread->page_directory);
+	unsigned int *pte = ptr_pte(vaddr);
+	unsigned int phy_addr = (int)(*pte & 0xFFFFF000) + (vaddr & 0xFFF);
+	update_cr3(current_thread->page_directory);
+	enable_int();
+
+	return phy_addr;
+}
+
 // 获取虚拟地址对应的物理地址
 unsigned int get_physical_address(unsigned int vaddr)
 {
@@ -304,13 +319,17 @@ unsigned int get_physical_address(unsigned int vaddr)
 // 想不到更恰当的名字，就用这个。
 unsigned int alloc_physical_memory_of_proc(unsigned int vaddr, unsigned int pid)
 {
+	disable_int();
+
 	unsigned int page_vaddr = vaddr & 0xFFFFF000;
 	VirtualMemoryAddress pool;
 	MEMORY_POOL_TYPE pool_type = USER;
 
-	Proc *current_thread = pid2proc(pid); 
+	Proc *thread = pid2proc(pid); 
+	Proc *current_thread = get_running_thread_pcb();
+
 	// TODO 某个用户进程的虚拟地址池
-	Memcpy(&pool, current_thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
+	Memcpy(&pool, thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
 
 	Bitmap map = pool.map;
 	unsigned int index = (page_vaddr - pool.start_addr) / PAGE_SIZE;
@@ -320,7 +339,12 @@ unsigned int alloc_physical_memory_of_proc(unsigned int vaddr, unsigned int pid)
 	unsigned int phy_page = get_a_page(pool_type);
 	unsigned int phy_addr = phy_page + (vaddr & 0xFFF);
 
+//	asm ("xchgw %bx, %bx");
+	update_cr3(thread->page_directory);
 	add_map_entry(page_vaddr, phy_page);
+	update_cr3(current_thread->page_directory);
+
+	enable_int();
 	
 	return phy_addr;
 }

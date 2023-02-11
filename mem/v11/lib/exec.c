@@ -101,6 +101,7 @@ int execv(const char *pathname, char **argv) {
 	unsigned int phy_pathname = get_physical_address(pathname);
 	unsigned int phy_arg_stack = get_physical_address(arg_stack);
 	unsigned int phy_proc_esp = get_physical_address(0xC0000000 - 0x1000 + PAGE_SIZE);
+//	unsigned int phy_proc = get_physical_address();
 
     msg.TYPE = EXEC;
     msg.PATHNAME = phy_pathname;

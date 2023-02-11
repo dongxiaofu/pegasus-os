@@ -84,6 +84,7 @@ typedef struct {
 #define PHY_PROC_ESP u0.u10.m16
 #define VADDR_PROC_ESP u0.u10.m17
 #define DELTA u0.u10.m18
+#define PHY_PROC u0.u10.m19
 
 // do_rdwt中使用
 #define HD_OPERATE_TYPE u0.u20.m20

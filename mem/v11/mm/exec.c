@@ -94,18 +94,19 @@ int fd_stdout = open(tty1, O_RDONLY);
 		// 在测试时，我发现了这种情况。程序段的大小是0，不能做内存地址映射，不能调用下面的phycopy。
 		if(program_size == 0)	continue;
 
+		unsigned int page_vaddr = get_virtual_address_start_with_addr(p_vaddr, page_cnt, source);
+		unsigned int p_vaddr_tmp = p_vaddr;
+
 		for(int i = 0; i < page_cnt; i++){
-			unsigned int phy_addr = alloc_physical_memory_of_proc(p_vaddr, source);
+			unsigned int phy_addr = alloc_physical_memory_of_proc(p_vaddr_tmp, source);
 			unsigned vaddr = alloc_virtual_memory(phy_addr, PAGE_SIZE);
 			if(start_vaddr == 0)	start_vaddr = vaddr;
 
-			p_vaddr += PAGE_SIZE;
+			p_vaddr_tmp += PAGE_SIZE;
 		}
 
-		asm ("xchgw %bx, %bx");
-        // phycopy(start_vaddr, mmbuf + program_header->p_offset, program_header->p_filesz);
-        phycopy(start_vaddr, mmbuf + e_entry_offset_in_file, program_header->p_filesz);
-		asm ("xchgw %bx, %bx");
+        phycopy(start_vaddr, mmbuf + program_header->p_offset, program_header->p_filesz);
+//        phycopy(start_vaddr, mmbuf + e_entry_offset_in_file, program_header->p_filesz);
     }
 
 //	Printf("after reload elf\n");
@@ -150,14 +151,17 @@ int fd_stdout = open(tty1, O_RDONLY);
 	// 在TASK_MM中直接调用pid2proc，合适吗？
 
 	unsigned int caller_virtual_proc_esp = msg->VADDR_PROC_ESP;
-	unsigned int caller_phy_proc = get_physical_address(proc);
+	unsigned int caller_phy_proc = get_physical_address_proc(proc, source);
 	unsigned int caller_virtual_proc = alloc_virtual_memory(caller_phy_proc, PAGE_SIZE); 
 
     // 设置eip、esp、eax、ecx
     Regs *stack0 = (Regs *)(caller_virtual_proc + PAGE_SIZE - sizeof(Regs));
 	stack0->eax = caller_virtual_proc_esp;
 	stack0->ecx = argc;
+	asm ("xchgw %bx, %bx");
 	stack0->eip = elf_header->e_entry;
+	asm ("xchgw %bx, %bx");
+//	stack0->eip = 0xc0001000;
 	stack0->esp = caller_virtual_proc_esp;
 
 	proc->p_send_to = NO_TASK;
