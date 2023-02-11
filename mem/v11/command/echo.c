@@ -9,7 +9,8 @@ int main(int argc, char *argv[])
 //	argc = 2;
 	for(int i = 0; i < argc; i++){
 //		//dis_pos = 12000 - 128 + 10 + 160 * 7;
-		Printf("i = %d\n", i);
+//		Printf("i = %d\n", i);
+		Printf("%s\n", argv[i]);
 //		Printf("%s%s", i == 0 ? "-" : " ", argv[i] );
 	}
 //	Printf("\n");

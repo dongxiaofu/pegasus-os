@@ -38,9 +38,12 @@ LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
 
 LOBJS	=	lib/pegasus_crt.a
 
-image:clean everything buildimg
+image:clean everything buildimg subsystem
 
 everything:${BOOT} ${KERNEL} ${LOBJS}
+
+subsystem:
+	cd command && make all
 
 buildimg:
 	dd if=boot.bin of=a.img bs=512 count=1 conv=notrunc
