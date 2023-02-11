@@ -306,7 +306,7 @@ unsigned int alloc_physical_memory_of_proc(unsigned int vaddr, unsigned int pid)
 	set_bits(&map, index, 1, 1);
 
 	unsigned int phy_page = get_a_page(pool_type);
-	unsigned int phy_addr = phy_page + vaddr & 0xFFF;
+	unsigned int phy_addr = phy_page + (vaddr & 0xFFF);
 
 	add_map_entry(page_vaddr, phy_page);
 	
@@ -334,7 +334,7 @@ unsigned int alloc_physical_memory(unsigned int vaddr, MEMORY_POOL_TYPE pool_typ
 	set_bits(&map, index, 1, 1);
 
 	unsigned int phy_page = get_a_page(pool_type);
-	unsigned int phy_addr = phy_page + vaddr & 0xFFF;
+	unsigned int phy_addr = phy_page + (vaddr & 0xFFF);
 
 	add_map_entry(page_vaddr, phy_page);
 	
