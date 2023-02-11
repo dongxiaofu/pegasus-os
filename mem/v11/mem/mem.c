@@ -116,14 +116,6 @@ int get_bits(Bitmap *map, int cnt)
 	return start_idx;
 }
 
-int get_a_page2(int vaddr, MEMORY_POOL_TYPE pool_type)
-{
-	int phy_addr = get_a_page(pool_type);
-	add_map_entry(vaddr, phy_addr);
-
-	return vaddr;
-}
-
 // 申请一个物理页框
 unsigned int get_a_page(MEMORY_POOL_TYPE pool_type)
 {
@@ -144,6 +136,26 @@ unsigned int get_a_page(MEMORY_POOL_TYPE pool_type)
 	set_bit_val(&map, index, 1);
 
 	return addr;
+}
+
+unsigned int get_virtual_address_start_with_addr(unsigned int vaddr, unsigned int cnt, int pid)
+{
+	VirtualMemoryAddress pool;
+	Proc *current_thread = (Proc *)get_running_thread_pcb();
+	Proc *thread = pid2proc(pid);
+
+	Memcpy(&pool, thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
+
+	Bitmap map = pool.map;
+	int index = (vaddr - pool.start_addr) / PAGE_SIZE;
+	assert(index >= 0);
+	// TODO 本应该检查索引为index的bit是否被占用。
+//	unsigned int addr = pool.start_addr + PAGE_SIZE * index;
+	set_bits(&map, index, 1, cnt);
+
+	unsigned int page_vaddr = vaddr & 0xFFF;
+
+	return page_vaddr;
 }
 
 // 申请一个虚拟内存地址

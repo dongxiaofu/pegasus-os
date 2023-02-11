@@ -56,6 +56,7 @@ int get_bits(Bitmap *map, int cnt);
 int get_a_page2(int vaddr, MEMORY_POOL_TYPE pool_type);
 // 申请一个物理页框
 unsigned int get_a_page(MEMORY_POOL_TYPE pool_type);
+unsigned int get_virtual_address_start_with_addr(unsigned int vaddr, unsigned int cnt, int pid);
 // 申请一个虚拟内存地址
 // cnt是页框数量
 // 每个进程的虚拟内存地址池不同，是不是要指定进程？
