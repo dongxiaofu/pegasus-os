@@ -334,7 +334,7 @@ ReadSector2:
 	int 13h				; int 13h 中断
 	ret
 
-BaseOfLoader	equ	0x9000
+BaseOfLoader	equ	0x9A00
 ;BaseOfLoader	equ	0x2000
 OffSetOfLoader	equ	0x100
 BaseOfFATEntry	equ	0x1000

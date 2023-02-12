@@ -628,13 +628,13 @@ ReadSector2:
 ; 3>0x30000 这个数值，是 Makefile 中编译时设置的：ld -s -Ttext 0x30400  -o kernel.bin  kernel.o -m elf_i386 
 ;BaseOfKernel	equ	0x8000
 ;BaseOfKernel	equ	0x6000
-BaseOfKernel	equ	0x5000
+BaseOfKernel	equ	0x6000
 BaseOfKernel2	equ	0x6000
 BaseOfKernel3	equ	0x0
 OffSetOfLoader	equ	0x0
 BaseOfFATEntry	equ	0x1000
 ;BaseOfLoader    equ     0x9000
-BaseOfLoader    equ     0x9000
+BaseOfLoader    equ     0x9A00
 ;BaseOfLoader    equ     0x2000
 
 
