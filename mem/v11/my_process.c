@@ -110,9 +110,18 @@ Proc *clone_pcb(Proc *parent_process)
 	process->page_directory = page_dir_phy_addr;
 
 	// 用户进程的虚拟地址空间
-	process->user_virtual_memory_address = (unsigned int)create_user_process_address_space();
-	Memcpy(process->user_virtual_memory_address,parent_process->user_virtual_memory_address,	\
-		sizeof(VirtualMemoryAddress)); 
+	VirtualMemoryAddress *process_user_vm = create_user_process_address_space();
+	process->user_virtual_memory_address = (unsigned int)process_user_vm;
+	VirtualMemoryAddress *parent_process_user_vm = parent_process->user_virtual_memory_address;
+	Memcpy(process_user_vm, parent_process_user_vm, sizeof(VirtualMemoryAddress));
+	// 复制位图中的bits。因为bits是指针，因而需要单独分配空间。
+	unsigned int length = 0xC0000000 - 0x8048000;		// 单位是字节
+	unsigned int bitmap_bit_cnt = ROUND_UP(length, PAGE_SIZE);
+	unsigned map_length = length = ROUND_UP(bitmap_bit_cnt, 8); 
+	int bitmap_page_cnt = ROUND_UP(map_length, PAGE_SIZE);
+	process_user_vm->map.bits = (char *)alloc_memory(bitmap_page_cnt, KERNEL);
+	int bitmap_bits_char_len = bitmap_page_cnt * PAGE_SIZE;
+	Memcpy(process_user_vm->map.bits, parent_process_user_vm->map.bits, bitmap_bits_char_len);
 
 // 我担心克隆子进程的所有流程还没有完成就调度到子进程了。
 //	// 加入链表，在调度模块中处理
@@ -228,6 +237,7 @@ Proc *fork_process(unsigned int parent_pid)
 	Proc *parent_process = pid2proc(parent_pid);
 	Proc *child_process = clone_pcb(parent_process);
 	unsigned int buf = alloc_memory(1, KERNEL);
+	Memset(buf, 0, PAGE_SIZE);
 	build_body_stack(parent_process, child_process, buf);
 	build_process_kernel_stack(child_process);
 

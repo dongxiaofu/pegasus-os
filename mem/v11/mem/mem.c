@@ -397,7 +397,7 @@ unsigned int alloc_memory(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
 unsigned int get_a_virtual_page(MEMORY_POOL_TYPE pool_type, unsigned int vaddr)
 {
 	unsigned int phy_addr = get_a_page(pool_type);
-	unsigned int page_vaddr = vaddr & 0xFFF;
+	unsigned int page_vaddr = vaddr & 0xFFFFF000;
 	add_map_entry(page_vaddr, phy_addr);
 
 	return vaddr;
