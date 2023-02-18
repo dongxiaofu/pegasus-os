@@ -11,16 +11,6 @@
 #include "proto.h"
 #include "global.h"
 
-void check();
-
-void check()
-{
-	int j = 0;
-	for(int i = 0; i < 4; i++){
-		j++;
-	}
-}
-
 // 进程调度次数
 void schedule_process()
 {
@@ -60,10 +50,6 @@ void clock_handler()
 //	assert(cur->stack_magic == STACK_MAGIC);
 	if(key_pressed){
 		inform_int(TASK_TTY);
-	}
-
-	if(cur->pid == 5 && cur->ticks == 1){
-		check();
 	}
 
     // 调度进程

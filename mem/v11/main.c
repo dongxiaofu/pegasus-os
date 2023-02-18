@@ -126,8 +126,8 @@ void user_proc_a()
 	while(1);
 }
 
-void user_proc_b()
-{
-	disp_str("I am user_proc_b\n");
-	while(1);
-}
+// void user_proc_b()
+// {
+// 	disp_str("I am user_proc_b\n");
+// 	while(1);
+// }

@@ -17,6 +17,6 @@ int fork() {
     send_rec(BOTH, &msg, TASK_MM);
 
     assert(msg.TYPE = SYSCALL_RET);
-    assert(msg.RETVAL == 0);
+//    assert(msg.RETVAL == 0);
     return msg.PID;
 }

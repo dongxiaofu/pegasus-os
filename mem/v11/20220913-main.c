@@ -14,6 +14,16 @@
 
 void u_thread_a();
 
+void catch_error(){
+	test_ticks++;
+	current_dis_pos = dis_pos;
+//	dis_pos = 0;
+//	disp_str("[");
+//	disp_int(test_ticks);
+//	disp_str("]");
+//	dis_pos = current_dis_pos;
+}
+
 
 /* 开中断并返回开中断前的状态*/
 enum intr_status intr_enable() {
@@ -462,12 +472,6 @@ void init_keyboard()
 
 }
 
-void u_thread_a()
-{
-	disp_str("hi, a thread\n");
-	while(1);
-}
-
 #define A_PRINT_NUM 3
 #define B_PRINT_NUM 3
 #define C_PRINT_NUM 3
@@ -607,7 +611,7 @@ void INIT_fork()
 
 	int j = 0;
 	int pid = fork();
-	asm ("xchgw %bx, %bx");		
+//	asm ("xchgw %bx, %bx");		
 	delay(1);
 //	pid = 0;
 //	asm ("xchgw %bx, %bx");
@@ -636,7 +640,7 @@ void INIT_fork()
 		j += 2;
 //		int fd2 = open("dev_tty0", O_RDWR);
 		char buf2[40] = "Child.See you again\n";
-		asm ("xchgw %bx, %bx");		
+//		asm ("xchgw %bx, %bx");		
 		write(fd_stdout, buf2, Strlen(buf2));			
 		write(fd_stdout, buf2, Strlen(buf2));			
 		write(fd_stdout, buf2, Strlen(buf2));			
@@ -746,76 +750,6 @@ void simple_shell()
 
 	}
 }
-
-void test_split_str()
-{
-	char *argv[100];
-	int argc = 0;
-	int word = 0;
-	char *p = "echo hello world";
-	char *s;
-
-	do{
-		if(argc == 0){
-		Printf("*p = %x\n", *p); 
-		}
-		if((*p != ' ' || *p != 0) && word == 0){
-			s = p;
-			word = 1;
-		}
-
-		if((*p == ' ' || *p == 0) && word == 1){
-			argv[argc++] = s;
-			//Printf("argc[%d] = %s\n", argc-1, argc[argc-1]);
-			*p = 0;
-//			Printf("argv2[%d] = %s\n", argc-1, argv2[argc-1]);
-			word = 0;
-		}
-
-		p++;
-	}while(*p);
-	argv[argc] = s;
-
-	Printf("print argv, argc = %x\n", argc);
-	// for(int i = 0; i < argc; i++){
-	for(int i = 0; i <= argc; i++){
-		Printf("argv[%x] = %s\n", i, argv[i]);
-	}
-
-	if(strcmp(argv[0], "echo") == 0){
-		Printf("Yes,it is.\n");
-	}
-
-//	return;
-	//char *argv[10] = {"echo4", "Hello2", "World3"};
-	Printf("argv[0] = %s\n", argv[0]);
-	Printf("print argv[0]\n");
-	int j = 0;
-	while(j <= 5){
-		Printf("ch = %x\n", argv[0][j]);
-		j++;
-	}
-	return;
-//	argv[0] = "echo ";
-	int fd = open(argv[0], O_RDWR);
-//	int fd = open("echo", O_RDWR);
-	if(fd == -1){
-		Printf("{%s}\n", argv[0]);
-	}else{
-		// 实现shell	
-		int pid = fork();
-		if(pid > 0){
-			int s;
-			wait(&s);
-		}else{
-			close(fd);
-			execv(argv[0], argv);	
-		}
-	}
-}
-
-
-
 
 void test_shell()
 {
@@ -1291,6 +1225,10 @@ void assertion_failure(char *exp, char *filename, char *base_filename, unsigned 
     printx("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
            //Printf("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
            ASSERT_MAGIC, exp, filename, base_filename, line);
+	dis_pos = 0;
+	disp_str("[");
+	disp_int(test_ticks);
+	disp_str("]");
     spin("Stop Here!\n");
     return;
 }
@@ -1338,6 +1276,7 @@ int dead_lock(int src, int dest)
 // send_msg 通过sys_call调用
 int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 {
+	int j = 0;
 //	enum intr_status old_status = intr_disable();	
     Proc *receiver = pid2proc(receiver_pid);
 	if(receiver != 0){
@@ -1349,13 +1288,14 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 		assert(receiver != 0x0);
 	}
     int sender_pid = proc2pid(sender);
+	unsigned int msg_size = sizeof(Message);
+	unsigned int msg_vaddr = (unsigned int)msg;
+	unsigned int msg_phy_addr = get_physical_address_proc(msg_vaddr, sender_pid); 
+    int msg_line_addr = alloc_virtual_memory(msg_phy_addr, msg_size);
 
         // 计算msg的线性地址
         int ds = sender->s_reg.ds;
         int base = 0;//Seg2PhyAddrLDT(ds, sender);
-		// msg是一个物理地址，在内核中把一个虚拟地址映射到这个物理地址。
-        int msg_line_addr = alloc_virtual_memory((unsigned int)msg, sizeof(Message));
-        int msg_size = sizeof(Message);
 	Message *msg_tmp =  (Message *)msg_line_addr;
 	msg_tmp->source = sender_pid;
 //    msg->source = sender_pid;
@@ -1374,11 +1314,18 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
        // int msg_size = sizeof(Message);
 
         int ds2 = receiver->s_reg.ds;
+		unsigned int p_msg_vaddr = (unsigned int)receiver->p_msg;	
+		unsigned int p_msg_phy_addr = get_physical_address_proc(p_msg_vaddr, receiver_pid);
         // int msg_line_addr2 = base2 + (int)(receiver->p_msg);
-        int msg_line_addr2 = alloc_virtual_memory((receiver->p_msg), sizeof(Message));
+        int msg_line_addr2 = alloc_virtual_memory(p_msg_phy_addr, msg_size);
+		catch_error();
         // 从sender中把消息复制到receiver
         //    phycopy(receiver->p_msg, msg_line_addr, msg_size);
         phycopy(msg_line_addr2, msg_line_addr, msg_size);
+		if(test_ticks == 0x541){
+			current_dis_pos = 4;
+		}
+//		disable_int();
         // 重置sender
         sender->p_msg = 0;
         sender->p_flag = RUNNING;
@@ -1402,6 +1349,7 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
         assert(receiver->p_flag == 0);
         assert(receiver->p_receive_from == NO_TASK);
         //assert(receiver->p_send_to == NO_TASK);
+//        enable_int();
     }
     else
     {
@@ -1461,6 +1409,10 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
 
     int receiver_pid = proc2pid(receiver);
 
+	unsigned int msg_size = sizeof(Message);
+	unsigned int msg_vaddr = (unsigned int)msg;
+	unsigned int msg_phy_addr = get_physical_address_proc(msg_vaddr, receiver->pid); 
+
 	int int_flag = 0;
     if (receiver->has_int_msg && (sender_pid == ANY || sender_pid == INTERRUPT))
     {
@@ -1471,7 +1423,7 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
         m->source = INTERRUPT;
         m->TYPE = HARD_INT;
 
-		unsigned int vaddr_msg = alloc_virtual_memory(msg, msg_size);
+		unsigned int vaddr_msg = alloc_virtual_memory(msg_phy_addr, msg_size);
         // phycopy(v2l(receiver_pid, msg), &m,
          //       sizeof(Message));
         phycopy(vaddr_msg, m, msg_size);
@@ -1528,13 +1480,14 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
     {
         Proc *p_from_proc = p_from;
         // 计算msg的线性地址
-        void *msg_line_addr = (void *)alloc_virtual_memory((unsigned int)msg, sizeof(Message));
-		// PCB中的p_msg是一个物理地址。要使用它，必须分配一个虚拟地址。
-//        void *msg_line_addr2 = (void *)((int)(p_from_proc->p_msg));
-		void *msg_line_addr2 = (void *)alloc_virtual_memory((unsigned int)p_from_proc->p_msg, sizeof(Message));
+        void *msg_line_addr = (void *)alloc_virtual_memory(msg_phy_addr, msg_size);
+		unsigned int p_msg_vaddr = (unsigned int)p_from_proc->p_msg;
+		int p_from_proc_pid = proc2pid(p_from_proc);
+		unsigned int p_msg_phy_addr = get_physical_address_proc(p_msg_vaddr, p_from_proc_pid); 
+		void *msg_line_addr2 = (void *)alloc_virtual_memory(p_msg_phy_addr, msg_size);
 
         // 从receiver中把消息复制到sender
-        phycopy(msg_line_addr, msg_line_addr2, sizeof(Message));
+        phycopy(msg_line_addr, msg_line_addr2, msg_size);
         Message *m = (Message *)msg_line_addr;
 
         // 移除已经处理过的消息。
@@ -1598,32 +1551,18 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
     return 0;
 }
 
-// 系统调用--用汇编实现
-// int send_msg(Message *msg, int receiver_pid)
-// {
-
-// }
-
-// 系统调用--用汇编实现
-// int receive_msg(Message *msg, int sender_pid)
-// {
-
-// }
-// todo 以后去掉这个函数。
-void disp_str_colour_debug(char *strr)
-{
-}
-
 // send_rec封装send_msg和receive_msg，直接被外部使用
 // function：选择发送还是接收还是其他;pid，sender或receiver的进程id
 int send_rec(int function, Message *msg_vaddr, int pid)
 {
-	unsigned int msg = get_physical_address((unsigned int)msg_vaddr);
+//	unsigned int msg = get_physical_address((unsigned int)msg_vaddr);
+	unsigned int msg = (unsigned int)msg_vaddr;
+	unsigned int msg_size = sizeof(Message);
 
     assert(function == SEND || function == RECEIVE || function == BOTH);
 	
 	if(function == RECEIVE){
-		Memset(msg_vaddr, 0, sizeof(Message));
+		Memset(msg_vaddr, 0, msg_size);
 	}
 
     int ret;
@@ -1650,7 +1589,7 @@ int send_rec(int function, Message *msg_vaddr, int pid)
         //assert(proc_table[1].p_flag == RUNNING);
         if (ret == 0)
         {
-		Memset(msg_vaddr, 0, sizeof(Message));
+			Memset(msg_vaddr, 0, msg_size);
             ret = receive_msg(msg, pid); // pid是sender
             // assert(msg->val != 0);
         }

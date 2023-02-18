@@ -7,7 +7,6 @@
 // assert的魔数
 #define ASSERT_MAGIC 59
 int vsprintf(char *buf, char *fmt, char *var_list);
-void write2(char *buf, int len);
 void printx(char *fmt, ...);
 int write_debug(char *buf, int len);
 // int vsprintf_debug(char *buf, char *fmt, char *var_list);

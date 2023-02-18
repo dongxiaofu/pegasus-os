@@ -160,9 +160,9 @@ int fd_stdout = open(tty1, O_RDONLY);
 //	stack0->eax = caller_virtual_proc_esp;
 	stack0->ebx = caller_virtual_proc_esp;
 	stack0->ecx = argc;
-	asm ("xchgw %bx, %bx");
+//	asm ("xchgw %bx, %bx");
 	stack0->eip = elf_header->e_entry;
-	asm ("xchgw %bx, %bx");
+//	asm ("xchgw %bx, %bx");
 //	stack0->eip = 0xc0001000;
 	stack0->esp = caller_virtual_proc_esp;
 

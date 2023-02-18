@@ -277,6 +277,7 @@
 
 
 #define TICKS_NUM	10
+// #define TICKS_NUM	100
 #define STACK_MAGIC	0x99ABCDE0
 
 #endif

@@ -23,8 +23,8 @@ int do_fork(Message *msg)
     // 解除子进程的阻塞
     Message m;
     m.TYPE = SYSCALL_RET;
-    m.RETVAL = 3;
-    m.PID = 2;
+    m.RETVAL = 0;
+    m.PID = 0;
     send_rec(SEND, &m, child_pid);
 
     return child_pid;
