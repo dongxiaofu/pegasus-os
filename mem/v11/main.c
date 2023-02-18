@@ -113,14 +113,8 @@ void kernel_thread_d(void *msg)
 
 void user_proc_a()
 {
-	int a = 5;
-	int b = a;
 	disp_str("I am user_proc_a\n");
-//	while(1);
-//	int a = 5;
-//	int b = a;
-//	int c = a;
-//	int d = a;
+	wait_exit();
 //	test_exec();
 //	test_shell();
 	INIT_fork();

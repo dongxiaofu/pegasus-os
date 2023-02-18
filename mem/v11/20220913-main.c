@@ -588,7 +588,7 @@ void wait_exit()
 			}
 		}
 		Printf("I am child 0\n");
-		exit(9);
+		exit(90);
 		Printf("I am child 1\n");
 		while(1){}
 	}

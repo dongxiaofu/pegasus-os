@@ -35,7 +35,7 @@ void do_exit(Message *msg, int exit_code)
 {
     // 获取caller
     int pid = msg->source;
-    Proc *proc = &proc_table[pid];
+	Proc *proc = pid2proc(pid);
 
     // 处理文件 todo 暂时不实现。
 //    Message msg2fs;
@@ -45,10 +45,11 @@ void do_exit(Message *msg, int exit_code)
 
     // 处理caller
     int parent_pid = proc->parent_pid;
+	Proc *parent_proc = pid2proc(parent_pid);
 	proc->exit_status = msg->STATUS;
-    if (proc_table[parent_pid].wait_status == WAITING)
+    if (parent_proc->wait_status == WAITING)
     {
-        proc_table[parent_pid].wait_status = ~WAITING;
+		parent_proc->wait_status = ~WAITING;
         cleanup(proc);
     }
     else
@@ -58,18 +59,19 @@ void do_exit(Message *msg, int exit_code)
     }
 
     // 处理caller的子进程
-    for (int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++)
-    {
-        if (proc_table[i].parent_pid == pid)
-        {
-            proc_table[i].parent_pid = INIT_PID;
-            if (proc_table[INIT_PID].wait_status == WAITING && proc_table[i].wait_status == HANGING)
-            {
-                proc_table[INIT_PID].wait_status = ~WAITING;
-                cleanup(&proc_table[i]);
-            }
-        }
-    }
+    // TODO 暂时不实现。我不知道怎么实现。
+//    for (int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++)
+//    {
+//        if (proc_table[i].parent_pid == pid)
+//        {
+//            proc_table[i].parent_pid = INIT_PID;
+//            if (proc_table[INIT_PID].wait_status == WAITING && proc_table[i].wait_status == HANGING)
+//            {
+//                proc_table[INIT_PID].wait_status = ~WAITING;
+//                cleanup(&proc_table[i]);
+//            }
+//        }
+//    }
 }
 
 void do_wait(Message *msg)
@@ -79,25 +81,33 @@ void do_wait(Message *msg)
     int child_count = 0;
 
     // 检查子进程是否处于HANGING状态
-    for (int i = TASK_PROC_NUM + USER_PROC_NUM; i <= FORKED_USER_PROC_NUM; i++)
-    {
-        if (proc_table[i].parent_pid == pid)
-        {
-            child_count++;
-            if (proc_table[i].wait_status == HANGING)
-            {
-                proc_table[pid].wait_status = ~WAITING;
-                cleanup(&proc_table[i]);
-                return;
-            }
-        }
-    }
+	Proc *proc = 0x0;
+	Proc *parent_proc = pid2proc(pid);
+	assert(parent_proc != 0x0);
+	ListElement head = pcb_list.head;
+	ListElement tail = pcb_list.tail;
+	// ListElement *cur = head.next;
+	ListElement *cur = pcb_list.head.next;
+	while(cur != &pcb_list.tail){
+		proc = (Proc *)((unsigned int)cur & 0xFFFFF000);
+		if(proc->parent_pid != pid){
+			cur = cur->next;
+			continue;
+		}
+		child_count++;
+        if(proc->wait_status != HANGING){
+			cur = cur->next;
+			continue;
+		}
+        parent_proc->wait_status = ~WAITING;
+        cleanup(proc);
+        return;
+	}
 
     // 有子进程；无子进程。
     if (child_count)
     {
-        //proc_table[pid].wait_status = HANGING;
-        proc_table[pid].wait_status = WAITING;
+        parent_proc->wait_status = WAITING;
     }
     else
     {
