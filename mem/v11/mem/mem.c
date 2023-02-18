@@ -704,13 +704,13 @@ void init_memory(int total_memory)
 //	asm ("xchgw %bx, %bx");
 	// int map_base_addr = 0xC009F000;
 	
-	int map_base_addr = 0xC009A000;
+	int map_base_addr = 0xC0020000;
 	// 					0xc0100000;
-	int k_v_addr 	  = 0xc0100000;
+	int k_v_addr 	  = 0xc0400000;
 	
 
 	int page_table_size = PAGE_SIZE * 256;
-	int used_memory = 0x100000 + page_table_size;	
+	int used_memory = 0x400000 + page_table_size;	
 
 	int all_free_page_cnt = (total_memory - used_memory) / PAGE_SIZE;
 	int kernel_pool_free_pages = all_free_page_cnt / 2;

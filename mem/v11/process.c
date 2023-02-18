@@ -14,7 +14,7 @@
 // 进程调度次数
 void schedule_process()
 {
-	int page_directory = 0x100000;
+	int page_directory = 0x400000;
     Proc *next, *cur;
 
 	// 脏数据太多，怎么办？

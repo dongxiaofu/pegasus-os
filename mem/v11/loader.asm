@@ -118,7 +118,7 @@ org	0100h
 LABEL_START:
 	mov	ax,	cs
 	mov	ds,	ax
-	;;xhcg bx, bx	
+	xchg bx, bx	
 	xor		eax,	eax
 	mov		ax,		cs
 	movzx	eax, ax
@@ -185,6 +185,7 @@ LABEL_START:
 	pop ebx
 	pop eax
 	
+	xchg bx, bx
 	mov ax, BaseOfKernel
 	mov es, ax
 	;mov ds, ax		; lodsb、lodsw，把[ds:si]中的数据加载到ax中
@@ -264,6 +265,7 @@ FILE_FOUND:
 	and di, 0xFFE0  ; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置; 获取文件的第一个簇的簇号
 	add di, 0x1A
 	mov si, di
+	xchg bx, bx
 	mov ax, BaseOfKernel
 	push ds
 	mov ds, ax
@@ -475,10 +477,10 @@ _RamSize		equ		RamSize + BaseOfLoaderPhyAddr
 _MemCheckBuf	equ		MemCheckBuf + BaseOfLoaderPhyAddr
 
 ;分页
-PageDirectoryTablePhysicalAddress		equ			0x100000
+PageDirectoryTablePhysicalAddress		equ			0x400000
 PageTablePhysicalAddress				equ		    PageDirectoryTablePhysicalAddress + 4096	
 ;PageDirectoryTablePhysicalAddress		equ			0x100000
-UserPageDirectoryTablePhysicalAddress	equ			(0x100000 + 0x2000)
+UserPageDirectoryTablePhysicalAddress	equ			(0x400000 + 0x2000)
 UserPageTablePhysicalAddress			equ		    UserPageDirectoryTablePhysicalAddress + 4096	
 
 PG_P_NO				equ			0
@@ -627,14 +629,13 @@ ReadSector2:
 ; 3>BaseOfKernel 和 0x30000 之间呢？
 ; 3>0x30000 这个数值，是 Makefile 中编译时设置的：ld -s -Ttext 0x30400  -o kernel.bin  kernel.o -m elf_i386 
 ;BaseOfKernel	equ	0x8000
-;BaseOfKernel	equ	0x6000
-BaseOfKernel	equ	0x6000
+BaseOfKernel	equ	0x5000
+;BaseOfKernel	equ	0x30000
 BaseOfKernel2	equ	0x6000
 BaseOfKernel3	equ	0x0
 OffSetOfLoader	equ	0x0
 BaseOfFATEntry	equ	0x1000
-;BaseOfLoader    equ     0x9000
-BaseOfLoader    equ     0x9A00
+BaseOfLoader    equ     0x9000
 ;BaseOfLoader    equ     0x2000
 
 
@@ -730,7 +731,7 @@ LABEL_PM_START:
 	call Init_8259A
 	call Init8253
 
-	mov esp, 0xc009f000
+	mov esp, 0xc02FFFFF
 	;;xhcg bx, bx
 	call InitKernel
 	;;xchg bx, bx	
@@ -743,7 +744,8 @@ LABEL_PM_START:
 	xchg bx, bx
 	;jmp SelectFlatX:0x30400
 	;jmp SelectFlatX:0x1000
-	jmp SelectFlatX:0xc0001000
+	;jmp SelectFlatX:0xc0001000
+	jmp SelectFlatX:0xc0100000
 	jmp $
 	jmp $
 	jmp $
@@ -812,6 +814,7 @@ Init8253:
 	
 	; 设置每10毫秒发生一次时钟中断
 	mov ax, 11931
+	;mov ax, 50
 	;mov ax, (1193182 / 10000000000000)
 	;mov ax, (1193182 / 10 * 5)
 	;mov ax, 65535
@@ -970,7 +973,7 @@ SetupPage:
 	;mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], PageTablePhysicalAddress
 
 	;设置第一个页表的前256个PTE
-	mov ecx, 256
+	mov ecx, 1024
 	;mov ecx, 1024
 	;mov esi, 0
 	xor esi, esi
