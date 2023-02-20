@@ -527,6 +527,11 @@ void hd_rdwt(Message *msg) {
 
 
 void hd_handler() {
+//	catch_error();
+//	if(test_ticks == 0x12D){
+//		asm ("xchgw %bx, %bx");
+//		current_dis_pos = 7;
+//	}
     int t = in_byte(0x1F7);
     inform_int(TASK_HD);
 }

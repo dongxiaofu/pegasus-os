@@ -14,6 +14,14 @@
 
 void u_thread_a();
 
+void stop_here()
+{
+	dis_pos = 0;
+	disp_str("[");
+	disp_int(test_ticks);
+	disp_str("]");
+}
+
 void catch_error(){
 	test_ticks++;
 	current_dis_pos = dis_pos;
@@ -181,6 +189,7 @@ void untar(const char *filename)
 //		   iobytes = -1;
  //           Memset(buf, 0, iobytes);
 //			Printf("Before read\n");
+			catch_error();
             bytes_read2 += read(fd, buf2, iobytes);
 //			bytes_read2 += iobytes;
 
@@ -575,7 +584,8 @@ void wait_exit()
 	int pid = fork();
 	//while(1){}
 	if(pid > 0){
-		int s;;
+		Printf("----------I am parent.\n");
+		int s;
 		wait(&s);
 		Printf("child main exit status %d\n", s);
 		while(1){}
@@ -588,6 +598,8 @@ void wait_exit()
 			}
 		}
 		Printf("I am child 0\n");
+		Printf("I am child 11\n");
+		Printf("I am child 12\n");
 		exit(90);
 		Printf("I am child 1\n");
 		while(1){}
@@ -617,14 +629,17 @@ void INIT_fork()
 //	asm ("xchgw %bx, %bx");
 //	Printf("pid = %d\n", pid);
 
+	//	asm ("xchgw %bx, %bx");
+
 	if(pid > 0){
-	Printf("pid0\n");
+	Printf("\pid = %d\n", pid);
 //		asm ("xchgw %bx, %bx");		
 //		while(1);
 //	delay(1);
 		j++;
 		char buf1[40] = "Parent.Nice to meet you!\n";
 		write(fd_stdout, buf1, Strlen(buf1));			
+		catch_error();
 		write(fd_stdout, buf1, Strlen(buf1));			
 		write(fd_stdout, buf1, Strlen(buf1));			
 //		while(1);
@@ -635,6 +650,7 @@ void INIT_fork()
 		//spin("parent\n");
 	}else{	
 //		asm ("xchgw %bx, %bx");		
+		Printf("\pid = %d\n", pid);
 		delay(1);
 		j++;		//	spin("child");
 		j += 2;
@@ -664,59 +680,61 @@ void simple_shell()
 	int fd_stdout = open(tty1, O_RDWR);
 	int fd_stdin = open(tty1, O_RDWR);
 	
-	char read_buf[128];
-	while(1){
-	Memset(read_buf, 0, 128);
-//	Printf("simple_shell Before read\n");
-	read(fd_stdout, read_buf, 128);
-	Printf("read_buf = %s\n", read_buf);
-
-	// 分割从终端读取的字符串
-	char *argv[10];
-//	Memset(argv, 0, 10);
-//	char argv[5][10];
+//	char read_buf[128];
+//	Memset(read_buf, 0, 128);
+////	Printf("simple_shell Before read\n");
+//	read(fd_stdout, read_buf, 128);
+//	Printf("read_buf = %s\n", read_buf);
+//
+//	// 分割从终端读取的字符串
+	char *argv[10] = {"echo", "hello"};
+////	Memset(argv, 0, 10);
+////	char argv[5][10];
 	int argc = 0;
-	int word = 0;
-	char *p = read_buf;
-	char *s;
-	char ch;
+//	int word = 0;
+//	char *p = read_buf;
+//	char *s;
+//	char ch;
 
-	do{
-		ch = *p;
-		if((*p != ' ' && *p != 0) && word == 0){
-			s = p;
-			word = 1;
-		}
+//	do{
+//		ch = *p;
+//		if((*p != ' ' && *p != 0) && word == 0){
+//			s = p;
+//			word = 1;
+//		}
+//
+//		if((*p == ' ' || *p == 0) && word == 1){
+////			int index = argc++;
+////			Memset(argv[index], 0, sizeof(argv[index]));
+////			argv[index] = s;
+//			argv[argc++] = s;
+////			Printf("argc[%d] = %s\n", argc-1, argv + (argc-1) * 4);
+//			*p = 0;
+//			word = 0;
+//		}
+//
+//		p++;
+//	}while(ch);
 
-		if((*p == ' ' || *p == 0) && word == 1){
-//			int index = argc++;
-//			Memset(argv[index], 0, sizeof(argv[index]));
-//			argv[index] = s;
-			argv[argc++] = s;
-			//Printf("argc[%d] = %s\n", argc-1, argc[argc-1]);
-			*p = 0;
-		//	Printf("argv[%d] = %s\n", argc-1, argv[argc-1]);
-			word = 0;
-		}
-
-		p++;
-	}while(ch);
-	// argv[argc] = s;
-	argv[argc] = 0;
-	
+	asm ("xchgw %bx, %bx");
 	int i = -1;
+	// argv[argc] = s;
+	argc = 2;
+	argv[argc] = 0;
 //	while(argv[++i]){
 //		Printf("argv[%d] = %s\n", i, argv[i]);
 //	}
 //	// int fd = open(argv[0], O_RDWR);
 //	argv[0][5] = 0;
 //	Printf("argv2[0] = %s\n", argv[0]);
+	assert(argv[0] != 0x0);
 	int fd = open(argv[0], O_RDWR);
 //	char file[5] = "echo";
 //	int fd = open(file, O_RDWR);
 //	int fd = open("echo", O_RDWR);
 //	int fd = 2;
 		//	Printf("simple shell start3\n");
+	asm ("xchgw %bx, %bx");
 	if(fd == -1){
 		for(int i = 0; i < 6; i++){
 			Printf("%x:%x\n", i, argv[0][i]);
@@ -724,9 +742,10 @@ void simple_shell()
 		Printf("{%s}\n", argv[0]);
 	}else{
 		// 实现shell	
-//			Printf("simple shell start4\n");
+			Printf("simple shell start4\n");
 		int pid = fork();
-//		Printf("simple shell start5\n");
+		Printf("simple shell start5\n");
+		asm ("xchgw %bx, %bx");
 		//return;
 		if(pid > 0){
 			int s;
@@ -735,8 +754,11 @@ void simple_shell()
 		}else{
 			Printf("=======simple shell start2\n");
 			close(fd);
+		asm ("xchgw %bx, %bx");
 //			exit(5);
-			execv(argv[0], argv);	
+//			execv(argv[0], argv);	
+			execl("/echo", "echo", "hello", 0);
+		asm ("xchgw %bx, %bx");
 			while(1){}
 	//		char *s1 = "echo";
 	//		char *s2 = "hello";
@@ -746,8 +768,6 @@ void simple_shell()
 	//		execv("echo", argv);	
 	//		exit(5);
 		}
-	}
-
 	}
 }
 
@@ -836,7 +856,7 @@ void test_exec()
 	char filename[20] = "install.tar";
 	untar(filename);
 	execl("/echo", "echo", "hello",  "world", "Jim", 0);
-	while(1){};
+	stop_here();
 
 	int pid = fork();
 	if(pid > 0){
@@ -1233,6 +1253,20 @@ void assertion_failure(char *exp, char *filename, char *base_filename, unsigned 
     return;
 }
 
+void assertion_failure2(char *exp, unsigned int flag, char *filename, char *base_filename, unsigned int line)
+{
+    // todo %d还未实现或者有问题。
+    printx("%c%s flag = [%d], error in file [%s],base_file [%s],line [%d]\n\n",
+           //Printf("%c%s error in file [%s],base_file [%s],line [%d]\n\n",
+           ASSERT_MAGIC, exp, flag, filename, base_filename, line);
+	dis_pos = 0;
+	disp_str("[");
+	disp_int(test_ticks);
+	disp_str("]");
+    spin("Stop Here!\n");
+    return;
+}
+
 // debug end
 
 // ipc start
@@ -1287,6 +1321,13 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 	if(receiver == 0x0){
 		assert(receiver != 0x0);
 	}
+	
+	assert2(receiver->p_flag == RUNNING || receiver->p_flag == SENDING || receiver->p_flag == RECEIVING \
+		|| receiver->p_flag == HANGING || receiver->p_flag == WAITING, receiver->p_flag);
+
+	assert2(sender->p_flag == RUNNING || sender->p_flag == SENDING || sender->p_flag == RECEIVING \
+        || sender->p_flag == HANGING || sender->p_flag == WAITING, sender->p_flag);
+
     int sender_pid = proc2pid(sender);
 	unsigned int msg_size = sizeof(Message);
 	unsigned int msg_vaddr = (unsigned int)msg;
@@ -1318,7 +1359,6 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 		unsigned int p_msg_phy_addr = get_physical_address_proc(p_msg_vaddr, receiver_pid);
         // int msg_line_addr2 = base2 + (int)(receiver->p_msg);
         int msg_line_addr2 = alloc_virtual_memory(p_msg_phy_addr, msg_size);
-		catch_error();
         // 从sender中把消息复制到receiver
         //    phycopy(receiver->p_msg, msg_line_addr, msg_size);
         phycopy(msg_line_addr2, msg_line_addr, msg_size);
@@ -1406,6 +1446,14 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
 		assert(sender->stack_magic == STACK_MAGIC);
 	}
 	assert(receiver->stack_magic == STACK_MAGIC);
+
+	assert2(receiver->p_flag == RUNNING || receiver->p_flag == SENDING || receiver->p_flag == RECEIVING \
+		|| receiver->p_flag == HANGING || receiver->p_flag == WAITING, receiver->p_flag);
+
+	if(sender != 0){
+		assert2(sender->p_flag == RUNNING || sender->p_flag == SENDING || sender->p_flag == RECEIVING \
+        	|| sender->p_flag == HANGING || sender->p_flag == WAITING, sender->p_flag);
+	}
 
     int receiver_pid = proc2pid(receiver);
 
@@ -1541,7 +1589,7 @@ int sys_receive_msg(Message *msg, int sender_pid, Proc *receiver)
             receiver->p_receive_from = sender_pid;
         }
 
-        assert(receiver->p_flag == RECEIVING);
+        assert2(receiver->p_flag == RECEIVING, receiver->p_flag);
 
         block(receiver);
     }

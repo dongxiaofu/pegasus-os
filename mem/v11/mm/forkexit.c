@@ -46,6 +46,8 @@ void do_exit(Message *msg, int exit_code)
     // 处理caller
     int parent_pid = proc->parent_pid;
 	Proc *parent_proc = pid2proc(parent_pid);
+	// TODO 没有父进程怎么处理？
+	if(parent_proc == 0x0)	return;
 	proc->exit_status = msg->STATUS;
     if (parent_proc->wait_status == WAITING)
     {

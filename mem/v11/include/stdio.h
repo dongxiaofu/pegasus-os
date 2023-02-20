@@ -18,6 +18,8 @@ void assertion_failure(char *exp, char *filename, char *base_filename, unsigned 
 #define assert(exp)  if(exp) ; \
 	else assertion_failure(#exp, __FILE__, __BASE_FILE__, __LINE__)
 
+#define assert2(exp, arg)  if(exp) ; \
+	else assertion_failure2(#exp, arg, __FILE__, __BASE_FILE__, __LINE__)
 
 
 char* i2a(int val, int base, char ** ps);

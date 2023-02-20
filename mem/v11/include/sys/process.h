@@ -55,6 +55,7 @@ typedef struct _thread_stack
 	thread_function func_name;
 	void *func_arg;
 	unsigned int privilege;
+	unsigned int init_ticks;
 	unsigned int pcb_addr;
 	Func eip;
 	//void (*eip)(void *);
@@ -72,8 +73,11 @@ typedef struct proc{
 		unsigned int user_virtual_memory_address;
 		mem_block_desc mem_block_desc_array[MEM_BLOCK_DESC_KIND_NUM];
 //		ListElement tag;
-		char tag[8];
-		char all_tag[8];
+//		char tag[8];
+//		char all_tag[8];
+// 		不能像这样写。报错，原因未知。
+//		unsigned int tag;
+//		unsigned int all_tag;
         // ldt选择子
         unsigned short ldt_selector;
         // ldt
@@ -81,6 +85,7 @@ typedef struct proc{
         unsigned int pid;
         // 进程剩余可用的时钟中断次数
         unsigned int ticks;
+		unsigned int init_ticks;
         // 进程优先级
         unsigned int priority;
         // 本进程使用哪个tty，tty_table的索引
@@ -108,6 +113,8 @@ typedef struct proc{
 	int exit_status;	// wait、exit系列中的退出状态码
 	
         // ipc end
+		char tag[10];
+		char all_tag[10];
         
 		// 为了兼容，先保留这个成员。
 		Regs s_reg;

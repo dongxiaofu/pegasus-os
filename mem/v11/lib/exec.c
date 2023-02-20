@@ -48,8 +48,10 @@ int execv(const char *pathname, char **argv) {
     // char *p = argv;
     // 必须使用类型转换。
 //    char arg_stack[PROC_STACK_SIZE];
-	char *arg_stack = sys_malloc(PROC_STACK_SIZE);
-	Memset(arg_stack, 0, PROC_STACK_SIZE);
+	unsigned int proc_stack_size = 256;
+	char *arg_stack = sys_malloc(proc_stack_size);
+	asm ("xchgw %bx, %bx");
+	Memset(arg_stack, 0, proc_stack_size);
     char **p = (char **) argv;
     int len = 0;
     while (*p) {

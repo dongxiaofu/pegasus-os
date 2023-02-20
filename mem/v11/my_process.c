@@ -30,7 +30,7 @@ VirtualMemoryAddress *create_user_process_address_space()
 	return space;
 }
 
-void user_process(Func func, void *arg, unsigned int privilege)
+void user_process(Func func, void *arg, unsigned int privilege, unsigned int init_ticks)
 {
 	unsigned short es;	// = 0x49;
 	// unsigned short cs = 0x50;
@@ -61,6 +61,7 @@ void user_process(Func func, void *arg, unsigned int privilege)
 //	gdt_index++;
 
 	Proc *process = (Proc *)get_running_thread_pcb();
+	process->init_ticks = process->ticks = init_ticks;
 	process->stack = (unsigned int *)((unsigned int)process + PAGE_SIZE);
 	// 费了很大劲才找出的错误。
 	// process->stack -= sizeof(Regs);
@@ -95,7 +96,7 @@ Proc *clone_pcb(Proc *parent_process)
 	// Memcpy(process, parent_process, sizeof(Proc));
 	Memcpy(process, parent_process, PAGE_SIZE);
 
-	process->pid = ++pid;
+	process->pid = fork_pid++;
 	process->parent_pid = parent_process->pid;
 //	unsigned int stack_offset = (unsigned int)(parent_process + PAGE_SIZE) - (unsigned int)parent_process->stack;
 //	process->stack = (unsigned int)(process + PAGE_SIZE) - stack_offset;
@@ -243,18 +244,21 @@ Proc *fork_process(unsigned int parent_pid)
 
 	// 加入链表，在调度模块中处理
 //	if(child_process->p_flag == RUNNING){
-		Memset(&child_process->tag, 0, sizeof(child_process->tag));
+	//	Memset(&child_process->tag, 0, sizeof(child_process->tag));
+//		Memset(&child_process->tag, 0, 64);
 //		appendToDoubleLinkList(&pcb_list, (ListElement *)(&child_process->tag));	
 //	}
 
-	Memset(&child_process->all_tag, 0, sizeof(child_process->all_tag));
+	// TODO 危害极大、非常隐蔽的错误。
+	// Memset(&child_process->all_tag, 0, sizeof(child_process->all_tag));
+//	Memset(&child_process->all_tag, 0, 64);
 	appendToDoubleLinkList(&all_pcb_list, (ListElement *)(&child_process->all_tag));	
 
 	// 在函数返回前，这个新创建的进程会被调度到吗？
 	return child_process;
 }
 
-void process_execute(Func func, char *thread_arg, char *process_name, unsigned int privilege)
+void process_execute(Func func, char *thread_arg, char *process_name, unsigned int privilege, unsigned int init_ticks)
 {
 	Proc *process = thread_init();
 	thread_create(process);
@@ -283,6 +287,7 @@ void process_execute(Func func, char *thread_arg, char *process_name, unsigned i
 	thread_stack->func_name = func;
 	thread_stack->func_arg = thread_arg;
 	thread_stack->privilege = privilege;
+	thread_stack->init_ticks = init_ticks;
 	thread_stack->pcb_addr = (unsigned int)process;
 	thread_stack->ebp = thread_stack->ebx = thread_stack->edi = thread_stack->esi = 0;
 	if(isListEmpty(&pcb_list) == 1){

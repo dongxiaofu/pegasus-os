@@ -338,7 +338,7 @@ hwint0:
 .2:
 ;	push 0x100000
 ;	call update_cr3
-	;sti
+	sti
 	call clock_handler
 	;mov al, 11111000b
 	;out 21h, al
@@ -382,7 +382,7 @@ hwint1:
 .1:
 	;mov esp, StackTop
 .2:
-	;sti	
+	sti	
 	;inc dword [k_reenter]
 	; 中间代码
 	;mov esp, StackTop
@@ -442,7 +442,7 @@ hwint14:
 .1:
 	;mov esp, StackTop
 .2:
-	;sti	
+	sti	
 	; 调用硬盘中断
 	;call hd_handle
 	call hd_handler
@@ -495,7 +495,7 @@ sys_call:
 .1:
 ;	mov esp, StackTop 
 .2:
-	;sti
+	sti
 	;inc dword [k_reenter]
 	; 中间代码
 	; 需要切换到内核栈吗？
@@ -566,6 +566,7 @@ sys_call:
 ; 启动子进程时使用
 fork_restart:
 	cli
+	dec dword [k_reenter]
 	; 修改tss.esp0
 ;	mov eax, esp
 ;	and eax, 0xFFFFF000
@@ -593,6 +594,7 @@ restart:
 	;lldt [proc_table + 64]
 	;lldt [proc_table + 68]
 	; 不能放到前面
+	cli
 	dec dword [k_reenter]
 	mov ebp, esp
 	mov esp, [ebp+4]
@@ -637,6 +639,7 @@ restore:
 	;lea eax, [esp + 68]
 	;mov dword [tss + 4], ebp
 reenter_restore:
+	cli
 	dec dword [k_reenter]
 	; 出栈 	
 	pop gs

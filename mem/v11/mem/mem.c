@@ -271,7 +271,7 @@ unsigned int alloc_virtual_memory(unsigned int phy_addr, unsigned int size)
 	int page_cnt = ROUND_UP(new_size, PAGE_SIZE);
 	MEMORY_POOL_TYPE pool_type;	
 	Proc *proc = (Proc *)get_running_thread_pcb();
-	if(proc->page_directory == 0x0){
+	if(proc->page_directory == MAIN_THREAD_PAGE_DIRECTORY){
 		pool_type = KERNEL;
 	}else{
 		pool_type = USER;
@@ -431,7 +431,7 @@ unsigned int sys_malloc2(unsigned int size)
 	mem_block_desc *desc_array;
 
 	Proc *current_thread = (Proc *)get_running_thread_pcb();
-	if(current_thread->page_directory == 0x0){
+	if(current_thread->page_directory == MAIN_THREAD_PAGE_DIRECTORY){
 		pool_type = KERNEL;
 		desc_array = kernel_mem_block_decs_array;
 	}else{
@@ -562,7 +562,7 @@ void sys_free2(unsigned int addr, unsigned int size)
 //		dis_pos = 0;
 //	}
 
-	if(current_thread->page_directory == 0x0){
+	if(current_thread->page_directory == MAIN_THREAD_PAGE_DIRECTORY){
 		pool_type = KERNEL;
 		desc_array = kernel_mem_block_decs_array;
 	}else{
