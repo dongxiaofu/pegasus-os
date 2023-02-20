@@ -85,13 +85,14 @@ void init()
 	initDoubleLinkList(&pcb_list);
 	initDoubleLinkList(&all_pcb_list);
 
+	// 用下面的代码清屏，不晓得为啥没效果。已经在boot.asm用汇编代码清屏了。
 	// 清屏
-	dis_pos = 0;
-	for(int i = 0; i < 80*25*2; i++){
-		disp_str("");
-	}
-
-	dis_pos = 0;
+//	dis_pos = 0;
+//	for(int i = 0; i < 80*25*4; i++){
+//		disp_str("");
+//	}
+//
+//	dis_pos = 0;
 }
 
 void kernel_thread_a(void *msg)
@@ -135,16 +136,11 @@ void user_proc_a()
 	disp_str("I am user_proc_a\n");
 //	wait_exit();
 //	test_exec();
-	test_shell();
+//	test_shell();
 //	INIT_fork();
-//	TestTTY();
+	TestTTY();
 //	TestFS();
-	while(1){
-		dis_pos = 0;
-		disp_str("[");
-		disp_int(test_ticks);
-		disp_str("]");
-	}
+	stop_here();
 }
 
  void user_proc_b()

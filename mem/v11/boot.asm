@@ -29,6 +29,19 @@ LABEL_START:
 	xchg bx, bx
 	mov ax,	0B800h
 	mov gs,	ax
+
+	; 清屏
+	mov ah,0x06
+	mov al,0   ;清窗口
+
+	mov ch,0   ;左上角的行号
+	mov cl,0   ;左上角的列号
+	mov dh,25  ;右下角的行号
+	mov dl,80  ;右下角的行号
+	;mov bh,0x17;属性为蓝底白字
+	mov bl,0x7;属性为黑底白字
+	int 0x10
+
 	;;;;;;;;;;;;xhcg; bx, bx	
 	mov ax, BaseOfLoader
 	mov es, ax
