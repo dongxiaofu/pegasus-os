@@ -48,7 +48,7 @@ void kernel_main()
 	process_execute(TaskHD, "task_hd\n", "TaskHD", 0, init_ticks);
 	process_execute(TaskTTY, "task_tty\n", "TaskTTY", 0, init_ticks);
 	process_execute(user_proc_a, "user_proc_a\n", "process_a", 1, init_ticks - 2);
-//	process_execute(user_proc_b, "user_proc_b\n", "process_b", 1);
+	process_execute(user_proc_b, "user_proc_b\n", "process_b", 1, init_ticks - 3);
 
 //	enable_int();
 //	thread_start(kernel_thread_a, "thread a\n");
@@ -133,18 +133,18 @@ void kernel_thread_d(void *msg)
 
 void user_proc_a()
 {
-	disp_str("I am user_proc_a\n");
+	disp_str("-------------I am user_proc_a\n");
 //	wait_exit();
 //	test_exec();
 //	test_shell();
 //	INIT_fork();
-	TestTTY();
-//	TestFS();
-	stop_here();
+//	TestTTY();
+	TestFS();
+	while(1);
 }
 
  void user_proc_b()
  {
- 	disp_str("I am user_proc_b\n");
+ 	disp_str("\n-------------I am user_proc_b\n");
  	while(1);
  }

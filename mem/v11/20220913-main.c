@@ -469,13 +469,13 @@ void init_keyboard()
     keyboard_buffer.counter = 0;
     // 初始键盘中断例程
     //init_keyboard_handler();
-    dis_pos = 0;
-    // 清屏
-    for (int i = 0; i < 80 * 25 * 2; i++)
-    {
-     //   disp_str(" ");
-    }
-    dis_pos = 0;
+//    dis_pos = 0;
+//    // 清屏
+//    for (int i = 0; i < 80 * 25 * 2; i++)
+//    {
+//     //   disp_str(" ");
+//    }
+//    dis_pos = 0;
 
     init_keyboard_handler();
 
