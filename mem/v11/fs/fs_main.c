@@ -500,6 +500,7 @@ int do_open(Message *msg)
     file_desc_table[j].pos = 0;
     // mode怎么设置？
     file_desc_table[j].mode = 0;
+	file_desc_table[j].fd_cnt = file_desc_table[j].fd_cnt + 1;
 
     int fd = i;
 

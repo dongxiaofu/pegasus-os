@@ -510,20 +510,20 @@ void TestFS()
 {
 	disp_str("TestFS\n");
 	char tty1[10] = "dev_tty1";
-	asm ("xchgw %bx, %bx");		
+//	asm ("xchgw %bx, %bx");		
 	int fd_stdout = open(tty1, O_RDWR);
-	asm ("xchgw %bx, %bx");		
+//	asm ("xchgw %bx, %bx");		
 	int fd_stdin = open(tty1, O_RDWR);
-	asm ("xchgw %bx, %bx");		
+//	asm ("xchgw %bx, %bx");		
     Printf("TestA is running\n");
-	asm ("xchgw %bx, %bx");		
+//	asm ("xchgw %bx, %bx");		
 //	return;
     char filename[5] = "AC";
     char filename2[5] = "cAB";
     char filename3[10] = "INTERRUPT";
-	asm ("xchgw %bx, %bx");		
+//	asm ("xchgw %bx, %bx");		
     int flag = 1;
-	asm ("xchgw %bx, %bx");		
+//	asm ("xchgw %bx, %bx");		
     Printf("TestA is running again\n");
 //    while (1)
     {
@@ -534,22 +534,28 @@ void TestFS()
             flag = 0;
             char buf[20] = "cg:hello,world!";
             write(fd, buf, Strlen(buf));
+			close(fd);	
+            fd = open(filename, O_RDONLY);
             char buf2[20];
-		Memset(buf2, 0, 20);
+			Memset(buf2, 0, 20);
             int k = read(fd, buf2, 18);
-           Printf("buf2 = %s\n", buf2);
-	asm ("xchgw %bx, %bx");		
+           	Printf("buf2 = %s\n", buf2);
+
             delay(10);
             int fd2 = open(filename2, O_CREAT);
-           Printf("fd2 = %x\n", fd2);
+           	Printf("fd2 = %x\n", fd2);
             flag = 0;
-            char buf3[20] = "cg:how are you?";
+//            char buf3[20] = "cg:how are you?";
+			char buf3[200] = "Lots of us say that looks aren’t important and that it is shallow to judge based on looks, but the truth is that we’re all human beings, and human beings are all prejudiced. I believe we";
             write(fd2, buf3, Strlen(buf3));
-            char buf4[20];
-		Memset(buf4, 0, 20);
-            int k2 = read(fd2, buf4, 18);
+			close(fd2);
+			fd2 = open(filename2, O_RDONLY);
+            char buf4[200];
+			Memset(buf4, 0, 200);
+            int k2 = read(fd2, buf4, Strlen(buf3));
             Printf("buf4 = %s\n", buf4);
          //   delay(10);
+
             int fd3 = open(filename3, O_CREAT);
            Printf("fd2 = %x\n", fd2);
             flag = 0;
@@ -557,6 +563,8 @@ void TestFS()
             write(fd3, buf5, Strlen(buf5));
             char buf6[30];
 		for(int i = 0; i < 3; i++){
+			close(fd3);
+			fd3 = open(filename3, O_RDONLY);
 		Memset(buf6, 0, 30);
             int k3 = read(fd3, buf6, Strlen(buf5));
             Printf("buf6 = %s\n", buf6);
