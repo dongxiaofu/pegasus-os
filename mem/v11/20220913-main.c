@@ -506,6 +506,50 @@ void TestTTY()
 }
 
 // 测试文件系统
+void TestReadReturnValue()
+{
+	char *filename = "install.tar";
+    int fd = open(filename, O_RDONLY);
+//	Printf("Start to test read 1\n");
+    // 获取文件的长度
+    int file_size = 0;
+    char buf[SECTOR_SIZE];
+
+	int len = read(fd, buf, 203);
+
+	assert(len == 203);
+
+	close(fd);
+}
+
+// 测试write的返回值
+void TestWriteReturnValue()
+{
+	char *filename = "write_return";
+    int fd = open(filename, O_CREAT);
+	assert(fd != -1);
+    // 获取文件的长度
+    int file_size = 0;
+    char buf[SECTOR_SIZE];
+
+	char *str = "How are you today?I am fine.And you?I am fine too.";
+	Memcpy(buf, str, Strlen(str));
+
+	int len = write(fd, buf, 511);
+
+	assert(len == 203);
+
+	close(fd);
+}
+
+void TestFS2()
+{
+	// TestReadReturnValue();
+	// 测试write的返回值
+	TestWriteReturnValue();
+}
+
+// 测试文件系统
 void TestFS()
 {
 	disp_str("TestFS\n");

@@ -134,9 +134,10 @@ void kernel_thread_d(void *msg)
 void user_proc_a()
 {
 	disp_str("-------------I am user_proc_a\n");
+	TestFS2();
 //	wait_exit();
 //	test_exec();
-	test_shell();
+//	test_shell();
 //	INIT_fork();
 //	TestTTY();
 //	TestFS();
