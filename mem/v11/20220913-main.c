@@ -537,7 +537,7 @@ void TestWriteReturnValue()
 
 	int len = write(fd, buf, 511);
 
-	assert(len == 203);
+	assert(len == Strlen(str));
 
 	close(fd);
 }
