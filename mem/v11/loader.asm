@@ -116,6 +116,25 @@ org	0100h
 
 
 LABEL_START:
+	;调试mov中的标识符start
+	xchg bx, bx	
+	mov ax, 2
+	mov ax, 2
+	mov ax, 2
+	mov ax, YourAge
+	;非法
+	;mov YourAge, ax
+	mov ax, [YourAge]
+	mov ax, [YourAge + 20]
+	mov ax, YourMessage
+	;非法
+	;mov YourMessage, ax
+	mov ax, [YourMessage]
+	mov ax, 3
+	mov ax, 3
+	mov [YourAge], ax
+	mov [0x12345678], eax
+	;调试mov中的标识符end
 	mov	ax,	cs
 	mov	ds,	ax
 	;xchg bx, bx	
@@ -640,6 +659,14 @@ BaseOfLoader    equ     0x9000
 
 
 BaseOfLoaderPhyAddr	equ	BaseOfLoader * 10h	; LOADER.BIN 被加载到的位置 ---- 物理地址 (= BaseOfLoader * 10h)
+
+
+;调试mov中的标识符
+YourAge		equ		256
+
+YourMessage         db      'hello, world' 
+msglen          equ     $-YourMessage
+
 
 [SECTION .s32]
 
