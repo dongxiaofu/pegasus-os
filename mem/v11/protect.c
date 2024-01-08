@@ -68,12 +68,14 @@ unsigned int v2l(int pid, void *offset)
 void init_propt()
 {
     // 时钟中断
-    InitInterruptDesc(INIT_MASTER_VEC_NO + 0, hwint0, 0x08, 0x0E);
+   InitInterruptDesc(INIT_MASTER_VEC_NO + 0, hwint0, 0x08, 0x0E);
     // 键盘中断
     InitInterruptDesc(INIT_MASTER_VEC_NO + 1, hwint1, 0x08, 0x0E);
     // InitInterruptDesc(INIT_MASTER_VEC_NO + 1, hwint14, 0x08, 0x0E);
     // 硬盘中断
     InitInterruptDesc(INIT_SLAVE_VEC_NO + 6, hwint14, 0x08, 0x0E);
+	// 网络中断
+    InitInterruptDesc(INIT_SLAVE_VEC_NO + 2, hwint10, 0x08, 0x0E);
 
     // Memset(proc_table, 0, sizeof(proc_table));
     Memset(proc_table, 0, sizeof(Proc) * (TASK_PROC_NUM + USER_PROC_NUM));

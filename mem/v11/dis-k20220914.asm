@@ -37,8 +37,8 @@ c0001565:	6a 01                	push   $0x1
 c0001567:	6a 02                	push   $0x2
 c0001569:	6a 03                	push   $0x3
 c000156b:	f4                   	hlt    
-c000156c:	66 90                	xchg   %ax,%ax
-c000156e:	66 90                	xchg   %ax,%ax
+c000156c:	66 90                	;xchg   %ax,%ax
+c000156e:	66 90                	;xchg   %ax,%ax
 
 c0001570 <InterruptTest>:
 c0001570:	b4 0d                	mov    $0xd,%ah
@@ -1628,9 +1628,9 @@ c00025f0:	7c de                	jl     c00025d0 <is_empty+0xf>
 c00025f2:	b8 01 00 00 00       	mov    $0x1,%eax
 c00025f7:	c9                   	leave  
 c00025f8:	c3                   	ret    
-c00025f9:	66 90                	xchg   %ax,%ax
-c00025fb:	66 90                	xchg   %ax,%ax
-c00025fd:	66 90                	xchg   %ax,%ax
+c00025f9:	66 90                	;xchg   %ax,%ax
+c00025fb:	66 90                	;xchg   %ax,%ax
+c00025fd:	66 90                	;xchg   %ax,%ax
 c00025ff:	90                   	nop
 
 c0002600 <get_ticks>:
@@ -10627,10 +10627,10 @@ c0009622:	29 c2                	sub    %eax,%edx
 c0009624:	89 d0                	mov    %edx,%eax
 c0009626:	c9                   	leave  
 c0009627:	c3                   	ret    
-c0009628:	66 90                	xchg   %ax,%ax
-c000962a:	66 90                	xchg   %ax,%ax
-c000962c:	66 90                	xchg   %ax,%ax
-c000962e:	66 90                	xchg   %ax,%ax
+c0009628:	66 90                	;xchg   %ax,%ax
+c000962a:	66 90                	;xchg   %ax,%ax
+c000962c:	66 90                	;xchg   %ax,%ax
+c000962e:	66 90                	;xchg   %ax,%ax
 
 c0009630 <switch_to>:
 c0009630:	56                   	push   %esi

@@ -80,6 +80,11 @@ void init()
 	disp_str("init\n");
 	init_keyboard();
 	init_memory(64*1024*1024);
+	DriverInitialize();
+	//asm ("xchgw %bx, %bx");
+	DriverSend();
+	//asm ("xchgw %bx, %bx");
+	disp_str("DriverInitialize\n");
 
 	// 初始化PCB链表
 	initDoubleLinkList(&pcb_list);

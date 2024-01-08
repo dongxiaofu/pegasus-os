@@ -80,7 +80,7 @@ char isListEmpty(DoubleLinkList *list)
 //	unsigned int data;
 //	Memcpy(&data, ((unsigned int)(&(list->head))) + 4, 4);
 //	if(data == 12){
-//		asm ("xchgw %bx, %bx");
+//		//asm ("xchgw %bx, %bx");
 //	}
 	// return list->head->next == list->tail;
 	// if(list.head.next == &list.tail && list.tail.prev == &list.head){

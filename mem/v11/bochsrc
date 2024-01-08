@@ -19,8 +19,9 @@ ata0-master: type=disk, path="80m.img", mode=flat
 #ata0-slave: type=disk, path="80n.img", mode=flat
 
 # 配置网卡
-ne2k: enabled=1, mac=fe:fd:00:00:00:01, ethmod=slirp
+#ne2k: enabled=1, mac=fe:fd:00:00:00:01, ethmod=slirp
 
+ne2k: enabled=1, ioaddr=0x300, irq=10, mac=b0:c4:20:00:00:00, ethmod=slirp, ethdev=eth0
 
 # choose the boot disk.
 boot: a

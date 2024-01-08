@@ -9,6 +9,11 @@ enum intr_status {       // 中断状态
 #define EFLAGS_IF   0x00000200       // eflags寄存器中的if位为1
 #define GET_EFLAGS(EFLAG_VAR) asm volatile("pushfl; popl %0" : "=g" (EFLAG_VAR))
 
+void DriverInitialize();
+void DriverSend();
+void PCtoNIC();
+void NICtoPC();
+
 enum intr_status intr_enable();
 enum intr_status intr_disable(); 
 enum intr_status intr_set_status(enum intr_status status);
@@ -162,12 +167,14 @@ void in_process(TTY *tty, unsigned int key);
 void enable_8259A_casecade_irq();
 // 打开8259A的从片硬盘中断
 void enable_8259A_slave_winchester_irq();
+void enable_8259A_slave_net_irq();
 
 void inform_int(int task_nr);
 
 // 硬盘驱动
 void hd_handle(Message *msg);
 void hd_handler();
+void net_handler();
 // hd.c end
 
 // 进程A的进程体
@@ -220,6 +227,7 @@ void kernel_main();
 void hwint0();
 void hwint1();
 void hwint14();
+void hwint10();
 // 外部中断 end
 
 void update_cr3(unsigned int page_dir_table_phy_addr);

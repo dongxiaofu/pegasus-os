@@ -42,11 +42,11 @@ c000156f:	6a 01                	push   $0x1
 c0001571:	6a 02                	push   $0x2
 c0001573:	6a 03                	push   $0x3
 c0001575:	f4                   	hlt    
-c0001576:	66 90                	xchg   %ax,%ax
-c0001578:	66 90                	xchg   %ax,%ax
-c000157a:	66 90                	xchg   %ax,%ax
-c000157c:	66 90                	xchg   %ax,%ax
-c000157e:	66 90                	xchg   %ax,%ax
+c0001576:	66 90                	;xchg   %ax,%ax
+c0001578:	66 90                	;xchg   %ax,%ax
+c000157a:	66 90                	;xchg   %ax,%ax
+c000157c:	66 90                	;xchg   %ax,%ax
+c000157e:	66 90                	;xchg   %ax,%ax
 
 c0001580 <InterruptTest>:
 c0001580:	b4 0d                	mov    $0xd,%ah
@@ -1874,12 +1874,12 @@ c000291b:	7c de                	jl     c00028fb <is_empty+0xf>
 c000291d:	b8 01 00 00 00       	mov    $0x1,%eax
 c0002922:	c9                   	leave  
 c0002923:	c3                   	ret    
-c0002924:	66 90                	xchg   %ax,%ax
-c0002926:	66 90                	xchg   %ax,%ax
-c0002928:	66 90                	xchg   %ax,%ax
-c000292a:	66 90                	xchg   %ax,%ax
-c000292c:	66 90                	xchg   %ax,%ax
-c000292e:	66 90                	xchg   %ax,%ax
+c0002924:	66 90                	;xchg   %ax,%ax
+c0002926:	66 90                	;xchg   %ax,%ax
+c0002928:	66 90                	;xchg   %ax,%ax
+c000292a:	66 90                	;xchg   %ax,%ax
+c000292c:	66 90                	;xchg   %ax,%ax
+c000292e:	66 90                	;xchg   %ax,%ax
 
 c0002930 <get_ticks>:
 c0002930:	b8 00 00 00 00       	mov    $0x0,%eax
@@ -9795,7 +9795,7 @@ c0008a5d:	83 c4 10             	add    $0x10,%esp
 c0008a60:	c7 45 be 64 65 76 5f 	movl   $0x5f766564,-0x42(%ebp)
 c0008a67:	c7 45 c2 74 74 79 31 	movl   $0x31797474,-0x3e(%ebp)
 c0008a6e:	66 c7 45 c6 00 00    	movw   $0x0,-0x3a(%ebp)
-c0008a74:	66 87 db             	xchg   %bx,%bx
+c0008a74:	66 87 db             	;xchg   %bx,%bx
 c0008a77:	83 ec 08             	sub    $0x8,%esp
 c0008a7a:	6a 02                	push   $0x2
 c0008a7c:	8d 45 be             	lea    -0x42(%ebp),%eax
@@ -9803,7 +9803,7 @@ c0008a7f:	50                   	push   %eax
 c0008a80:	e8 e0 d6 ff ff       	call   c0006165 <open>
 c0008a85:	83 c4 10             	add    $0x10,%esp
 c0008a88:	89 45 f0             	mov    %eax,-0x10(%ebp)
-c0008a8b:	66 87 db             	xchg   %bx,%bx
+c0008a8b:	66 87 db             	;xchg   %bx,%bx
 c0008a8e:	83 ec 08             	sub    $0x8,%esp
 c0008a91:	6a 02                	push   $0x2
 c0008a93:	8d 45 be             	lea    -0x42(%ebp),%eax
@@ -9811,12 +9811,12 @@ c0008a96:	50                   	push   %eax
 c0008a97:	e8 c9 d6 ff ff       	call   c0006165 <open>
 c0008a9c:	83 c4 10             	add    $0x10,%esp
 c0008a9f:	89 45 ec             	mov    %eax,-0x14(%ebp)
-c0008aa2:	66 87 db             	xchg   %bx,%bx
+c0008aa2:	66 87 db             	;xchg   %bx,%bx
 c0008aa5:	83 ec 0c             	sub    $0xc,%esp
 c0008aa8:	68 81 bc 00 c0       	push   $0xc000bc81
 c0008aad:	e8 73 0d 00 00       	call   c0009825 <Printf>
 c0008ab2:	83 c4 10             	add    $0x10,%esp
-c0008ab5:	66 87 db             	xchg   %bx,%bx
+c0008ab5:	66 87 db             	;xchg   %bx,%bx
 c0008ab8:	c7 45 b9 41 43 00 00 	movl   $0x4341,-0x47(%ebp)
 c0008abf:	c6 45 bd 00          	movb   $0x0,-0x43(%ebp)
 c0008ac3:	c7 45 b4 63 41 42 00 	movl   $0x424163,-0x4c(%ebp)
@@ -9824,9 +9824,9 @@ c0008aca:	c6 45 b8 00          	movb   $0x0,-0x48(%ebp)
 c0008ace:	c7 45 aa 49 4e 54 45 	movl   $0x45544e49,-0x56(%ebp)
 c0008ad5:	c7 45 ae 52 52 55 50 	movl   $0x50555252,-0x52(%ebp)
 c0008adc:	66 c7 45 b2 54 00    	movw   $0x54,-0x4e(%ebp)
-c0008ae2:	66 87 db             	xchg   %bx,%bx
+c0008ae2:	66 87 db             	;xchg   %bx,%bx
 c0008ae5:	c7 45 e8 01 00 00 00 	movl   $0x1,-0x18(%ebp)
-c0008aec:	66 87 db             	xchg   %bx,%bx
+c0008aec:	66 87 db             	;xchg   %bx,%bx
 c0008aef:	83 ec 0c             	sub    $0xc,%esp
 c0008af2:	68 a5 bc 00 c0       	push   $0xc000bca5
 c0008af7:	e8 29 0d 00 00       	call   c0009825 <Printf>
@@ -9884,7 +9884,7 @@ c0008bac:	50                   	push   %eax
 c0008bad:	68 c6 bc 00 c0       	push   $0xc000bcc6
 c0008bb2:	e8 6e 0c 00 00       	call   c0009825 <Printf>
 c0008bb7:	83 c4 10             	add    $0x10,%esp
-c0008bba:	66 87 db             	xchg   %bx,%bx
+c0008bba:	66 87 db             	;xchg   %bx,%bx
 c0008bbd:	83 ec 0c             	sub    $0xc,%esp
 c0008bc0:	6a 0a                	push   $0xa
 c0008bc2:	e8 2a 0b 00 00       	call   c00096f1 <delay>
@@ -10190,7 +10190,7 @@ c0008ff5:	83 c4 10             	add    $0x10,%esp
 c0008ff8:	c7 45 ec 00 00 00 00 	movl   $0x0,-0x14(%ebp)
 c0008fff:	e8 81 d3 ff ff       	call   c0006385 <fork>
 c0009004:	89 45 e8             	mov    %eax,-0x18(%ebp)
-c0009007:	66 87 db             	xchg   %bx,%bx
+c0009007:	66 87 db             	;xchg   %bx,%bx
 c000900a:	83 ec 0c             	sub    $0xc,%esp
 c000900d:	6a 01                	push   $0x1
 c000900f:	e8 dd 06 00 00       	call   c00096f1 <delay>
@@ -10265,7 +10265,7 @@ c0009125:	c7 45 a6 00 00 00 00 	movl   $0x0,-0x5a(%ebp)
 c000912c:	c7 45 aa 00 00 00 00 	movl   $0x0,-0x56(%ebp)
 c0009133:	c7 45 ae 00 00 00 00 	movl   $0x0,-0x52(%ebp)
 c000913a:	c7 45 b2 00 00 00 00 	movl   $0x0,-0x4e(%ebp)
-c0009141:	66 87 db             	xchg   %bx,%bx
+c0009141:	66 87 db             	;xchg   %bx,%bx
 c0009144:	83 ec 0c             	sub    $0xc,%esp
 c0009147:	8d 45 8e             	lea    -0x72(%ebp),%eax
 c000914a:	50                   	push   %eax
@@ -12615,7 +12615,7 @@ c000af28:	83 c4 10             	add    $0x10,%esp
 c000af2b:	90                   	nop
 c000af2c:	c9                   	leave  
 c000af2d:	c3                   	ret    
-c000af2e:	66 90                	xchg   %ax,%ax
+c000af2e:	66 90                	;xchg   %ax,%ax
 
 c000af30 <switch_to>:
 c000af30:	56                   	push   %esi

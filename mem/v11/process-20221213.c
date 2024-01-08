@@ -158,7 +158,7 @@ _start_switch:
 	if(next->pid == 6){
 		int a = 8;
 		int k = a;
-		// asm ("xchgw %bx, %bx");
+		// //asm ("xchgw %bx, %bx");
 	}
 
 
@@ -167,7 +167,7 @@ _start_switch:
 //	int page_directory = 0x100000;
 	if(next->page_directory != 0x0){
 //		disp_str("update_tss\n");
-    	// asm ("xchgw %bx, %bx");
+    	// //asm ("xchgw %bx, %bx");
 		update_tss((unsigned int)next + PAGE_SIZE);
 		// update_tss((unsigned int)next);
 //		disp_str("update_cr3\n");
@@ -183,7 +183,7 @@ _start_switch:
 	proc_ready_table = next;	
 
 	if(next->pid == 6 && next->parent_pid == 5){
-//    	asm ("xchgw %bx, %bx");
+//    	//asm ("xchgw %bx, %bx");
     	// next = pid2proc(next->parent_pid);
 	}
 

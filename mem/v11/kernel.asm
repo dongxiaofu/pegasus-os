@@ -75,6 +75,7 @@ global hwint0
 global hwint1
 ; 硬盘中断
 global hwint14
+global hwint15
 
 ; 打开8259A的级联中断
 global enable_8259A_casecade_irq
@@ -84,6 +85,8 @@ global disable_8259A_casecade_irq
 global enable_8259A_slave_winchester_irq
 ; 关闭8259A的从片的硬盘中断
 global disable_8259A_slave_winchester_irq
+; 打开8259A的从片的网络中断
+global enable_8259A_slave_net_irq:
 
 ; 中断例程
 InterruptTest:
@@ -443,6 +446,60 @@ hwint14:
 	jne reenter_restore
 	jmp restore
 
+; 网络中断
+hwint15:
+	; 建立快照
+	pushad
+	push ds
+	push es
+	push fs
+	push gs
+
+	mov dx, ss
+	mov ds, dx
+	mov es, dx
+	mov fs, dx
+
+
+	; 禁用硬盘中断
+	;call disable_8259A_slave_winchester_irq
+	mov al, 11111111b
+	out 0xA1, al	
+
+	; master置EOI位 start
+	;mov al, 20h
+	mov al, 0x20
+	out 0x20, al	
+	; master置EOI位 end
+	nop
+
+	; slave置EOI位 start
+	;mov al, A0h ; symbol `A0h' not defined
+	;mov al, 0xA0
+	out 0xA0, al	
+	; slave置EOI位 end
+
+	inc dword [k_reenter]
+	cmp dword [k_reenter], 0
+	jne .2
+.1:
+	mov esp, StackTop
+.2:
+	sti	
+	; 调用硬盘中断
+	;call hd_handle
+	;call hd_handler
+	
+	;cli
+	; 打开网络中断
+	;call enable_8259A_slave_winchester_irq
+	mov al, 00111111b
+	out 0xA1, al	
+
+	cli
+	cmp dword [k_reenter], 0
+	jne reenter_restore
+	jmp restore
 
 %macro hwint_slave 1
 	push %1
@@ -472,7 +529,7 @@ sys_call:
 	mov es, dx	
 	mov fs, dx
 	
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	inc dword [k_reenter]
 	cmp dword [k_reenter], 0
 	jne .2
@@ -490,7 +547,7 @@ sys_call:
 	push dword [proc_ready_table]
 	push ebx
 	push ecx
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	call [sys_call_table + 4 * eax]
 	; 修改请求系统调用的进程的进程表中的堆栈
 	; 获取堆栈中的eax是个难题：
@@ -503,7 +560,7 @@ sys_call:
 	mov [esi + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
 	;pop esi
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	;cli
 	; 恢复进程。不能使用restart，因为，不能使用proc_ready_table
 	; jmp restart	
@@ -606,9 +663,9 @@ reenter_restore:
 	pop es
 	pop ds
 
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	popad
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	iretd
 
 in_byte:
@@ -826,6 +883,17 @@ disable_8259A_slave_winchester_irq:
 	in al, 0xA1
 	or al, 1 << 6	
 	;and al, 1 << 6	
+	out 0xA1, al
+
+	popf; ax
+	ret
+
+enable_8259A_slave_net_irq:
+	pushf; ax
+	cli
+	in al, 0xA1
+	;or al, ~(1<<6)
+	and al, ~(1<<7)
 	out 0xA1, al
 
 	popf; ax

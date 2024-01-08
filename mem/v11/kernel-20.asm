@@ -35,6 +35,7 @@ extern disp_int
 extern keyboard_handler
 extern hd_handle
 extern hd_handler
+extern net_handler
 
 global disp_str
 global disp_str_colour
@@ -77,6 +78,8 @@ global hwint0
 global hwint1
 ; 硬盘中断
 global hwint14
+; 网络中断
+global hwint10
 
 ; 打开8259A的级联中断
 global enable_8259A_casecade_irq
@@ -86,6 +89,7 @@ global disable_8259A_casecade_irq
 global enable_8259A_slave_winchester_irq
 ; 关闭8259A的从片的硬盘中断
 global disable_8259A_slave_winchester_irq
+global enable_8259A_slave_net_irq
 
 global update_cr3
 global update_tss
@@ -264,7 +268,7 @@ stack_exception_fault:
 	push 12
 	jmp exception
 general_protection_exception_fault:
-	;xchg bx, bx
+	;;xchg bx, bx
 	push 13
 	call exception_handler
 	add esp, 4 * 2 
@@ -458,6 +462,61 @@ hwint14:
 	jne reenter_restore
 	jmp restore
 
+; 网络中断
+hwint10:
+	; 建立快照
+	pushad
+	push ds
+	push es
+	push fs
+	push gs
+
+	mov dx, ss
+	mov ds, dx
+	mov es, dx
+	mov fs, dx
+
+
+	; 禁用网卡中断
+	;call disable_8259A_slave_winchester_irq
+	mov al, 11111111b
+	out 0xA1, al	
+
+	; master置EOI位 start
+	;mov al, 20h
+	mov al, 0x20
+	out 0x20, al	
+	; master置EOI位 end
+	nop
+
+	; slave置EOI位 start
+	;mov al, A0h ; symbol `A0h' not defined
+	;mov al, 0xA0
+	out 0xA0, al	
+	; slave置EOI位 end
+
+	inc dword [k_reenter]
+	cmp dword [k_reenter], 0
+	jne .2
+.1:
+	;mov esp, StackTop
+.2:
+	sti	
+	; 调用网卡中断
+	;call hd_handle
+	call net_handler
+	
+	;cli
+	; 打开网卡中断
+	;call enable_8259A_slave_winchester_irq
+	mov al, 01111011b
+	out 0xA1, al	
+
+	;cli
+	cmp dword [k_reenter], 0
+	jne reenter_restore
+	jmp restore
+
 
 %macro hwint_slave 1
 	push %1
@@ -488,7 +547,7 @@ sys_call:
 	mov es, dx	
 	mov fs, dx
 	
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	inc dword [k_reenter]
 	cmp dword [k_reenter], 0
 	jne .2
@@ -506,7 +565,7 @@ sys_call:
 	push dword [proc_ready_table]
 	push ebx
 	push ecx
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	call [sys_call_table + 4 * eax]
 	; 修改请求系统调用的进程的进程表中的堆栈
 	; 获取堆栈中的eax是个难题：
@@ -520,7 +579,7 @@ sys_call:
 	mov [ebp + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
 	;pop esi
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	;cli
 	; 恢复进程。不能使用restart，因为，不能使用proc_ready_table
 	; jmp restart	
@@ -647,9 +706,9 @@ reenter_restore:
 	pop es
 	pop ds
 
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	popad
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	iretd
 
 in_byte:
@@ -904,7 +963,18 @@ get_running_thread_pcb:
 sys_call_test:
 	pushf
 
-	xchg bx, bx
+	;xchg bx, bx
 
 	popf
+	ret
+
+enable_8259A_slave_net_irq:
+	pushf; ax
+	cli
+	in al, 0xA1
+	;or al, ~(1<<6)
+	and al, ~(1<<7)
+	out 0xA1, al
+
+	popf; ax
 	ret

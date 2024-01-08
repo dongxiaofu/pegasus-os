@@ -25,7 +25,8 @@ OBJS	=	kernel_sub.o kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o glo
 		mm/main.o mm/exec.o mm/forkexit.o	\
 		mem/mem.o \
 		kernel_main_old.o my_process.o \
-		switch_to.o	double_link_list.o thread.o
+		switch_to.o	double_link_list.o thread.o \
+		ne2000.o
 	#	wait.o	exit.o	fork.o	unlink.o getpid.o
 
 LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
@@ -35,7 +36,8 @@ LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
 		mm/main.o mm/exec.o mm/forkexit.o \
 		mem/mem.o \
 		kernel_main_old.o my_process.o \
-		switch_to.o	double_link_list.o thread.o
+		switch_to.o	double_link_list.o thread.o \
+		ne2000.o
 
 LOBJS	=	lib/pegasus_crt.a
 
@@ -86,6 +88,12 @@ loader.bin:pmtest2.asm
 kernel.o:kernel-20.asm
 # kernel.o:kernel.asm
 	${ASM} ${ASKFLAGS} -o $@ $<
+
+ne2000.o:network/demo.asm
+	${ASM} ${ASKFLAGS} -o $@ $<
+
+#DriverSend.o:network/DriverSend.asm
+#	${ASM} ${ASKFLAGS} -o $@ $<
 
 kernel_sub.o:kernel_sub.asm
 	${ASM} ${ASKFLAGS} -o $@ $<

@@ -536,6 +536,14 @@ void hd_handler() {
     inform_int(TASK_HD);
 }
 
+void net_handler()
+{
+	Printf("net==== info primary part start:\n");
+	
+		asm ("xchgw %bx, %bx");
+
+}
+
 int waitfor(int mask, int val, int timeout) {
 //    int t = get_ticks_ipc();
 	int n = 0;

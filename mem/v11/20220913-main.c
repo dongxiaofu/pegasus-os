@@ -391,7 +391,7 @@ void exception_handler(unsigned int vec_no, unsigned int error_no, unsigned int 
     disp_str("\n\n");
 	disp_str("return from exception_handler\n");
 
-	// //asm ("xchgw %bx, %bx");
+	// ////asm ("xchgw %bx, %bx");
 //	if(vec_no == 14)	do_page_fault();
 	if(vec_no == 14){
 		unsigned int cr2;
@@ -411,7 +411,7 @@ void exception_handler(unsigned int vec_no, unsigned int error_no, unsigned int 
 	//asm volatile ("movl %%eax, 4(%%ebp)" : :"a"(eip));
 	//asm ("sti;");
 
-	//asm ("xchgw %bx, %bx");
+	////asm ("xchgw %bx, %bx");
     return;
 }
 
@@ -554,20 +554,20 @@ void TestFS()
 {
 	disp_str("TestFS\n");
 	char tty1[10] = "dev_tty1";
-//	asm ("xchgw %bx, %bx");		
+//	//asm ("xchgw %bx, %bx");		
 	int fd_stdout = open(tty1, O_RDWR);
-//	asm ("xchgw %bx, %bx");		
+//	//asm ("xchgw %bx, %bx");		
 	int fd_stdin = open(tty1, O_RDWR);
-//	asm ("xchgw %bx, %bx");		
+//	//asm ("xchgw %bx, %bx");		
     Printf("TestA is running\n");
-//	asm ("xchgw %bx, %bx");		
+//	//asm ("xchgw %bx, %bx");		
 //	return;
     char filename[5] = "AC";
     char filename2[5] = "cAB";
     char filename3[10] = "INTERRUPT";
-//	asm ("xchgw %bx, %bx");		
+//	//asm ("xchgw %bx, %bx");		
     int flag = 1;
-//	asm ("xchgw %bx, %bx");		
+//	//asm ("xchgw %bx, %bx");		
     Printf("TestA is running again\n");
 //    while (1)
     {
@@ -675,17 +675,17 @@ void INIT_fork()
 
 	int j = 0;
 	int pid = fork();
-//	asm ("xchgw %bx, %bx");		
+//	//asm ("xchgw %bx, %bx");		
 	delay(1);
 //	pid = 0;
-//	asm ("xchgw %bx, %bx");
+//	//asm ("xchgw %bx, %bx");
 //	Printf("pid = %d\n", pid);
 
-	//	asm ("xchgw %bx, %bx");
+	//	//asm ("xchgw %bx, %bx");
 
 	if(pid > 0){
 	Printf("\pid = %d\n", pid);
-//		asm ("xchgw %bx, %bx");		
+//		//asm ("xchgw %bx, %bx");		
 //		while(1);
 //	delay(1);
 		j++;
@@ -701,14 +701,14 @@ void INIT_fork()
 //		}
 		//spin("parent\n");
 	}else{	
-//		asm ("xchgw %bx, %bx");		
+//		//asm ("xchgw %bx, %bx");		
 		Printf("\pid = %d\n", pid);
 		delay(1);
 		j++;		//	spin("child");
 		j += 2;
 //		int fd2 = open("dev_tty0", O_RDWR);
 		char buf2[40] = "Child.See you again\n";
-//		asm ("xchgw %bx, %bx");		
+//		//asm ("xchgw %bx, %bx");		
 		write(fd_stdout, buf2, Strlen(buf2));			
 		write(fd_stdout, buf2, Strlen(buf2));			
 		write(fd_stdout, buf2, Strlen(buf2));			
@@ -768,7 +768,7 @@ void simple_shell()
 //		p++;
 //	}while(ch);
 
-	asm ("xchgw %bx, %bx");
+	//asm ("xchgw %bx, %bx");
 	int i = -1;
 	// argv[argc] = s;
 	argc = 2;
@@ -786,7 +786,7 @@ void simple_shell()
 //	int fd = open("echo", O_RDWR);
 //	int fd = 2;
 		//	Printf("simple shell start3\n");
-	asm ("xchgw %bx, %bx");
+	//asm ("xchgw %bx, %bx");
 	if(fd == -1){
 		for(int i = 0; i < 6; i++){
 			Printf("%x:%x\n", i, argv[0][i]);
@@ -797,7 +797,7 @@ void simple_shell()
 			Printf("simple shell start4\n");
 		int pid = fork();
 		Printf("simple shell start5\n");
-		asm ("xchgw %bx, %bx");
+		//asm ("xchgw %bx, %bx");
 		//return;
 		if(pid > 0){
 			int s;
@@ -806,11 +806,11 @@ void simple_shell()
 		}else{
 			Printf("=======simple shell start2\n");
 			close(fd);
-		asm ("xchgw %bx, %bx");
+		//asm ("xchgw %bx, %bx");
 //			exit(5);
 //			execv(argv[0], argv);	
 			execl("/echo", "echo", "hello", 0);
-		asm ("xchgw %bx, %bx");
+		//asm ("xchgw %bx, %bx");
 			while(1){}
 	//		char *s1 = "echo";
 	//		char *s2 = "hello";
@@ -881,7 +881,7 @@ void test_exec()
 ////	int k = 4;
 ////	if(test_ticks == 0x1F1A){
 ////		k = 2;
-////		asm ("xchgw %bx, %bx");
+////		//asm ("xchgw %bx, %bx");
 ////	}
 //	
 //	dis_pos = 0;
@@ -895,7 +895,7 @@ void test_exec()
 ////	int k = 4;
 ////	if(test_ticks == 0x1F1A){
 ////		k = 2;
-////		asm ("xchgw %bx, %bx");
+////		//asm ("xchgw %bx, %bx");
 ////		}
 //	}
 		disp_str("[");
@@ -934,11 +934,11 @@ void INIT()
 void TestA()
 {
 	disp_int(5);
-//	//asm ("xchgw %bx, %bx");
+//	////asm ("xchgw %bx, %bx");
 	disp_str("\n");
-//	//asm ("xchgw %bx, %bx");
+//	////asm ("xchgw %bx, %bx");
 	disp_str("TestA\n");
-//	//asm ("xchgw %bx, %bx");
+//	////asm ("xchgw %bx, %bx");
 	//asm ("sti");
 
 	while(1);
