@@ -58,6 +58,10 @@ EXTERN unsigned int fork_pid;
 EXTERN unsigned char is_init;
 EXTERN unsigned int gdt_index;
 
+EXTERN unsigned int net_data;
+
+
+
 // 全局相关 end
 
 // 进程相关 start

@@ -21,13 +21,32 @@ ata0-master: type=disk, path="80m.img", mode=flat
 # 配置网卡
 #ne2k: enabled=1, mac=fe:fd:00:00:00:01, ethmod=slirp
 
-ne2k: enabled=1, ioaddr=0x300, irq=10, mac=b0:c4:20:00:00:00, ethmod=slirp, ethdev=eth0
+# ethdev=/home/volker/tests/bochs
+#ne2k: enabled=1, ioaddr=0x310, irq=10, mac=b0:c4:20:00:00:00, ethmod=slirp, ethdev=/home/cg/os/pegasus-os/mem/v11/network
+#ne2k: enabled=1, ioaddr=0x310, irq=10, mac=1e:83:85:30:84:7e, ethmod=slirp, ethdev=eth0, script="slirp.conf",ip=192.168.1.2
+#ne2k: enabled=1, ioaddr=0x310, irq=10, mac=1e:83:85:30:84:7e, ethmod=slirp, ethdev=eth0, dhcp="dhcp"
+#ne2k: enabled=1, ioaddr=0x310, irq=10, mac=86:3e:b3:bf:d6:1c, ethdev=tap, script="./ifup.sh"
+
+#ne2k: enabled=1, ioaddr=0x310, irq=10, mac=86:3e:b3:bf:d6:1c, ethmod=linux, ethdev=tap0
+# 启用 ne2k 网络设备，并使用 slirp 作为底层网络模块
+ne2k: enabled=1, ioaddr=0x310, irq=10, mac=52:54:00:12:34:56, ethmod=slirp
+
+
+#ne2k: enabled=1, ioaddr=0x310, irq=10, mac=ce:a2:22:ec:29:a9, ethmod=tuntap, ethdev=/dev/net/tap4, script="tunconfig.sh" 
+
+#ne2k: enabled=1, ioaddr=0x300, irq=10, mac=b0:c4:20:00:00:00, ethmod=slirp, ethdev=vnet
+# 设置 IP 地址
+# 设置 IP 地址
+#slirp: enabled=1, dhcp=false, addr=192.168.1.2, mask=255.255.255.0
+# Configure network
+#dhcp: enabled=1, force=1
+#bootp: bootfile="pxelinux.0"
 
 # choose the boot disk.
 boot: a
 # boot: floppy
 # where do we send log messages?
-log: bochsout.txt
+#log: bochsout.txt
 
 # disable the mouse
 mouse: enabled=0

@@ -80,11 +80,11 @@ void init()
 	disp_str("init\n");
 	init_keyboard();
 	init_memory(64*1024*1024);
-	DriverInitialize();
-	//asm ("xchgw %bx, %bx");
-	DriverSend();
-	//asm ("xchgw %bx, %bx");
-	disp_str("DriverInitialize\n");
+//	DriverInitialize();
+//	//asm ("xchgw %bx, %bx");
+//	DriverSend();
+//	//asm ("xchgw %bx, %bx");
+//	disp_str("DriverInitialize\n");
 
 	// 初始化PCB链表
 	initDoubleLinkList(&pcb_list);
@@ -139,6 +139,21 @@ void kernel_thread_d(void *msg)
 void user_proc_a()
 {
 	disp_str("-------------I am user_proc_a\n");
+//	enable_8259A_slave_net_irq();
+//
+	net_data = 4;
+	DriverInitialize();
+//	//asm ("xchgw %bx, %bx");
+//	while(1){
+	DriverSend();
+//	}
+	//asm ("xchgw %bx, %bx");
+	disp_str("DriverInitialize2\n");
+	disp_str("DriverInitialize1\n");
+	disp_int(net_data);
+	disp_str("\nDriverInitialize3\n");
+	while(1);
+
 //	TestFS2();
 //	wait_exit();
 	test_exec();

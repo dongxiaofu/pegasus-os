@@ -424,7 +424,7 @@ hwint14:
 
 	; 禁用硬盘中断
 	;call disable_8259A_slave_winchester_irq
-	mov al, 11111111b
+	mov al, 11111011b
 	out 0xA1, al	
 
 	; master置EOI位 start
@@ -454,7 +454,7 @@ hwint14:
 	;cli
 	; 打开硬盘中断
 	;call enable_8259A_slave_winchester_irq
-	mov al, 10111111b
+	mov al, 10111011b
 	out 0xA1, al	
 
 	;cli
@@ -464,6 +464,7 @@ hwint14:
 
 ; 网络中断
 hwint10:
+	xchg bx, bx
 	; 建立快照
 	pushad
 	push ds
@@ -479,7 +480,7 @@ hwint10:
 
 	; 禁用网卡中断
 	;call disable_8259A_slave_winchester_irq
-	mov al, 11111111b
+	mov al, 10111111b
 	out 0xA1, al	
 
 	; master置EOI位 start
@@ -509,7 +510,7 @@ hwint10:
 	;cli
 	; 打开网卡中断
 	;call enable_8259A_slave_winchester_irq
-	mov al, 01111011b
+	mov al, 10111011b
 	out 0xA1, al	
 
 	;cli
@@ -973,8 +974,9 @@ enable_8259A_slave_net_irq:
 	cli
 	in al, 0xA1
 	;or al, ~(1<<6)
-	and al, ~(1<<7)
+	and al, ~(1<<2)
 	out 0xA1, al
 
 	popf; ax
+	;sti
 	ret

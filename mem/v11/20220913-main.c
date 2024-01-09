@@ -856,6 +856,9 @@ void test_shell()
 // exec测试用例
 void test_exec()
 {
+	disp_str("DriverInitialize\n");
+	disp_str("DriverInitialize2\n");
+	disp_int(7);
 //	char filename2[20] = "install.tar";
 //    int fd = open(filename2, O_RDONLY);
 //    char buf[SECTOR_SIZE];

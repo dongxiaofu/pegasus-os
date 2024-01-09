@@ -64,6 +64,7 @@ clean:
 	rm -rvf mm/*.o
 	rm -rvf lib/*.a
 	rm -rvf 80m.img
+	rm -rvf 80m.img.lock
 
 # 不能使用所有的输入文件
 # kernel.bin:kernel.o string.o kernel_main.o hd.o syscall.o
