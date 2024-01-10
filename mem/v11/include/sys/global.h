@@ -58,7 +58,9 @@ EXTERN unsigned int fork_pid;
 EXTERN unsigned char is_init;
 EXTERN unsigned int gdt_index;
 
-EXTERN unsigned int net_data;
+EXTERN unsigned char net_data;
+EXTERN unsigned char *net_buf;
+EXTERN unsigned char helloStr[12];
 
 
 

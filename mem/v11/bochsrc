@@ -29,7 +29,8 @@ ata0-master: type=disk, path="80m.img", mode=flat
 
 #ne2k: enabled=1, ioaddr=0x310, irq=10, mac=86:3e:b3:bf:d6:1c, ethmod=linux, ethdev=tap0
 # 启用 ne2k 网络设备，并使用 slirp 作为底层网络模块
-ne2k: enabled=1, ioaddr=0x310, irq=10, mac=52:54:00:12:34:56, ethmod=slirp
+#ne2k: enabled=1, ioaddr=0x310, irq=10, mac=52:54:00:12:34:56, ethmod=slirp
+ne2k: enabled=1, ioaddr=0x300, irq=10, mac=52:54:00:12:34:56, ethmod=slirp
 
 
 #ne2k: enabled=1, ioaddr=0x310, irq=10, mac=ce:a2:22:ec:29:a9, ethmod=tuntap, ethdev=/dev/net/tap4, script="tunconfig.sh" 
@@ -47,6 +48,8 @@ boot: a
 # boot: floppy
 # where do we send log messages?
 #log: bochsout.txt
+#dbglog: debug-bochsout.txt
+debug: action=report, pci=report
 
 # disable the mouse
 mouse: enabled=0

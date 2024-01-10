@@ -1,12 +1,25 @@
 extern net_data
+extern net_buf
+extern helloStr
+extern disp_str
 
 global DriverInitialize
 global DriverSend
 global PCtoNIC
 global NICtoPC
 
-LOOP_NUM equ 128
+LOOP_NUM equ 22
 NET_TEST_DATA equ 0x59
+;NET_TEST_DATA equ 0x20
+
+CRDA equ 16 * 1024
+
+LOOP_NUM_LESS equ LOOP_NUM
+PAGE_NO	equ 2
+
+Buf times 22  db  0
+My_Buf:    db  "Hello,World\0" 
+My_Buf_Len	equ $ - My_Buf
 
 COMMAND equ 300h
 PAGESTART equ COMMAND + 01
@@ -45,15 +58,16 @@ tcr equ 0 ;value for trans. config. reg
 ;dcr equ 0x59 ;value for data config. reg
 ;dcr equ 0b1001001
 ;dcr equ 0x59
-dcr equ 0x49
+dcr equ 0x59
 ;dcr equ 59h
 ;dcr equ 0xb
 ;imr db Obh ;value for intr. mask reg
 ;imr db 0xOb ;value for intr. mask reg
 ;imr equ 0xOb ;value for intr. mask reg
-imr equ 0xb ;value for intr. mask reg
+imr equ 0xFb ;value for intr. mask reg
 
 DriverInitialize:
+	xchg bx, bx
 	;保存栈
 	push esi
 	push edi
@@ -103,13 +117,21 @@ DriverInitialize:
     mov dx,INTERRUPTSTATUS ;interrupt status register
     out dx,al
     mov al,imr
+	xchg bx, bx
     mov dx,INTERRUPTMASK ;interrupt mask register
     out dx,al
     mov dx,TRANSMITCONFIGURATION
     mov al,tcr
     out dx,al ;TCR in normal mode, NIC is now
     ;ready for reception
+
+;	mov dx, CRDMA0
+;	mov ax, CRDA
+;	out dx, al
+;	mov al, ah
+;	out dx, al
 	;出栈
+	mov esp, ebp
 	pop ecx
 	pop ebp
 	pop ebx
@@ -171,10 +193,24 @@ DriverSend:
     cmp al, 26h ;transmitting?
     je QueueIt ;if so, queue packet
     push cx ;store byte count
+
+	and al, 0b00111111
+	out dx, al
+	mov dx, CRDMA0
+	mov ax, CRDA
+	out dx, al
+	mov dx, CRDMA1
+	;out dx, ah
+	mov al, ah
+	out dx, al
+
     mov ah,TRANSMITBUFFER
     xor al,al ;set page to transfer packet to
+
+	push dword [ebp + 24] 
     call PCtoNIC ;transfer packet to NIC buffer RAM
-	call NICtoPC
+	add esp, 4
+	;call NICtoPC
     mov dx,TRANSMITPAGE
     mov al,TRANSMITBUFFER
     out dx,al ;set NIC transmit page
@@ -195,6 +231,7 @@ QueueIt:
 Finished: ;enable interrupts
     ;sti
 	;出栈
+	mov esp, ebp
 	pop ecx
 	pop ebp
 	pop ebx
@@ -213,6 +250,16 @@ Finished: ;enable interrupts
 ; ax 4 NIC buffer page to transfer to
 ;***********************************************************************
 
+MyEnd:
+	;出栈
+	mov esp, ebp
+	pop ecx
+	pop ebp
+	pop ebx
+	pop edi
+	pop esi
+    ret
+
 PCtoNIC:
 	;保存栈
 	push esi
@@ -221,23 +268,26 @@ PCtoNIC:
 	push ebp
 	push ecx
 	mov ebp, esp
+	
+	;jmp MyEnd
 
-    push ax ; save buffer address
-    inc cx ; make even
-    and cx,0fffeh
 	mov bx, LOOP_NUM
     mov dx,REMOTEBYTECOUNT0 ; set byte count low byte
     mov al,bl
+	;jmp MyEnd
     out dx,al
+	;jmp MyEnd
     mov dx,REMOTEBYTECOUNT1 ; set byte count high byte
     mov al,bh
     out dx,al
-    pop ax ; get our page back
-    mov dx,REMOTESTARTADDRESS0
-    out dx,al ; set as lo address
-    mov dx,REMOTESTARTADDRESS1
-    mov al,ah ; set as hi address
-    out dx,al
+
+	;jmp MyEnd
+   ; pop ax ; get our page back
+   ; mov dx,REMOTESTARTADDRESS0
+   ; out dx,al ; set as lo address
+   ; mov dx,REMOTESTARTADDRESS1
+   ; mov al,ah ; set as hi address
+   ; out dx,al
     mov dx,COMMAND
     mov al,12h ; write and start
     out dx,al
@@ -248,13 +298,30 @@ PCtoNIC:
     shr cx,1 ; need to loop half as many times
 	;mov esi, 0xc050d004 
 	mov ax, NET_TEST_DATA
+	;mov esi, [net_buf]
+	xor esi, esi
+	;mov esi, net_buf
+	;mov esi, My_Buf
+	; 获取参数。
+	mov esi, dword [esp + 24]
+
+	mov dx, CRDMA0
+	mov ax, CRDA
+	out dx, al
+	mov al, ah
+	out dx, al
+    mov dx,IOPORT
+
 	;mov [esi], ax
+	xchg bx, bx
 Writing_Word: ;because of word-wide transfers
 	;mov esi, 0xc050d004 
-    ;lodsw ;load word from ds:si
+	xor ax, ax
+    lodsw ;load word from ds:si
     out dx,ax ;write to IOPORT on NIC board
     loop Writing_Word
-
+	xchg bx, bx
+	
     mov cx,0
     mov dx,INTERRUPTSTATUS
 CheckDMA:
@@ -262,12 +329,13 @@ CheckDMA:
     test al,40h ; dma done ???
     jnz toNICEND ; if so, go to NICEND
     jmp CheckDMA ;loop until done
-    toNICEND:
+toNICEND:
     mov dx,INTERRUPTSTATUS
     mov al,40h ;clear DMA interrupt bit in ISR
     out dx,al
     clc
 	;出栈
+	mov esp, ebp
 	pop ecx
 	pop ebp
 	pop ebx
@@ -286,6 +354,7 @@ CheckDMA:
 ; ax 4 NIC buffer page to transfer from
 ;***********************************************************************
 NICtoPC:
+	xchg bx, bx
 	;保存栈
 	push esi
 	push edi
@@ -294,37 +363,48 @@ NICtoPC:
 	push ecx
 	mov ebp, esp
 
-    push ax ; save buffer address
-    inc cx ; make even
-    and cx,0fffeh
-	mov bx, LOOP_NUM
+	mov bx, LOOP_NUM_LESS
     mov dx,REMOTEBYTECOUNT0
     mov al,bl
     out dx,al
     mov dx,REMOTEBYTECOUNT1
     mov al,bh
     out dx,al
-    pop ax ; get our page back
-    mov dx,REMOTESTARTADDRESS0
-    out dx,al ; set as low address
-    mov dx,REMOTESTARTADDRESS1
-    mov al,ah
-    out dx,al ; set as hi address
+   ; pop ax ; get our page back
+   ; mov dx,REMOTESTARTADDRESS0
+   ; out dx,al ; set as low address
+   ; mov dx,REMOTESTARTADDRESS1
+   ; mov al,ah
+   ; out dx,al ; set as hi address
     mov dx,COMMAND 
     mov al,0ah ; read and start
     out dx,al
     mov dx,IOPORT
+
+	mov dx, CRDMA0
+	mov ax, CRDA
+	out dx, al
+	mov al, ah
+	out dx, al
+    mov dx,IOPORT
     ;shr cx,1 ; need to loop half as many times
-	mov cx, LOOP_NUM
+	mov cx, LOOP_NUM_LESS
 	;inc cx
     shr cx,1 ; need to loop half as many times
+	;mov edi, [hello]
+	mov edi, Buf
 	;mov edi,0xc0503000
 READING_Word_NICtoPC: ;because of word-wide transfers
-	xor ax, ax
+	xor eax, eax
     in ax,dx
-	mov [net_data], ax
-    ;stosw ;read word and store in es:di
+    stosw ;read word and store in es:di
 	loop READING_Word_NICtoPC
+
+	mov eax, Buf
+	push eax
+	call disp_str
+	add esp, 4
+
     mov dx,INTERRUPTSTATUS
 CheckDMA_NICtoPC:
     in al,dx
@@ -334,6 +414,7 @@ CheckDMA_NICtoPC:
 ReadEnd:
     out dx,al ; clear RDMA bit in NIC ISR
 	;出栈
+	mov esp, ebp
 	pop ecx
 	pop ebp
 	pop ebx

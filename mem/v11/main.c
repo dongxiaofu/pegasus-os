@@ -139,20 +139,36 @@ void kernel_thread_d(void *msg)
 void user_proc_a()
 {
 	disp_str("-------------I am user_proc_a\n");
-//	enable_8259A_slave_net_irq();
+	net_data = 0;
+	unsigned int size = 22;
+	net_buf = (char *)sys_malloc(size);
+	Memset(net_buf, 0, size);
+
+	// char *str = "Next, what’s wealthy to you may not be wealthy to your children";
+	char *str = "Next, what’s wealthy";
+	Strcpy(net_buf, str);
+
+//	hello = (char *)sys_malloc(12);
+	// Memset(helloStr, 0, 12);
+//	Printf("net_buf = %s\n", net_buf);
+
+	//enable_8259A_slave_net_irq();
 //
 	net_data = 4;
 	DriverInitialize();
 //	//asm ("xchgw %bx, %bx");
 //	while(1){
-	DriverSend();
+	DriverSend(net_buf);
 //	}
 	//asm ("xchgw %bx, %bx");
+	disp_str(net_buf);
+	disp_str(helloStr);
+	disp_str("\n");
 	disp_str("DriverInitialize2\n");
 	disp_str("DriverInitialize1\n");
-	disp_int(net_data);
+	// disp_str(helloStr);
 	disp_str("\nDriverInitialize3\n");
-	while(1);
+//	while(1);
 
 //	TestFS2();
 //	wait_exit();

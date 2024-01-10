@@ -35,7 +35,7 @@ extern disp_int
 extern keyboard_handler
 extern hd_handle
 extern hd_handler
-extern net_handler
+extern NICtoPC
 
 global disp_str
 global disp_str_colour
@@ -505,7 +505,9 @@ hwint10:
 	sti	
 	; 调用网卡中断
 	;call hd_handle
-	call net_handler
+	call NICtoPC
+	nop
+	nop
 	
 	;cli
 	; 打开网卡中断
@@ -972,11 +974,13 @@ sys_call_test:
 enable_8259A_slave_net_irq:
 	pushf; ax
 	cli
+	xchg bx, bx
+	xor al, al
 	in al, 0xA1
 	;or al, ~(1<<6)
 	and al, ~(1<<2)
 	out 0xA1, al
 
 	popf; ax
-	;sti
+	sti
 	ret
