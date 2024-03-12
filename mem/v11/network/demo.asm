@@ -12,7 +12,7 @@ LOOP_NUM equ 22
 NET_TEST_DATA equ 0x59
 ;NET_TEST_DATA equ 0x20
 
-CRDA equ 16 * 1024
+CRDA equ (16 * 1024)
 
 LOOP_NUM_LESS equ LOOP_NUM
 PAGE_NO	equ 2
@@ -177,6 +177,19 @@ PSTART equ 46h
 PSTOP equ 80h
 TRANSMITBUFFER equ 40h
 
+SetPageStart:
+	mov dx, CRDMA0
+	xor ax, ax
+	mov ax, CRDA
+	out dx, al
+	mov dx, CRDMA1
+	;and ax, 0b11110000
+	and ax, 0xFF00
+	shr ax, 8
+	out dx, al
+
+	ret
+
 
 DriverSend:
 	;保存栈
@@ -193,19 +206,18 @@ DriverSend:
     cmp al, 26h ;transmitting?
     je QueueIt ;if so, queue packet
     push cx ;store byte count
-
+	
+	xchg bx, bx
 	and al, 0b00111111
 	out dx, al
 	mov dx, CRDMA0
+	xor ax, ax
 	mov ax, CRDA
 	out dx, al
 	mov dx, CRDMA1
-	;out dx, ah
-	mov al, ah
+	and ax, 0xFF00
+	shr ax, 8
 	out dx, al
-
-    mov ah,TRANSMITBUFFER
-    xor al,al ;set page to transfer packet to
 
 	push dword [ebp + 24] 
     call PCtoNIC ;transfer packet to NIC buffer RAM
@@ -213,7 +225,9 @@ DriverSend:
 	;call NICtoPC
     mov dx,TRANSMITPAGE
     mov al,TRANSMITBUFFER
-    out dx,al ;set NIC transmit page
+	mov ax, CRDA
+	shr ax, 8
+    out dx,ax ;set NIC transmit page
     pop cx ;get byte count back
     mov dx,TRANSMITBYTECOUNT0
     mov al,cl
@@ -305,11 +319,12 @@ PCtoNIC:
 	; 获取参数。
 	mov esi, dword [esp + 24]
 
-	mov dx, CRDMA0
-	mov ax, CRDA
-	out dx, al
-	mov al, ah
-	out dx, al
+	call SetPageStart
+;	mov dx, CRDMA0
+;	mov ax, CRDA
+;	out dx, al
+;	mov al, ah
+;	out dx, al
     mov dx,IOPORT
 
 	;mov [esi], ax
@@ -363,6 +378,8 @@ NICtoPC:
 	push ecx
 	mov ebp, esp
 
+	jmp MyEnd
+
 	mov bx, LOOP_NUM_LESS
     mov dx,REMOTEBYTECOUNT0
     mov al,bl
@@ -381,11 +398,11 @@ NICtoPC:
     out dx,al
     mov dx,IOPORT
 
-	mov dx, CRDMA0
-	mov ax, CRDA
-	out dx, al
-	mov al, ah
-	out dx, al
+;	mov dx, CRDMA0
+;	mov ax, CRDA
+;	out dx, al
+;	mov al, ah
+;	out dx, al
     mov dx,IOPORT
     ;shr cx,1 ; need to loop half as many times
 	mov cx, LOOP_NUM_LESS

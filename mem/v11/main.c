@@ -158,7 +158,9 @@ void user_proc_a()
 	DriverInitialize();
 //	//asm ("xchgw %bx, %bx");
 //	while(1){
-	DriverSend(net_buf);
+	for(int i = 0; i < 3; i++){
+		DriverSend(net_buf);
+	}
 //	}
 	//asm ("xchgw %bx, %bx");
 	disp_str(net_buf);
