@@ -69,7 +69,6 @@ dcr equ 0x59
 imr equ 0xFb ;value for intr. mask reg
 
 DriverInitialize:
-	xchg bx, bx
 	;保存栈
 	push esi
 	push edi
@@ -119,7 +118,6 @@ DriverInitialize:
     mov dx,INTERRUPTSTATUS ;interrupt status register
     out dx,al
     mov al,imr
-	xchg bx, bx
     mov dx,INTERRUPTMASK ;interrupt mask register
     out dx,al
     mov dx,TRANSMITCONFIGURATION
@@ -209,7 +207,6 @@ DriverSend:
     je QueueIt ;if so, queue packet
     push cx ;store byte count
 	
-	xchg bx, bx
 	and al, 0b00111111
 	out dx, al
 	mov dx, CRDMA0
@@ -330,14 +327,12 @@ PCtoNIC:
     mov dx,IOPORT
 
 	;mov [esi], ax
-	xchg bx, bx
 Writing_Word: ;because of word-wide transfers
 	;mov esi, 0xc050d004 
 	xor ax, ax
     lodsw ;load word from ds:si
     out dx,ax ;write to IOPORT on NIC board
     loop Writing_Word
-	xchg bx, bx
 	
     mov cx,0
     mov dx,INTERRUPTSTATUS
@@ -371,7 +366,6 @@ toNICEND:
 ; ax 4 NIC buffer page to transfer from
 ;***********************************************************************
 NICtoPC:
-	xchg bx, bx
 	;保存栈
 	push esi
 	push edi

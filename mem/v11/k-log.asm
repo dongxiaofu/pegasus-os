@@ -316,7 +316,7 @@ c0100253:	75 00                	jne    c0100255 <hwint10.1>
 
 c0100255 <hwint10.1>:
 c0100255:	fb                   	sti    
-c0100256:	e8 b5 a4 00 00       	call   c010a710 <NICtoPC>
+c0100256:	e8 a6 a4 00 00       	call   c010a701 <NICtoPC>
 c010025b:	90                   	nop
 c010025c:	90                   	nop
 c010025d:	b0 bb                	mov    $0xbb,%al
@@ -13566,246 +13566,240 @@ c010a590:	64 5c                	fs pop %esp
 c010a592:	30                   	.byte 0x30
 
 c010a593 <DriverInitialize>:
-c010a593:	66 87 db             	xchg   %bx,%bx
-c010a596:	56                   	push   %esi
-c010a597:	57                   	push   %edi
-c010a598:	53                   	push   %ebx
-c010a599:	55                   	push   %ebp
-c010a59a:	51                   	push   %ecx
-c010a59b:	89 e5                	mov    %esp,%ebp
-c010a59d:	b0 21                	mov    $0x21,%al
-c010a59f:	66 ba 00 03          	mov    $0x300,%dx
-c010a5a3:	ee                   	out    %al,(%dx)
-c010a5a4:	b0 59                	mov    $0x59,%al
-c010a5a6:	66 ba 0e 03          	mov    $0x30e,%dx
-c010a5aa:	ee                   	out    %al,(%dx)
-c010a5ab:	66 ba 0a 03          	mov    $0x30a,%dx
-c010a5af:	30 c0                	xor    %al,%al
-c010a5b1:	ee                   	out    %al,(%dx)
-c010a5b2:	66 ba 0b 03          	mov    $0x30b,%dx
-c010a5b6:	ee                   	out    %al,(%dx)
-c010a5b7:	b0 10                	mov    $0x10,%al
-c010a5b9:	66 ba 0c 03          	mov    $0x30c,%dx
-c010a5bd:	ee                   	out    %al,(%dx)
-c010a5be:	b0 20                	mov    $0x20,%al
-c010a5c0:	66 ba 04 03          	mov    $0x304,%dx
-c010a5c4:	ee                   	out    %al,(%dx)
-c010a5c5:	b0 02                	mov    $0x2,%al
-c010a5c7:	66 ba 0d 03          	mov    $0x30d,%dx
-c010a5cb:	ee                   	out    %al,(%dx)
-c010a5cc:	b0 40                	mov    $0x40,%al
-c010a5ce:	66 ba 01 03          	mov    $0x301,%dx
-c010a5d2:	ee                   	out    %al,(%dx)
-c010a5d3:	66 ba 03 03          	mov    $0x303,%dx
-c010a5d7:	ee                   	out    %al,(%dx)
-c010a5d8:	b0 60                	mov    $0x60,%al
-c010a5da:	66 ba 02 03          	mov    $0x302,%dx
-c010a5de:	ee                   	out    %al,(%dx)
-c010a5df:	b0 61                	mov    $0x61,%al
-c010a5e1:	66 ba 00 03          	mov    $0x300,%dx
-c010a5e5:	ee                   	out    %al,(%dx)
-c010a5e6:	b0 40                	mov    $0x40,%al
-c010a5e8:	66 ba 07 03          	mov    $0x307,%dx
-c010a5ec:	ee                   	out    %al,(%dx)
-c010a5ed:	b0 22                	mov    $0x22,%al
-c010a5ef:	66 ba 00 03          	mov    $0x300,%dx
-c010a5f3:	ee                   	out    %al,(%dx)
-c010a5f4:	b0 ff                	mov    $0xff,%al
-c010a5f6:	66 ba 07 03          	mov    $0x307,%dx
-c010a5fa:	ee                   	out    %al,(%dx)
-c010a5fb:	b0 fb                	mov    $0xfb,%al
-c010a5fd:	66 87 db             	xchg   %bx,%bx
-c010a600:	66 ba 0f 03          	mov    $0x30f,%dx
-c010a604:	ee                   	out    %al,(%dx)
-c010a605:	66 ba 0d 03          	mov    $0x30d,%dx
-c010a609:	b0 00                	mov    $0x0,%al
-c010a60b:	ee                   	out    %al,(%dx)
-c010a60c:	89 ec                	mov    %ebp,%esp
-c010a60e:	59                   	pop    %ecx
-c010a60f:	5d                   	pop    %ebp
-c010a610:	5b                   	pop    %ebx
-c010a611:	5f                   	pop    %edi
-c010a612:	5e                   	pop    %esi
-c010a613:	c3                   	ret    
+c010a593:	56                   	push   %esi
+c010a594:	57                   	push   %edi
+c010a595:	53                   	push   %ebx
+c010a596:	55                   	push   %ebp
+c010a597:	51                   	push   %ecx
+c010a598:	89 e5                	mov    %esp,%ebp
+c010a59a:	b0 21                	mov    $0x21,%al
+c010a59c:	66 ba 00 03          	mov    $0x300,%dx
+c010a5a0:	ee                   	out    %al,(%dx)
+c010a5a1:	b0 59                	mov    $0x59,%al
+c010a5a3:	66 ba 0e 03          	mov    $0x30e,%dx
+c010a5a7:	ee                   	out    %al,(%dx)
+c010a5a8:	66 ba 0a 03          	mov    $0x30a,%dx
+c010a5ac:	30 c0                	xor    %al,%al
+c010a5ae:	ee                   	out    %al,(%dx)
+c010a5af:	66 ba 0b 03          	mov    $0x30b,%dx
+c010a5b3:	ee                   	out    %al,(%dx)
+c010a5b4:	b0 10                	mov    $0x10,%al
+c010a5b6:	66 ba 0c 03          	mov    $0x30c,%dx
+c010a5ba:	ee                   	out    %al,(%dx)
+c010a5bb:	b0 20                	mov    $0x20,%al
+c010a5bd:	66 ba 04 03          	mov    $0x304,%dx
+c010a5c1:	ee                   	out    %al,(%dx)
+c010a5c2:	b0 02                	mov    $0x2,%al
+c010a5c4:	66 ba 0d 03          	mov    $0x30d,%dx
+c010a5c8:	ee                   	out    %al,(%dx)
+c010a5c9:	b0 40                	mov    $0x40,%al
+c010a5cb:	66 ba 01 03          	mov    $0x301,%dx
+c010a5cf:	ee                   	out    %al,(%dx)
+c010a5d0:	66 ba 03 03          	mov    $0x303,%dx
+c010a5d4:	ee                   	out    %al,(%dx)
+c010a5d5:	b0 60                	mov    $0x60,%al
+c010a5d7:	66 ba 02 03          	mov    $0x302,%dx
+c010a5db:	ee                   	out    %al,(%dx)
+c010a5dc:	b0 61                	mov    $0x61,%al
+c010a5de:	66 ba 00 03          	mov    $0x300,%dx
+c010a5e2:	ee                   	out    %al,(%dx)
+c010a5e3:	b0 40                	mov    $0x40,%al
+c010a5e5:	66 ba 07 03          	mov    $0x307,%dx
+c010a5e9:	ee                   	out    %al,(%dx)
+c010a5ea:	b0 22                	mov    $0x22,%al
+c010a5ec:	66 ba 00 03          	mov    $0x300,%dx
+c010a5f0:	ee                   	out    %al,(%dx)
+c010a5f1:	b0 ff                	mov    $0xff,%al
+c010a5f3:	66 ba 07 03          	mov    $0x307,%dx
+c010a5f7:	ee                   	out    %al,(%dx)
+c010a5f8:	b0 fb                	mov    $0xfb,%al
+c010a5fa:	66 ba 0f 03          	mov    $0x30f,%dx
+c010a5fe:	ee                   	out    %al,(%dx)
+c010a5ff:	66 ba 0d 03          	mov    $0x30d,%dx
+c010a603:	b0 00                	mov    $0x0,%al
+c010a605:	ee                   	out    %al,(%dx)
+c010a606:	89 ec                	mov    %ebp,%esp
+c010a608:	59                   	pop    %ecx
+c010a609:	5d                   	pop    %ebp
+c010a60a:	5b                   	pop    %ebx
+c010a60b:	5f                   	pop    %edi
+c010a60c:	5e                   	pop    %esi
+c010a60d:	c3                   	ret    
 
-c010a614 <SetPageStart>:
-c010a614:	66 ba 08 03          	mov    $0x308,%dx
-c010a618:	66 31 c0             	xor    %ax,%ax
-c010a61b:	66 b8 00 40          	mov    $0x4000,%ax
-c010a61f:	ee                   	out    %al,(%dx)
-c010a620:	66 ba 09 03          	mov    $0x309,%dx
-c010a624:	66 25 00 ff          	and    $0xff00,%ax
-c010a628:	66 c1 e8 08          	shr    $0x8,%ax
-c010a62c:	ee                   	out    %al,(%dx)
-c010a62d:	c3                   	ret    
+c010a60e <SetPageStart>:
+c010a60e:	66 ba 08 03          	mov    $0x308,%dx
+c010a612:	66 31 c0             	xor    %ax,%ax
+c010a615:	66 b8 00 40          	mov    $0x4000,%ax
+c010a619:	ee                   	out    %al,(%dx)
+c010a61a:	66 ba 09 03          	mov    $0x309,%dx
+c010a61e:	66 25 00 ff          	and    $0xff00,%ax
+c010a622:	66 c1 e8 08          	shr    $0x8,%ax
+c010a626:	ee                   	out    %al,(%dx)
+c010a627:	c3                   	ret    
 
-c010a62e <DriverSend>:
-c010a62e:	56                   	push   %esi
-c010a62f:	57                   	push   %edi
-c010a630:	53                   	push   %ebx
-c010a631:	55                   	push   %ebp
-c010a632:	51                   	push   %ecx
-c010a633:	89 e5                	mov    %esp,%ebp
-c010a635:	66 ba 00 03          	mov    $0x300,%dx
-c010a639:	ec                   	in     (%dx),%al
-c010a63a:	3c 26                	cmp    $0x26,%al
-c010a63c:	74 55                	je     c010a693 <QueueIt>
-c010a63e:	66 51                	push   %cx
-c010a640:	66 87 db             	xchg   %bx,%bx
-c010a643:	24 3f                	and    $0x3f,%al
-c010a645:	ee                   	out    %al,(%dx)
-c010a646:	66 ba 08 03          	mov    $0x308,%dx
-c010a64a:	66 31 c0             	xor    %ax,%ax
-c010a64d:	66 b8 00 40          	mov    $0x4000,%ax
-c010a651:	ee                   	out    %al,(%dx)
-c010a652:	66 ba 09 03          	mov    $0x309,%dx
-c010a656:	66 25 00 ff          	and    $0xff00,%ax
-c010a65a:	66 c1 e8 08          	shr    $0x8,%ax
-c010a65e:	ee                   	out    %al,(%dx)
-c010a65f:	ff 75 18             	pushl  0x18(%ebp)
-c010a662:	e8 3d 00 00 00       	call   c010a6a4 <PCtoNIC>
-c010a667:	83 c4 04             	add    $0x4,%esp
-c010a66a:	66 ba 04 03          	mov    $0x304,%dx
-c010a66e:	b0 40                	mov    $0x40,%al
-c010a670:	66 b8 00 40          	mov    $0x4000,%ax
-c010a674:	66 c1 e8 08          	shr    $0x8,%ax
-c010a678:	66 ef                	out    %ax,(%dx)
-c010a67a:	66 59                	pop    %cx
-c010a67c:	66 ba 05 03          	mov    $0x305,%dx
-c010a680:	88 c8                	mov    %cl,%al
-c010a682:	ee                   	out    %al,(%dx)
-c010a683:	66 ba 06 03          	mov    $0x306,%dx
-c010a687:	88 e8                	mov    %ch,%al
-c010a689:	ee                   	out    %al,(%dx)
-c010a68a:	66 ba 00 03          	mov    $0x300,%dx
-c010a68e:	b0 26                	mov    $0x26,%al
-c010a690:	ee                   	out    %al,(%dx)
-c010a691:	eb 01                	jmp    c010a694 <Finished>
+c010a628 <DriverSend>:
+c010a628:	56                   	push   %esi
+c010a629:	57                   	push   %edi
+c010a62a:	53                   	push   %ebx
+c010a62b:	55                   	push   %ebp
+c010a62c:	51                   	push   %ecx
+c010a62d:	89 e5                	mov    %esp,%ebp
+c010a62f:	66 ba 00 03          	mov    $0x300,%dx
+c010a633:	ec                   	in     (%dx),%al
+c010a634:	3c 26                	cmp    $0x26,%al
+c010a636:	74 52                	je     c010a68a <QueueIt>
+c010a638:	66 51                	push   %cx
+c010a63a:	24 3f                	and    $0x3f,%al
+c010a63c:	ee                   	out    %al,(%dx)
+c010a63d:	66 ba 08 03          	mov    $0x308,%dx
+c010a641:	66 31 c0             	xor    %ax,%ax
+c010a644:	66 b8 00 40          	mov    $0x4000,%ax
+c010a648:	ee                   	out    %al,(%dx)
+c010a649:	66 ba 09 03          	mov    $0x309,%dx
+c010a64d:	66 25 00 ff          	and    $0xff00,%ax
+c010a651:	66 c1 e8 08          	shr    $0x8,%ax
+c010a655:	ee                   	out    %al,(%dx)
+c010a656:	ff 75 18             	pushl  0x18(%ebp)
+c010a659:	e8 3d 00 00 00       	call   c010a69b <PCtoNIC>
+c010a65e:	83 c4 04             	add    $0x4,%esp
+c010a661:	66 ba 04 03          	mov    $0x304,%dx
+c010a665:	b0 40                	mov    $0x40,%al
+c010a667:	66 b8 00 40          	mov    $0x4000,%ax
+c010a66b:	66 c1 e8 08          	shr    $0x8,%ax
+c010a66f:	66 ef                	out    %ax,(%dx)
+c010a671:	66 59                	pop    %cx
+c010a673:	66 ba 05 03          	mov    $0x305,%dx
+c010a677:	88 c8                	mov    %cl,%al
+c010a679:	ee                   	out    %al,(%dx)
+c010a67a:	66 ba 06 03          	mov    $0x306,%dx
+c010a67e:	88 e8                	mov    %ch,%al
+c010a680:	ee                   	out    %al,(%dx)
+c010a681:	66 ba 00 03          	mov    $0x300,%dx
+c010a685:	b0 26                	mov    $0x26,%al
+c010a687:	ee                   	out    %al,(%dx)
+c010a688:	eb 01                	jmp    c010a68b <Finished>
 
-c010a693 <QueueIt>:
-c010a693:	90                   	nop
+c010a68a <QueueIt>:
+c010a68a:	90                   	nop
 
-c010a694 <Finished>:
-c010a694:	89 ec                	mov    %ebp,%esp
-c010a696:	59                   	pop    %ecx
-c010a697:	5d                   	pop    %ebp
-c010a698:	5b                   	pop    %ebx
-c010a699:	5f                   	pop    %edi
-c010a69a:	5e                   	pop    %esi
-c010a69b:	c3                   	ret    
+c010a68b <Finished>:
+c010a68b:	89 ec                	mov    %ebp,%esp
+c010a68d:	59                   	pop    %ecx
+c010a68e:	5d                   	pop    %ebp
+c010a68f:	5b                   	pop    %ebx
+c010a690:	5f                   	pop    %edi
+c010a691:	5e                   	pop    %esi
+c010a692:	c3                   	ret    
 
-c010a69c <MyEnd>:
-c010a69c:	89 ec                	mov    %ebp,%esp
-c010a69e:	59                   	pop    %ecx
-c010a69f:	5d                   	pop    %ebp
-c010a6a0:	5b                   	pop    %ebx
-c010a6a1:	5f                   	pop    %edi
-c010a6a2:	5e                   	pop    %esi
-c010a6a3:	c3                   	ret    
+c010a693 <MyEnd>:
+c010a693:	89 ec                	mov    %ebp,%esp
+c010a695:	59                   	pop    %ecx
+c010a696:	5d                   	pop    %ebp
+c010a697:	5b                   	pop    %ebx
+c010a698:	5f                   	pop    %edi
+c010a699:	5e                   	pop    %esi
+c010a69a:	c3                   	ret    
 
-c010a6a4 <PCtoNIC>:
-c010a6a4:	56                   	push   %esi
-c010a6a5:	57                   	push   %edi
-c010a6a6:	53                   	push   %ebx
-c010a6a7:	55                   	push   %ebp
-c010a6a8:	51                   	push   %ecx
-c010a6a9:	89 e5                	mov    %esp,%ebp
-c010a6ab:	66 bb 16 00          	mov    $0x16,%bx
-c010a6af:	66 ba 0a 03          	mov    $0x30a,%dx
-c010a6b3:	88 d8                	mov    %bl,%al
-c010a6b5:	ee                   	out    %al,(%dx)
-c010a6b6:	66 ba 0b 03          	mov    $0x30b,%dx
-c010a6ba:	88 f8                	mov    %bh,%al
-c010a6bc:	ee                   	out    %al,(%dx)
-c010a6bd:	66 ba 00 03          	mov    $0x300,%dx
-c010a6c1:	b0 12                	mov    $0x12,%al
-c010a6c3:	ee                   	out    %al,(%dx)
-c010a6c4:	66 ba 10 03          	mov    $0x310,%dx
-c010a6c8:	66 b9 16 00          	mov    $0x16,%cx
-c010a6cc:	66 d1 e9             	shr    %cx
-c010a6cf:	66 b8 59 00          	mov    $0x59,%ax
-c010a6d3:	31 f6                	xor    %esi,%esi
-c010a6d5:	8b 74 24 18          	mov    0x18(%esp),%esi
-c010a6d9:	e8 36 ff ff ff       	call   c010a614 <SetPageStart>
-c010a6de:	66 ba 10 03          	mov    $0x310,%dx
-c010a6e2:	66 87 db             	xchg   %bx,%bx
+c010a69b <PCtoNIC>:
+c010a69b:	56                   	push   %esi
+c010a69c:	57                   	push   %edi
+c010a69d:	53                   	push   %ebx
+c010a69e:	55                   	push   %ebp
+c010a69f:	51                   	push   %ecx
+c010a6a0:	89 e5                	mov    %esp,%ebp
+c010a6a2:	66 bb 16 00          	mov    $0x16,%bx
+c010a6a6:	66 ba 0a 03          	mov    $0x30a,%dx
+c010a6aa:	88 d8                	mov    %bl,%al
+c010a6ac:	ee                   	out    %al,(%dx)
+c010a6ad:	66 ba 0b 03          	mov    $0x30b,%dx
+c010a6b1:	88 f8                	mov    %bh,%al
+c010a6b3:	ee                   	out    %al,(%dx)
+c010a6b4:	66 ba 00 03          	mov    $0x300,%dx
+c010a6b8:	b0 12                	mov    $0x12,%al
+c010a6ba:	ee                   	out    %al,(%dx)
+c010a6bb:	66 ba 10 03          	mov    $0x310,%dx
+c010a6bf:	66 b9 16 00          	mov    $0x16,%cx
+c010a6c3:	66 d1 e9             	shr    %cx
+c010a6c6:	66 b8 59 00          	mov    $0x59,%ax
+c010a6ca:	31 f6                	xor    %esi,%esi
+c010a6cc:	8b 74 24 18          	mov    0x18(%esp),%esi
+c010a6d0:	e8 39 ff ff ff       	call   c010a60e <SetPageStart>
+c010a6d5:	66 ba 10 03          	mov    $0x310,%dx
 
-c010a6e5 <Writing_Word>:
-c010a6e5:	66 31 c0             	xor    %ax,%ax
-c010a6e8:	66 ad                	lods   %ds:(%esi),%ax
-c010a6ea:	66 ef                	out    %ax,(%dx)
-c010a6ec:	e2 f7                	loop   c010a6e5 <Writing_Word>
-c010a6ee:	66 87 db             	xchg   %bx,%bx
-c010a6f1:	66 b9 00 00          	mov    $0x0,%cx
-c010a6f5:	66 ba 07 03          	mov    $0x307,%dx
+c010a6d9 <Writing_Word>:
+c010a6d9:	66 31 c0             	xor    %ax,%ax
+c010a6dc:	66 ad                	lods   %ds:(%esi),%ax
+c010a6de:	66 ef                	out    %ax,(%dx)
+c010a6e0:	e2 f7                	loop   c010a6d9 <Writing_Word>
+c010a6e2:	66 b9 00 00          	mov    $0x0,%cx
+c010a6e6:	66 ba 07 03          	mov    $0x307,%dx
 
-c010a6f9 <CheckDMA>:
-c010a6f9:	ec                   	in     (%dx),%al
-c010a6fa:	a8 40                	test   $0x40,%al
-c010a6fc:	75 02                	jne    c010a700 <toNICEND>
-c010a6fe:	eb f9                	jmp    c010a6f9 <CheckDMA>
+c010a6ea <CheckDMA>:
+c010a6ea:	ec                   	in     (%dx),%al
+c010a6eb:	a8 40                	test   $0x40,%al
+c010a6ed:	75 02                	jne    c010a6f1 <toNICEND>
+c010a6ef:	eb f9                	jmp    c010a6ea <CheckDMA>
 
-c010a700 <toNICEND>:
-c010a700:	66 ba 07 03          	mov    $0x307,%dx
-c010a704:	b0 40                	mov    $0x40,%al
-c010a706:	ee                   	out    %al,(%dx)
-c010a707:	f8                   	clc    
-c010a708:	89 ec                	mov    %ebp,%esp
-c010a70a:	59                   	pop    %ecx
-c010a70b:	5d                   	pop    %ebp
-c010a70c:	5b                   	pop    %ebx
-c010a70d:	5f                   	pop    %edi
-c010a70e:	5e                   	pop    %esi
-c010a70f:	c3                   	ret    
+c010a6f1 <toNICEND>:
+c010a6f1:	66 ba 07 03          	mov    $0x307,%dx
+c010a6f5:	b0 40                	mov    $0x40,%al
+c010a6f7:	ee                   	out    %al,(%dx)
+c010a6f8:	f8                   	clc    
+c010a6f9:	89 ec                	mov    %ebp,%esp
+c010a6fb:	59                   	pop    %ecx
+c010a6fc:	5d                   	pop    %ebp
+c010a6fd:	5b                   	pop    %ebx
+c010a6fe:	5f                   	pop    %edi
+c010a6ff:	5e                   	pop    %esi
+c010a700:	c3                   	ret    
 
-c010a710 <NICtoPC>:
-c010a710:	66 87 db             	xchg   %bx,%bx
-c010a713:	56                   	push   %esi
-c010a714:	57                   	push   %edi
-c010a715:	53                   	push   %ebx
-c010a716:	55                   	push   %ebp
-c010a717:	51                   	push   %ecx
-c010a718:	89 e5                	mov    %esp,%ebp
-c010a71a:	66 bb 16 00          	mov    $0x16,%bx
-c010a71e:	66 ba 0a 03          	mov    $0x30a,%dx
-c010a722:	88 d8                	mov    %bl,%al
-c010a724:	ee                   	out    %al,(%dx)
-c010a725:	66 ba 0b 03          	mov    $0x30b,%dx
-c010a729:	88 f8                	mov    %bh,%al
-c010a72b:	ee                   	out    %al,(%dx)
-c010a72c:	66 ba 00 03          	mov    $0x300,%dx
-c010a730:	b0 0a                	mov    $0xa,%al
-c010a732:	ee                   	out    %al,(%dx)
-c010a733:	66 ba 10 03          	mov    $0x310,%dx
-c010a737:	e8 d8 fe ff ff       	call   c010a614 <SetPageStart>
-c010a73c:	66 ba 10 03          	mov    $0x310,%dx
-c010a740:	66 b9 16 00          	mov    $0x16,%cx
-c010a744:	66 d1 e9             	shr    %cx
-c010a747:	bf 70 a5 10 c0       	mov    $0xc010a570,%edi
+c010a701 <NICtoPC>:
+c010a701:	56                   	push   %esi
+c010a702:	57                   	push   %edi
+c010a703:	53                   	push   %ebx
+c010a704:	55                   	push   %ebp
+c010a705:	51                   	push   %ecx
+c010a706:	89 e5                	mov    %esp,%ebp
+c010a708:	66 bb 16 00          	mov    $0x16,%bx
+c010a70c:	66 ba 0a 03          	mov    $0x30a,%dx
+c010a710:	88 d8                	mov    %bl,%al
+c010a712:	ee                   	out    %al,(%dx)
+c010a713:	66 ba 0b 03          	mov    $0x30b,%dx
+c010a717:	88 f8                	mov    %bh,%al
+c010a719:	ee                   	out    %al,(%dx)
+c010a71a:	66 ba 00 03          	mov    $0x300,%dx
+c010a71e:	b0 0a                	mov    $0xa,%al
+c010a720:	ee                   	out    %al,(%dx)
+c010a721:	66 ba 10 03          	mov    $0x310,%dx
+c010a725:	e8 e4 fe ff ff       	call   c010a60e <SetPageStart>
+c010a72a:	66 ba 10 03          	mov    $0x310,%dx
+c010a72e:	66 b9 16 00          	mov    $0x16,%cx
+c010a732:	66 d1 e9             	shr    %cx
+c010a735:	bf 70 a5 10 c0       	mov    $0xc010a570,%edi
 
-c010a74c <READING_Word_NICtoPC>:
-c010a74c:	31 c0                	xor    %eax,%eax
-c010a74e:	66 ed                	in     (%dx),%ax
-c010a750:	66 ab                	stos   %ax,%es:(%edi)
-c010a752:	e2 f8                	loop   c010a74c <READING_Word_NICtoPC>
-c010a754:	b8 70 a5 10 c0       	mov    $0xc010a570,%eax
-c010a759:	50                   	push   %eax
-c010a75a:	e8 2d 59 ff ff       	call   c010008c <disp_str>
-c010a75f:	83 c4 04             	add    $0x4,%esp
-c010a762:	66 ba 07 03          	mov    $0x307,%dx
+c010a73a <READING_Word_NICtoPC>:
+c010a73a:	31 c0                	xor    %eax,%eax
+c010a73c:	66 ed                	in     (%dx),%ax
+c010a73e:	66 ab                	stos   %ax,%es:(%edi)
+c010a740:	e2 f8                	loop   c010a73a <READING_Word_NICtoPC>
+c010a742:	b8 70 a5 10 c0       	mov    $0xc010a570,%eax
+c010a747:	50                   	push   %eax
+c010a748:	e8 3f 59 ff ff       	call   c010008c <disp_str>
+c010a74d:	83 c4 04             	add    $0x4,%esp
+c010a750:	66 ba 07 03          	mov    $0x307,%dx
 
-c010a766 <CheckDMA_NICtoPC>:
-c010a766:	ec                   	in     (%dx),%al
-c010a767:	a8 40                	test   $0x40,%al
-c010a769:	75 02                	jne    c010a76d <ReadEnd>
-c010a76b:	eb f9                	jmp    c010a766 <CheckDMA_NICtoPC>
+c010a754 <CheckDMA_NICtoPC>:
+c010a754:	ec                   	in     (%dx),%al
+c010a755:	a8 40                	test   $0x40,%al
+c010a757:	75 02                	jne    c010a75b <ReadEnd>
+c010a759:	eb f9                	jmp    c010a754 <CheckDMA_NICtoPC>
 
-c010a76d <ReadEnd>:
-c010a76d:	ee                   	out    %al,(%dx)
-c010a76e:	89 ec                	mov    %ebp,%esp
-c010a770:	59                   	pop    %ecx
-c010a771:	5d                   	pop    %ebp
-c010a772:	5b                   	pop    %ebx
-c010a773:	5f                   	pop    %edi
-c010a774:	5e                   	pop    %esi
-c010a775:	c3                   	ret    
+c010a75b <ReadEnd>:
+c010a75b:	ee                   	out    %al,(%dx)
+c010a75c:	89 ec                	mov    %ebp,%esp
+c010a75e:	59                   	pop    %ecx
+c010a75f:	5d                   	pop    %ebp
+c010a760:	5b                   	pop    %ebx
+c010a761:	5f                   	pop    %edi
+c010a762:	5e                   	pop    %esi
+c010a763:	c3                   	ret    
