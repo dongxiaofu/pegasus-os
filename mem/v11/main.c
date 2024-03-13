@@ -159,7 +159,7 @@ void user_proc_a()
 //	//asm ("xchgw %bx, %bx");
 //	while(1){
 	for(int i = 0; i < 3; i++){
-  		DriverSend(net_buf);
+//  		DriverSend(net_buf);
 	}
 	//asm ("xchgw %bx, %bx");
 //	disp_str(net_buf);
