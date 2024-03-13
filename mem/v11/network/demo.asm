@@ -97,18 +97,18 @@ DriverInitialize:
     mov al,02
     mov dx,TRANSMITCONFIGURATION
     out dx,al ;temporarily go into Loopback mode
-    mov al,26h
+    mov al,40h
     mov dx,PAGESTART ;page start
     out dx,al
     mov dx,BOUNDARY ;boundary register
     out dx,al
-    mov al,40h
+    mov al,60h
     mov dx,PAGESTOP ;page stop
     out dx,al
     mov al,61h ;go to page 1 registers
     mov dx,COMMAND
     out dx,al
-    mov al,26h
+    mov al,40h
     mov dx,CURRENT ;current page register
     out dx,al
     mov al,22h ;back to page 0, start mode
@@ -379,7 +379,7 @@ NICtoPC:
 	push ecx
 	mov ebp, esp
 
-	jmp MyEnd
+	;jmp MyEnd
 
 	mov bx, LOOP_NUM_LESS
     mov dx,REMOTEBYTECOUNT0
@@ -404,6 +404,7 @@ NICtoPC:
 ;	out dx, al
 ;	mov al, ah
 ;	out dx, al
+	call SetPageStart
     mov dx,IOPORT
     ;shr cx,1 ; need to loop half as many times
 	mov cx, LOOP_NUM_LESS
@@ -419,6 +420,7 @@ READING_Word_NICtoPC: ;because of word-wide transfers
 	loop READING_Word_NICtoPC
 
 	mov eax, Buf
+	;mov eax, My_Buf
 	push eax
 	call disp_str
 	add esp, 4
