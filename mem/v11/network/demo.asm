@@ -50,7 +50,8 @@ PSTART equ 46h
 PSTOP equ 80h
 
 ;rcrc db 0 ;value for Recv config. reg
-rcrc equ 0 ;value for Recv config. reg
+;rcrc equ 0 ;value for Recv config. reg
+rcrc equ 0x10 ;value for Recv config. reg
 ;tcr db 0 ;value for trans. config. reg
 ;tcr equ 0b110 ;value for trans. config. reg
 ;tcr equ 0b110 ;value for trans. config. reg

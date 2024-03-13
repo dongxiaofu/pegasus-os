@@ -13600,7 +13600,7 @@ c010a5ef:	30 c0                	xor    %al,%al
 c010a5f1:	ee                   	out    %al,(%dx)
 c010a5f2:	66 ba 0b 03          	mov    $0x30b,%dx
 c010a5f6:	ee                   	out    %al,(%dx)
-c010a5f7:	b0 00                	mov    $0x0,%al
+c010a5f7:	b0 10                	mov    $0x10,%al
 c010a5f9:	66 ba 0c 03          	mov    $0x30c,%dx
 c010a5fd:	ee                   	out    %al,(%dx)
 c010a5fe:	b0 20                	mov    $0x20,%al
