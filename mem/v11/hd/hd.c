@@ -543,11 +543,11 @@ void hd_handler() {
 void net_handler()
 {
 	disp_str("net==== info primary part start:\n");
-	//unsigned char status = get_interrupt_status();
+	unsigned char status = get_interrupt_status();
 	// TODO 如果status是指针，我确定可以这样使用。如果它不是指针，我不知道能不能这样做。
 	// interrupt_status irs = (interrupt_status)status;
 	interrupt_status irs = {0};
-	unsigned char status = 0;
+	// unsigned char status = 0;
 	Memcpy(&irs, &status, sizeof(interrupt_status));
 	disp_str("\n=====================\n");
 	disp_int(irs.prx);
@@ -555,6 +555,8 @@ void net_handler()
 	disp_int(irs.rxe);
 	disp_int(irs.rdc);
 	disp_str("\n=====================\n");
+
+	set_interrupt_status(status);
 	
 	asm ("xchgw %bx, %bx");
 }

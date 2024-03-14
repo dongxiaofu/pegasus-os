@@ -14,6 +14,7 @@ void DriverSend();
 void PCtoNIC();
 void NICtoPC();
 unsigned char get_interrupt_status();
+void set_interrupt_status(unsigned char status);
 
 enum intr_status intr_enable();
 enum intr_status intr_disable(); 

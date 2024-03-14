@@ -465,6 +465,7 @@ hwint14:
 
 ; 网络中断
 hwint10:
+	xchg bx, bx
 	; 建立快照
 	pushad
 	push ds
@@ -503,9 +504,8 @@ hwint10:
 	;mov esp, StackTop
 .2:
 	sti	
-	xchg bx, bx
 	; 调用网卡中断
-	;call net_handler
+	call net_handler
 	;call NICtoPC
 	nop
 	nop

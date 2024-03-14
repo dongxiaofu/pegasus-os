@@ -8,6 +8,7 @@ global DriverSend
 global PCtoNIC
 global NICtoPC
 global get_interrupt_status
+global set_interrupt_status
 
 LOOP_NUM equ 32
 NET_TEST_DATA equ 0x59
@@ -404,6 +405,33 @@ get_interrupt_status:
 	pop edi
 	pop esi
     ret
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;start;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;void char get_interrupt_status(unsigned char status)
+set_interrupt_status:
+	;保存栈
+	push esi
+	push edi
+	push ebx
+	push ebp
+	push ecx
+	mov ebp, esp
+
+	;读取INTERRUPT STATUS REGISTER
+    mov dx,INTERRUPTSTATUS
+	xor eax, eax
+	mov eax, [ebp + 20]
+    out dx,	al
+
+	;出栈
+	mov esp, ebp
+	pop ecx
+	pop ebp
+	pop ebx
+	pop edi
+	pop esi
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;end;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;***********************************************************************
 ; NICtoPC
