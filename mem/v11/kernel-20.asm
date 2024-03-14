@@ -36,6 +36,7 @@ extern keyboard_handler
 extern hd_handle
 extern hd_handler
 extern NICtoPC
+extern net_handler
 
 global disp_str
 global disp_str_colour
@@ -503,8 +504,8 @@ hwint10:
 .2:
 	sti	
 	; 调用网卡中断
-	;call hd_handle
-	call NICtoPC
+	call net_handler
+	;call NICtoPC
 	nop
 	nop
 	

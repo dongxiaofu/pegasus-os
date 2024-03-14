@@ -118,6 +118,9 @@ typedef struct proc{
         
 		// 为了兼容，先保留这个成员。
 		Regs s_reg;
+	// TODO 这是什么？当初，我为什么设计这个成员？
+	// 这是栈魔数，在thread_init设置这个值。我不记得它的用途。
+	// 当初，真应该写注释！
 	unsigned int stack_magic;
 }Proc;
 

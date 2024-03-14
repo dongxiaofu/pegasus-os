@@ -538,10 +538,9 @@ void hd_handler() {
 
 void net_handler()
 {
-	Printf("net==== info primary part start:\n");
+	disp_str("net==== info primary part start:\n");
 	
-		asm ("xchgw %bx, %bx");
-
+	asm ("xchgw %bx, %bx");
 }
 
 int waitfor(int mask, int val, int timeout) {

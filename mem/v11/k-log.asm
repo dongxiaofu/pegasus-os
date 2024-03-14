@@ -315,7 +315,7 @@ c0100250:	75 00                	jne    c0100252 <hwint10.1>
 
 c0100252 <hwint10.1>:
 c0100252:	fb                   	sti    
-c0100253:	e8 ac a4 00 00       	call   c010a704 <NICtoPC>
+c0100253:	e8 14 12 00 00       	call   c010146c <net_handler>
 c0100258:	90                   	nop
 c0100259:	90                   	nop
 c010025a:	b0 bb                	mov    $0xbb,%al
@@ -1909,7 +1909,7 @@ c010146d:	89 e5                	mov    %esp,%ebp
 c010146f:	83 ec 08             	sub    $0x8,%esp
 c0101472:	83 ec 0c             	sub    $0xc,%esp
 c0101475:	68 48 b2 10 c0       	push   $0xc010b248
-c010147a:	e8 29 71 00 00       	call   c01085a8 <Printf>
+c010147a:	e8 0d ec ff ff       	call   c010008c <disp_str>
 c010147f:	83 c4 10             	add    $0x10,%esp
 c0101482:	66 87 db             	xchg   %bx,%bx
 c0101485:	90                   	nop
