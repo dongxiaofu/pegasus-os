@@ -8,7 +8,7 @@ global DriverSend
 global PCtoNIC
 global NICtoPC
 
-LOOP_NUM equ 22
+LOOP_NUM equ 32
 NET_TEST_DATA equ 0x59
 ;NET_TEST_DATA equ 0x20
 
@@ -330,6 +330,7 @@ PCtoNIC:
 Writing_Word: ;because of word-wide transfers
 	;mov esi, 0xc050d004 
 	xor ax, ax
+	xchg bx, bx
     lodsw ;load word from ds:si
     out dx,ax ;write to IOPORT on NIC board
     loop Writing_Word
@@ -410,10 +411,12 @@ NICtoPC:
 	;mov edi,0xc0503000
 READING_Word_NICtoPC: ;because of word-wide transfers
 	xor eax, eax
+	;xchg bx, bx
     in ax,dx
     stosw ;read word and store in es:di
 	loop READING_Word_NICtoPC
 
+	;xchg bx, bx
 	mov eax, Buf
 	;mov eax, My_Buf
 	push eax

@@ -318,7 +318,7 @@ LOAD ne2000.o
 .plt.sec
  *(.plt.sec)
 
-.text           0xc0100000     0xa764
+.text           0xc0100000     0xa767
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
@@ -328,7 +328,7 @@ LOAD ne2000.o
  .text          0xc0100000       0x71 kernel_sub.o
                 0xc0100000                _start
  *fill*         0xc0100071        0xf 
- .text          0xc0100080      0x389 kernel.o
+ .text          0xc0100080      0x386 kernel.o
                 0xc0100080                InterruptTest
                 0xc010008c                disp_str
                 0xc01000c7                disp_str_colour
@@ -354,52 +354,52 @@ LOAD ne2000.o
                 0xc010019f                hwint1
                 0xc01001e2                hwint14
                 0xc0100228                hwint10
-                0xc010026c                sys_call
-                0xc01002b2                fork_restart
-                0xc01002c1                restart
-                0xc01002e4                in_byte
-                0xc01002f0                out_byte
-                0xc0100312                disable_int
-                0xc0100314                enable_int
-                0xc01003aa                enable_8259A_casecade_irq
-                0xc01003b4                disable_8259A_casecade_irq
-                0xc01003be                enable_8259A_slave_winchester_irq
-                0xc01003c8                disable_8259A_slave_winchester_irq
-                0xc01003d2                update_cr3
-                0xc01003df                update_tss
-                0xc01003ee                get_running_thread_pcb
-                0xc01003f6                sys_call_test
-                0xc01003f9                enable_8259A_slave_net_irq
- .text          0xc0100409      0x3b2 kernel_main.o
-                0xc0100409                kernel_main
-                0xc010058f                init
-                0xc0100623                kernel_thread_a
-                0xc0100670                kernel_thread_b
-                0xc01006bd                kernel_thread_c
-                0xc01006d3                kernel_thread_d
-                0xc01006e9                user_proc_a
-                0xc01007a3                user_proc_b
- .text          0xc01007bb      0xe39 hd.o
-                0xc01007bb                TaskHD
-                0xc0100800                init_hd
-                0xc010081a                hd_handle
-                0xc010091f                hd_cmd_out
-                0xc0100a21                hd_identify
-                0xc0100ad8                print_hdinfo
-                0xc0100c66                print_dpt_entry
-                0xc0100cd2                get_partition_table
-                0xc0100db1                partition
-                0xc0100fcb                hd_open
-                0xc0101072                get_hd_ioctl
-                0xc0101123                wait_for
-                0xc0101154                interrupt_wait
-                0xc01011a4                hd_rdwt
-                0xc0101443                hd_handler
-                0xc010146f                net_handler
-                0xc010148b                waitfor
-                0xc01014cf                print_hd_info
-                0xc01015bc                is_empty
- *fill*         0xc01015f4        0xc 
+                0xc0100269                sys_call
+                0xc01002af                fork_restart
+                0xc01002be                restart
+                0xc01002e1                in_byte
+                0xc01002ed                out_byte
+                0xc010030f                disable_int
+                0xc0100311                enable_int
+                0xc01003a7                enable_8259A_casecade_irq
+                0xc01003b1                disable_8259A_casecade_irq
+                0xc01003bb                enable_8259A_slave_winchester_irq
+                0xc01003c5                disable_8259A_slave_winchester_irq
+                0xc01003cf                update_cr3
+                0xc01003dc                update_tss
+                0xc01003eb                get_running_thread_pcb
+                0xc01003f3                sys_call_test
+                0xc01003f6                enable_8259A_slave_net_irq
+ .text          0xc0100406      0x3b2 kernel_main.o
+                0xc0100406                kernel_main
+                0xc010058c                init
+                0xc0100620                kernel_thread_a
+                0xc010066d                kernel_thread_b
+                0xc01006ba                kernel_thread_c
+                0xc01006d0                kernel_thread_d
+                0xc01006e6                user_proc_a
+                0xc01007a0                user_proc_b
+ .text          0xc01007b8      0xe39 hd.o
+                0xc01007b8                TaskHD
+                0xc01007fd                init_hd
+                0xc0100817                hd_handle
+                0xc010091c                hd_cmd_out
+                0xc0100a1e                hd_identify
+                0xc0100ad5                print_hdinfo
+                0xc0100c63                print_dpt_entry
+                0xc0100ccf                get_partition_table
+                0xc0100dae                partition
+                0xc0100fc8                hd_open
+                0xc010106f                get_hd_ioctl
+                0xc0101120                wait_for
+                0xc0101151                interrupt_wait
+                0xc01011a1                hd_rdwt
+                0xc0101440                hd_handler
+                0xc010146c                net_handler
+                0xc0101488                waitfor
+                0xc01014cc                print_hd_info
+                0xc01015b9                is_empty
+ *fill*         0xc01015f1        0xf 
  .text          0xc0101600       0x69 syscall.o
                 0xc0101600                write_debug
                 0xc0101610                send_msg
@@ -598,11 +598,11 @@ LOAD ne2000.o
                 0xc010a3d6                thread_init
                 0xc010a483                thread_create
                 0xc010a4b8                thread_start
- .text          0xc010a570      0x1f4 ne2000.o
+ .text          0xc010a570      0x1f7 ne2000.o
                 0xc010a593                DriverInitialize
                 0xc010a628                DriverSend
                 0xc010a69b                PCtoNIC
-                0xc010a701                NICtoPC
+                0xc010a704                NICtoPC
  *(.gnu.warning)
 
 .fini

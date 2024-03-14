@@ -464,7 +464,6 @@ hwint14:
 
 ; 网络中断
 hwint10:
-	xchg bx, bx
 	; 建立快照
 	pushad
 	push ds
