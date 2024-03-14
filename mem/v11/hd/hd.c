@@ -536,6 +536,7 @@ void hd_handler() {
     inform_int(TASK_HD);
 }
 
+// 这就是网络中断例程。
 void net_handler()
 {
 	disp_str("net==== info primary part start:\n");

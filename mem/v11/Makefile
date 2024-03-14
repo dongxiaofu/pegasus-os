@@ -90,7 +90,7 @@ kernel.o:kernel-20.asm
 # kernel.o:kernel.asm
 	${ASM} ${ASKFLAGS} -o $@ $<
 
-ne2000.o:network/demo.asm
+ne2000.o:network/driver/demo.asm
 	${ASM} ${ASKFLAGS} -o $@ $<
 
 #DriverSend.o:network/DriverSend.asm
