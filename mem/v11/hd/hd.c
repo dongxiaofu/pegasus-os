@@ -11,6 +11,9 @@
 #include "global.h"
 #include "hd.h"
 
+// 网络驱动。重构时移走。
+#include "net.h"
+
 struct hd_info hd_info[1];
 char hd_cache[SECTOR_SIZE];
 
@@ -540,6 +543,18 @@ void hd_handler() {
 void net_handler()
 {
 	disp_str("net==== info primary part start:\n");
+	//unsigned char status = get_interrupt_status();
+	// TODO 如果status是指针，我确定可以这样使用。如果它不是指针，我不知道能不能这样做。
+	// interrupt_status irs = (interrupt_status)status;
+	interrupt_status irs = {0};
+	unsigned char status = 0;
+	Memcpy(&irs, &status, sizeof(interrupt_status));
+	disp_str("\n=====================\n");
+	disp_int(irs.prx);
+	disp_int(irs.ptx);
+	disp_int(irs.rxe);
+	disp_int(irs.rdc);
+	disp_str("\n=====================\n");
 	
 	asm ("xchgw %bx, %bx");
 }

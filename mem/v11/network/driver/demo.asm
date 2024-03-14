@@ -7,6 +7,7 @@ global DriverInitialize
 global DriverSend
 global PCtoNIC
 global NICtoPC
+global get_interrupt_status
 
 LOOP_NUM equ 32
 NET_TEST_DATA equ 0x59
@@ -84,9 +85,11 @@ DriverInitialize:
     mov dx,DATACONFIGURATION ;data configuration register
     out dx,al
     mov dx,REMOTEBYTECOUNT0
-    xor al,al
+    xor ax,ax
+	mov al, 0
     out dx,al ;low remote byte count
     mov dx,REMOTEBYTECOUNT1
+	mov al, 1
     out dx,al ;high remote byte count
     mov al,rcrc
     mov dx,RECEIVECONFIGURATION ;receive configuration register
@@ -178,6 +181,14 @@ PSTOP equ 80h
 TRANSMITBUFFER equ 40h
 
 SetPageStart:
+	;保存栈
+	push esi
+	push edi
+	push ebx
+	push ebp
+	push ecx
+	mov ebp, esp
+
 	mov dx, CRDMA0
 	xor ax, ax
 	mov ax, CRDA
@@ -188,10 +199,18 @@ SetPageStart:
 	shr ax, 8
 	out dx, al
 
-	ret
+	;出栈
+	mov esp, ebp
+	pop ecx
+	pop ebp
+	pop ebx
+	pop edi
+	pop esi
+    ret
 
 
 DriverSend:
+	;xchg bx, bx
 	;保存栈
 	push esi
 	push edi
@@ -219,8 +238,10 @@ DriverSend:
 	out dx, al
 
 	push dword [ebp + 24] 
+	xchg bx, bx
     call PCtoNIC ;transfer packet to NIC buffer RAM
 	add esp, 4
+    jmp Finished
 	;call NICtoPC
     mov dx,TRANSMITPAGE
     mov al,TRANSMITBUFFER
@@ -330,7 +351,6 @@ PCtoNIC:
 Writing_Word: ;because of word-wide transfers
 	;mov esi, 0xc050d004 
 	xor ax, ax
-	xchg bx, bx
     lodsw ;load word from ds:si
     out dx,ax ;write to IOPORT on NIC board
     loop Writing_Word
@@ -338,15 +358,44 @@ Writing_Word: ;because of word-wide transfers
     mov cx,0
     mov dx,INTERRUPTSTATUS
 CheckDMA:
+	xchg bx, bx
     in al,dx
+	;当al是40h时，跳转到toNICEND。
     test al,40h ; dma done ???
     jnz toNICEND ; if so, go to NICEND
     jmp CheckDMA ;loop until done
 toNICEND:
     mov dx,INTERRUPTSTATUS
-    mov al,40h ;clear DMA interrupt bit in ISR
+    mov al,0 ;clear DMA interrupt bit in ISR
     out dx,al
+	;不清楚为什么要使用这个指令。
     clc
+
+	;出栈
+	mov esp, ebp
+	pop ecx
+	pop ebp
+	pop ebx
+	pop edi
+	pop esi
+    ret
+
+;和外面的C函数保持一致的命名风格。
+;unsigned char get_interrupt_status()
+get_interrupt_status:
+	;保存栈
+	push esi
+	push edi
+	push ebx
+	push ebp
+	push ecx
+	mov ebp, esp
+
+	;读取INTERRUPT STATUS REGISTER
+    mov dx,INTERRUPTSTATUS
+	xor eax, eax
+    in al,dx
+
 	;出栈
 	mov esp, ebp
 	pop ecx

@@ -503,8 +503,9 @@ hwint10:
 	;mov esp, StackTop
 .2:
 	sti	
+	xchg bx, bx
 	; 调用网卡中断
-	call net_handler
+	;call net_handler
 	;call NICtoPC
 	nop
 	nop
