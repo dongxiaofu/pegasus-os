@@ -132,11 +132,9 @@ DriverInitialize:
     out dx,al ;TCR in normal mode, NIC is now
     ;ready for reception
 
-;	mov dx, CRDMA0
-;	mov ax, CRDA
-;	out dx, al
-;	mov al, ah
-;	out dx, al
+	push 16*1024 
+	call SetPageStart
+
 	;出栈
 	mov esp, ebp
 	pop ecx
@@ -478,12 +476,9 @@ NICtoPC:
     out dx,al
     mov dx,IOPORT
 
-;	mov dx, CRDMA0
-;	mov ax, CRDA
-;	out dx, al
-;	mov al, ah
-;	out dx, al
-	;call SetPageStart
+	push 16*1024 
+	call SetPageStart
+
     mov dx,IOPORT
     ;shr cx,1 ; need to loop half as many times
 	mov cx, LOOP_NUM_LESS
