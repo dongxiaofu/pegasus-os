@@ -2,6 +2,8 @@ extern net_data
 extern net_buf
 extern helloStr
 extern disp_str
+extern disp_str_len
+extern debug_ticks
 
 global DriverInitialize
 global DriverSend
@@ -9,6 +11,7 @@ global PCtoNIC
 global NICtoPC
 global get_interrupt_status
 global set_interrupt_status
+global SetPageStart
 
 LOOP_NUM equ 32
 NET_TEST_DATA equ 0x59
@@ -17,7 +20,7 @@ NET_TEST_DATA equ 0x59
 CRDA equ (16 * 1024)
 CRDA0 equ (0 * 1024)
 
-LOOP_NUM_LESS equ LOOP_NUM
+LOOP_NUM_LESS equ 128
 PAGE_NO	equ 2
 
 Buf times 22  db  0
@@ -181,6 +184,7 @@ PSTART equ 46h
 PSTOP equ 80h
 TRANSMITBUFFER equ 40h
 
+;void SetPageStart(unsigned int pageStart)
 SetPageStart:
 	;保存栈
 	push esi
@@ -192,7 +196,8 @@ SetPageStart:
 
 	mov dx, CRDMA0
 	xor ax, ax
-	mov ax, CRDA
+	;mov ax, CRDA
+	mov ax, [ebp+24]
 	out dx, al
 	mov dx, CRDMA1
 	;and ax, 0b11110000
@@ -239,7 +244,6 @@ DriverSend:
 	out dx, al
 
 	push dword [ebp + 24] 
-	xchg bx, bx
     call PCtoNIC ;transfer packet to NIC buffer RAM
 	add esp, 4
     jmp Finished
@@ -340,6 +344,7 @@ PCtoNIC:
 	; 获取参数。
 	mov esi, dword [esp + 24]
 
+	push 16*1024 
 	call SetPageStart
 ;	mov dx, CRDMA0
 ;	mov ax, CRDA
@@ -359,7 +364,6 @@ Writing_Word: ;because of word-wide transfers
     mov cx,0
     mov dx,INTERRUPTSTATUS
 CheckDMA:
-	xchg bx, bx
     in al,dx
 	;当al是40h时，跳转到toNICEND。
     test al,40h ; dma done ???
@@ -420,7 +424,8 @@ set_interrupt_status:
 	;读取INTERRUPT STATUS REGISTER
     mov dx,INTERRUPTSTATUS
 	xor eax, eax
-	mov eax, [ebp + 20]
+	;mov eax, [ebp + 20]
+	mov eax, [ebp + 24]
     out dx,	al
 
 	;出栈
@@ -430,6 +435,8 @@ set_interrupt_status:
 	pop ebx
 	pop edi
 	pop esi
+
+	ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;end;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -443,6 +450,7 @@ set_interrupt_status:
 ; cx 4 byte count
 ; ax 4 NIC buffer page to transfer from
 ;***********************************************************************
+;unsigned int NICtoPC(char *buf)
 NICtoPC:
 	;保存栈
 	push esi
@@ -451,8 +459,6 @@ NICtoPC:
 	push ebp
 	push ecx
 	mov ebp, esp
-
-	;jmp MyEnd
 
 	mov bx, LOOP_NUM_LESS
     mov dx,REMOTEBYTECOUNT0
@@ -477,7 +483,7 @@ NICtoPC:
 ;	out dx, al
 ;	mov al, ah
 ;	out dx, al
-	call SetPageStart
+	;call SetPageStart
     mov dx,IOPORT
     ;shr cx,1 ; need to loop half as many times
 	mov cx, LOOP_NUM_LESS
@@ -485,20 +491,25 @@ NICtoPC:
     shr cx,1 ; need to loop half as many times
 	;mov edi, [hello]
 	mov edi, Buf
+	;[ebb + 24]是NICtoPC的参数buf。
+	mov edi, [ebp + 24]
 	;mov edi,0xc0503000
 READING_Word_NICtoPC: ;because of word-wide transfers
 	xor eax, eax
 	;xchg bx, bx
+	;call debug_ticks
+    mov dx,IOPORT
     in ax,dx
     stosw ;read word and store in es:di
 	loop READING_Word_NICtoPC
 
 	;xchg bx, bx
-	mov eax, Buf
+;	mov eax, Buf
 	;mov eax, My_Buf
-	push eax
-	call disp_str
-	add esp, 4
+;	push 80
+;	push eax
+;	call disp_str_len
+;	add esp, 4
 
     mov dx,INTERRUPTSTATUS
 CheckDMA_NICtoPC:
@@ -508,6 +519,8 @@ CheckDMA_NICtoPC:
     jmp CheckDMA_NICtoPC
 ReadEnd:
     out dx,al ; clear RDMA bit in NIC ISR
+	;NICtoPC的返回值，是数据的长度。
+	mov eax, LOOP_NUM
 	;出栈
 	mov esp, ebp
 	pop ecx

@@ -12,9 +12,11 @@ enum intr_status {       // 中断状态
 void DriverInitialize();
 void DriverSend();
 void PCtoNIC();
-void NICtoPC();
+unsigned int NICtoPC(char *buf);
 unsigned char get_interrupt_status();
+void debug_ticks();
 void set_interrupt_status(unsigned char status);
+void SetPageStart(unsigned int pageStart);
 
 enum intr_status intr_enable();
 enum intr_status intr_disable(); 
@@ -23,6 +25,7 @@ enum intr_status intr_get_status();
 
 // void Memcpy(unsigned int *dst, unsigned int *src, unsigned int size);
 void disp_str(char *str);
+void disp_str_len(char *str, unsigned int len);
 void disp_str_colour2(int str, int colour);
 void disp_str_colour(char *str, int colour);
 

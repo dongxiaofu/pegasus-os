@@ -539,22 +539,73 @@ void hd_handler() {
     inform_int(TASK_HD);
 }
 
+void debug_ticks()
+{
+	test_ticks++;
+//	dis_pos = 0;
+//	for(int i = 0; i < 160; i++){
+//	    disp_str(" ");
+//	    dis_pos++;
+//	}
+	
+	dis_pos = 430;
+	disp_int(test_ticks);
+	if(test_ticks == 1){
+		asm ("xchgw %bx, %bx");
+	}
+}
+
 // 这就是网络中断例程。
 void net_handler()
 {
-	disp_str("net==== info primary part start:\n");
+//	disp_str("net==== info primary part start:\n");
 	unsigned char status = get_interrupt_status();
 	// TODO 如果status是指针，我确定可以这样使用。如果它不是指针，我不知道能不能这样做。
 	// interrupt_status irs = (interrupt_status)status;
 	interrupt_status irs = {0};
 	// unsigned char status = 0;
 	Memcpy(&irs, &status, sizeof(interrupt_status));
-	disp_str("\n=====================\n");
-	disp_int(irs.prx);
-	disp_int(irs.ptx);
-	disp_int(irs.rxe);
-	disp_int(irs.rdc);
-	disp_str("\n=====================\n");
+//	disp_int(irs.prx);
+//	disp_int(irs.ptx);
+//	disp_int(irs.rxe);
+//	disp_int(irs.rdc);
+//	disp_str("\n=====================\n");
+
+	int size = 128;
+	char *buf = (char *)sys_malloc(size); 
+//	dis_pos = 320 + 40;
+//	disp_int(buf);
+//	if(irs.prx == 1){
+//		disp_str("\n===start@@@@@@@@@==================\n");
+//		disp_str("receive Message\n");
+	unsigned int pageStart = 16 * 1024;
+	for(int k = 0; k < 5; k++){
+		Memset(buf, 0, size);
+		SetPageStart(pageStart);
+		pageStart += size;
+		unsigned int len = NICtoPC(buf);
+//		asm ("xchgw %bx, %bx");
+		
+		len = 64;
+		for(int i = 0; i < len; i++){
+			//asm ("xchgw %bx, %bx");
+			disp_int((unsigned char)(buf[i]));
+			// disp_str(buf[i]);
+			disp_str(" ");
+		}
+
+		disp_str_len(buf, len);
+		disp_str("\n");
+		disp_str("\n");
+	}
+//		disp_str("===end@@@@@@@@@==================\n");
+//	}
+//
+//	if(irs.ptx == 1){
+//		disp_str("\n===0000@@@@@@@@@==================\n");
+//		disp_str("write Message\n");
+//		disp_str("===11111@@@@@@@@@==================\n");
+//	}
 
 	set_interrupt_status(status);
 	

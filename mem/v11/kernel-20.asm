@@ -39,6 +39,7 @@ extern NICtoPC
 extern net_handler
 
 global disp_str
+global disp_str_len
 global disp_str_colour
 global InterruptTest
 global fork_restart
@@ -103,6 +104,73 @@ InterruptTest:
 	mov [gs:(80 * 20 + 42)*2], ax
 	ret
 
+;;;;;;;;;;;;打印长度为len的字符串start;;;;;;;;;;;
+;void disp_str_len(char *str, unsigned int len)
+;参数入栈的顺序是从右边往左边。
+disp_str_len:
+	;;;;;;;start
+	;保存栈
+	push esi
+	push edi
+	push ebx
+	push ebp
+	push ecx
+	mov ebp, esp
+	;;;;;;;;end
+	
+	mov ah, 0Dh
+
+	;mov esi, [ebp + 20]; ebp + 20，乱码。那么，[ebp + 20]存储的是什么？
+	;是eip。
+	mov esi, [ebp + 24]	; str
+	mov ecx, [ebp + 28]	; len
+
+	mov edi, [dis_pos]
+	;;;;;;;;xhcg bx, bx
+
+.1:
+	lodsb
+	; al为空，即字符串打印完毕
+	dec ecx
+	test ecx, ecx	
+	jz .4
+	cmp al, 0X0A
+	jnz .3
+	; 处理换行
+	push eax
+	mov eax, edi
+	mov bl, 160
+	div bl
+	inc eax
+	mov bl, 160
+	mul bl
+	mov edi, eax
+	pop eax
+	jmp .1
+.3:
+	;;;;;;;;xhcg bx, bx
+;	mov [gs:edi], ax
+;	add edi, 2
+
+	mov [gs:edi], al
+	add edi, 1
+
+	mov byte [gs:edi],32 
+	add edi, 1
+
+	jmp .1
+.4:
+	mov [dis_pos], edi
+
+	;出栈
+	mov esp, ebp
+	pop ecx
+	pop ebp
+	pop ebx
+	pop edi
+	pop esi
+	ret
+;;;;;;;;;;;;打印长度为len的字符串end;;;;;;;;;;;
 
 ; 打印字符串
 disp_str:
@@ -344,7 +412,9 @@ hwint0:
 ;	push 0x100000
 ;	call update_cr3
 	sti
+	pushad
 	call clock_handler
+	popad
 	;mov al, 11111000b
 	;out 21h, al
 	;cli	
@@ -465,7 +535,7 @@ hwint14:
 
 ; 网络中断
 hwint10:
-	xchg bx, bx
+	;xchg bx, bx
 	; 建立快照
 	pushad
 	push ds
@@ -504,8 +574,10 @@ hwint10:
 	;mov esp, StackTop
 .2:
 	sti	
+	pushad
 	; 调用网卡中断
 	call net_handler
+	popad
 	;call NICtoPC
 	nop
 	nop
