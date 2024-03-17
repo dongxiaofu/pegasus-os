@@ -572,7 +572,6 @@ void net_handler()
 //	disp_str("\n=====================\n");
 
 	int size = 256;
-	char *buf = (char *)sys_malloc(size); 
 //	dis_pos = 320 + 40;
 //	disp_int(buf);
 	if(irs.prx == 1){
@@ -584,28 +583,55 @@ void net_handler()
 	disp_int(curr_page);
 	disp_str("#\n");
 //	asm ("xchgw %bx, %bx");
+//	没有NULL，只能用0。略感惊讶，我的OS中还不能使用NULL。
+//	我使用过链表，不用NULL用什么解决问题的？
+	NIC_PAGE_BUF_NODE bufLinkList = 0;	
+	NIC_PAGE_BUF_NODE preNode = 0;
 	unsigned char startPage = nic_current_page;
 	unsigned char endPage = curr_page;
 	nic_current_page = curr_page;
+	unsigned int pageNum = 0;
 	for(int k = startPage; k < endPage; k++){
+		pageNum++;
+		char *buf = (char *)sys_malloc(size); 
 		Memset(buf, 0, size);
 		SetPageStart(k * 256);
 		unsigned int len = NICtoPC(buf);
 //		asm ("xchgw %bx, %bx");
-		
-		len = size;
-		for(int i = 0; i < len; i++){
-			//asm ("xchgw %bx, %bx");
-			disp_int((unsigned char)(buf[i]));
-			// disp_str(buf[i]);
-			disp_str(" ");
+		// 把从NIC中读取的数据存储到单链表中。
+		unsigned int nodeSize = sizeof(struct nic_page_buf_node);
+		NIC_PAGE_BUF_NODE node = (NIC_PAGE_BUF_NODE)sys_malloc(nodeSize);
+		Memset(node, 0, nodeSize);
+		node->buf = buf;
+		if(bufLinkList == 0){
+			bufLinkList = node;
+		}else{
+			preNode->next = node;
+		}
+		preNode = node;
+
+	}
+
+		// 遍历链表，把数据合并到一个连续的区域中。
+		unsigned int bufSize = pageNum * size;
+		char *buf = (char *)sys_malloc(bufSize);
+		NIC_PAGE_BUF_NODE current_node = bufLinkList;
+		unsigned int start = 0;
+		while(current_node != 0){
+			Memcpy(buf+start * size, current_node->buf, size);
+			start++;
+
+			current_node = current_node->next;
 		}
 
-		disp_str_len(buf, len);
+		for(int i = 0; i < bufSize; i++){
+			disp_int((unsigned char)(buf[i]));
+			disp_str(" ");
+		}
+		disp_str(buf);
 		disp_str("\n");
 		disp_str("\n");
-	}
-		disp_str("===end@@@@@@@@@==================\n");
+
 	}
 //
 //	if(irs.ptx == 1){

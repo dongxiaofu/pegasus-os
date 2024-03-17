@@ -138,6 +138,15 @@ struct hd_info{
 #define IDX_OF_LOGICAL(device) ((device - hd1a) % (NR_SUB_PART_PER_PRIM * NR_PRIM_PART_PER_HD))
 // 位移运算---字节与扇区的换算需要移动的位数
 #define SECTOR_SIZE_SHIFT 9
+
+
+// 网络驱动。
+typedef struct nic_page_buf_node{
+	unsigned char *buf;
+	struct nic_page_buf_node *next;
+} *NIC_PAGE_BUF_NODE;
+
+
 void read_port(int port, char *fsbuf, int size);
 void write_port(int port, char *fsbuf, int size);
 
