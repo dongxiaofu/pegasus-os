@@ -77,6 +77,9 @@ void init()
 	gdt_index = 9;
 	proc_ready_table = 0x0;
 
+	// 网卡驱动用到这个数据。
+	nic_current_page = 0x40;
+
 	disp_str("init\n");
 	init_keyboard();
 	init_memory(64*1024*1024);

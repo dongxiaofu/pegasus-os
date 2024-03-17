@@ -48,6 +48,7 @@ EXTERN int dis_pos;
 EXTERN int current_dis_pos;
 EXTERN unsigned long long int ticks;
 EXTERN unsigned int MAIN_THREAD_PAGE_DIRECTORY;
+EXTERN unsigned char nic_current_page;
 // TODO 测试用，要删除
 EXTERN unsigned int test_ticks;
 EXTERN unsigned int k_reenter;

@@ -571,7 +571,7 @@ void net_handler()
 //	disp_int(irs.rdc);
 //	disp_str("\n=====================\n");
 
-	int size = 128;
+	int size = 256;
 	char *buf = (char *)sys_malloc(size); 
 //	dis_pos = 320 + 40;
 //	disp_int(buf);
@@ -583,15 +583,17 @@ void net_handler()
 	disp_str("#");
 	disp_int(curr_page);
 	disp_str("#\n");
-	asm ("xchgw %bx, %bx");
-	for(int k = 0; k < 0; k++){
+//	asm ("xchgw %bx, %bx");
+	unsigned char startPage = nic_current_page;
+	unsigned char endPage = curr_page;
+	nic_current_page = curr_page;
+	for(int k = startPage; k < endPage; k++){
 		Memset(buf, 0, size);
-		pageStart += size;
-		SetPageStart(pageStart);
+		SetPageStart(k * 256);
 		unsigned int len = NICtoPC(buf);
 //		asm ("xchgw %bx, %bx");
 		
-		len = 64;
+		len = size;
 		for(int i = 0; i < len; i++){
 			//asm ("xchgw %bx, %bx");
 			disp_int((unsigned char)(buf[i]));

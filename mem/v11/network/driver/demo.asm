@@ -21,7 +21,7 @@ NET_TEST_DATA equ 0x59
 CRDA equ (16 * 1024)
 CRDA0 equ (0 * 1024)
 
-LOOP_NUM_LESS equ 128
+LOOP_NUM_LESS equ 256
 PAGE_NO	equ 2
 
 Buf times 22  db  0
