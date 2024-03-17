@@ -575,14 +575,19 @@ void net_handler()
 	char *buf = (char *)sys_malloc(size); 
 //	dis_pos = 320 + 40;
 //	disp_int(buf);
-//	if(irs.prx == 1){
-//		disp_str("\n===start@@@@@@@@@==================\n");
-//		disp_str("receive Message\n");
+	if(irs.prx == 1){
+		disp_str("\n===start@@@@@@@@@==================\n");
+		disp_str("receive Message\n");
 	unsigned int pageStart = 16 * 1024;
-	for(int k = 0; k < 5; k++){
+	unsigned char curr_page = get_curr_page();
+	disp_str("#");
+	disp_int(curr_page);
+	disp_str("#\n");
+	asm ("xchgw %bx, %bx");
+	for(int k = 0; k < 0; k++){
 		Memset(buf, 0, size);
-		SetPageStart(pageStart);
 		pageStart += size;
+		SetPageStart(pageStart);
 		unsigned int len = NICtoPC(buf);
 //		asm ("xchgw %bx, %bx");
 		
@@ -598,18 +603,20 @@ void net_handler()
 		disp_str("\n");
 		disp_str("\n");
 	}
-//		disp_str("===end@@@@@@@@@==================\n");
-//	}
+		disp_str("===end@@@@@@@@@==================\n");
+	}
 //
 //	if(irs.ptx == 1){
-//		disp_str("\n===0000@@@@@@@@@==================\n");
-//		disp_str("write Message\n");
-//		disp_str("===11111@@@@@@@@@==================\n");
-//	}
+	// if(irs.rdma_done == 1){
+	if(irs.rdc == 1){
+		disp_str("\n===0000@@@@@@@@@==================\n");
+		disp_str("write Message\n");
+		disp_str("===11111@@@@@@@@@==================\n");
+	}
 
 	set_interrupt_status(status);
 	
-	asm ("xchgw %bx, %bx");
+	// asm ("xchgw %bx, %bx");
 }
 
 int waitfor(int mask, int val, int timeout) {

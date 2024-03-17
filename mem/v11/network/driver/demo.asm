@@ -11,6 +11,7 @@ global PCtoNIC
 global NICtoPC
 global get_interrupt_status
 global set_interrupt_status
+global get_curr_page
 global SetPageStart
 
 LOOP_NUM equ 32
@@ -344,6 +345,7 @@ PCtoNIC:
 
 	push 16*1024 
 	call SetPageStart
+	add esp, 4
 ;	mov dx, CRDMA0
 ;	mov ax, CRDA
 ;	out dx, al
@@ -369,7 +371,7 @@ CheckDMA:
     jmp CheckDMA ;loop until done
 toNICEND:
     mov dx,INTERRUPTSTATUS
-    mov al,0 ;clear DMA interrupt bit in ISR
+    mov al,0xF ;clear DMA interrupt bit in ISR
     out dx,al
 	;不清楚为什么要使用这个指令。
     clc
@@ -438,6 +440,38 @@ set_interrupt_status:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;end;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;;;;;;;;;;;;;;;start get_curr_page;;;;;;;;;;;;;;;;;
+;unsigned char get_curr_page()
+get_curr_page:
+	;保存栈
+	push esi
+	push edi
+	push ebx
+	push ebp
+	push ecx
+	mov ebp, esp
+	
+    mov al,61h ;go to page 1 registers
+    mov dx,COMMAND
+    out dx,al
+
+    mov dx,CURRENT
+	xor eax, eax
+	in al, dx
+
+	;出栈
+	mov esp, ebp
+	pop ecx
+	pop ebp
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+;;;;;;;;;;;;;;;;;end get_curr_page;;;;;;;;;;;;;;;;;
+
+
+
 ;***********************************************************************
 ; NICtoPC
 ;
@@ -476,8 +510,8 @@ NICtoPC:
     out dx,al
     mov dx,IOPORT
 
-	push 16*1024 
-	call SetPageStart
+	;push 16*1024 
+	;call SetPageStart
 
     mov dx,IOPORT
     ;shr cx,1 ; need to loop half as many times

@@ -16,6 +16,7 @@ unsigned int NICtoPC(char *buf);
 unsigned char get_interrupt_status();
 void debug_ticks();
 void set_interrupt_status(unsigned char status);
+unsigned char get_curr_page();
 void SetPageStart(unsigned int pageStart);
 
 enum intr_status intr_enable();
