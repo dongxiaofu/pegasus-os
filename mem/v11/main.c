@@ -47,6 +47,7 @@ void kernel_main()
 	process_execute(task_fs, "task_fs\n", "task_fs", 0, init_ticks);
 	process_execute(TaskHD, "task_hd\n", "TaskHD", 0, init_ticks);
 	process_execute(TaskTTY, "task_tty\n", "TaskTTY", 0, init_ticks);
+	process_execute(task_network, "task_network\n", "task_network", 0, init_ticks);
 	process_execute(user_proc_a, "user_proc_a\n", "process_a", 1, init_ticks - 2);
 	process_execute(user_proc_b, "user_proc_b\n", "process_b", 1, init_ticks - 3);
 

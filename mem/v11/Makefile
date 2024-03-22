@@ -26,7 +26,8 @@ OBJS	=	kernel_sub.o kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o glo
 		mem/mem.o \
 		kernel_main_old.o my_process.o \
 		switch_to.o	double_link_list.o thread.o \
-		ne2000.o
+		ne2000.o	\
+		task_network.o
 	#	wait.o	exit.o	fork.o	unlink.o getpid.o
 
 LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
@@ -37,7 +38,8 @@ LOBJS2	=	kernel.o string.o kernel_main.o hd.o syscall.o fs_main.o global.o \
 		mem/mem.o \
 		kernel_main_old.o my_process.o \
 		switch_to.o	double_link_list.o thread.o \
-		ne2000.o
+		ne2000.o	\
+		task_network.o
 
 LOBJS	=	lib/pegasus_crt.a
 
@@ -56,8 +58,8 @@ buildimg:
 	sudo umount /mnt/floppy
 	cp -rvf /home/cg/os/pegasus-os/hd/80m.img ./
 	chown cg 80m.img
-
 	objdump -d kernel.bin > k-log.asm
+
 clean:
 	rm -rvf *.bin
 	rm -rvf *.o
@@ -65,6 +67,7 @@ clean:
 	rm -rvf lib/*.a
 	rm -rvf 80m.img
 	rm -rvf 80m.img.lock
+	rm -rvf k-log.asm
 
 # 不能使用所有的输入文件
 # kernel.bin:kernel.o string.o kernel_main.o hd.o syscall.o
@@ -180,6 +183,10 @@ exec.o:lib/exec.c
 	${CC} ${CFLAGS} -o $@ $<
 # 内存管理
 mem.o:mem/mem.c
+	${CC} ${CFLAGS} -o $@ $<
+
+# 网络协议
+task_network.o:network/ipc.c
 	${CC} ${CFLAGS} -o $@ $<
 
 # 重构时写的代码start

@@ -558,6 +558,8 @@ void debug_ticks()
 // 这就是网络中断例程。
 void net_handler()
 {
+
+	return;
 //	disp_str("net==== info primary part start:\n");
 	unsigned char status = get_interrupt_status();
 	// TODO 如果status是指针，我确定可以这样使用。如果它不是指针，我不知道能不能这样做。

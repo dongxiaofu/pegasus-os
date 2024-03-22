@@ -30,12 +30,13 @@ Task user_task_table[USER_PROC_NUM] = {
 };
 // 系统任务元数据
 // Task sys_task_table[TASK_PROC_NUM] = {
-Task sys_task_table[5] = {
+Task sys_task_table[6] = {
         {"TTY", TaskTTY, TaskTTY_STACK_SIZE},
         {"SYS", TaskSys, TASK_SYS_SIZE},
         {"HD", TaskHD,  TASK_HD_SIZE},
         {"FS", task_fs, TASK_FS_SIZE},
-        {"MM",TaskMM, TASK_MM_SIZE}
+        {"MM",TaskMM, TASK_MM_SIZE},
+        {"NET",task_network, TASK_NETWORK_SIZE}
  };
 
 // 进程的堆栈

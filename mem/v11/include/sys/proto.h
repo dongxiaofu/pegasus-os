@@ -196,6 +196,7 @@ void TaskSys();
 void TaskHD();
 // 文件系统
 extern void task_fs();
+extern void task_network();
 // 内存管理
 void TaskMM();
 // INIT进程
