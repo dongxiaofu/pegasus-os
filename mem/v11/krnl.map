@@ -326,7 +326,7 @@ LOAD task_network.o
 .plt.sec
  *(.plt.sec)
 
-.text           0xc0100000     0xa972
+.text           0xc0100000     0xa938
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
@@ -617,7 +617,7 @@ LOAD task_network.o
                 0xc010a7ee                set_interrupt_status
                 0xc010a807                get_curr_page
                 0xc010a824                NICtoPC
- .text          0xc010a880       0xf2 task_network.o
+ .text          0xc010a880       0xb8 task_network.o
                 0xc010a880                task_network
                 0xc010a8f0                network_handle
  *(.gnu.warning)
@@ -630,7 +630,7 @@ LOAD task_network.o
                 0xc010b000                        . = ALIGN (CONSTANT (MAXPAGESIZE))
                 0xc010b000                        . = SEGMENT_START ("rodata-segment", (ALIGN (CONSTANT (MAXPAGESIZE)) + (. & (CONSTANT (MAXPAGESIZE) - 0x1))))
 
-.rodata         0xc010b000     0x1238
+.rodata         0xc010b000     0x11cd
  *(.rodata .rodata.* .gnu.linkonce.r.*)
  .rodata        0xc010b000      0x14c kernel_main.o
  .rodata        0xc010b14c      0x19c hd.o
@@ -647,18 +647,17 @@ LOAD task_network.o
  *fill*         0xc010b5ef       0x11 
  .rodata        0xc010b600      0xb75 kernel_main_old.o
  .rodata        0xc010c175       0x2c double_link_list.o
- *fill*         0xc010c1a1        0x3 
- .rodata        0xc010c1a4       0x94 task_network.o
+ .rodata        0xc010c1a1       0x2c task_network.o
 
-.txt            0xc010c238       0xaa
- .txt           0xc010c238       0x82 string.o
-                0xc010c238                Memcpy2
-                0xc010c266                Memset
-                0xc010c285                Strcpy
-                0xc010c29f                Strlen
- .txt           0xc010c2ba       0x28 hd_rdwt.o
-                0xc010c2ba                read_port
-                0xc010c2ce                write_port
+.txt            0xc010c1cd       0xaa
+ .txt           0xc010c1cd       0x82 string.o
+                0xc010c1cd                Memcpy2
+                0xc010c1fb                Memset
+                0xc010c21a                Strcpy
+                0xc010c234                Strlen
+ .txt           0xc010c24f       0x28 hd_rdwt.o
+                0xc010c24f                read_port
+                0xc010c263                write_port
 
 .rodata1
  *(.rodata1)
@@ -667,56 +666,56 @@ LOAD task_network.o
  *(.eh_frame_hdr)
  *(.eh_frame_entry .eh_frame_entry.*)
 
-.eh_frame       0xc010c2e4     0x18a4
+.eh_frame       0xc010c278     0x18a4
  *(.eh_frame)
- .eh_frame      0xc010c2e4       0xfc kernel_main.o
- .eh_frame      0xc010c3e0      0x284 hd.o
+ .eh_frame      0xc010c278       0xfc kernel_main.o
+ .eh_frame      0xc010c374      0x284 hd.o
                                 0x29c (size before relaxing)
- .eh_frame      0xc010c664      0x27c fs_main.o
+ .eh_frame      0xc010c5f8      0x27c fs_main.o
                                 0x294 (size before relaxing)
- .eh_frame      0xc010c8e0       0x80 process.o
+ .eh_frame      0xc010c874       0x80 process.o
                                  0x98 (size before relaxing)
- .eh_frame      0xc010c960      0x100 protect.o
+ .eh_frame      0xc010c8f4      0x100 protect.o
                                 0x118 (size before relaxing)
- .eh_frame      0xc010ca60      0x1e0 console.o
+ .eh_frame      0xc010c9f4      0x1e0 console.o
                                 0x1f8 (size before relaxing)
- .eh_frame      0xc010cc40       0xa0 keyboard.o
+ .eh_frame      0xc010cbd4       0xa0 keyboard.o
                                  0xb8 (size before relaxing)
- .eh_frame      0xc010cce0       0x20 open.o
+ .eh_frame      0xc010cc74       0x20 open.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010cd00       0x20 read.o
+ .eh_frame      0xc010cc94       0x20 read.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010cd20       0x20 write.o
+ .eh_frame      0xc010ccb4       0x20 write.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010cd40       0x20 close.o
+ .eh_frame      0xc010ccd4       0x20 close.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010cd60       0x20 wait.o
+ .eh_frame      0xc010ccf4       0x20 wait.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010cd80       0x20 exit.o
+ .eh_frame      0xc010cd14       0x20 exit.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010cda0       0x20 fork.o
+ .eh_frame      0xc010cd34       0x20 fork.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010cdc0       0x20 getpid.o
+ .eh_frame      0xc010cd54       0x20 getpid.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010cde0       0x60 exec.o
+ .eh_frame      0xc010cd74       0x60 exec.o
                                  0x78 (size before relaxing)
- .eh_frame      0xc010ce40       0x3c mm/main.o
+ .eh_frame      0xc010cdd4       0x3c mm/main.o
                                  0x54 (size before relaxing)
- .eh_frame      0xc010ce7c       0x20 mm/exec.o
+ .eh_frame      0xc010ce10       0x20 mm/exec.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010ce9c       0x80 mm/forkexit.o
+ .eh_frame      0xc010ce30       0x80 mm/forkexit.o
                                  0x98 (size before relaxing)
- .eh_frame      0xc010cf1c      0x364 mem/mem.o
+ .eh_frame      0xc010ceb0      0x364 mem/mem.o
                                 0x37c (size before relaxing)
- .eh_frame      0xc010d280      0x6ac kernel_main_old.o
+ .eh_frame      0xc010d214      0x6ac kernel_main_old.o
                                 0x6c4 (size before relaxing)
- .eh_frame      0xc010d92c       0xe0 my_process.o
+ .eh_frame      0xc010d8c0       0xe0 my_process.o
                                  0xf8 (size before relaxing)
- .eh_frame      0xc010da0c       0xc0 double_link_list.o
+ .eh_frame      0xc010d9a0       0xc0 double_link_list.o
                                  0xd8 (size before relaxing)
- .eh_frame      0xc010dacc       0x80 thread.o
+ .eh_frame      0xc010da60       0x80 thread.o
                                  0x98 (size before relaxing)
- .eh_frame      0xc010db4c       0x3c task_network.o
+ .eh_frame      0xc010dae0       0x3c task_network.o
                                  0x54 (size before relaxing)
  *(.eh_frame.*)
 
@@ -1135,7 +1134,7 @@ LOAD task_network.o
  .debug_abbrev  0x00003333      0x222 thread.o
  .debug_abbrev  0x00003555      0x1b3 task_network.o
 
-.debug_line     0x00000000     0x4a0f
+.debug_line     0x00000000     0x49f0
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x1ea kernel_main.o
  .debug_line    0x000001ea      0x639 hd.o
@@ -1162,7 +1161,7 @@ LOAD task_network.o
  .debug_line    0x0000422e      0x33b my_process.o
  .debug_line    0x00004569      0x253 double_link_list.o
  .debug_line    0x000047bc      0x145 thread.o
- .debug_line    0x00004901      0x10e task_network.o
+ .debug_line    0x00004901       0xef task_network.o
 
 .debug_frame
  *(.debug_frame)

@@ -1,6 +1,6 @@
 [section .bss]
 ;Stack	resb	1024*2
-Stack	resb	1024*8
+Stack	resb	1024*2
 ;Stack	resb	1024*1024
 ;Stack	resb	1024*1024*16
 ;Stack	resb	1024*2
@@ -35,10 +35,14 @@ extern disp_int
 extern keyboard_handler
 extern hd_handle
 extern hd_handler
+extern NICtoPC
+extern net_handler
 
 global disp_str
+global disp_str_len
 global disp_str_colour
 global InterruptTest
+global fork_restart
 global restart
 global in_byte
 global out_byte
@@ -69,13 +73,15 @@ global align_check_fault
 global simd_float_exception_fault
 ; 系统调用
 global sys_call
+global sys_call_test
 
 ; 内部中断
 global hwint0
 global hwint1
 ; 硬盘中断
 global hwint14
-global hwint15
+; 网络中断
+global hwint10
 
 ; 打开8259A的级联中断
 global enable_8259A_casecade_irq
@@ -85,8 +91,11 @@ global disable_8259A_casecade_irq
 global enable_8259A_slave_winchester_irq
 ; 关闭8259A的从片的硬盘中断
 global disable_8259A_slave_winchester_irq
-; 打开8259A的从片的网络中断
-global enable_8259A_slave_net_irq:
+global enable_8259A_slave_net_irq
+
+global update_cr3
+global update_tss
+global get_running_thread_pcb
 
 ; 中断例程
 InterruptTest:
@@ -95,6 +104,73 @@ InterruptTest:
 	mov [gs:(80 * 20 + 42)*2], ax
 	ret
 
+;;;;;;;;;;;;打印长度为len的字符串start;;;;;;;;;;;
+;void disp_str_len(char *str, unsigned int len)
+;参数入栈的顺序是从右边往左边。
+disp_str_len:
+	;;;;;;;start
+	;保存栈
+	push esi
+	push edi
+	push ebx
+	push ebp
+	push ecx
+	mov ebp, esp
+	;;;;;;;;end
+	
+	mov ah, 0Dh
+
+	;mov esi, [ebp + 20]; ebp + 20，乱码。那么，[ebp + 20]存储的是什么？
+	;是eip。
+	mov esi, [ebp + 24]	; str
+	mov ecx, [ebp + 28]	; len
+
+	mov edi, [dis_pos]
+	;;;;;;;;xhcg bx, bx
+
+.1:
+	lodsb
+	; al为空，即字符串打印完毕
+	dec ecx
+	test ecx, ecx	
+	jz .4
+	cmp al, 0X0A
+	jnz .3
+	; 处理换行
+	push eax
+	mov eax, edi
+	mov bl, 160
+	div bl
+	inc eax
+	mov bl, 160
+	mul bl
+	mov edi, eax
+	pop eax
+	jmp .1
+.3:
+	;;;;;;;;xhcg bx, bx
+;	mov [gs:edi], ax
+;	add edi, 2
+
+	mov [gs:edi], al
+	add edi, 1
+
+	mov byte [gs:edi],32 
+	add edi, 1
+
+	jmp .1
+.4:
+	mov [dis_pos], edi
+
+	;出栈
+	mov esp, ebp
+	pop ecx
+	pop ebp
+	pop ebx
+	pop edi
+	pop esi
+	ret
+;;;;;;;;;;;;打印长度为len的字符串end;;;;;;;;;;;
 
 ; 打印字符串
 disp_str:
@@ -261,8 +337,13 @@ stack_exception_fault:
 	push 12
 	jmp exception
 general_protection_exception_fault:
+	;;xchg bx, bx
 	push 13
-	jmp exception
+	call exception_handler
+	add esp, 4 * 2 
+	
+	iret
+	;jmp exception
 page_fault:
 	push 14
 	jmp exception
@@ -309,13 +390,15 @@ hwint0:
 	push fs
 	push gs
 
+	;inc qword [ticks]
+
 	mov dx, ss
 	mov ds, dx
 	mov es, dx
 	mov fs, dx
 	;;xhcg bx, bx	
-	mov al, 11111001b
-	out 21h, al
+	;mov al, 11111001b
+	;out 21h, al
 	; 置EOI位 start
 	mov al, 20h
 	out 20h, al	
@@ -324,15 +407,19 @@ hwint0:
 	cmp dword [k_reenter], 0
 	jne .2
 .1:
-	mov esp, StackTop
+	;mov esp, StackTop
 .2:
+;	push 0x100000
+;	call update_cr3
 	sti
+	pushad
 	call clock_handler
-	mov al, 11111000b
-	out 21h, al
-	cli	
-	cmp dword [k_reenter], 0
-	jne reenter_restore
+	popad
+	;mov al, 11111000b
+	;out 21h, al
+	;cli	
+	;cmp dword [k_reenter], 0
+	;jne reenter_restore
 	jmp restore
 
 
@@ -368,7 +455,7 @@ hwint1:
 	cmp dword [k_reenter], 0
 	jne .2
 .1:
-	mov esp, StackTop
+	;mov esp, StackTop
 .2:
 	sti	
 	;inc dword [k_reenter]
@@ -379,7 +466,7 @@ hwint1:
 	;;;;;xhcg bx, bx
 	mov al, 11111000b
 	out 21h, al
-	cli
+	;cli
 	;dec dword [k_reenter]
 	;;;;;xhcg bx, bx
 	; 没有比较，为啥用jne？因为这是修改之前的代码后遗漏的地方.
@@ -408,7 +495,7 @@ hwint14:
 
 	; 禁用硬盘中断
 	;call disable_8259A_slave_winchester_irq
-	mov al, 11111111b
+	mov al, 11111011b
 	out 0xA1, al	
 
 	; master置EOI位 start
@@ -428,7 +515,7 @@ hwint14:
 	cmp dword [k_reenter], 0
 	jne .2
 .1:
-	mov esp, StackTop
+	;mov esp, StackTop
 .2:
 	sti	
 	; 调用硬盘中断
@@ -438,16 +525,17 @@ hwint14:
 	;cli
 	; 打开硬盘中断
 	;call enable_8259A_slave_winchester_irq
-	mov al, 10111111b
+	mov al, 10111011b
 	out 0xA1, al	
 
-	cli
+	;cli
 	cmp dword [k_reenter], 0
 	jne reenter_restore
 	jmp restore
 
 ; 网络中断
-hwint15:
+hwint10:
+	;xchg bx, bx
 	; 建立快照
 	pushad
 	push ds
@@ -461,9 +549,9 @@ hwint15:
 	mov fs, dx
 
 
-	; 禁用硬盘中断
+	; 禁用网卡中断
 	;call disable_8259A_slave_winchester_irq
-	mov al, 11111111b
+	mov al, 10111111b
 	out 0xA1, al	
 
 	; master置EOI位 start
@@ -483,23 +571,28 @@ hwint15:
 	cmp dword [k_reenter], 0
 	jne .2
 .1:
-	mov esp, StackTop
+	;mov esp, StackTop
 .2:
 	sti	
-	; 调用硬盘中断
-	;call hd_handle
-	;call hd_handler
+	pushad
+	; 调用网卡中断
+	call net_handler
+	popad
+	;call NICtoPC
+	nop
+	nop
 	
 	;cli
-	; 打开网络中断
+	; 打开网卡中断
 	;call enable_8259A_slave_winchester_irq
-	mov al, 00111111b
+	mov al, 10111011b
 	out 0xA1, al	
 
-	cli
+	;cli
 	cmp dword [k_reenter], 0
 	jne reenter_restore
 	jmp restore
+
 
 %macro hwint_slave 1
 	push %1
@@ -522,6 +615,7 @@ sys_call:
 	; 从gs到eax，距离是多少个字节？11个	
 	; 中间代码修改eax使用
 	mov esi, esp
+	mov ebp, esp
 	;mov edx, esp
 	
 	mov dx, ss
@@ -534,7 +628,7 @@ sys_call:
 	cmp dword [k_reenter], 0
 	jne .2
 .1:
-	mov esp, StackTop 
+;	mov esp, StackTop 
 .2:
 	sti
 	;inc dword [k_reenter]
@@ -557,7 +651,8 @@ sys_call:
 	;pop esi
 	add esp, 12
 	pop esi
-	mov [esi + 11 * 4], eax
+	;mov [esi + 11 * 4], eax
+	mov [ebp + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
 	;pop esi
 	;;;;;xchg bx, bx
@@ -582,7 +677,7 @@ sys_call:
 	; 进程C的进程表。本来想恢复B，却恢复了C。
 	; 8. 我模拟的过程，可能和实际执行情况不同，但足以证明：恢复进程的操作如果不是原子操作，会导致
 	; 非常混乱的执行过程。总之，不是预期的、正确的执行过程。
-	cli
+	;cli
 	cmp dword [k_reenter], 0
 	;je restore
 	jne reenter_restore
@@ -603,6 +698,27 @@ sys_call:
 
 ; 系统调用中断 end
 
+; 启动子进程时使用
+fork_restart:
+	cli
+	dec dword [k_reenter]
+	; 修改tss.esp0
+;	mov eax, esp
+;	and eax, 0xFFFFF000
+;	sub esp, 20
+;	;add eax, 4
+;;	push eax
+;;	call update_tss
+;	add esp, 24
+	; 出栈 	
+	pop gs
+	pop fs
+	pop es
+	pop ds
+
+	popad
+	iretd
+
 ; 启动进程
 restart:
 	;mov esp, [proc_table]
@@ -613,16 +729,18 @@ restart:
 	;lldt [proc_table + 64]
 	;lldt [proc_table + 68]
 	; 不能放到前面
+	cli
 	dec dword [k_reenter]
-	mov esp, [proc_ready_table]
-	lldt [esp + 68]
+	mov ebp, esp
+	mov esp, [ebp+4]
+	;lldt [esp + 68]
 	;lldt [proc_table + 56]
 	; 设置tss.esp0
 	;lea eax, [proc_table + 52]
 	;lea eax, [proc_table + 56]
 	;lea eax, [proc_table + 68]
-	lea eax, [esp + 68]
-	mov [tss + 4], eax 
+	;lea eax, [esp + 68]
+	;mov [tss + 4], eax 
 	; 出栈 	
 	pop gs
 	pop fs
@@ -646,16 +764,17 @@ restore:
 	;;;;;xhcg bx, bx
 	; 能放到前dword 面，和其他函数在形式上比较相似
 	;dec dword [k_reenter]
-	mov esp, [proc_ready_table]
-	lldt [esp + 68]
+	;mov esp, [proc_ready_table]
+	;lldt [esp + 68]
 	;lldt [proc_table + 56]
 	; 设置tss.esp0
 	;lea eax, [proc_table + 52]
 	;lea eax, [proc_table + 56]
 	;lea eax, [proc_table + 68]
-	lea eax, [esp + 68]
-	mov dword [tss + 4], eax 
+	;lea eax, [esp + 68]
+	;mov dword [tss + 4], ebp
 reenter_restore:
+	cli
 	dec dword [k_reenter]
 	; 出栈 	
 	pop gs
@@ -888,13 +1007,53 @@ disable_8259A_slave_winchester_irq:
 	popf; ax
 	ret
 
+update_cr3:
+	push ebp
+	mov ebp, esp
+
+	mov eax, [ebp+8]
+	mov cr3, eax
+	
+	mov esp, ebp
+	pop ebp
+	ret
+
+update_tss:
+	push ebp
+	mov ebp, esp
+
+	mov eax, [ebp+8]
+	;mov eax, [eax]
+	mov [tss+4], eax
+	
+	mov esp, ebp
+	pop ebp
+	ret
+
+get_running_thread_pcb:
+	mov eax, esp
+	and eax, 0xFFFFF000
+
+	ret
+
+sys_call_test:
+	pushf
+
+	;xchg bx, bx
+
+	popf
+	ret
+
 enable_8259A_slave_net_irq:
 	pushf; ax
 	cli
+	xchg bx, bx
+	xor al, al
 	in al, 0xA1
 	;or al, ~(1<<6)
-	and al, ~(1<<7)
+	and al, ~(1<<2)
 	out 0xA1, al
 
 	popf; ax
+	sti
 	ret
