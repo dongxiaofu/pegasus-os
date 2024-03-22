@@ -146,6 +146,17 @@ typedef struct nic_page_buf_node{
 	struct nic_page_buf_node *next;
 } *NIC_PAGE_BUF_NODE;
 
+// 以太网帧结构体。
+#define ETH_ALEN	6
+// 16位大端法。
+typedef __be16 unsigned short
+
+typedef struct ethhdr{
+	unsigned char   h_dest[ETH_ALEN];   /* destination eth addr */
+	unsigned char   h_source[ETH_ALEN];   /* source eth addr */
+	__be16      h_proto;        /* packet type ID field */
+} *ETHHDR;
+
 
 void read_port(int port, char *fsbuf, int size);
 void write_port(int port, char *fsbuf, int size);
