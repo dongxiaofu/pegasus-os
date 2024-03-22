@@ -35,7 +35,7 @@ _start:
 	;jmp $
 	;jmp $
 	;jmp $
-	;;;xchg bx, bx	
+	xchg bx, bx	
 	;mov word [dis_pos], 0
 	mov dword [dis_pos], 0
 	mov ah, 0Bh

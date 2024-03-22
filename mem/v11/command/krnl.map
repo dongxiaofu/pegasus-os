@@ -1,211 +1,191 @@
 Archive member included to satisfy reference by file (symbol)
 
-../lib/pegasus_crt.a(exit.o)  start.o (exit)
 ../lib/pegasus_crt.a(kernel_main_old.o)
-                              test.o (Printf)
-../lib/pegasus_crt.a(double_link_list.o)
-                              ../lib/pegasus_crt.a(kernel_main_old.o) (appendToDoubleLinkList)
-../lib/pegasus_crt.a(kernel.o)
-                              ../lib/pegasus_crt.a(kernel_main_old.o) (disp_str)
-../lib/pegasus_crt.a(string.o)
-                              ../lib/pegasus_crt.a(kernel_main_old.o) (Memcpy2)
-../lib/pegasus_crt.a(hd.o)    ../lib/pegasus_crt.a(kernel.o) (hd_handler)
-../lib/pegasus_crt.a(syscall.o)
-                              ../lib/pegasus_crt.a(kernel_main_old.o) (write_debug)
-../lib/pegasus_crt.a(global.o)
-                              ../lib/pegasus_crt.a(kernel.o) (sys_call_table)
-../lib/pegasus_crt.a(hd_rdwt.o)
-                              ../lib/pegasus_crt.a(hd.o) (read_port)
+                              echo.o (Printf)
+../lib/pegasus_crt.a(keyboard.o)
+                              ../lib/pegasus_crt.a(kernel_main_old.o) (init_keyboard_handler)
 ../lib/pegasus_crt.a(process.o)
                               ../lib/pegasus_crt.a(kernel_main_old.o) (schedule_process)
-../lib/pegasus_crt.a(protect.o)
-                              ../lib/pegasus_crt.a(kernel_main_old.o) (InitInterruptDesc)
-../lib/pegasus_crt.a(console.o)
-                              ../lib/pegasus_crt.a(kernel_main_old.o) (out_char)
-../lib/pegasus_crt.a(keyboard.o)
-                              ../lib/pegasus_crt.a(kernel.o) (keyboard_handler)
-../lib/pegasus_crt.a(open.o)  ../lib/pegasus_crt.a(kernel_main_old.o) (open)
+../lib/pegasus_crt.a(mem.o)   ../lib/pegasus_crt.a(kernel_main_old.o) (ptr_pde)
+../lib/pegasus_crt.a(exec.o)  ../lib/pegasus_crt.a(kernel_main_old.o) (execl)
 ../lib/pegasus_crt.a(read.o)  ../lib/pegasus_crt.a(kernel_main_old.o) (read)
+../lib/pegasus_crt.a(exit.o)  start.o (exit)
+../lib/pegasus_crt.a(wait.o)  ../lib/pegasus_crt.a(kernel_main_old.o) (wait)
+../lib/pegasus_crt.a(open.o)  ../lib/pegasus_crt.a(kernel_main_old.o) (open)
 ../lib/pegasus_crt.a(write.o)
                               ../lib/pegasus_crt.a(kernel_main_old.o) (write)
 ../lib/pegasus_crt.a(close.o)
                               ../lib/pegasus_crt.a(kernel_main_old.o) (close)
-../lib/pegasus_crt.a(wait.o)  ../lib/pegasus_crt.a(kernel_main_old.o) (wait)
 ../lib/pegasus_crt.a(fork.o)  ../lib/pegasus_crt.a(kernel_main_old.o) (fork)
-../lib/pegasus_crt.a(exec.o)  ../lib/pegasus_crt.a(kernel_main_old.o) (execl)
-../lib/pegasus_crt.a(main.o)  ../lib/pegasus_crt.a(global.o) (TaskMM)
-../lib/pegasus_crt.a(exec.o)  ../lib/pegasus_crt.a(main.o) (do_exec)
-../lib/pegasus_crt.a(forkexit.o)
-                              ../lib/pegasus_crt.a(main.o) (do_fork)
-../lib/pegasus_crt.a(mem.o)   ../lib/pegasus_crt.a(exec.o) (get_virtual_address_start_with_addr)
-../lib/pegasus_crt.a(my_process.o)
-                              ../lib/pegasus_crt.a(forkexit.o) (fork_process)
-../lib/pegasus_crt.a(switch_to.o)
-                              ../lib/pegasus_crt.a(process.o) (switch_to)
-../lib/pegasus_crt.a(thread.o)
-                              ../lib/pegasus_crt.a(my_process.o) (thread_init)
+../lib/pegasus_crt.a(double_link_list.o)
+                              ../lib/pegasus_crt.a(mem.o) (initDoubleLinkList)
+../lib/pegasus_crt.a(protect.o)
+                              ../lib/pegasus_crt.a(kernel_main_old.o) (InitInterruptDesc)
+../lib/pegasus_crt.a(console.o)
+                              ../lib/pegasus_crt.a(keyboard.o) (select_console)
+../lib/pegasus_crt.a(global.o)
+                              ../lib/pegasus_crt.a(protect.o) (proc_table)
 ../lib/pegasus_crt.a(task_network.o)
                               ../lib/pegasus_crt.a(global.o) (task_network)
+../lib/pegasus_crt.a(hd.o)    ../lib/pegasus_crt.a(global.o) (TaskHD)
 ../lib/pegasus_crt.a(fs_main.o)
                               ../lib/pegasus_crt.a(global.o) (task_fs)
+../lib/pegasus_crt.a(main.o)  ../lib/pegasus_crt.a(global.o) (TaskMM)
+../lib/pegasus_crt.a(forkexit.o)
+                              ../lib/pegasus_crt.a(main.o) (do_fork)
+../lib/pegasus_crt.a(exec.o)  ../lib/pegasus_crt.a(main.o) (do_exec)
+../lib/pegasus_crt.a(my_process.o)
+                              ../lib/pegasus_crt.a(forkexit.o) (fork_process)
+../lib/pegasus_crt.a(thread.o)
+                              ../lib/pegasus_crt.a(my_process.o) (thread_init)
 
 Merging program properties
 
-Removed property 0xc0010001 to merge test.o (0x1) and start.o (not found)
-Removed property 0xc0010002 to merge test.o (0x0) and start.o (not found)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(exit.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(exit.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(kernel_main_old.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(kernel_main_old.o) (0x1)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(double_link_list.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(double_link_list.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(hd.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(hd.o) (0x1)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(global.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(global.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(process.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(process.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(protect.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(protect.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(console.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(console.o) (0x1)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(keyboard.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(keyboard.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(open.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(open.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(read.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(read.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(write.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(write.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(close.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(close.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(wait.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(wait.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(fork.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(fork.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(exec.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(exec.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(main.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(main.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(exec.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(exec.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(forkexit.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(forkexit.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(my_process.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(my_process.o) (0x1)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(thread.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(thread.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(task_network.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(task_network.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and ../lib/pegasus_crt.a(fs_main.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and ../lib/pegasus_crt.a(fs_main.o) (0x1)
+Removed property 0xc0010001 to merge echo.o (0x1) and start.o (not found)
+Removed property 0xc0010002 to merge echo.o (0x0) and start.o (not found)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(kernel_main_old.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(kernel_main_old.o) (0x1)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(keyboard.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(keyboard.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(process.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(process.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(exec.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(exec.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(read.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(read.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(exit.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(exit.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(wait.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(wait.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(open.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(open.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(write.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(write.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(close.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(close.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(fork.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(fork.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(double_link_list.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(double_link_list.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(protect.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(protect.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(console.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(console.o) (0x1)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(global.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(global.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(task_network.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(task_network.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(hd.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(hd.o) (0x1)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(fs_main.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(fs_main.o) (0x1)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(main.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(main.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(forkexit.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(forkexit.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(exec.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(exec.o) (0x0)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(my_process.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(my_process.o) (0x1)
+Removed property 0xc0010001 to merge echo.o (not found) and ../lib/pegasus_crt.a(thread.o) (0x1)
+Removed property 0xc0010002 to merge echo.o (not found) and ../lib/pegasus_crt.a(thread.o) (0x0)
 
 Allocating common symbols
 Common symbol       size              file
 
-current_tty         0x4               ../lib/pegasus_crt.a(exit.o)
+current_tty         0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
 file_desc_table     0x400             ../lib/pegasus_crt.a(fs_main.o)
-is_e0               0x1               ../lib/pegasus_crt.a(exit.o)
+is_e0               0x1               ../lib/pegasus_crt.a(kernel_main_old.o)
 phy_super_block_buf
                     0x4               ../lib/pegasus_crt.a(fs_main.o)
 phy_fsbuf           0x4               ../lib/pegasus_crt.a(fs_main.o)
-idt_ptr             0x6               ../lib/pegasus_crt.a(exit.o)
-pid                 0x4               ../lib/pegasus_crt.a(exit.o)
+idt_ptr             0x6               ../lib/pegasus_crt.a(kernel_main_old.o)
+pid                 0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
 KernelVirtualMemory
                     0xc               ../lib/pegasus_crt.a(kernel_main_old.o)
 inode_table         0xa00             ../lib/pegasus_crt.a(fs_main.o)
-current_dis_pos     0x4               ../lib/pegasus_crt.a(exit.o)
-dis_pos             0x4               ../lib/pegasus_crt.a(exit.o)
-k_reenter           0x4               ../lib/pegasus_crt.a(exit.o)
+current_dis_pos     0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
+dis_pos             0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
+k_reenter           0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
 super_block_buf     0x4               ../lib/pegasus_crt.a(fs_main.o)
-gdt                 0x400             ../lib/pegasus_crt.a(exit.o)
-proc_ready_table    0x4               ../lib/pegasus_crt.a(exit.o)
-test_ticks          0x4               ../lib/pegasus_crt.a(exit.o)
+gdt                 0x400             ../lib/pegasus_crt.a(kernel_main_old.o)
+proc_ready_table    0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
+test_ticks          0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
 hd_info             0x224             ../lib/pegasus_crt.a(hd.o)
 proc_stack          0x70000           ../lib/pegasus_crt.a(global.o)
-pcaller             0x4               ../lib/pegasus_crt.a(exit.o)
-keyboard_buffer     0x20c             ../lib/pegasus_crt.a(exit.o)
-pcb_list            0x10              ../lib/pegasus_crt.a(exit.o)
-gdt_index           0x4               ../lib/pegasus_crt.a(exit.o)
-tty_table           0x828             ../lib/pegasus_crt.a(exit.o)
-tss                 0x6c              ../lib/pegasus_crt.a(exit.o)
+pcaller             0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
+keyboard_buffer     0x20c             ../lib/pegasus_crt.a(kernel_main_old.o)
+pcb_list            0x10              ../lib/pegasus_crt.a(kernel_main_old.o)
+gdt_index           0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
+tty_table           0x828             ../lib/pegasus_crt.a(kernel_main_old.o)
+tss                 0x6c              ../lib/pegasus_crt.a(kernel_main_old.o)
 KernelPool          0x10              ../lib/pegasus_crt.a(kernel_main_old.o)
-net_buf             0x4               ../lib/pegasus_crt.a(exit.o)
+net_buf             0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
 fsbuf               0x4               ../lib/pegasus_crt.a(fs_main.o)
-nic_current_page    0x1               ../lib/pegasus_crt.a(exit.o)
+nic_current_page    0x1               ../lib/pegasus_crt.a(kernel_main_old.o)
 root                0x28              ../lib/pegasus_crt.a(fs_main.o)
 kernel_mem_block_decs_array
                     0xf0              ../lib/pegasus_crt.a(mem.o)
-counter             0x4               ../lib/pegasus_crt.a(exit.o)
-key_pressed         0x4               ../lib/pegasus_crt.a(exit.o)
-fork_pid            0x4               ../lib/pegasus_crt.a(exit.o)
-is_shift            0x1               ../lib/pegasus_crt.a(exit.o)
-net_data            0x1               ../lib/pegasus_crt.a(exit.o)
-gdt_ptr             0x6               ../lib/pegasus_crt.a(exit.o)
-idt                 0x800             ../lib/pegasus_crt.a(exit.o)
-main_thread         0x4               ../lib/pegasus_crt.a(exit.o)
-ticks               0x8               ../lib/pegasus_crt.a(exit.o)
-is_init             0x1               ../lib/pegasus_crt.a(exit.o)
+counter             0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
+key_pressed         0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
+fork_pid            0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
+is_shift            0x1               ../lib/pegasus_crt.a(kernel_main_old.o)
+net_data            0x1               ../lib/pegasus_crt.a(kernel_main_old.o)
+gdt_ptr             0x6               ../lib/pegasus_crt.a(kernel_main_old.o)
+idt                 0x800             ../lib/pegasus_crt.a(kernel_main_old.o)
+main_thread         0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
+ticks               0x8               ../lib/pegasus_crt.a(kernel_main_old.o)
+is_init             0x1               ../lib/pegasus_crt.a(kernel_main_old.o)
 UserPool            0x10              ../lib/pegasus_crt.a(kernel_main_old.o)
-all_pcb_list        0x10              ../lib/pegasus_crt.a(exit.o)
-console_table       0x10              ../lib/pegasus_crt.a(exit.o)
-is_disp             0x1               ../lib/pegasus_crt.a(exit.o)
+all_pcb_list        0x10              ../lib/pegasus_crt.a(kernel_main_old.o)
+console_table       0x10              ../lib/pegasus_crt.a(kernel_main_old.o)
+is_disp             0x1               ../lib/pegasus_crt.a(kernel_main_old.o)
 MAIN_THREAD_PAGE_DIRECTORY
-                    0x4               ../lib/pegasus_crt.a(exit.o)
-helloStr            0xc               ../lib/pegasus_crt.a(exit.o)
+                    0x4               ../lib/pegasus_crt.a(kernel_main_old.o)
+helloStr            0xc               ../lib/pegasus_crt.a(kernel_main_old.o)
 proc_table          0x189c            ../lib/pegasus_crt.a(global.o)
 hd_cache            0x200             ../lib/pegasus_crt.a(hd.o)
 
 Discarded input sections
 
  .note.GNU-stack
-                0x00000000        0x0 test.o
+                0x00000000        0x0 echo.o
  .note.gnu.property
-                0x00000000       0x28 test.o
- .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(exit.o)
- .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(exit.o)
+                0x00000000       0x28 echo.o
  .note.GNU-stack
                 0x00000000        0x0 ../lib/pegasus_crt.a(kernel_main_old.o)
  .note.gnu.property
                 0x00000000       0x28 ../lib/pegasus_crt.a(kernel_main_old.o)
  .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(double_link_list.o)
+                0x00000000        0x0 ../lib/pegasus_crt.a(keyboard.o)
  .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(double_link_list.o)
- .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(hd.o)
- .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(hd.o)
- .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(global.o)
- .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(global.o)
+                0x00000000       0x28 ../lib/pegasus_crt.a(keyboard.o)
  .note.GNU-stack
                 0x00000000        0x0 ../lib/pegasus_crt.a(process.o)
  .note.gnu.property
                 0x00000000       0x28 ../lib/pegasus_crt.a(process.o)
  .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(protect.o)
- .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(protect.o)
+                0x00000000        0x0 ../lib/pegasus_crt.a(mem.o)
  .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(console.o)
+                0x00000000        0x0 ../lib/pegasus_crt.a(exec.o)
  .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(console.o)
- .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(keyboard.o)
- .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(keyboard.o)
- .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(open.o)
- .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(open.o)
+                0x00000000       0x28 ../lib/pegasus_crt.a(exec.o)
  .note.GNU-stack
                 0x00000000        0x0 ../lib/pegasus_crt.a(read.o)
  .note.gnu.property
                 0x00000000       0x28 ../lib/pegasus_crt.a(read.o)
+ .note.GNU-stack
+                0x00000000        0x0 ../lib/pegasus_crt.a(exit.o)
+ .note.gnu.property
+                0x00000000       0x28 ../lib/pegasus_crt.a(exit.o)
+ .note.GNU-stack
+                0x00000000        0x0 ../lib/pegasus_crt.a(wait.o)
+ .note.gnu.property
+                0x00000000       0x28 ../lib/pegasus_crt.a(wait.o)
+ .note.GNU-stack
+                0x00000000        0x0 ../lib/pegasus_crt.a(open.o)
+ .note.gnu.property
+                0x00000000       0x28 ../lib/pegasus_crt.a(open.o)
  .note.GNU-stack
                 0x00000000        0x0 ../lib/pegasus_crt.a(write.o)
  .note.gnu.property
@@ -215,31 +195,49 @@ Discarded input sections
  .note.gnu.property
                 0x00000000       0x28 ../lib/pegasus_crt.a(close.o)
  .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(wait.o)
- .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(wait.o)
- .note.GNU-stack
                 0x00000000        0x0 ../lib/pegasus_crt.a(fork.o)
  .note.gnu.property
                 0x00000000       0x28 ../lib/pegasus_crt.a(fork.o)
  .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(exec.o)
+                0x00000000        0x0 ../lib/pegasus_crt.a(double_link_list.o)
  .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(exec.o)
+                0x00000000       0x28 ../lib/pegasus_crt.a(double_link_list.o)
+ .note.GNU-stack
+                0x00000000        0x0 ../lib/pegasus_crt.a(protect.o)
+ .note.gnu.property
+                0x00000000       0x28 ../lib/pegasus_crt.a(protect.o)
+ .note.GNU-stack
+                0x00000000        0x0 ../lib/pegasus_crt.a(console.o)
+ .note.gnu.property
+                0x00000000       0x28 ../lib/pegasus_crt.a(console.o)
+ .note.GNU-stack
+                0x00000000        0x0 ../lib/pegasus_crt.a(global.o)
+ .note.gnu.property
+                0x00000000       0x28 ../lib/pegasus_crt.a(global.o)
+ .note.GNU-stack
+                0x00000000        0x0 ../lib/pegasus_crt.a(task_network.o)
+ .note.gnu.property
+                0x00000000       0x28 ../lib/pegasus_crt.a(task_network.o)
+ .note.GNU-stack
+                0x00000000        0x0 ../lib/pegasus_crt.a(hd.o)
+ .note.gnu.property
+                0x00000000       0x28 ../lib/pegasus_crt.a(hd.o)
+ .note.GNU-stack
+                0x00000000        0x0 ../lib/pegasus_crt.a(fs_main.o)
+ .note.gnu.property
+                0x00000000       0x28 ../lib/pegasus_crt.a(fs_main.o)
  .note.GNU-stack
                 0x00000000        0x0 ../lib/pegasus_crt.a(main.o)
  .note.gnu.property
                 0x00000000       0x28 ../lib/pegasus_crt.a(main.o)
  .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(exec.o)
- .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(exec.o)
- .note.GNU-stack
                 0x00000000        0x0 ../lib/pegasus_crt.a(forkexit.o)
  .note.gnu.property
                 0x00000000       0x28 ../lib/pegasus_crt.a(forkexit.o)
  .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(mem.o)
+                0x00000000        0x0 ../lib/pegasus_crt.a(exec.o)
+ .note.gnu.property
+                0x00000000       0x28 ../lib/pegasus_crt.a(exec.o)
  .note.GNU-stack
                 0x00000000        0x0 ../lib/pegasus_crt.a(my_process.o)
  .note.gnu.property
@@ -248,14 +246,6 @@ Discarded input sections
                 0x00000000        0x0 ../lib/pegasus_crt.a(thread.o)
  .note.gnu.property
                 0x00000000       0x28 ../lib/pegasus_crt.a(thread.o)
- .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(task_network.o)
- .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(task_network.o)
- .note.GNU-stack
-                0x00000000        0x0 ../lib/pegasus_crt.a(fs_main.o)
- .note.gnu.property
-                0x00000000       0x28 ../lib/pegasus_crt.a(fs_main.o)
 
 Memory Configuration
 
@@ -265,7 +255,7 @@ Name             Origin             Length             Attributes
 Linker script and memory map
 
 Address of section .text set to 0xb0800000
-LOAD test.o
+LOAD echo.o
 LOAD start.o
 LOAD ../lib/pegasus_crt.a
                 [!provide]                        PROVIDE (__executable_start = SEGMENT_START ("text-segment", 0x8048000))
@@ -301,7 +291,7 @@ LOAD ../lib/pegasus_crt.a
 .rel.dyn        0x080480d4        0x0
  *(.rel.init)
  *(.rel.text .rel.text.* .rel.gnu.linkonce.t.*)
- .rel.text      0x080480d4        0x0 test.o
+ .rel.text      0x080480d4        0x0 echo.o
  *(.rel.fini)
  *(.rel.rodata .rel.rodata.* .rel.gnu.linkonce.r.*)
  *(.rel.data.rel.ro .rel.data.rel.ro.* .rel.gnu.linkonce.d.rel.ro.*)
@@ -311,7 +301,7 @@ LOAD ../lib/pegasus_crt.a
  *(.rel.ctors)
  *(.rel.dtors)
  *(.rel.got)
- .rel.got       0x080480d4        0x0 test.o
+ .rel.got       0x080480d4        0x0 echo.o
  *(.rel.bss .rel.bss.* .rel.gnu.linkonce.b.*)
  *(.rel.ifunc)
 
@@ -319,7 +309,7 @@ LOAD ../lib/pegasus_crt.a
  *(.rel.plt)
                 [!provide]                        PROVIDE (__rel_iplt_start = .)
  *(.rel.iplt)
- .rel.iplt      0x080480d4        0x0 test.o
+ .rel.iplt      0x080480d4        0x0 echo.o
                 [!provide]                        PROVIDE (__rel_iplt_end = .)
 
 .relr.dyn
@@ -332,7 +322,7 @@ LOAD ../lib/pegasus_crt.a
 .plt            0x08049000        0x0
  *(.plt)
  *(.iplt)
- .iplt          0x08049000        0x0 test.o
+ .iplt          0x08049000        0x0 echo.o
 
 .plt.got
  *(.plt.got)
@@ -340,283 +330,229 @@ LOAD ../lib/pegasus_crt.a
 .plt.sec
  *(.plt.sec)
 
-.text           0xb0800000     0xa29e
+.text           0xb0800000     0x9e92
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
  *(.text.hot .text.hot.*)
  *(SORT_BY_NAME(.text.sorted.*))
  *(.text .stub .text.* .gnu.linkonce.t.*)
- .text          0xb0800000       0x3e test.o
+ .text          0xb0800000       0x9c echo.o
                 0xb0800000                main
- *fill*         0xb080003e        0x2 
- .text          0xb0800040       0x15 start.o
-                0xb0800040                _start
- .text          0xb0800055       0x2f ../lib/pegasus_crt.a(exit.o)
-                0xb0800055                exit
- .text          0xb0800084     0x2d4d ../lib/pegasus_crt.a(kernel_main_old.o)
-                0xb0800084                stop_here
-                0xb08000c8                catch_error
-                0xb08000e5                intr_enable
-                0xb080010e                intr_disable
-                0xb0800137                intr_set_status
-                0xb0800155                intr_get_status
-                0xb0800172                Memcpy
-                0xb08001a5                untar
-                0xb08004ba                atoi
-                0xb0800560                disp_int
-                0xb0800589                do_page_fault
-                0xb08006c6                exception_handler
-                0xb08008ad                init_internal_interrupt
-                0xb0800a22                spurious_irq
-                0xb0800ab0                init_keyboard
-                0xb0800af3                TestTTY
-                0xb0800b92                TestReadReturnValue
-                0xb0800c0f                TestWriteReturnValue
-                0xb0800ce3                TestFS2
-                0xb0800cf1                TestFS
-                0xb0801193                wait_exit
-                0xb0801291                INIT_fork
-                0xb0801589                simple_shell
-                0xb0801710                test_shell
-                0xb0801778                test_exec
-                0xb08018b8                INIT
-                0xb08018c5                TestA
-                0xb08018fa                delay
-                0xb080193e                TestB
-                0xb0801956                TestC
-                0xb0801989                sys_get_ticks
-                0xb0801999                sys_write
-                0xb08019ed                milli_delay
-                0xb0801a29                TaskSys
-                0xb0801a2e                Printf
-                0xb0801a8c                vsprintf
-                0xb0801c38                printx
-                0xb0801c7b                sys_printx
-                0xb0801d47                spin
-                0xb0801d6d                panic
-                0xb0801d8b                assertion_failure
-                0xb0801dfd                assertion_failure2
-                0xb0801e72                dead_lock
-                0xb0801e7c                sys_send_msg
-                0xb080239b                sys_receive_msg
-                0xb08029fb                send_rec
-                0xb0802af6                block
-                0xb0802b32                unblock
-                0xb0802b82                get_ticks_ipc
-                0xb0802bd9                itoa
-                0xb0802c2f                i2a
-                0xb0802c95                inform_int
-                0xb0802d62                strcmp
- .text          0xb0802dd1      0x329 ../lib/pegasus_crt.a(double_link_list.o)
-                0xb0802dd1                initDoubleLinkList
-                0xb0802dff                isListEmpty
-                0xb0802e20                findElementInList
-                0xb0802efc                appendToDoubleLinkList
-                0xb0802fe3                insertToDoubleLinkList
-                0xb0803066                popFromDoubleLinkList
- *fill*         0xb08030fa        0x6 
- .text          0xb0803100      0x3d7 ../lib/pegasus_crt.a(kernel.o)
-                0xb0803100                InterruptTest
-                0xb080310c                disp_str_len
-                0xb0803159                disp_str
-                0xb0803194                disp_str_colour
-                0xb08031d0                divide_zero_fault
-                0xb08031d6                single_step_fault
-                0xb08031dc                non_maskable_interrupt
-                0xb08031e2                breakpoint_trap
-                0xb08031e8                overflow_trap
-                0xb08031ee                bound_range_exceeded_fault
-                0xb08031f4                invalid_opcode_fault
-                0xb08031fa                coprocessor_not_available_fault
-                0xb0803200                double_fault_exception_abort
-                0xb0803204                coprocessor_segment_overrun
-                0xb080320a                invalid_task_state_segment_fault
-                0xb080320e                segment_not_present_fault
-                0xb0803212                stack_exception_fault
-                0xb0803216                general_protection_exception_fault
-                0xb0803221                page_fault
-                0xb0803225                coprocessor_error_fault
-                0xb080322b                align_check_fault
-                0xb080322f                simd_float_exception_fault
-                0xb080323e                hwint0
-                0xb080326e                hwint1
-                0xb08032b1                hwint14
-                0xb08032f7                hwint10
-                0xb080333a                sys_call
-                0xb0803380                fork_restart
-                0xb080338f                restart
-                0xb08033b2                in_byte
-                0xb08033be                out_byte
-                0xb08033e0                disable_int
-                0xb08033e2                enable_int
-                0xb0803478                enable_8259A_casecade_irq
-                0xb0803482                disable_8259A_casecade_irq
-                0xb080348c                enable_8259A_slave_winchester_irq
-                0xb0803496                disable_8259A_slave_winchester_irq
-                0xb08034a0                update_cr3
-                0xb08034ad                update_tss
-                0xb08034bc                get_running_thread_pcb
-                0xb08034c4                sys_call_test
-                0xb08034c7                enable_8259A_slave_net_irq
- .text          0xb08034d7      0xe63 ../lib/pegasus_crt.a(hd.o)
-                0xb08034d7                TaskHD
-                0xb080351c                init_hd
-                0xb0803536                hd_handle
-                0xb080363b                hd_cmd_out
-                0xb080373d                hd_identify
-                0xb08037f4                print_hdinfo
-                0xb0803982                print_dpt_entry
-                0xb08039ee                get_partition_table
-                0xb0803acd                partition
-                0xb0803ce7                hd_open
-                0xb0803d8e                get_hd_ioctl
-                0xb0803e3f                wait_for
-                0xb0803e70                interrupt_wait
-                0xb0803ec0                hd_rdwt
-                0xb080415f                hd_handler
-                0xb080418b                debug_ticks
-                0xb08041c9                net_handler
-                0xb08041d1                waitfor
-                0xb0804215                print_hd_info
-                0xb0804302                is_empty
- *fill*         0xb080433a        0x6 
- .text          0xb0804340       0x69 ../lib/pegasus_crt.a(syscall.o)
-                0xb0804340                write_debug
-                0xb0804350                send_msg
-                0xb0804366                receive_msg
-                0xb080437c                sys_malloc
-                0xb0804391                sys_free
- .text          0xb08043a9        0x0 ../lib/pegasus_crt.a(global.o)
- .text          0xb08043a9      0x21b ../lib/pegasus_crt.a(process.o)
-                0xb08043a9                schedule_process
-                0xb08044b6                clock_handler
-                0xb0804527                pid2proc
-                0xb08045ad                proc2pid
- .text          0xb08045c4      0x3b3 ../lib/pegasus_crt.a(protect.o)
-                0xb08045c4                InitDescriptor
-                0xb0804631                Seg2PhyAddr
-                0xb0804672                Seg2PhyAddrLDT
-                0xb08046b6                VirAddr2PhyAddr
-                0xb08046cc                v2l
-                0xb080470f                init_propt
-                0xb0804890                InitInterruptDesc
-                0xb08048ec                ReloadGDT
- .text          0xb0804977      0xaca ../lib/pegasus_crt.a(console.o)
-                0xb0804977                select_console
-                0xb08049b3                flush
-                0xb08049ec                set_cursor
-                0xb0804a4a                set_console_start_video_addr
-                0xb0804aa8                put_key
-                0xb0804b14                scroll_up
-                0xb0804b56                scroll_down
-                0xb0804bc1                out_char
-                0xb0804d7e                tty_dev_read
-                0xb0804da8                tty_dev_write
-                0xb0804fd5                tty_do_read
-                0xb080509d                tty_do_write
-                0xb0805200                init_screen
-                0xb0805289                init_tty
-                0xb080533e                TaskTTY
- .text          0xb0805441      0x40f ../lib/pegasus_crt.a(keyboard.o)
-                0xb0805441                keyboard_handler
-                0xb08054c5                read_from_keyboard_buf
-                0xb080552b                keyboard_read
-                0xb08056aa                init_keyboard_handler
-                0xb08056be                in_process
- .text          0xb0805850       0x95 ../lib/pegasus_crt.a(open.o)
-                0xb0805850                open
- .text          0xb08058e5      0x181 ../lib/pegasus_crt.a(read.o)
-                0xb08058e5                read
- .text          0xb0805a66       0x85 ../lib/pegasus_crt.a(write.o)
-                0xb0805a66                write
- .text          0xb0805aeb       0x52 ../lib/pegasus_crt.a(close.o)
-                0xb0805aeb                close
- .text          0xb0805b3d       0x44 ../lib/pegasus_crt.a(wait.o)
-                0xb0805b3d                wait
- .text          0xb0805b81       0x48 ../lib/pegasus_crt.a(fork.o)
-                0xb0805b81                fork
- .text          0xb0805bc9      0x285 ../lib/pegasus_crt.a(exec.o)
-                0xb0805bc9                exec
-                0xb0805c3a                execv
-                0xb0805e29                execl
- .text          0xb0805e4e      0x148 ../lib/pegasus_crt.a(main.o)
-                0xb0805e4e                TaskMM
-                0xb0805f77                alloc_mem
- .text          0xb0805f96      0x419 ../lib/pegasus_crt.a(exec.o)
-                0xb0805f96                do_exec
- .text          0xb08063af      0x271 ../lib/pegasus_crt.a(forkexit.o)
-                0xb08063af                do_fork
-                0xb080641d                do_exit
-                0xb08064a7                do_wait
-                0xb08065c6                cleanup
- .text          0xb0806620     0x1275 ../lib/pegasus_crt.a(mem.o)
-                0xb0806620                init_bitmap
-                0xb0806643                test_bit_val
-                0xb08066ac                set_bit_val
-                0xb0806727                set_bits
-                0xb0806761                get_first_free_bit
-                0xb08067a5                get_bits
-                0xb080686d                get_a_page
-                0xb0806921                get_virtual_address_start_with_addr
-                0xb08069bb                get_virtual_address
-                0xb0806a4b                ptr_pde
-                0xb0806a5e                ptr_pte
-                0xb0806a85                add_map_entry
-                0xb0806b16                alloc_virtual_memory
-                0xb0806be9                get_physical_address_proc
-                0xb0806c65                get_physical_address
-                0xb0806c97                alloc_physical_memory_of_proc
-                0xb0806d86                alloc_physical_memory
-                0xb0806e4e                alloc_memory
-                0xb0806eb0                get_a_virtual_page
-                0xb0806ee8                block2arena
-                0xb0806efe                sys_malloc2
-                0xb08071b4                remove_map_entry
-                0xb08071d5                free_a_page
-                0xb080727c                sys_free2
-                0xb0807404                init_memory_block_desc
-                0xb08074d5                init_memory2
-                0xb080774c                init_memory
- .text          0xb0807895      0x730 ../lib/pegasus_crt.a(my_process.o)
-                0xb0807895                create_user_process_address_space
-                0xb0807925                user_process
-                0xb0807a52                clone_pcb
-                0xb0807bc4                build_body_stack
-                0xb0807cf7                build_process_kernel_stack
-                0xb0807dba                fork_process
-                0xb0807e4b                process_execute
- *fill*         0xb0807fc5        0xb 
- .text          0xb0807fd0       0x15 ../lib/pegasus_crt.a(switch_to.o)
-                0xb0807fd0                switch_to
- .text          0xb0807fe5      0x1b2 ../lib/pegasus_crt.a(thread.o)
-                0xb0807fe5                kernel_thread
-                0xb0807ffd                thread_init
-                0xb08080aa                thread_create
-                0xb08080df                thread_start
- .text          0xb0808197       0xb8 ../lib/pegasus_crt.a(task_network.o)
-                0xb0808197                task_network
-                0xb0808207                network_handle
- .text          0xb080824f     0x204f ../lib/pegasus_crt.a(fs_main.o)
-                0xb080824f                task_fs
-                0xb080845a                rd_wt
-                0xb0808533                mkfs
-                0xb0808b15                init_fs
-                0xb0808b69                do_open
-                0xb0808d58                search_file
-                0xb0808e8a                strip_path
-                0xb0808f56                get_inode
-                0xb0809118                create_file
-                0xb0809223                alloc_imap_bit
-                0xb0809320                alloc_smap_bit
-                0xb08094c1                new_inode
-                0xb08095df                new_dir_entry
-                0xb08097eb                do_unlink
-                0xb0809cc7                do_rdwt
-                0xb080a052                sync_inode
-                0xb080a1a6                put_inode
-                0xb080a1e4                do_close
-                0xb080a236                get_super_block
+ *fill*         0xb080009c        0x4 
+ .text          0xb08000a0       0x15 start.o
+                0xb08000a0                _start
+ .text          0xb08000b5     0x2d4d ../lib/pegasus_crt.a(kernel_main_old.o)
+                0xb08000b5                stop_here
+                0xb08000f9                catch_error
+                0xb0800116                intr_enable
+                0xb080013f                intr_disable
+                0xb0800168                intr_set_status
+                0xb0800186                intr_get_status
+                0xb08001a3                Memcpy
+                0xb08001d6                untar
+                0xb08004eb                atoi
+                0xb0800591                disp_int
+                0xb08005ba                do_page_fault
+                0xb08006f7                exception_handler
+                0xb08008de                init_internal_interrupt
+                0xb0800a53                spurious_irq
+                0xb0800ae1                init_keyboard
+                0xb0800b24                TestTTY
+                0xb0800bc3                TestReadReturnValue
+                0xb0800c40                TestWriteReturnValue
+                0xb0800d14                TestFS2
+                0xb0800d22                TestFS
+                0xb08011c4                wait_exit
+                0xb08012c2                INIT_fork
+                0xb08015ba                simple_shell
+                0xb0801741                test_shell
+                0xb08017a9                test_exec
+                0xb08018e9                INIT
+                0xb08018f6                TestA
+                0xb080192b                delay
+                0xb080196f                TestB
+                0xb0801987                TestC
+                0xb08019ba                sys_get_ticks
+                0xb08019ca                sys_write
+                0xb0801a1e                milli_delay
+                0xb0801a5a                TaskSys
+                0xb0801a5f                Printf
+                0xb0801abd                vsprintf
+                0xb0801c69                printx
+                0xb0801cac                sys_printx
+                0xb0801d78                spin
+                0xb0801d9e                panic
+                0xb0801dbc                assertion_failure
+                0xb0801e2e                assertion_failure2
+                0xb0801ea3                dead_lock
+                0xb0801ead                sys_send_msg
+                0xb08023cc                sys_receive_msg
+                0xb0802a2c                send_rec
+                0xb0802b27                block
+                0xb0802b63                unblock
+                0xb0802bb3                get_ticks_ipc
+                0xb0802c0a                itoa
+                0xb0802c60                i2a
+                0xb0802cc6                inform_int
+                0xb0802d93                strcmp
+ .text          0xb0802e02      0x40f ../lib/pegasus_crt.a(keyboard.o)
+                0xb0802e02                keyboard_handler
+                0xb0802e86                read_from_keyboard_buf
+                0xb0802eec                keyboard_read
+                0xb080306b                init_keyboard_handler
+                0xb080307f                in_process
+ .text          0xb0803211      0x21b ../lib/pegasus_crt.a(process.o)
+                0xb0803211                schedule_process
+                0xb080331e                clock_handler
+                0xb080338f                pid2proc
+                0xb0803415                proc2pid
+ .text          0xb080342c     0x1275 ../lib/pegasus_crt.a(mem.o)
+                0xb080342c                init_bitmap
+                0xb080344f                test_bit_val
+                0xb08034b8                set_bit_val
+                0xb0803533                set_bits
+                0xb080356d                get_first_free_bit
+                0xb08035b1                get_bits
+                0xb0803679                get_a_page
+                0xb080372d                get_virtual_address_start_with_addr
+                0xb08037c7                get_virtual_address
+                0xb0803857                ptr_pde
+                0xb080386a                ptr_pte
+                0xb0803891                add_map_entry
+                0xb0803922                alloc_virtual_memory
+                0xb08039f5                get_physical_address_proc
+                0xb0803a71                get_physical_address
+                0xb0803aa3                alloc_physical_memory_of_proc
+                0xb0803b92                alloc_physical_memory
+                0xb0803c5a                alloc_memory
+                0xb0803cbc                get_a_virtual_page
+                0xb0803cf4                block2arena
+                0xb0803d0a                sys_malloc2
+                0xb0803fc0                remove_map_entry
+                0xb0803fe1                free_a_page
+                0xb0804088                sys_free2
+                0xb0804210                init_memory_block_desc
+                0xb08042e1                init_memory2
+                0xb0804558                init_memory
+ .text          0xb08046a1      0x285 ../lib/pegasus_crt.a(exec.o)
+                0xb08046a1                exec
+                0xb0804712                execv
+                0xb0804901                execl
+ .text          0xb0804926      0x181 ../lib/pegasus_crt.a(read.o)
+                0xb0804926                read
+ .text          0xb0804aa7       0x2f ../lib/pegasus_crt.a(exit.o)
+                0xb0804aa7                exit
+ .text          0xb0804ad6       0x44 ../lib/pegasus_crt.a(wait.o)
+                0xb0804ad6                wait
+ .text          0xb0804b1a       0x95 ../lib/pegasus_crt.a(open.o)
+                0xb0804b1a                open
+ .text          0xb0804baf       0x85 ../lib/pegasus_crt.a(write.o)
+                0xb0804baf                write
+ .text          0xb0804c34       0x52 ../lib/pegasus_crt.a(close.o)
+                0xb0804c34                close
+ .text          0xb0804c86       0x48 ../lib/pegasus_crt.a(fork.o)
+                0xb0804c86                fork
+ .text          0xb0804cce      0x329 ../lib/pegasus_crt.a(double_link_list.o)
+                0xb0804cce                initDoubleLinkList
+                0xb0804cfc                isListEmpty
+                0xb0804d1d                findElementInList
+                0xb0804df9                appendToDoubleLinkList
+                0xb0804ee0                insertToDoubleLinkList
+                0xb0804f63                popFromDoubleLinkList
+ .text          0xb0804ff7      0x3b3 ../lib/pegasus_crt.a(protect.o)
+                0xb0804ff7                InitDescriptor
+                0xb0805064                Seg2PhyAddr
+                0xb08050a5                Seg2PhyAddrLDT
+                0xb08050e9                VirAddr2PhyAddr
+                0xb08050ff                v2l
+                0xb0805142                init_propt
+                0xb08052c3                InitInterruptDesc
+                0xb080531f                ReloadGDT
+ .text          0xb08053aa      0xaca ../lib/pegasus_crt.a(console.o)
+                0xb08053aa                select_console
+                0xb08053e6                flush
+                0xb080541f                set_cursor
+                0xb080547d                set_console_start_video_addr
+                0xb08054db                put_key
+                0xb0805547                scroll_up
+                0xb0805589                scroll_down
+                0xb08055f4                out_char
+                0xb08057b1                tty_dev_read
+                0xb08057db                tty_dev_write
+                0xb0805a08                tty_do_read
+                0xb0805ad0                tty_do_write
+                0xb0805c33                init_screen
+                0xb0805cbc                init_tty
+                0xb0805d71                TaskTTY
+ .text          0xb0805e74        0x0 ../lib/pegasus_crt.a(global.o)
+ .text          0xb0805e74       0xb8 ../lib/pegasus_crt.a(task_network.o)
+                0xb0805e74                task_network
+                0xb0805ee4                network_handle
+ .text          0xb0805f2c      0xe63 ../lib/pegasus_crt.a(hd.o)
+                0xb0805f2c                TaskHD
+                0xb0805f71                init_hd
+                0xb0805f8b                hd_handle
+                0xb0806090                hd_cmd_out
+                0xb0806192                hd_identify
+                0xb0806249                print_hdinfo
+                0xb08063d7                print_dpt_entry
+                0xb0806443                get_partition_table
+                0xb0806522                partition
+                0xb080673c                hd_open
+                0xb08067e3                get_hd_ioctl
+                0xb0806894                wait_for
+                0xb08068c5                interrupt_wait
+                0xb0806915                hd_rdwt
+                0xb0806bb4                hd_handler
+                0xb0806be0                debug_ticks
+                0xb0806c1e                net_handler
+                0xb0806c26                waitfor
+                0xb0806c6a                print_hd_info
+                0xb0806d57                is_empty
+ .text          0xb0806d8f     0x204f ../lib/pegasus_crt.a(fs_main.o)
+                0xb0806d8f                task_fs
+                0xb0806f9a                rd_wt
+                0xb0807073                mkfs
+                0xb0807655                init_fs
+                0xb08076a9                do_open
+                0xb0807898                search_file
+                0xb08079ca                strip_path
+                0xb0807a96                get_inode
+                0xb0807c58                create_file
+                0xb0807d63                alloc_imap_bit
+                0xb0807e60                alloc_smap_bit
+                0xb0808001                new_inode
+                0xb080811f                new_dir_entry
+                0xb080832b                do_unlink
+                0xb0808807                do_rdwt
+                0xb0808b92                sync_inode
+                0xb0808ce6                put_inode
+                0xb0808d24                do_close
+                0xb0808d76                get_super_block
+ .text          0xb0808dde      0x148 ../lib/pegasus_crt.a(main.o)
+                0xb0808dde                TaskMM
+                0xb0808f07                alloc_mem
+ .text          0xb0808f26      0x271 ../lib/pegasus_crt.a(forkexit.o)
+                0xb0808f26                do_fork
+                0xb0808f94                do_exit
+                0xb080901e                do_wait
+                0xb080913d                cleanup
+ .text          0xb0809197      0x419 ../lib/pegasus_crt.a(exec.o)
+                0xb0809197                do_exec
+ .text          0xb08095b0      0x730 ../lib/pegasus_crt.a(my_process.o)
+                0xb08095b0                create_user_process_address_space
+                0xb0809640                user_process
+                0xb080976d                clone_pcb
+                0xb08098df                build_body_stack
+                0xb0809a12                build_process_kernel_stack
+                0xb0809ad5                fork_process
+                0xb0809b66                process_execute
+ .text          0xb0809ce0      0x1b2 ../lib/pegasus_crt.a(thread.o)
+                0xb0809ce0                kernel_thread
+                0xb0809cf8                thread_init
+                0xb0809da5                thread_create
+                0xb0809dda                thread_start
  *(.gnu.warning)
 
 .fini
@@ -624,38 +560,28 @@ LOAD ../lib/pegasus_crt.a
                 [!provide]                        PROVIDE (__etext = .)
                 [!provide]                        PROVIDE (_etext = .)
                 [!provide]                        PROVIDE (etext = .)
-                0xb080b000                        . = ALIGN (CONSTANT (MAXPAGESIZE))
-                0xb080b000                        . = SEGMENT_START ("rodata-segment", (ALIGN (CONSTANT (MAXPAGESIZE)) + (. & (CONSTANT (MAXPAGESIZE) - 0x1))))
+                0xb080a000                        . = ALIGN (CONSTANT (MAXPAGESIZE))
+                0xb080a000                        . = SEGMENT_START ("rodata-segment", (ALIGN (CONSTANT (MAXPAGESIZE)) + (. & (CONSTANT (MAXPAGESIZE) - 0x1))))
 
-.rodata         0xb080b000     0x1093
+.rodata         0xb080a000     0x10f1
  *(.rodata .rodata.* .gnu.linkonce.r.*)
- .rodata        0xb080b000       0x10 test.o
- *fill*         0xb080b010       0x10 
- .rodata        0xb080b020      0xb75 ../lib/pegasus_crt.a(kernel_main_old.o)
- .rodata        0xb080bb95       0x2c ../lib/pegasus_crt.a(double_link_list.o)
- *fill*         0xb080bbc1        0x3 
- .rodata        0xb080bbc4      0x19c ../lib/pegasus_crt.a(hd.o)
- .rodata        0xb080bd60       0x26 ../lib/pegasus_crt.a(process.o)
- .rodata        0xb080bd86       0x22 ../lib/pegasus_crt.a(console.o)
- .rodata        0xb080bda8       0x24 ../lib/pegasus_crt.a(close.o)
- .rodata        0xb080bdcc       0x2d ../lib/pegasus_crt.a(exec.o)
- .rodata        0xb080bdf9       0x11 ../lib/pegasus_crt.a(main.o)
- .rodata        0xb080be0a       0x10 ../lib/pegasus_crt.a(exec.o)
- .rodata        0xb080be1a       0x21 ../lib/pegasus_crt.a(forkexit.o)
- .rodata        0xb080be3b       0x41 ../lib/pegasus_crt.a(mem.o)
- .rodata        0xb080be7c       0x2c ../lib/pegasus_crt.a(task_network.o)
- .rodata        0xb080bea8      0x1eb ../lib/pegasus_crt.a(fs_main.o)
-                0xb080bea8                FSBUF_SIZE
-
-.txt            0xb080c093       0xaa
- .txt           0xb080c093       0x82 ../lib/pegasus_crt.a(string.o)
-                0xb080c093                Memcpy2
-                0xb080c0c1                Memset
-                0xb080c0e0                Strcpy
-                0xb080c0fa                Strlen
- .txt           0xb080c115       0x28 ../lib/pegasus_crt.a(hd_rdwt.o)
-                0xb080c115                read_port
-                0xb080c129                write_port
+ .rodata        0xb080a000       0x68 echo.o
+ *fill*         0xb080a068       0x18 
+ .rodata        0xb080a080      0xb75 ../lib/pegasus_crt.a(kernel_main_old.o)
+ .rodata        0xb080abf5       0x26 ../lib/pegasus_crt.a(process.o)
+ .rodata        0xb080ac1b       0x41 ../lib/pegasus_crt.a(mem.o)
+ .rodata        0xb080ac5c       0x2d ../lib/pegasus_crt.a(exec.o)
+ .rodata        0xb080ac89       0x24 ../lib/pegasus_crt.a(close.o)
+ .rodata        0xb080acad       0x2c ../lib/pegasus_crt.a(double_link_list.o)
+ .rodata        0xb080acd9       0x22 ../lib/pegasus_crt.a(console.o)
+ .rodata        0xb080acfb       0x2c ../lib/pegasus_crt.a(task_network.o)
+ *fill*         0xb080ad27        0x1 
+ .rodata        0xb080ad28      0x19c ../lib/pegasus_crt.a(hd.o)
+ .rodata        0xb080aec4      0x1eb ../lib/pegasus_crt.a(fs_main.o)
+                0xb080aec4                FSBUF_SIZE
+ .rodata        0xb080b0af       0x11 ../lib/pegasus_crt.a(main.o)
+ .rodata        0xb080b0c0       0x21 ../lib/pegasus_crt.a(forkexit.o)
+ .rodata        0xb080b0e1       0x10 ../lib/pegasus_crt.a(exec.o)
 
 .rodata1
  *(.rodata1)
@@ -664,55 +590,55 @@ LOAD ../lib/pegasus_crt.a
  *(.eh_frame_hdr)
  *(.eh_frame_entry .eh_frame_entry.*)
 
-.eh_frame       0xb080c140     0x17cc
+.eh_frame       0xb080b0f4     0x17d4
  *(.eh_frame)
- .eh_frame      0xb080c140       0x44 test.o
- .eh_frame      0xb080c184       0x20 ../lib/pegasus_crt.a(exit.o)
-                                 0x38 (size before relaxing)
- .eh_frame      0xb080c1a4      0x6ac ../lib/pegasus_crt.a(kernel_main_old.o)
+ .eh_frame      0xb080b0f4       0x4c echo.o
+ .eh_frame      0xb080b140      0x6ac ../lib/pegasus_crt.a(kernel_main_old.o)
                                 0x6c4 (size before relaxing)
- .eh_frame      0xb080c850       0xc0 ../lib/pegasus_crt.a(double_link_list.o)
-                                 0xd8 (size before relaxing)
- .eh_frame      0xb080c910      0x284 ../lib/pegasus_crt.a(hd.o)
-                                0x29c (size before relaxing)
- .eh_frame      0xb080cb94       0x80 ../lib/pegasus_crt.a(process.o)
-                                 0x98 (size before relaxing)
- .eh_frame      0xb080cc14      0x100 ../lib/pegasus_crt.a(protect.o)
-                                0x118 (size before relaxing)
- .eh_frame      0xb080cd14      0x1e0 ../lib/pegasus_crt.a(console.o)
-                                0x1f8 (size before relaxing)
- .eh_frame      0xb080cef4       0xa0 ../lib/pegasus_crt.a(keyboard.o)
+ .eh_frame      0xb080b7ec       0xa0 ../lib/pegasus_crt.a(keyboard.o)
                                  0xb8 (size before relaxing)
- .eh_frame      0xb080cf94       0x20 ../lib/pegasus_crt.a(open.o)
-                                 0x38 (size before relaxing)
- .eh_frame      0xb080cfb4       0x20 ../lib/pegasus_crt.a(read.o)
-                                 0x38 (size before relaxing)
- .eh_frame      0xb080cfd4       0x20 ../lib/pegasus_crt.a(write.o)
-                                 0x38 (size before relaxing)
- .eh_frame      0xb080cff4       0x20 ../lib/pegasus_crt.a(close.o)
-                                 0x38 (size before relaxing)
- .eh_frame      0xb080d014       0x20 ../lib/pegasus_crt.a(wait.o)
-                                 0x38 (size before relaxing)
- .eh_frame      0xb080d034       0x20 ../lib/pegasus_crt.a(fork.o)
-                                 0x38 (size before relaxing)
- .eh_frame      0xb080d054       0x60 ../lib/pegasus_crt.a(exec.o)
-                                 0x78 (size before relaxing)
- .eh_frame      0xb080d0b4       0x3c ../lib/pegasus_crt.a(main.o)
-                                 0x54 (size before relaxing)
- .eh_frame      0xb080d0f0       0x20 ../lib/pegasus_crt.a(exec.o)
-                                 0x38 (size before relaxing)
- .eh_frame      0xb080d110       0x80 ../lib/pegasus_crt.a(forkexit.o)
+ .eh_frame      0xb080b88c       0x80 ../lib/pegasus_crt.a(process.o)
                                  0x98 (size before relaxing)
- .eh_frame      0xb080d190      0x364 ../lib/pegasus_crt.a(mem.o)
+ .eh_frame      0xb080b90c      0x364 ../lib/pegasus_crt.a(mem.o)
                                 0x37c (size before relaxing)
- .eh_frame      0xb080d4f4       0xe0 ../lib/pegasus_crt.a(my_process.o)
-                                 0xf8 (size before relaxing)
- .eh_frame      0xb080d5d4       0x80 ../lib/pegasus_crt.a(thread.o)
-                                 0x98 (size before relaxing)
- .eh_frame      0xb080d654       0x3c ../lib/pegasus_crt.a(task_network.o)
+ .eh_frame      0xb080bc70       0x60 ../lib/pegasus_crt.a(exec.o)
+                                 0x78 (size before relaxing)
+ .eh_frame      0xb080bcd0       0x20 ../lib/pegasus_crt.a(read.o)
+                                 0x38 (size before relaxing)
+ .eh_frame      0xb080bcf0       0x20 ../lib/pegasus_crt.a(exit.o)
+                                 0x38 (size before relaxing)
+ .eh_frame      0xb080bd10       0x20 ../lib/pegasus_crt.a(wait.o)
+                                 0x38 (size before relaxing)
+ .eh_frame      0xb080bd30       0x20 ../lib/pegasus_crt.a(open.o)
+                                 0x38 (size before relaxing)
+ .eh_frame      0xb080bd50       0x20 ../lib/pegasus_crt.a(write.o)
+                                 0x38 (size before relaxing)
+ .eh_frame      0xb080bd70       0x20 ../lib/pegasus_crt.a(close.o)
+                                 0x38 (size before relaxing)
+ .eh_frame      0xb080bd90       0x20 ../lib/pegasus_crt.a(fork.o)
+                                 0x38 (size before relaxing)
+ .eh_frame      0xb080bdb0       0xc0 ../lib/pegasus_crt.a(double_link_list.o)
+                                 0xd8 (size before relaxing)
+ .eh_frame      0xb080be70      0x100 ../lib/pegasus_crt.a(protect.o)
+                                0x118 (size before relaxing)
+ .eh_frame      0xb080bf70      0x1e0 ../lib/pegasus_crt.a(console.o)
+                                0x1f8 (size before relaxing)
+ .eh_frame      0xb080c150       0x3c ../lib/pegasus_crt.a(task_network.o)
                                  0x54 (size before relaxing)
- .eh_frame      0xb080d690      0x27c ../lib/pegasus_crt.a(fs_main.o)
+ .eh_frame      0xb080c18c      0x284 ../lib/pegasus_crt.a(hd.o)
+                                0x29c (size before relaxing)
+ .eh_frame      0xb080c410      0x27c ../lib/pegasus_crt.a(fs_main.o)
                                 0x294 (size before relaxing)
+ .eh_frame      0xb080c68c       0x3c ../lib/pegasus_crt.a(main.o)
+                                 0x54 (size before relaxing)
+ .eh_frame      0xb080c6c8       0x80 ../lib/pegasus_crt.a(forkexit.o)
+                                 0x98 (size before relaxing)
+ .eh_frame      0xb080c748       0x20 ../lib/pegasus_crt.a(exec.o)
+                                 0x38 (size before relaxing)
+ .eh_frame      0xb080c768       0xe0 ../lib/pegasus_crt.a(my_process.o)
+                                 0xf8 (size before relaxing)
+ .eh_frame      0xb080c848       0x80 ../lib/pegasus_crt.a(thread.o)
+                                 0x98 (size before relaxing)
  *(.eh_frame.*)
 
 .sframe
@@ -727,7 +653,7 @@ LOAD ../lib/pegasus_crt.a
 
 .exception_ranges
  *(.exception_ranges*)
-                0xb080e000                        . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
+                0xb080d000                        . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
 
 .eh_frame
  *(.eh_frame)
@@ -746,7 +672,7 @@ LOAD ../lib/pegasus_crt.a
 .exception_ranges
  *(.exception_ranges*)
 
-.tdata          0xb080e000        0x0
+.tdata          0xb080d000        0x0
                 [!provide]                        PROVIDE (__tdata_start = .)
  *(.tdata .tdata.* .gnu.linkonce.td.*)
 
@@ -754,18 +680,18 @@ LOAD ../lib/pegasus_crt.a
  *(.tbss .tbss.* .gnu.linkonce.tb.*)
  *(.tcommon)
 
-.preinit_array  0xb080e000        0x0
+.preinit_array  0xb080d000        0x0
                 [!provide]                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array)
                 [!provide]                        PROVIDE (__preinit_array_end = .)
 
-.init_array     0xb080e000        0x0
+.init_array     0xb080d000        0x0
                 [!provide]                        PROVIDE (__init_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
  *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
                 [!provide]                        PROVIDE (__init_array_end = .)
 
-.fini_array     0xb080e000        0x0
+.fini_array     0xb080d000        0x0
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
  *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
@@ -795,158 +721,151 @@ LOAD ../lib/pegasus_crt.a
 .dynamic
  *(.dynamic)
 
-.got            0xb080e000        0x0
+.got            0xb080d000        0x0
  *(.got)
- .got           0xb080e000        0x0 test.o
+ .got           0xb080d000        0x0 echo.o
  *(.igot)
-                0xb080e000                        . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
+                0xb080d000                        . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
 
-.got.plt        0xb080e000        0x0
+.got.plt        0xb080d000        0x0
  *(.got.plt)
- .got.plt       0xb080e000        0x0 test.o
+ .got.plt       0xb080d000        0x0 echo.o
  *(.igot.plt)
- .igot.plt      0xb080e000        0x0 test.o
+ .igot.plt      0xb080d000        0x0 echo.o
 
-.data           0xb080e000      0x780
+.data           0xb080d000      0x744
  *(.data .data.* .gnu.linkonce.d.*)
- .data          0xb080e000        0x0 test.o
- .data          0xb080e000        0x0 ../lib/pegasus_crt.a(exit.o)
- .data          0xb080e000        0x0 ../lib/pegasus_crt.a(kernel_main_old.o)
- .data          0xb080e000        0x0 ../lib/pegasus_crt.a(double_link_list.o)
- .data          0xb080e000        0xf ../lib/pegasus_crt.a(kernel.o)
- .data          0xb080e00f        0x0 ../lib/pegasus_crt.a(hd.o)
- *fill*         0xb080e00f        0x1 
- .data          0xb080e010        0x0 ../lib/pegasus_crt.a(syscall.o)
- *fill*         0xb080e010       0x10 
- .data          0xb080e020      0x144 ../lib/pegasus_crt.a(global.o)
-                0xb080e020                user_task_table
-                0xb080e0a0                sys_task_table
-                0xb080e148                sys_call_table
- .data          0xb080e164        0x0 ../lib/pegasus_crt.a(process.o)
- .data          0xb080e164        0x0 ../lib/pegasus_crt.a(protect.o)
- .data          0xb080e164        0x0 ../lib/pegasus_crt.a(console.o)
- *fill*         0xb080e164       0x1c 
- .data          0xb080e180      0x600 ../lib/pegasus_crt.a(keyboard.o)
-                0xb080e180                keymap
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(open.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(read.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(write.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(close.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(wait.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(fork.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(exec.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(main.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(exec.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(forkexit.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(mem.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(my_process.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(thread.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(task_network.o)
- .data          0xb080e780        0x0 ../lib/pegasus_crt.a(fs_main.o)
+ .data          0xb080d000        0x0 echo.o
+ .data          0xb080d000        0x0 ../lib/pegasus_crt.a(kernel_main_old.o)
+ .data          0xb080d000      0x600 ../lib/pegasus_crt.a(keyboard.o)
+                0xb080d000                keymap
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(process.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(mem.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(exec.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(read.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(exit.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(wait.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(open.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(write.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(close.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(fork.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(double_link_list.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(protect.o)
+ .data          0xb080d600        0x0 ../lib/pegasus_crt.a(console.o)
+ .data          0xb080d600      0x144 ../lib/pegasus_crt.a(global.o)
+                0xb080d600                user_task_table
+                0xb080d680                sys_task_table
+                0xb080d728                sys_call_table
+ .data          0xb080d744        0x0 ../lib/pegasus_crt.a(task_network.o)
+ .data          0xb080d744        0x0 ../lib/pegasus_crt.a(hd.o)
+ .data          0xb080d744        0x0 ../lib/pegasus_crt.a(fs_main.o)
+ .data          0xb080d744        0x0 ../lib/pegasus_crt.a(main.o)
+ .data          0xb080d744        0x0 ../lib/pegasus_crt.a(forkexit.o)
+ .data          0xb080d744        0x0 ../lib/pegasus_crt.a(exec.o)
+ .data          0xb080d744        0x0 ../lib/pegasus_crt.a(my_process.o)
+ .data          0xb080d744        0x0 ../lib/pegasus_crt.a(thread.o)
 
 .data1
  *(.data1)
-                0xb080e780                        _edata = .
+                0xb080d744                        _edata = .
                 [!provide]                        PROVIDE (edata = .)
-                0xb080e780                        . = .
-                0xb080e780                        __bss_start = .
+                0xb080d744                        . = .
+                0xb080d744                        __bss_start = .
 
-.bss            0xb080e780    0x74c28
+.bss            0xb080d760    0x74428
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0xb080e780        0x0 test.o
- .bss           0xb080e780        0x0 ../lib/pegasus_crt.a(exit.o)
- .bss           0xb080e780        0x0 ../lib/pegasus_crt.a(kernel_main_old.o)
- .bss           0xb080e780        0x0 ../lib/pegasus_crt.a(double_link_list.o)
- .bss           0xb080e780      0x800 ../lib/pegasus_crt.a(kernel.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(hd.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(global.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(process.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(protect.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(console.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(keyboard.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(open.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(read.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(write.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(close.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(wait.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(fork.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(exec.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(main.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(exec.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(forkexit.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(mem.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(my_process.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(thread.o)
- .bss           0xb080ef80        0x0 ../lib/pegasus_crt.a(task_network.o)
- .bss           0xb080ef80        0x4 ../lib/pegasus_crt.a(fs_main.o)
-                0xb080ef80                c
+ .bss           0xb080d760        0x0 echo.o
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(kernel_main_old.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(keyboard.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(process.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(mem.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(exec.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(read.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(exit.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(wait.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(open.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(write.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(close.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(fork.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(double_link_list.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(protect.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(console.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(global.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(task_network.o)
+ .bss           0xb080d760        0x0 ../lib/pegasus_crt.a(hd.o)
+ .bss           0xb080d760        0x4 ../lib/pegasus_crt.a(fs_main.o)
+                0xb080d760                c
+ .bss           0xb080d764        0x0 ../lib/pegasus_crt.a(main.o)
+ .bss           0xb080d764        0x0 ../lib/pegasus_crt.a(forkexit.o)
+ .bss           0xb080d764        0x0 ../lib/pegasus_crt.a(exec.o)
+ .bss           0xb080d764        0x0 ../lib/pegasus_crt.a(my_process.o)
+ .bss           0xb080d764        0x0 ../lib/pegasus_crt.a(thread.o)
  *(COMMON)
- *fill*         0xb080ef84       0x1c 
- COMMON         0xb080efa0     0x1788 ../lib/pegasus_crt.a(exit.o)
-                0xb080efa0                current_tty
-                0xb080efa4                is_e0
-                0xb080efa8                idt_ptr
-                0xb080efb0                pid
-                0xb080efb4                current_dis_pos
-                0xb080efb8                dis_pos
-                0xb080efbc                k_reenter
-                0xb080efc0                gdt
-                0xb080f3c0                proc_ready_table
-                0xb080f3c4                test_ticks
-                0xb080f3c8                pcaller
-                0xb080f3e0                keyboard_buffer
-                0xb080f5ec                pcb_list
-                0xb080f5fc                gdt_index
-                0xb080f600                tty_table
-                0xb080fe40                tss
-                0xb080feac                net_buf
-                0xb080feb0                nic_current_page
-                0xb080feb4                counter
-                0xb080feb8                key_pressed
-                0xb080febc                fork_pid
-                0xb080fec0                is_shift
-                0xb080fec1                net_data
-                0xb080fec4                gdt_ptr
-                0xb080fee0                idt
-                0xb08106e0                main_thread
-                0xb08106e8                ticks
-                0xb08106f0                is_init
-                0xb08106f4                all_pcb_list
-                0xb0810704                console_table
-                0xb0810714                is_disp
-                0xb0810718                MAIN_THREAD_PAGE_DIRECTORY
-                0xb081071c                helloStr
- COMMON         0xb0810728       0x2c ../lib/pegasus_crt.a(kernel_main_old.o)
-                0xb0810728                KernelVirtualMemory
-                0xb0810734                KernelPool
-                0xb0810744                UserPool
- *fill*         0xb0810754        0xc 
- COMMON         0xb0810760      0x440 ../lib/pegasus_crt.a(hd.o)
-                0xb0810760                hd_info
-                0xb08109a0                hd_cache
- COMMON         0xb0810ba0    0x7189c ../lib/pegasus_crt.a(global.o)
-                0xb0810ba0                proc_stack
-                0xb0880ba0                proc_table
- *fill*         0xb088243c        0x4 
- COMMON         0xb0882440       0xf0 ../lib/pegasus_crt.a(mem.o)
-                0xb0882440                kernel_mem_block_decs_array
- *fill*         0xb0882530       0x10 
- COMMON         0xb0882540      0xe68 ../lib/pegasus_crt.a(fs_main.o)
-                0xb0882540                file_desc_table
-                0xb0882940                phy_super_block_buf
-                0xb0882944                phy_fsbuf
-                0xb0882960                inode_table
-                0xb0883360                super_block_buf
-                0xb0883364                fsbuf
-                0xb0883380                root
-                0xb08833a8                        . = ALIGN ((. != 0x0)?0x4:0x1)
-                0xb08833a8                        . = ALIGN (0x4)
-                0xb08833a8                        . = SEGMENT_START ("ldata-segment", .)
-                0xb08833a8                        . = ALIGN (0x4)
-                0xb08833a8                        _end = .
+ *fill*         0xb080d764       0x1c 
+ COMMON         0xb080d780     0x17b8 ../lib/pegasus_crt.a(kernel_main_old.o)
+                0xb080d780                current_tty
+                0xb080d784                is_e0
+                0xb080d788                idt_ptr
+                0xb080d790                pid
+                0xb080d794                KernelVirtualMemory
+                0xb080d7a0                current_dis_pos
+                0xb080d7a4                dis_pos
+                0xb080d7a8                k_reenter
+                0xb080d7c0                gdt
+                0xb080dbc0                proc_ready_table
+                0xb080dbc4                test_ticks
+                0xb080dbc8                pcaller
+                0xb080dbe0                keyboard_buffer
+                0xb080ddec                pcb_list
+                0xb080ddfc                gdt_index
+                0xb080de00                tty_table
+                0xb080e640                tss
+                0xb080e6ac                KernelPool
+                0xb080e6bc                net_buf
+                0xb080e6c0                nic_current_page
+                0xb080e6c4                counter
+                0xb080e6c8                key_pressed
+                0xb080e6cc                fork_pid
+                0xb080e6d0                is_shift
+                0xb080e6d1                net_data
+                0xb080e6d4                gdt_ptr
+                0xb080e6e0                idt
+                0xb080eee0                main_thread
+                0xb080eee8                ticks
+                0xb080eef0                is_init
+                0xb080eef4                UserPool
+                0xb080ef04                all_pcb_list
+                0xb080ef14                console_table
+                0xb080ef24                is_disp
+                0xb080ef28                MAIN_THREAD_PAGE_DIRECTORY
+                0xb080ef2c                helloStr
+ *fill*         0xb080ef38        0x8 
+ COMMON         0xb080ef40       0xf0 ../lib/pegasus_crt.a(mem.o)
+                0xb080ef40                kernel_mem_block_decs_array
+ *fill*         0xb080f030       0x10 
+ COMMON         0xb080f040    0x7189c ../lib/pegasus_crt.a(global.o)
+                0xb080f040                proc_stack
+                0xb087f040                proc_table
+ *fill*         0xb08808dc        0x4 
+ COMMON         0xb08808e0      0x440 ../lib/pegasus_crt.a(hd.o)
+                0xb08808e0                hd_info
+                0xb0880b20                hd_cache
+ COMMON         0xb0880d20      0xe68 ../lib/pegasus_crt.a(fs_main.o)
+                0xb0880d20                file_desc_table
+                0xb0881120                phy_super_block_buf
+                0xb0881124                phy_fsbuf
+                0xb0881140                inode_table
+                0xb0881b40                super_block_buf
+                0xb0881b44                fsbuf
+                0xb0881b60                root
+                0xb0881b88                        . = ALIGN ((. != 0x0)?0x4:0x1)
+                0xb0881b88                        . = ALIGN (0x4)
+                0xb0881b88                        . = SEGMENT_START ("ldata-segment", .)
+                0xb0881b88                        . = ALIGN (0x4)
+                0xb0881b88                        _end = .
                 [!provide]                        PROVIDE (end = .)
-                0xb08833a8                        . = DATA_SEGMENT_END (.)
+                0xb0881b88                        . = DATA_SEGMENT_END (.)
 
 .stab
  *(.stab)
@@ -968,32 +887,32 @@ LOAD ../lib/pegasus_crt.a
 
 .comment        0x00000000       0x2c
  *(.comment)
- .comment       0x00000000       0x2c test.o
+ .comment       0x00000000       0x2c echo.o
                                  0x2d (size before relaxing)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(exit.o)
  .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(kernel_main_old.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(double_link_list.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(hd.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(global.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(process.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(protect.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(console.o)
  .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(keyboard.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(open.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(process.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(mem.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(exec.o)
  .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(read.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(exit.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(wait.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(open.o)
  .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(write.o)
  .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(close.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(wait.o)
  .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(fork.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(exec.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(double_link_list.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(protect.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(console.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(global.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(task_network.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(hd.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(fs_main.o)
  .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(main.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(exec.o)
  .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(forkexit.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(mem.o)
+ .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(exec.o)
  .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(my_process.o)
  .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(thread.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(task_network.o)
- .comment       0x0000002c       0x2d ../lib/pegasus_crt.a(fs_main.o)
 
 .gnu.build.attributes
  *(.gnu.build.attributes .gnu.build.attributes.*)
@@ -1013,168 +932,168 @@ LOAD ../lib/pegasus_crt.a
 .debug_aranges  0x00000000      0x2f8
  *(.debug_aranges)
  .debug_aranges
-                0x00000000       0x20 ../lib/pegasus_crt.a(exit.o)
+                0x00000000       0x20 ../lib/pegasus_crt.a(kernel_main_old.o)
  .debug_aranges
-                0x00000020       0x20 ../lib/pegasus_crt.a(kernel_main_old.o)
+                0x00000020       0x20 ../lib/pegasus_crt.a(keyboard.o)
  .debug_aranges
-                0x00000040       0x20 ../lib/pegasus_crt.a(double_link_list.o)
+                0x00000040       0x20 ../lib/pegasus_crt.a(process.o)
  .debug_aranges
-                0x00000060       0x20 ../lib/pegasus_crt.a(hd.o)
+                0x00000060       0x20 ../lib/pegasus_crt.a(mem.o)
  .debug_aranges
-                0x00000080       0x18 ../lib/pegasus_crt.a(global.o)
+                0x00000080       0x20 ../lib/pegasus_crt.a(exec.o)
  .debug_aranges
-                0x00000098       0x20 ../lib/pegasus_crt.a(process.o)
+                0x000000a0       0x20 ../lib/pegasus_crt.a(read.o)
  .debug_aranges
-                0x000000b8       0x20 ../lib/pegasus_crt.a(protect.o)
+                0x000000c0       0x20 ../lib/pegasus_crt.a(exit.o)
  .debug_aranges
-                0x000000d8       0x20 ../lib/pegasus_crt.a(console.o)
+                0x000000e0       0x20 ../lib/pegasus_crt.a(wait.o)
  .debug_aranges
-                0x000000f8       0x20 ../lib/pegasus_crt.a(keyboard.o)
+                0x00000100       0x20 ../lib/pegasus_crt.a(open.o)
  .debug_aranges
-                0x00000118       0x20 ../lib/pegasus_crt.a(open.o)
+                0x00000120       0x20 ../lib/pegasus_crt.a(write.o)
  .debug_aranges
-                0x00000138       0x20 ../lib/pegasus_crt.a(read.o)
+                0x00000140       0x20 ../lib/pegasus_crt.a(close.o)
  .debug_aranges
-                0x00000158       0x20 ../lib/pegasus_crt.a(write.o)
+                0x00000160       0x20 ../lib/pegasus_crt.a(fork.o)
  .debug_aranges
-                0x00000178       0x20 ../lib/pegasus_crt.a(close.o)
+                0x00000180       0x20 ../lib/pegasus_crt.a(double_link_list.o)
  .debug_aranges
-                0x00000198       0x20 ../lib/pegasus_crt.a(wait.o)
+                0x000001a0       0x20 ../lib/pegasus_crt.a(protect.o)
  .debug_aranges
-                0x000001b8       0x20 ../lib/pegasus_crt.a(fork.o)
+                0x000001c0       0x20 ../lib/pegasus_crt.a(console.o)
  .debug_aranges
-                0x000001d8       0x20 ../lib/pegasus_crt.a(exec.o)
+                0x000001e0       0x18 ../lib/pegasus_crt.a(global.o)
  .debug_aranges
-                0x000001f8       0x20 ../lib/pegasus_crt.a(main.o)
+                0x000001f8       0x20 ../lib/pegasus_crt.a(task_network.o)
  .debug_aranges
-                0x00000218       0x20 ../lib/pegasus_crt.a(exec.o)
+                0x00000218       0x20 ../lib/pegasus_crt.a(hd.o)
  .debug_aranges
-                0x00000238       0x20 ../lib/pegasus_crt.a(forkexit.o)
+                0x00000238       0x20 ../lib/pegasus_crt.a(fs_main.o)
  .debug_aranges
-                0x00000258       0x20 ../lib/pegasus_crt.a(mem.o)
+                0x00000258       0x20 ../lib/pegasus_crt.a(main.o)
  .debug_aranges
-                0x00000278       0x20 ../lib/pegasus_crt.a(my_process.o)
+                0x00000278       0x20 ../lib/pegasus_crt.a(forkexit.o)
  .debug_aranges
-                0x00000298       0x20 ../lib/pegasus_crt.a(thread.o)
+                0x00000298       0x20 ../lib/pegasus_crt.a(exec.o)
  .debug_aranges
-                0x000002b8       0x20 ../lib/pegasus_crt.a(task_network.o)
+                0x000002b8       0x20 ../lib/pegasus_crt.a(my_process.o)
  .debug_aranges
-                0x000002d8       0x20 ../lib/pegasus_crt.a(fs_main.o)
+                0x000002d8       0x20 ../lib/pegasus_crt.a(thread.o)
 
 .debug_pubnames
  *(.debug_pubnames)
 
 .debug_info     0x00000000    0x1b457
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x00000000      0xdb3 ../lib/pegasus_crt.a(exit.o)
- .debug_info    0x00000db3     0x27c5 ../lib/pegasus_crt.a(kernel_main_old.o)
- .debug_info    0x00003578     0x1044 ../lib/pegasus_crt.a(double_link_list.o)
- .debug_info    0x000045bc     0x19f3 ../lib/pegasus_crt.a(hd.o)
- .debug_info    0x00005faf      0xe8a ../lib/pegasus_crt.a(global.o)
- .debug_info    0x00006e39      0xf73 ../lib/pegasus_crt.a(process.o)
- .debug_info    0x00007dac     0x11b5 ../lib/pegasus_crt.a(protect.o)
- .debug_info    0x00008f61     0x128a ../lib/pegasus_crt.a(console.o)
- .debug_info    0x0000a1eb      0xfde ../lib/pegasus_crt.a(keyboard.o)
- .debug_info    0x0000b1c9      0xe02 ../lib/pegasus_crt.a(open.o)
- .debug_info    0x0000bfcb      0xea1 ../lib/pegasus_crt.a(read.o)
- .debug_info    0x0000ce6c      0xe2f ../lib/pegasus_crt.a(write.o)
- .debug_info    0x0000dc9b      0xdb6 ../lib/pegasus_crt.a(close.o)
- .debug_info    0x0000ea51      0xdc1 ../lib/pegasus_crt.a(wait.o)
- .debug_info    0x0000f812      0xda8 ../lib/pegasus_crt.a(fork.o)
- .debug_info    0x000105ba      0xf40 ../lib/pegasus_crt.a(exec.o)
- .debug_info    0x000114fa      0xdcc ../lib/pegasus_crt.a(main.o)
- .debug_info    0x000122c6     0x11ca ../lib/pegasus_crt.a(exec.o)
- .debug_info    0x00013490      0xfbc ../lib/pegasus_crt.a(forkexit.o)
- .debug_info    0x0001444c     0x1cfa ../lib/pegasus_crt.a(mem.o)
- .debug_info    0x00016146     0x149d ../lib/pegasus_crt.a(my_process.o)
- .debug_info    0x000175e3     0x1069 ../lib/pegasus_crt.a(thread.o)
- .debug_info    0x0001864c      0xed0 ../lib/pegasus_crt.a(task_network.o)
- .debug_info    0x0001951c     0x1f3b ../lib/pegasus_crt.a(fs_main.o)
+ .debug_info    0x00000000     0x27c5 ../lib/pegasus_crt.a(kernel_main_old.o)
+ .debug_info    0x000027c5      0xfde ../lib/pegasus_crt.a(keyboard.o)
+ .debug_info    0x000037a3      0xf73 ../lib/pegasus_crt.a(process.o)
+ .debug_info    0x00004716     0x1cfa ../lib/pegasus_crt.a(mem.o)
+ .debug_info    0x00006410      0xf40 ../lib/pegasus_crt.a(exec.o)
+ .debug_info    0x00007350      0xea1 ../lib/pegasus_crt.a(read.o)
+ .debug_info    0x000081f1      0xdb3 ../lib/pegasus_crt.a(exit.o)
+ .debug_info    0x00008fa4      0xdc1 ../lib/pegasus_crt.a(wait.o)
+ .debug_info    0x00009d65      0xe02 ../lib/pegasus_crt.a(open.o)
+ .debug_info    0x0000ab67      0xe2f ../lib/pegasus_crt.a(write.o)
+ .debug_info    0x0000b996      0xdb6 ../lib/pegasus_crt.a(close.o)
+ .debug_info    0x0000c74c      0xda8 ../lib/pegasus_crt.a(fork.o)
+ .debug_info    0x0000d4f4     0x1044 ../lib/pegasus_crt.a(double_link_list.o)
+ .debug_info    0x0000e538     0x11b5 ../lib/pegasus_crt.a(protect.o)
+ .debug_info    0x0000f6ed     0x128a ../lib/pegasus_crt.a(console.o)
+ .debug_info    0x00010977      0xe8a ../lib/pegasus_crt.a(global.o)
+ .debug_info    0x00011801      0xed0 ../lib/pegasus_crt.a(task_network.o)
+ .debug_info    0x000126d1     0x19f3 ../lib/pegasus_crt.a(hd.o)
+ .debug_info    0x000140c4     0x1f3b ../lib/pegasus_crt.a(fs_main.o)
+ .debug_info    0x00015fff      0xdcc ../lib/pegasus_crt.a(main.o)
+ .debug_info    0x00016dcb      0xfbc ../lib/pegasus_crt.a(forkexit.o)
+ .debug_info    0x00017d87     0x11ca ../lib/pegasus_crt.a(exec.o)
+ .debug_info    0x00018f51     0x149d ../lib/pegasus_crt.a(my_process.o)
+ .debug_info    0x0001a3ee     0x1069 ../lib/pegasus_crt.a(thread.o)
 
 .debug_abbrev   0x00000000     0x3361
  *(.debug_abbrev)
- .debug_abbrev  0x00000000      0x19b ../lib/pegasus_crt.a(exit.o)
- .debug_abbrev  0x0000019b      0x452 ../lib/pegasus_crt.a(kernel_main_old.o)
- .debug_abbrev  0x000005ed      0x216 ../lib/pegasus_crt.a(double_link_list.o)
- .debug_abbrev  0x00000803      0x33e ../lib/pegasus_crt.a(hd.o)
- .debug_abbrev  0x00000b41      0x157 ../lib/pegasus_crt.a(global.o)
- .debug_abbrev  0x00000c98      0x1e0 ../lib/pegasus_crt.a(process.o)
- .debug_abbrev  0x00000e78      0x227 ../lib/pegasus_crt.a(protect.o)
- .debug_abbrev  0x0000109f      0x2ac ../lib/pegasus_crt.a(console.o)
- .debug_abbrev  0x0000134b      0x1fb ../lib/pegasus_crt.a(keyboard.o)
- .debug_abbrev  0x00001546      0x1c5 ../lib/pegasus_crt.a(open.o)
- .debug_abbrev  0x0000170b      0x1ef ../lib/pegasus_crt.a(read.o)
- .debug_abbrev  0x000018fa      0x1db ../lib/pegasus_crt.a(write.o)
- .debug_abbrev  0x00001ad5      0x19d ../lib/pegasus_crt.a(close.o)
- .debug_abbrev  0x00001c72      0x19f ../lib/pegasus_crt.a(wait.o)
- .debug_abbrev  0x00001e11      0x18a ../lib/pegasus_crt.a(fork.o)
- .debug_abbrev  0x00001f9b      0x1e8 ../lib/pegasus_crt.a(exec.o)
- .debug_abbrev  0x00002183      0x208 ../lib/pegasus_crt.a(main.o)
- .debug_abbrev  0x0000238b      0x1c4 ../lib/pegasus_crt.a(exec.o)
- .debug_abbrev  0x0000254f      0x204 ../lib/pegasus_crt.a(forkexit.o)
- .debug_abbrev  0x00002753      0x2ea ../lib/pegasus_crt.a(mem.o)
- .debug_abbrev  0x00002a3d      0x260 ../lib/pegasus_crt.a(my_process.o)
- .debug_abbrev  0x00002c9d      0x222 ../lib/pegasus_crt.a(thread.o)
- .debug_abbrev  0x00002ebf      0x1b3 ../lib/pegasus_crt.a(task_network.o)
- .debug_abbrev  0x00003072      0x2ef ../lib/pegasus_crt.a(fs_main.o)
+ .debug_abbrev  0x00000000      0x452 ../lib/pegasus_crt.a(kernel_main_old.o)
+ .debug_abbrev  0x00000452      0x1fb ../lib/pegasus_crt.a(keyboard.o)
+ .debug_abbrev  0x0000064d      0x1e0 ../lib/pegasus_crt.a(process.o)
+ .debug_abbrev  0x0000082d      0x2ea ../lib/pegasus_crt.a(mem.o)
+ .debug_abbrev  0x00000b17      0x1e8 ../lib/pegasus_crt.a(exec.o)
+ .debug_abbrev  0x00000cff      0x1ef ../lib/pegasus_crt.a(read.o)
+ .debug_abbrev  0x00000eee      0x19b ../lib/pegasus_crt.a(exit.o)
+ .debug_abbrev  0x00001089      0x19f ../lib/pegasus_crt.a(wait.o)
+ .debug_abbrev  0x00001228      0x1c5 ../lib/pegasus_crt.a(open.o)
+ .debug_abbrev  0x000013ed      0x1db ../lib/pegasus_crt.a(write.o)
+ .debug_abbrev  0x000015c8      0x19d ../lib/pegasus_crt.a(close.o)
+ .debug_abbrev  0x00001765      0x18a ../lib/pegasus_crt.a(fork.o)
+ .debug_abbrev  0x000018ef      0x216 ../lib/pegasus_crt.a(double_link_list.o)
+ .debug_abbrev  0x00001b05      0x227 ../lib/pegasus_crt.a(protect.o)
+ .debug_abbrev  0x00001d2c      0x2ac ../lib/pegasus_crt.a(console.o)
+ .debug_abbrev  0x00001fd8      0x157 ../lib/pegasus_crt.a(global.o)
+ .debug_abbrev  0x0000212f      0x1b3 ../lib/pegasus_crt.a(task_network.o)
+ .debug_abbrev  0x000022e2      0x33e ../lib/pegasus_crt.a(hd.o)
+ .debug_abbrev  0x00002620      0x2ef ../lib/pegasus_crt.a(fs_main.o)
+ .debug_abbrev  0x0000290f      0x208 ../lib/pegasus_crt.a(main.o)
+ .debug_abbrev  0x00002b17      0x204 ../lib/pegasus_crt.a(forkexit.o)
+ .debug_abbrev  0x00002d1b      0x1c4 ../lib/pegasus_crt.a(exec.o)
+ .debug_abbrev  0x00002edf      0x260 ../lib/pegasus_crt.a(my_process.o)
+ .debug_abbrev  0x0000313f      0x222 ../lib/pegasus_crt.a(thread.o)
 
-.debug_line     0x00000000     0x4766
+.debug_line     0x00000000     0x4771
  *(.debug_line .debug_line.* .debug_line_end)
- .debug_line    0x00000000       0xa0 ../lib/pegasus_crt.a(exit.o)
- .debug_line    0x000000a0      0xdff ../lib/pegasus_crt.a(kernel_main_old.o)
- .debug_line    0x00000e9f      0x253 ../lib/pegasus_crt.a(double_link_list.o)
- .debug_line    0x000010f2      0x639 ../lib/pegasus_crt.a(hd.o)
- .debug_line    0x0000172b       0x95 ../lib/pegasus_crt.a(global.o)
- .debug_line    0x000017c0      0x180 ../lib/pegasus_crt.a(process.o)
- .debug_line    0x00001940      0x1ff ../lib/pegasus_crt.a(protect.o)
- .debug_line    0x00001b3f      0x54e ../lib/pegasus_crt.a(console.o)
- .debug_line    0x0000208d      0x296 ../lib/pegasus_crt.a(keyboard.o)
- .debug_line    0x00002323       0xbd ../lib/pegasus_crt.a(open.o)
- .debug_line    0x000023e0      0x155 ../lib/pegasus_crt.a(read.o)
- .debug_line    0x00002535       0xbc ../lib/pegasus_crt.a(write.o)
- .debug_line    0x000025f1       0xad ../lib/pegasus_crt.a(close.o)
- .debug_line    0x0000269e       0xb7 ../lib/pegasus_crt.a(wait.o)
- .debug_line    0x00002755       0xa5 ../lib/pegasus_crt.a(fork.o)
- .debug_line    0x000027fa      0x18b ../lib/pegasus_crt.a(exec.o)
- .debug_line    0x00002985       0xec ../lib/pegasus_crt.a(main.o)
- .debug_line    0x00002a71      0x20c ../lib/pegasus_crt.a(exec.o)
- .debug_line    0x00002c7d      0x17a ../lib/pegasus_crt.a(forkexit.o)
- .debug_line    0x00002df7      0x7e6 ../lib/pegasus_crt.a(mem.o)
- .debug_line    0x000035dd      0x33b ../lib/pegasus_crt.a(my_process.o)
- .debug_line    0x00003918      0x145 ../lib/pegasus_crt.a(thread.o)
- .debug_line    0x00003a5d       0xef ../lib/pegasus_crt.a(task_network.o)
- .debug_line    0x00003b4c      0xc1a ../lib/pegasus_crt.a(fs_main.o)
+ .debug_line    0x00000000      0xe01 ../lib/pegasus_crt.a(kernel_main_old.o)
+ .debug_line    0x00000e01      0x296 ../lib/pegasus_crt.a(keyboard.o)
+ .debug_line    0x00001097      0x180 ../lib/pegasus_crt.a(process.o)
+ .debug_line    0x00001217      0x7e6 ../lib/pegasus_crt.a(mem.o)
+ .debug_line    0x000019fd      0x18b ../lib/pegasus_crt.a(exec.o)
+ .debug_line    0x00001b88      0x155 ../lib/pegasus_crt.a(read.o)
+ .debug_line    0x00001cdd       0xa0 ../lib/pegasus_crt.a(exit.o)
+ .debug_line    0x00001d7d       0xb7 ../lib/pegasus_crt.a(wait.o)
+ .debug_line    0x00001e34       0xbd ../lib/pegasus_crt.a(open.o)
+ .debug_line    0x00001ef1       0xbc ../lib/pegasus_crt.a(write.o)
+ .debug_line    0x00001fad       0xad ../lib/pegasus_crt.a(close.o)
+ .debug_line    0x0000205a       0xa5 ../lib/pegasus_crt.a(fork.o)
+ .debug_line    0x000020ff      0x253 ../lib/pegasus_crt.a(double_link_list.o)
+ .debug_line    0x00002352      0x1ff ../lib/pegasus_crt.a(protect.o)
+ .debug_line    0x00002551      0x54e ../lib/pegasus_crt.a(console.o)
+ .debug_line    0x00002a9f       0x95 ../lib/pegasus_crt.a(global.o)
+ .debug_line    0x00002b34       0xf8 ../lib/pegasus_crt.a(task_network.o)
+ .debug_line    0x00002c2c      0x639 ../lib/pegasus_crt.a(hd.o)
+ .debug_line    0x00003265      0xc1a ../lib/pegasus_crt.a(fs_main.o)
+ .debug_line    0x00003e7f       0xec ../lib/pegasus_crt.a(main.o)
+ .debug_line    0x00003f6b      0x17a ../lib/pegasus_crt.a(forkexit.o)
+ .debug_line    0x000040e5      0x20c ../lib/pegasus_crt.a(exec.o)
+ .debug_line    0x000042f1      0x33b ../lib/pegasus_crt.a(my_process.o)
+ .debug_line    0x0000462c      0x145 ../lib/pegasus_crt.a(thread.o)
 
 .debug_frame
  *(.debug_frame)
 
-.debug_str      0x00000000     0x1ef3
+.debug_str      0x00000000     0x1efe
  *(.debug_str)
- .debug_str     0x00000000     0x1ef3 ../lib/pegasus_crt.a(exit.o)
-                                0x5a5 (size before relaxing)
- .debug_str     0x00001ef3      0xb62 ../lib/pegasus_crt.a(kernel_main_old.o)
- .debug_str     0x00001ef3      0x6d1 ../lib/pegasus_crt.a(double_link_list.o)
- .debug_str     0x00001ef3      0x9c5 ../lib/pegasus_crt.a(hd.o)
- .debug_str     0x00001ef3      0x610 ../lib/pegasus_crt.a(global.o)
- .debug_str     0x00001ef3      0x64a ../lib/pegasus_crt.a(process.o)
- .debug_str     0x00001ef3      0x76b ../lib/pegasus_crt.a(protect.o)
- .debug_str     0x00001ef3      0x75f ../lib/pegasus_crt.a(console.o)
- .debug_str     0x00001ef3      0x69c ../lib/pegasus_crt.a(keyboard.o)
- .debug_str     0x00001ef3      0x5d8 ../lib/pegasus_crt.a(open.o)
- .debug_str     0x00001ef3      0x611 ../lib/pegasus_crt.a(read.o)
- .debug_str     0x00001ef3      0x5d5 ../lib/pegasus_crt.a(write.o)
- .debug_str     0x00001ef3      0x5a0 ../lib/pegasus_crt.a(close.o)
- .debug_str     0x00001ef3      0x5a5 ../lib/pegasus_crt.a(wait.o)
- .debug_str     0x00001ef3      0x59e ../lib/pegasus_crt.a(fork.o)
- .debug_str     0x00001ef3      0x62c ../lib/pegasus_crt.a(exec.o)
- .debug_str     0x00001ef3      0x598 ../lib/pegasus_crt.a(main.o)
- .debug_str     0x00001ef3      0x86d ../lib/pegasus_crt.a(exec.o)
- .debug_str     0x00001ef3      0x617 ../lib/pegasus_crt.a(forkexit.o)
- .debug_str     0x00001ef3      0xa6d ../lib/pegasus_crt.a(mem.o)
- .debug_str     0x00001ef3      0x8fe ../lib/pegasus_crt.a(my_process.o)
- .debug_str     0x00001ef3      0x717 ../lib/pegasus_crt.a(thread.o)
- .debug_str     0x00001ef3      0x640 ../lib/pegasus_crt.a(task_network.o)
- .debug_str     0x00001ef3      0xafa ../lib/pegasus_crt.a(fs_main.o)
+ .debug_str     0x00000000     0x1efe ../lib/pegasus_crt.a(kernel_main_old.o)
+                                0xb64 (size before relaxing)
+ .debug_str     0x00001efe      0x69c ../lib/pegasus_crt.a(keyboard.o)
+ .debug_str     0x00001efe      0x64a ../lib/pegasus_crt.a(process.o)
+ .debug_str     0x00001efe      0xa6d ../lib/pegasus_crt.a(mem.o)
+ .debug_str     0x00001efe      0x62c ../lib/pegasus_crt.a(exec.o)
+ .debug_str     0x00001efe      0x611 ../lib/pegasus_crt.a(read.o)
+ .debug_str     0x00001efe      0x5a5 ../lib/pegasus_crt.a(exit.o)
+ .debug_str     0x00001efe      0x5a5 ../lib/pegasus_crt.a(wait.o)
+ .debug_str     0x00001efe      0x5d8 ../lib/pegasus_crt.a(open.o)
+ .debug_str     0x00001efe      0x5d5 ../lib/pegasus_crt.a(write.o)
+ .debug_str     0x00001efe      0x5a0 ../lib/pegasus_crt.a(close.o)
+ .debug_str     0x00001efe      0x59e ../lib/pegasus_crt.a(fork.o)
+ .debug_str     0x00001efe      0x6d1 ../lib/pegasus_crt.a(double_link_list.o)
+ .debug_str     0x00001efe      0x76b ../lib/pegasus_crt.a(protect.o)
+ .debug_str     0x00001efe      0x75f ../lib/pegasus_crt.a(console.o)
+ .debug_str     0x00001efe      0x610 ../lib/pegasus_crt.a(global.o)
+ .debug_str     0x00001efe      0x649 ../lib/pegasus_crt.a(task_network.o)
+ .debug_str     0x00001efe      0x9c5 ../lib/pegasus_crt.a(hd.o)
+ .debug_str     0x00001efe      0xafa ../lib/pegasus_crt.a(fs_main.o)
+ .debug_str     0x00001efe      0x598 ../lib/pegasus_crt.a(main.o)
+ .debug_str     0x00001efe      0x617 ../lib/pegasus_crt.a(forkexit.o)
+ .debug_str     0x00001efe      0x86d ../lib/pegasus_crt.a(exec.o)
+ .debug_str     0x00001efe      0x8fe ../lib/pegasus_crt.a(my_process.o)
+ .debug_str     0x00001efe      0x717 ../lib/pegasus_crt.a(thread.o)
 
 .debug_loc
  *(.debug_loc)
@@ -1234,4 +1153,4 @@ LOAD ../lib/pegasus_crt.a
  *(.note.GNU-stack)
  *(.gnu_debuglink)
  *(.gnu.lto_*)
-OUTPUT(test elf32-i386)
+OUTPUT(echo elf32-i386)

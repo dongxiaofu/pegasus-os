@@ -6,6 +6,7 @@
 #include "process.h"
 #include "keyboard.h"
 #include "console.h"
+#include "mem.h"
 #include "proto.h"
 #include "global.h"
 

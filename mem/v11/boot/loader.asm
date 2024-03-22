@@ -54,7 +54,8 @@ org	0100h
 	LABLE_GDT_FLAT_WR_TEST:Descriptor 5242880,	        0fffffh,	         0c92h
 	LABLE_GDT_FLAT_WR_16:Descriptor 0,	        0fffffh,	         0892h
 	LABLE_GDT_FLAT_WR:Descriptor	0,	        0fffffh,	         0c92h
-	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 0f2h
+	;LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 0f2h
+	LABLE_GDT_VIDEO: Descriptor	0b8000h,		0ffffh,		 0c92h
 
 	GdtLen	equ		$ - LABEL_GDT
 	GdtPtr	dw	GdtLen - 1
@@ -66,7 +67,8 @@ org	0100h
 	SelectFlatWR	equ	LABLE_GDT_FLAT_WR - LABEL_GDT
 	SelectFlatWR_TEST	equ	LABLE_GDT_FLAT_WR_TEST - LABEL_GDT
 	SelectFlatWR_16	equ	LABLE_GDT_FLAT_WR_16 - LABEL_GDT
-	SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 3
+	;SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 3
+	SelectVideo	equ	LABLE_GDT_VIDEO - LABEL_GDT + 0
 
 ; ----------- 获取物理内存容量 start ----------------------
 ;MemCheckBuf:	times 256 db 0
@@ -114,9 +116,28 @@ org	0100h
 
 
 LABEL_START:
+	;调试mov中的标识符start
+	;xchg bx, bx	
+	mov ax, 2
+	mov ax, 2
+	mov ax, 2
+	mov ax, YourAge
+	;非法
+	;mov YourAge, ax
+	mov ax, [YourAge]
+	mov ax, [YourAge + 20]
+	mov ax, YourMessage
+	;非法
+	;mov YourMessage, ax
+	mov ax, [YourMessage]
+	mov ax, 3
+	mov ax, 3
+	mov [YourAge], ax
+	mov [0x12345678], eax
+	;调试mov中的标识符end
 	mov	ax,	cs
 	mov	ds,	ax
-	;;xhcg bx, bx	
+	;;xchg bx, bx	
 	xor		eax,	eax
 	mov		ax,		cs
 	movzx	eax, ax
@@ -183,6 +204,7 @@ LABEL_START:
 	pop ebx
 	pop eax
 	
+	;;xchg bx, bx
 	mov ax, BaseOfKernel
 	mov es, ax
 	;mov ds, ax		; lodsb、lodsw，把[ds:si]中的数据加载到ax中
@@ -262,6 +284,7 @@ FILE_FOUND:
 	and di, 0xFFE0  ; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置; 获取文件的第一个簇的簇号
 	add di, 0x1A
 	mov si, di
+	;;xchg bx, bx
 	mov ax, BaseOfKernel
 	push ds
 	mov ds, ax
@@ -320,7 +343,7 @@ READ_FILE:
 	push bx
 	;;;;xhcg bx, bx
 	call GetFATEntry
-	;;;;;;xchg	bx,	bx
+	;;;;;;;xchg	bx,	bx
 	pop bx
 	push ax
 	cmp ax, 0xFF8
@@ -348,7 +371,7 @@ READ_FILE_OVER:
 	;分页
 	;call SetupPage
 
-	;;;;;xchg	bx, bx
+	;;;;;;xchg	bx, bx
 	;mov al, 'O'
 	;mov ah, 0Dh
 	;mov [gs:(80 * 23 + 33) * 2], ax
@@ -418,6 +441,9 @@ IN_REAL_MODEL:
 	jmp $
 
 
+_LABLE_GDT_VIDEO_VIRTUAL: Descriptor	(0xc0000000 + 0b8000h),		0ffffh,		 0f2h
+_LABLE_GDT_VIDEO_VIRTUAL2	equ _LABLE_GDT_VIDEO_VIRTUAL - $$
+LABLE_GDT_VIDEO_VIRTUAL	equ BaseOfLoaderPhyAddr + _LABLE_GDT_VIDEO_VIRTUAL2
 
 BootMessage:	db	"Hello,World OS!"
 ;BootMessageLength:	db	$ - BootMessage
@@ -470,9 +496,12 @@ _RamSize		equ		RamSize + BaseOfLoaderPhyAddr
 _MemCheckBuf	equ		MemCheckBuf + BaseOfLoaderPhyAddr
 
 ;分页
-PageDirectoryTablePhysicalAddress		equ			0x100000
+PageDirectoryTablePhysicalAddress		equ			0x400000
 PageTablePhysicalAddress				equ		    PageDirectoryTablePhysicalAddress + 4096	
 ;PageDirectoryTablePhysicalAddress		equ			0x100000
+UserPageDirectoryTablePhysicalAddress	equ			(0x400000 + 0x2000)
+UserPageTablePhysicalAddress			equ		    UserPageDirectoryTablePhysicalAddress + 4096	
+
 PG_P_NO				equ			0
 PG_P_YES			equ			1
 PG_RW_R				equ			00b
@@ -619,17 +648,25 @@ ReadSector2:
 ; 3>BaseOfKernel 和 0x30000 之间呢？
 ; 3>0x30000 这个数值，是 Makefile 中编译时设置的：ld -s -Ttext 0x30400  -o kernel.bin  kernel.o -m elf_i386 
 ;BaseOfKernel	equ	0x8000
-BaseOfKernel	equ	0x6000
+BaseOfKernel	equ	0x5000
+;BaseOfKernel	equ	0x30000
 BaseOfKernel2	equ	0x6000
 BaseOfKernel3	equ	0x0
 OffSetOfLoader	equ	0x0
 BaseOfFATEntry	equ	0x1000
-;BaseOfLoader    equ     0x9000
 BaseOfLoader    equ     0x9000
 ;BaseOfLoader    equ     0x2000
 
 
 BaseOfLoaderPhyAddr	equ	BaseOfLoader * 10h	; LOADER.BIN 被加载到的位置 ---- 物理地址 (= BaseOfLoader * 10h)
+
+
+;调试mov中的标识符
+YourAge		equ		256
+
+YourMessage         db      'hello, world' 
+msglen          equ     $-YourMessage
+
 
 [SECTION .s32]
 
@@ -654,8 +691,9 @@ LABEL_PM_START:
 	; 跳入16位模式（保护模式)
 	;jmp word SelectFlatX_16:0
 	;分页
-	;;;;xchg bx, bx
+	;;;xchg bx, bx
 	call SetupPage
+	;call SetupUserPage
 	;开启分页
 	call OpenPaging
 	;设置cr3的值
@@ -663,13 +701,11 @@ LABEL_PM_START:
 ;	mov cr3, eax
 ;
 ;	;设置cr0的PG位
-;	;;;xchg bx, bx
 ;	mov eax, cr0
 ;	or eax, 0x80000000
 ;	mov cr0, eax
 	
 
-	;;;xchg bx, bx
 	; --------------------获取物理内存容量start--------------------------
 	push esi
 	push ecx
@@ -709,7 +745,7 @@ LABEL_PM_START:
 	add edx, 20
 	loop .DispMem
 	mov eax, [_RamSize]
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 	pop eax
 	pop ebx
 	pop edi
@@ -718,43 +754,25 @@ LABEL_PM_START:
 	; --------------------获取物理内存容量end--------------------------
 
 
-	;;;xchg bx, bx	
+	;;;;xchg bx, bx	
 	call Init_8259A
 	call Init8253
 
+	mov esp, 0xc02FFFFF
 	;;xhcg bx, bx
 	call InitKernel
-	;;;xchg bx, bx	
+	;;;;xchg bx, bx	
 
 	;mov gs, ax
-	mov al, 'G'
+	mov al, 'J'
 	mov ah, 0Ah
 	mov [gs:(80 * 19 + 20) * 2], ax
 	
-	
-	; 测试读写5M之上的内存读写 start
-;	push es
-;	mov ax, SelectFlatWR_TEST
-;	mov es, ax
-;	mov esi, 0
-;	mov edi, 0
-;	;;;xhcg bx, bx
-;	mov byte [es:edi], 'W'
-;	mov byte al, [es:edi]
-;	mov ah, 0Ah
-;	mov [gs:(80*20 + 20) * 2], ax
-;	
-;	mov byte [es:edi], 'Q'
-;	mov byte al, [es:edi]
-;	mov [gs:(80*20 + 21) * 2], ax
-;	
-;	pop es
-	; 测试读写5M之上的内存读写 end
-
-
-	;;;;xchg bx, bx
+	xchg bx, bx
 	;jmp SelectFlatX:0x30400
-	jmp SelectFlatX:0x1000
+	;jmp SelectFlatX:0x1000
+	;jmp SelectFlatX:0xc0001000
+	jmp SelectFlatX:0xc0100000
 	jmp $
 	jmp $
 	jmp $
@@ -803,7 +821,7 @@ Init_8259A:
 	out 0x21, al
 	call io_delay
 
-	mov al, 10111111b	; 正确的
+	mov al, 10111011b	; 正确的
 	;mov al, 10111111b	; 测试硬盘，打开硬盘中断
 	out 0xA1, al
 	call io_delay
@@ -823,6 +841,7 @@ Init8253:
 	
 	; 设置每10毫秒发生一次时钟中断
 	mov ax, 11931
+	;mov ax, 50
 	;mov ax, (1193182 / 10000000000000)
 	;mov ax, (1193182 / 10 * 5)
 	;mov ax, 65535
@@ -845,7 +864,7 @@ InitKernel:
 	push eax
 	push ecx
 	push esi
-	;xhcg bx, bx
+	;xchg bx, bx
 	;程序段的个数
 	;mov cx, word ptr ds:0x802c
 	mov cx, [BaseOfKernelPhyAddr + 2CH]
@@ -981,8 +1000,8 @@ SetupPage:
 	;mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], PageTablePhysicalAddress
 
 	;设置第一个页表的前256个PTE
-	;mov ecx, 256
 	mov ecx, 1024
+	;mov ecx, 1024
 	;mov esi, 0
 	xor esi, esi
 	xor eax, eax
@@ -1014,7 +1033,7 @@ SetupPage:
 	add eax, 4096
 	inc esi
 	loop .SetHigh1GBMemPDE
-	;;;;xchg bx, bx
+	;;;;;xchg bx, bx
 
 	pop esp
 	pop edi
@@ -1024,6 +1043,63 @@ SetupPage:
 
 	ret
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;user page start;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SetupUserPage:
+	push ebp
+	push ebx
+	push esi
+	push edi
+	push esp
+
+	;清空页目录表
+	mov ecx, 4096
+	mov eax, UserPageDirectoryTablePhysicalAddress
+.ClearPageDirectoryTable:
+	mov dword [eax], 0
+	add eax, 1
+	loop .ClearPageDirectoryTable
+
+	;设置第0个、第768个、第1023个PDE的值
+	mov eax, UserPageTablePhysicalAddress
+	or eax, PG_P_YES |  PG_RW_RW |  PG_US_SUPER
+	mov dword [UserPageDirectoryTablePhysicalAddress], eax
+	mov dword [UserPageDirectoryTablePhysicalAddress + 0x300 * 4], eax
+	mov eax, UserPageDirectoryTablePhysicalAddress
+	or eax, PG_P_YES |  PG_RW_RW |  PG_US_SUPER
+	mov dword [UserPageDirectoryTablePhysicalAddress + 0x3FF * 4], eax
+
+	;设置第一个页表的前256个PTE
+	mov ecx, 1024
+	xor esi, esi
+	xor eax, eax
+.SetPre256PTE:
+	or eax, PG_P_YES |  PG_RW_RW |  PG_US_SUPER
+	mov dword [UserPageTablePhysicalAddress + 4 * esi], eax
+	add eax, 4096
+	inc esi
+	loop .SetPre256PTE
+
+	;设置页目录的第769到1022个PDE
+	mov ecx, 254
+	mov esi, 769
+	mov eax, UserPageTablePhysicalAddress + 4096
+.SetHigh1GBMemPDE:
+	or eax, PG_P_YES |  PG_RW_RW |  PG_US_SUPER
+	mov dword [UserPageDirectoryTablePhysicalAddress + 4 * esi], eax
+	add eax, 4096
+	inc esi
+	loop .SetHigh1GBMemPDE
+
+	pop esp
+	pop edi
+	pop esi
+	pop ebx
+	pop ebp
+
+	ret
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;user page end;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;开启分页
 OpenPaging:
 	push ebp
@@ -1032,20 +1108,77 @@ OpenPaging:
 	push edi
 	push esp
 
+	;;;xchg bx, bx
 	sgdt [GdtPtr]             ; 存储到原来gdt所有的位置
+;	add dword [GdtPtr + 2], 0xc0000000
+
+	;error: instruction not supported in 32-bit mode
+	;mov qword [GdtPtr + 7 * 8], LABLE_GDT_VIDEO_VIRTUAL	
+;	push 8
+;	push LABLE_GDT_VIDEO_VIRTUAL
+;	xor eax, eax
+;	mov eax, 56
+;	add dword eax, [GdtPtr + 2]
+;	push eax
+;	;push GdtPtr + 7 * 8
+;	call Memcpy
+	push eax
+	push ebx
+	push ecx
+
+	xor eax, eax
+	xor ebx, ebx
+;	mov eax, [GdtPtr + 2]
+;	and eax, 0xFFFF
+;	mov ebx, 2
+;
+;	;;;xchg bx, bx
+;	mov eax, [GdtPtr + 2]
+;	add eax, 56
+;	mov ebx, 0xb800
+;	add ebx, 0xc0000000
+;	mov word [eax + 2], 0xFFFF	
+;	and word bx, [eax + 2] 
+;	mov ecx, ebx
+;	shr ebx, 2
+;	mov byte [eax + 4], 0xFF
+;	and byte [eax + 4], bl
+;	mov byte [eax + 7], 0xFF
+;	shr ebx, 1
+;	and byte [eax + 7], bl
+
+	pop ecx
+	pop ebx
+	pop eax
+
+	mov ebx, [GdtPtr + 2]
+	or dword [ebx + 56 + 4], 0xc0000000
+	;or dword [BaseOfLoaderPhyAddr + 0x9013f + 56 + 4], 0xc0000000
 	add dword [GdtPtr + 2], 0xc0000000
 
 	add esp, 0xc0000000        ; 将栈指针同样映射到内核地址
 	
 	;设置cr3的值
 	mov eax, PageDirectoryTablePhysicalAddress
+	;mov eax, UserPageDirectoryTablePhysicalAddress
 	mov cr3, eax
 
 	;设置cr0的PG位
-	;;;;xchg bx, bx
+	;;xchg bx, bx
 	mov eax, cr0
 	or eax, 0x80000000
 	mov cr0, eax
+
+	;error: instruction not supported in 32-bit mode
+	;mov qword [GdtPtr + 7 * 8], LABLE_GDT_VIDEO_VIRTUAL	
+;	push 8
+;	push LABLE_GDT_VIDEO_VIRTUAL
+;	mov eax, 56
+;	add eax, GdtPtr
+;	push eax
+;	;push GdtPtr + 7 * 8
+;	call Memcpy
+	
 
 	lgdt [GdtPtr]             ; 重新加载
 
