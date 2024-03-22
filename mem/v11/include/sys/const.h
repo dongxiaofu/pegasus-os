@@ -281,4 +281,16 @@
 // #define TICKS_NUM	100
 #define STACK_MAGIC	0x99ABCDE0
 
+// 网络协议
+#define IPC_SOCKET	 0x0001
+#define IPC_CONNECT  0x0002
+#define IPC_WRITE    0x0003
+#define IPC_READ     0x0004
+#define IPC_CLOSE    0x0005
+#define IPC_BIND	 0x0006
+#define IPC_ACCEPT   0x0007
+#define IPC_LISTEN   0x0008
+#define IPC_SENDTO   0x0009
+#define IPC_RECVFROM 0x000a
+
 #endif
