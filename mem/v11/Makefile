@@ -1,18 +1,10 @@
-ENTRYOFFSET     =   0x400
-
 ASM	:=	nasm
 CC	=	gcc
 LD	=	ld
 ASKFLAGS=	-I include/ -f elf
 CFLAGS	=	-I include/ -I include/sys -I include/mem \
 			-g -c -fno-builtin -m32	
-# CFLAGS	=	-I include/ -I include/sys -c -fno-builtin -m32	
-# LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386 -dynamic-linker /lib/ld-linux.so.2 -lc
-# LDFLAGS		= -Ttext 0x30400 -Map krnl.map -m elf_i386
-# LDFLAGS		= -Ttext 0x1000 -Map krnl.map -m elf_i386
-# LDFLAGS		= -Ttext 0xc0001000 -Map krnl.map -m elf_i386
 LDFLAGS		:= -Ttext 0xc0100000 -Map krnl.map -m elf_i386
-#LDFLAGS	=	-s -Ttext 0x30400 -m elf_i386
 
 BIN	:=	kernel.bin
 
@@ -39,17 +31,15 @@ ASM_BOOT_OBJS	:=  $(ASM_BOOT_SOURCE:.asm=.bin)
 
 ASM_KERNEL_SOURCE	:=	$(wildcard kernel/*.asm)
 ASM_KERNEL_OBJS	:=  $(ASM_KERNEL_SOURCE:.asm=.o)	
+#排除kernel_sub.o。
+ASM_KERNEL_OBJS_FILTERED	:=	$(filter-out kernel_sub.o, $(ASM_KERNEL_OBJS))
 
 LOBJS	=	lib/pegasus_crt.a
 
-.PHONY: all clean
-
-#image:clean everything buildimg subsystem
-image:clean everything buildimg
+image:clean everything buildimg subsystem
 
 everything:${BIN} ${LOBJS} $(ASM_BOOT_OBJS) $(ASM_KERNEL_OBJS)
 
-#$(BIN):$(OBJS) $(ASM_OBJS)
 $(BIN):$(ASM_KERNEL_OBJS) $(ASM_OBJS) $(OBJS)
 	${LD} ${LDFLAGS} -o $@ $^
 
@@ -66,7 +56,7 @@ $(BIN):$(ASM_KERNEL_OBJS) $(ASM_OBJS) $(OBJS)
 	${ASM}	$<	-o	$@
 
 # 生成CRT，C语言运行时环境
-${LOBJS}:${OBJS}
+${LOBJS}: $(ASM_KERNEL_OBJS_FILTERED) $(ASM_OBJS) $(OBJS)
 	ar rcs $@ $^
 
 subsystem:

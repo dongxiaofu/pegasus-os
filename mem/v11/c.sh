@@ -2,4 +2,4 @@
 
 # 编译项目
 
-make clean && make
+make clean && make image
