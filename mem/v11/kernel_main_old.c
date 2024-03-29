@@ -1119,6 +1119,15 @@ void Printf(char *fmt, ...)
     return;
 }
 
+int sprintf(char *str, const char *format, ...)
+{
+    // unsigned int *var_list = (unsigned int *)((unsigned int *)&fmt + 1);
+    char *var_list = (char *)((char *)&fmt + 4);
+    int len = vsprintf(buf, fmt, var_list);
+
+    return len;
+}
+
 int vsprintf(char *buf, char *fmt, char *var_list)
 {
     // 指向buf

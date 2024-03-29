@@ -25,6 +25,7 @@ void assertion_failure(char *exp, char *filename, char *base_filename, unsigned 
 char* i2a(int val, int base, char ** ps);
 // 只支持%x
 void Printf(char *fmt, ...);
+int sprintf(char *str, const char *format, ...);
 
 // 把整型数字转成指定进制的字符串
 // void itoa(int value, char **str, int base);
