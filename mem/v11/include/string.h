@@ -8,6 +8,12 @@ int Strlen(char *buf);
 void Memcpy(void *dst, void *src, int size);
 void Memset(void *dest, char character, int size);
 
+int strcmp(const char *s1, const char *s2);
+int strncmp(const char *s1, const char *s2, size_t n);
+
+char *strpbrk(const char *s, const char *accept);
+char *strtok(char *str, const char *delim);
+
 // 为什么用宏？以后可能会不使用Memcpy
 // #define phycopy Memcpy2
 #define phycopy Memcpy

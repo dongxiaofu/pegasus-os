@@ -34,6 +34,8 @@ char *itoa(int value, char **str, int base);
 void atoi(char *str, int num);
 void disp_int(int num);
 
+int sscanf(const char *str, const char *format, ...);
+
 
 // debug end
 
