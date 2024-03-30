@@ -246,7 +246,7 @@ udp_send(struct sock *sk, const void *buf, const uint len)
 	udphd->dport = sk->dport;
 	udphd->len = skb->len;
 
-	udpdbg("udpout");
+	//udpdbg("udpout");
 
 	udphd->sport = htons(udphd->sport);
 	udphd->dport = htons(udphd->dport);

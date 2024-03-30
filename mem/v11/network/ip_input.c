@@ -71,7 +71,7 @@ ip_rcv(struct sk_buff *skb)
 	 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 	ip_init_pkt(ih);
-	ip_dbg("in", ih);
+	//ip_dbg("in", ih);
 
 	if (!ip_pkt_for_us(ih)) goto drop_pkt;
     switch (ih->proto) {

@@ -90,7 +90,7 @@ void arp_rcv(struct sk_buff *skb)
 
 	arpdata->sip = ntohl(arpdata->sip);		// 发送方ip地址
 	arpdata->dip = ntohl(arpdata->dip);		// 接收方ip地址
-	arpdata_dbg("receive", arpdata);
+	//arpdata_dbg("receive", arpdata);
 
 	merge = update_arp_translation_table(arphdr, arpdata); // 更新arp缓存
 
@@ -157,7 +157,7 @@ arp_request(uint32_t sip, uint32_t dip, struct netdev *netdev)
 	arp->hwsize = netdev->addr_len;
 	arp->prosize = 4;
 
-	arpdata_dbg("req", payload);
+	//arpdata_dbg("req", payload);
 	/* 然后转换为网络字节序 */
 	payload->sip = htonl(payload->sip);
 	payload->dip = htonl(payload->dip);
@@ -202,7 +202,7 @@ arp_reply(struct sk_buff *skb, struct netdev *netdev)
 	arphdr->hwtype = htons(arphdr->hwtype);
 	arphdr->protype = htons(arphdr->protype);
 
-	arpdata_dbg("reply", arpdata);
+	//arpdata_dbg("reply", arpdata);
 	/* 最终转换为本机字节序 */
 	arpdata->sip = htonl(arpdata->sip);
 	arpdata->dip = htonl(arpdata->dip);
@@ -227,7 +227,7 @@ arp_get_hwaddr(uint32_t sip)
 
 		if (entry->state == ARP_RESOLVED &&
 			entry->sip == sip) {
-			arpcache_dbg("entry", entry);
+			//arpcache_dbg("entry", entry);
 			return entry->smac;
 		}
 	}

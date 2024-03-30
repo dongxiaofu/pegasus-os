@@ -62,7 +62,7 @@ netdev_transmit(struct sk_buff *skb, uint8_t *dst_hw, uint16_t ethertype)
 	memcpy(hdr->dmac, dst_hw, dev->addr_len); /* 对端的mac地址 */
 	memcpy(hdr->smac, dev->hwaddr, dev->addr_len); /* 本端的mac地址 */
 	
-	eth_dbg("out", hdr);
+	//eth_dbg("out", hdr);
 	hdr->ethertype = htons(ethertype);	/* 帧类型 */
 	/* 回复,直接写即可 */
 	ret = tun_write((char *)skb->data, skb->len);
@@ -73,7 +73,7 @@ netdev_receive(struct sk_buff *skb)
 {
 	struct eth_hdr *hdr = eth_hdr(skb);  /* 获得以太网头部信息,以太网头部包括
 										 目的mac地址,源mac地址,以及类型信息 */
-	eth_dbg("in", hdr);
+	//eth_dbg("in", hdr);
 	/* 以太网头部的Type(类型)字段 0x86dd表示IPv6 0x0800表示IPv4
 	0x0806表示ARP */
 	switch (hdr->ethertype) {
