@@ -25,7 +25,7 @@ arp_entry_alloc(struct arp_hdr *hdr, struct arp_ipv4 *data)
 	entry->state = ARP_RESOLVED;	// arp应答
 	entry->hwtype = hdr->hwtype;
 	entry->sip = data->sip;
-	memcpy(entry->smac, data->smac, sizeof(entry->smac));
+	Memcpy(entry->smac, data->smac, sizeof(entry->smac));
 	return entry;
 }
 
@@ -49,7 +49,7 @@ update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
 	list_for_each(item, &arp_cache) {
 		entry = list_entry(item, struct arp_cache_entry, list);
 		if (entry->hwtype == hdr->hwtype && entry->sip == data->sip) {
-			memcpy(entry->smac, data->smac, 6);
+			Memcpy(entry->smac, data->smac, 6);
 			return 1;
 		}
 	}
@@ -77,12 +77,12 @@ void arp_rcv(struct sk_buff *skb)
 	arp_dbg("in", arphdr);
 
 	if (arphdr->hwtype != ARP_ETHERNET) {		// 1代表以太网地址
-		printf("ARP: Unsupported HW type\n");
+		Printf("ARP: Unsupported HW type\n");
 		goto drop_pkt;
 	}
 
 	if (arphdr->protype != ARP_IPV4) {			// 0x0800 -- 2048表示arp协议
-		printf("ARP: Unsupported protocol\n");
+		Printf("ARP: Unsupported protocol\n");
 		goto drop_pkt;
 	}
 
@@ -95,7 +95,7 @@ void arp_rcv(struct sk_buff *skb)
 	merge = update_arp_translation_table(arphdr, arpdata); // 更新arp缓存
 
 	if (!(netdev = netdev_get(arpdata->dip))) {
-		printf("ARP was not for us\n");
+		Printf("ARP was not for us\n");
 		goto drop_pkt;
 	}
 
@@ -111,7 +111,7 @@ void arp_rcv(struct sk_buff *skb)
 	case ARP_REPLY:			// 0x0002 -- arp回复,这里实际上在上面已经处理了,更新了arp缓存
 		return;
 	default:
-		printf("ARP: Opcode not supported\n");
+		Printf("ARP: Opcode not supported\n");
 		goto drop_pkt;
 	}
 
@@ -141,11 +141,11 @@ arp_request(uint32_t sip, uint32_t dip, struct netdev *netdev)
 	payload = (struct arp_ipv4 *)skb_push(skb, ARP_DATA_LEN);
 	
 	/* 发送端填入的是本机的地址信息,但是ip是主机字节序 */
-	memcpy(payload->smac, netdev->hwaddr, netdev->addr_len); // 拷贝硬件地址
+	Memcpy(payload->smac, netdev->hwaddr, netdev->addr_len); // 拷贝硬件地址
 	payload->sip = sip;
 
 	/* 接收端填入的是广播地址以及想要查询的ip的地址,但是ip是主机字节序 */
-	memcpy(payload->dmac, broadcast_hw, netdev->addr_len);  // 广播
+	Memcpy(payload->dmac, broadcast_hw, netdev->addr_len);  // 广播
 	payload->dip = dip;
 
 	arp = (struct arp_hdr *)skb_push(skb, ARP_HDR_LEN);
@@ -188,10 +188,10 @@ arp_reply(struct sk_buff *skb, struct netdev *netdev)
 	arpdata = (struct arp_ipv4 *)arphdr->data;
 
 	/* 将源地址和目的地址进行交换,需要注意的是下面的ip地址都是主机字节序 */
-	memcpy(arpdata->dmac, arpdata->smac, 6);
+	Memcpy(arpdata->dmac, arpdata->smac, 6);
 	arpdata->dip = arpdata->sip;
 
-	memcpy(arpdata->smac, netdev->hwaddr, 6);
+	Memcpy(arpdata->smac, netdev->hwaddr, 6);
 	arpdata->sip = netdev->addr;
 
 	arphdr->opcode = ARP_REPLY; // 0x0002

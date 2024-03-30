@@ -14,10 +14,10 @@ run_cmd(char *cmd, ...)
 	va_list ap;
 	char buf[CMDBUFLEN];
 	va_start(ap, cmd);
-	vsnprintf(buf, CMDBUFLEN, cmd, ap);
+	vsnPrintf(buf, CMDBUFLEN, cmd, ap);
 	va_end(ap);
 	if (debug) { // DEBUG模式下输出信息
-		printf("EXEC: %s\n", buf);
+		Printf("EXEC: %s\n", buf);
 	}
 	return system(buf);
 }
@@ -27,7 +27,7 @@ print_err(char *format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
-	vfprintf(stderr, format, ap);
+	vfPrintf(stderr, format, ap);
 	va_end(ap);
 }
 

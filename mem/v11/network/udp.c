@@ -78,7 +78,7 @@ udp_data_dequeue(struct udp_sock *usk, void *user_buf, const uint userlen, struc
 		udphd = udp_hdr(skb);
 		ih = ip_hdr(skb);
 		rlen = skb->dlen > userlen? userlen : skb->dlen;
-		memcpy(user_buf, skb->payload, rlen);
+		Memcpy(user_buf, skb->payload, rlen);
 		/* 即使该数据报的数据没有读完,也要丢弃掉. */
 		skb_dequeue(&sk->receive_queue);
 		if (saddr) {

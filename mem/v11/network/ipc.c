@@ -98,7 +98,7 @@ ipc_write_rc(int sockfd, pid_t pid, uint16_t type, int rc)
 		err.rc = rc;
 	}
 
-	memcpy(response->data, &err, sizeof(struct ipc_err));	/* 直接拷贝err */
+	Memcpy(response->data, &err, sizeof(struct ipc_err));	/* 直接拷贝err */
 
 	if (write(sockfd, (char *)response, resplen) == -1) {	/* 往sock中写入数据 */
 		perror("Error on writing IPC write response");
@@ -139,7 +139,7 @@ ipc_read(int sockfd, struct ipc_msg *msg)
 
 	actual->sockfd = requested->sockfd;
 	actual->len = rlen;
-	memcpy(actual->buf, rbuf, rlen > 0 ? rlen : 0);
+	Memcpy(actual->buf, rbuf, rlen > 0 ? rlen : 0);
 	
 	if (write(sockfd, (char *)response, resplen) == -1) {
 		perror("Error on writing IPC write response");
@@ -158,7 +158,7 @@ ipc_sendto(int sockfd, struct ipc_msg *msg)
 	char buf[payload->len];
 	
 	memset(buf, 0, payload->len);
-	memcpy(buf, payload->buf, payload->len > IPC_BUFLEN ? IPC_BUFLEN : payload->len);
+	Memcpy(buf, payload->buf, payload->len > IPC_BUFLEN ? IPC_BUFLEN : payload->len);
 
 	if (payload->len > IPC_BUFLEN) {
 		int res = read(sockfd, buf + IPC_BUFLEN, payload->len - IPC_BUFLEN);
@@ -209,7 +209,7 @@ ipc_recvfrom(int sockfd, struct ipc_msg *msg)
 	if (saddr) {	/* 拷贝对方的地址信息 */
 		actual->addr = *saddr;
 	}
-	memcpy(actual->buf, rbuf, rlen > 0 ? rlen : 0);
+	Memcpy(actual->buf, rbuf, rlen > 0 ? rlen : 0);
 
 	if (write(sockfd, (char *)response, resplen) == -1) {
 		perror("Error on writing IPC recvfrom response");
@@ -228,7 +228,7 @@ ipc_write(int sockfd, struct ipc_msg *msg)
 	int dlen = payload->len - IPC_BUFLEN;
 	char buf[payload->len];
 	memset(buf, 0, payload->len);
-	memcpy(buf, payload->buf, payload->len > IPC_BUFLEN ? IPC_BUFLEN : payload->len);
+	Memcpy(buf, payload->buf, payload->len > IPC_BUFLEN ? IPC_BUFLEN : payload->len);
 
 	if (payload->len > IPC_BUFLEN) {
 		int res = read(sockfd, buf + IPC_BUFLEN, payload->len - IPC_BUFLEN);
@@ -307,7 +307,7 @@ ipc_accept(int sockfd, struct ipc_msg *msg)
 
 	acc->sockfd = sockfd;
 	if (payload->contain_addr)
-		memcpy(&acc->addr, addr, sizeof(struct sockaddr_in));
+		Memcpy(&acc->addr, addr, sizeof(struct sockaddr_in));
 	if (write(sockfd, (char *)response, resplen) == -1) {
 		perror("Error on writing IPC accept response");
 	}
@@ -385,7 +385,7 @@ socket_ipc_open(void *args) {
 		rc = demux_ipc_socket_call(sockfd, buf, blen);	/* 分发 */
 
 		if (rc == -1) {
-			printf("Error on demuxing IPC socket call\n");
+			Printf("Error on demuxing IPC socket call\n");
 			close(sockfd);
 			return NULL;
 		}
@@ -450,7 +450,7 @@ start_ipc_listener()
 		struct ipc_thread *th = ipc_alloc_thread(datasock);
 
 		if (pthread_create(&th->id, NULL, &socket_ipc_open, &datasock) != 0) {
-			printf("Error on socket thread creation\n");
+			Printf("Error on socket thread creation\n");
 			exit(1);
 		}
 	}

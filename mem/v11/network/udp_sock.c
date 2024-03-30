@@ -237,7 +237,7 @@ udp_send(struct sock *sk, const void *buf, const uint len)
 	// tofix: 可能需要将数据分片,如果数据过大的话,当然,这应该发生在ip层 
 	skb = udp_alloc_skb(len);
 	skb_push(skb, len);
-	memcpy(skb->data, buf, len);
+	Memcpy(skb->data, buf, len);
 
 	skb_push(skb, UDP_HDR_LEN);
 	udphd = udp_hdr(skb);

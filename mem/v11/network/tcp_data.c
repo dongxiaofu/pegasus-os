@@ -67,7 +67,7 @@ tcp_data_dequeue(struct tcp_sock *tsk, void *user_buf, const uint userlen)
 		// tofix: tcp头部可能存在可选项,因此,直接从skb->payload开始拷贝可能存在问题.
 		// 当然,如果数据读取的时候,已经将payload指向了数据部分,那就没有问题了. 
 		dlen = (rlen + skb->dlen) > userlen ? (userlen - rlen) : skb->dlen;
-		memcpy(user_buf, skb->payload, dlen);
+		Memcpy(user_buf, skb->payload, dlen);
 
 		skb->dlen -= dlen;
 		skb->payload += dlen;

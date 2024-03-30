@@ -379,7 +379,7 @@ tcp_send(struct tcp_sock *tsk, const void *buf, int len)
 
 		skb = tcp_alloc_skb(0, dlen); /* tcp头部选项0字节,数据大小dlen字节 */
 		skb_push(skb, dlen);
-		memcpy(skb->data, buf, dlen);
+		Memcpy(skb->data, buf, dlen);
 
 		buf += dlen;
 		th = tcp_hdr(skb);

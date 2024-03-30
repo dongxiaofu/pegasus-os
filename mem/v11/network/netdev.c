@@ -59,8 +59,8 @@ netdev_transmit(struct sk_buff *skb, uint8_t *dst_hw, uint16_t ethertype)
 	hdr = (struct eth_hdr *)skb->data;
 
 	/* 拷贝硬件地址 */
-	memcpy(hdr->dmac, dst_hw, dev->addr_len); /* 对端的mac地址 */
-	memcpy(hdr->smac, dev->hwaddr, dev->addr_len); /* 本端的mac地址 */
+	Memcpy(hdr->dmac, dst_hw, dev->addr_len); /* 对端的mac地址 */
+	Memcpy(hdr->smac, dev->hwaddr, dev->addr_len); /* 本端的mac地址 */
 	
 	//eth_dbg("out", hdr);
 	hdr->ethertype = htons(ethertype);	/* 帧类型 */
@@ -85,7 +85,7 @@ netdev_receive(struct sk_buff *skb)
 		break;
 	case ETH_P_IPV6: /* IPv6 0x86dd -- not supported! */
 	default:
-		printf("Unsupported ethertype %x\n", hdr->ethertype);
+		Printf("Unsupported ethertype %x\n", hdr->ethertype);
 		free_skb(skb);
 		break;
 	}
