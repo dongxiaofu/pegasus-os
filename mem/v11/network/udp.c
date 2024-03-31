@@ -8,7 +8,7 @@ udp_generate_port()
 {
 	// todo: 更好的方法来产生port
 	static int port = 40000;
-	return ++port + (timer_get_tick() % 10000);
+	return ++port + (sys_get_ticks() % 10000);
 }
 
 
