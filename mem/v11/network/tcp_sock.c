@@ -67,7 +67,7 @@ struct net_ops tcp_ops = {
 struct sock *
 	tcp_alloc_sock()
 {
-	struct tcp_sock *tsk = malloc(sizeof(struct tcp_sock));
+	struct tcp_sock *tsk = sys_malloc(sizeof(struct tcp_sock));
 	memset(tsk, 0, sizeof(struct tcp_sock));
 	tsk->sk.state = TCP_CLOSE;		/* 最开始处在关闭状态 */
 	tsk->flags = 0;

@@ -258,7 +258,7 @@ udp_send(struct sock *sk, const void *buf, const uint len)
 struct sock *
 	udp_alloc_sock()
 {
-	struct udp_sock *usk = malloc(sizeof(struct udp_sock));
+	struct udp_sock *usk = sys_malloc(sizeof(struct udp_sock));
 	memset(usk, 0, sizeof(struct udp_sock));
 	usk->sk.ops = &udp_ops;
 	usk->sk.state = UDP_UNCONNECTED;

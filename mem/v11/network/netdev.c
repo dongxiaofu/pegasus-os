@@ -18,7 +18,7 @@ static struct netdev *
 netdev_alloc(char *addr, char* hwaddr, uint32_t mtu)
 {
 	/* hwaddr表示硬件地址 */
-	struct netdev *dev = malloc(sizeof(struct netdev));
+	struct netdev *dev = sys_malloc(sizeof(struct netdev));
 	dev->addr = ip_parse(addr);		/* 记录下ip地址 */
 
 	sscanf(hwaddr, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",

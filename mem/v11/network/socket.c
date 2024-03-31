@@ -65,7 +65,7 @@ alloc_socket(pid_t pid)
 	/* todo: 这里需要想出一种方法使得我们的fd不会和kernel的fd重叠,
 	 所以这里的fd设置得非常大. */
 	static int fd = 4097;
-	struct socket *sock = malloc(sizeof(struct socket));
+	struct socket *sock = sys_malloc(sizeof(struct socket));
 	list_init(&sock->list);
 
 	sock->pid = pid;	/* 进程id */

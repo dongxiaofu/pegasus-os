@@ -27,7 +27,7 @@ void task_network() {
 
 	Printf("------network is running\n");
 
-	Message *msg = (Message *)sys_malloc(sizeof(Message));
+	Message *msg = (Message *)sys_sys_malloc(sizeof(Message));
 
     while (1) {
 		Memset(msg, 0, sizeof(Message));

@@ -18,7 +18,7 @@ static struct rtentry*
 route_alloc(uint32_t dst, uint32_t gateway, uint32_t netmask,
 	uint8_t flags, uint32_t metric, struct netdev *dev)
 {
-	struct rtentry *rt = malloc(sizeof(struct rtentry));
+	struct rtentry *rt = sys_malloc(sizeof(struct rtentry));
 	list_init(&rt->list);
 	rt->dst = dst;		   /* 目的地址 */
 	rt->gateway = gateway; /* 网关 */

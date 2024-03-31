@@ -20,7 +20,7 @@ arp_alloc_skb()
 static struct arp_cache_entry *
 arp_entry_alloc(struct arp_hdr *hdr, struct arp_ipv4 *data)
 {
-	struct arp_cache_entry *entry = malloc(sizeof(struct arp_cache_entry));
+	struct arp_cache_entry *entry = sys_malloc(sizeof(struct arp_cache_entry));
 	list_init(&entry->list);
 	entry->state = ARP_RESOLVED;	// arp应答
 	entry->hwtype = hdr->hwtype;

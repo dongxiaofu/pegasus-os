@@ -5,9 +5,9 @@
 struct sk_buff *
 alloc_skb(uint size)
 {
-	struct sk_buff *skb = malloc(sizeof(struct sk_buff));
+	struct sk_buff *skb = sys_malloc(sizeof(struct sk_buff));
 	memset(skb, 0, sizeof(struct sk_buff));
-	skb->data = malloc(size);    /* 记录下数据 */
+	skb->data = sys_malloc(size);    /* 记录下数据 */
 	memset(skb->data, 0, size);
 
 	skb->refcnt = 0;
