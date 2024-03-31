@@ -25,10 +25,11 @@ run_cmd(char *cmd, ...)
 void 
 print_err(char *format, ...)
 {
-	va_list ap;
-	va_start(ap, format);
-	vfPrintf(stderr, format, ap);
-	va_end(ap);
+	// va_list ap;
+	// va_start(ap, format);
+	// vfPrintf(stderr, format, ap);
+	// va_end(ap);
+	Printf(format);
 }
 
 
