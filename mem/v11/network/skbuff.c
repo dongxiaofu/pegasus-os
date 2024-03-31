@@ -20,6 +20,7 @@ alloc_skb(uint size)
 void 
 free_skb(struct sk_buff *skb)
 {
+	return;
 	if (skb->refcnt < 1) {
 		free(skb->head);
 		free(skb);
