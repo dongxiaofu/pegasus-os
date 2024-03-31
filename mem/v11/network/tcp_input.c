@@ -409,7 +409,7 @@ tcp_receive(struct tcp_sock *tsk, void *buf, int len)
 	int curlen = 0;
 	struct sock *sk = &tsk->sk;
 	struct socket *sock = sk->sock;
-	memset(buf, 0, len);
+	Memset(buf, 0, len);
 	
 	/* 接收tcp数据报的原则在于,尽量将buf填满,除非已经读到了FIN */
 	while (rlen < len) {

@@ -39,7 +39,7 @@ icmpv4_reply(struct sk_buff *skb)
 	struct icmp_v4 *icmp;
 	// todo
 	struct sock sk;
-	memset(&sk, 0, sizeof(struct sock));
+	Memset(&sk, 0, sizeof(struct sock));
 
 	// iphdr->ihl * 4指的是ip头部的大小
 	uint16_t icmp_len = iphdr->len - (iphdr->ihl * 4);		// ip数据报的总长度减去ip头部大小,得到icmp数据报的大小
@@ -66,7 +66,7 @@ icmpv4_timestamp(struct sk_buff *skb)
 	struct sock sk;
 	struct timeval tv;
 	uint32_t ts_recv;
-	memset(&sk, 0, sizeof(struct sock));
+	Memset(&sk, 0, sizeof(struct sock));
 	uint16_t icmp_len = iphdr->len - (iphdr->ihl << 2);
 
 	skb_reserve(skb, ETH_HDR_LEN + IP_HDR_LEN + icmp_len);

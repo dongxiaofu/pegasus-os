@@ -118,7 +118,7 @@ ipc_read(int sockfd, struct ipc_msg *msg)
 	pid_t pid = msg->pid;
 	int rlen = -1;
 	char rbuf[requested->len];
-	memset(rbuf, 0, requested->len);
+	Memset(rbuf, 0, requested->len);
 	/* pid和sockfd可以唯一确定一个socket */
 	rlen = _read(pid, requested->sockfd, rbuf, requested->len);
 	int resplen = sizeof(struct ipc_msg) + sizeof(struct ipc_err) + sizeof(struct ipc_read) + rlen;
@@ -157,7 +157,7 @@ ipc_sendto(int sockfd, struct ipc_msg *msg)
 	int dlen = payload->len - IPC_BUFLEN;
 	char buf[payload->len];
 	
-	memset(buf, 0, payload->len);
+	Memset(buf, 0, payload->len);
 	Memcpy(buf, payload->buf, payload->len > IPC_BUFLEN ? IPC_BUFLEN : payload->len);
 
 	if (payload->len > IPC_BUFLEN) {
@@ -182,7 +182,7 @@ ipc_recvfrom(int sockfd, struct ipc_msg *msg)
 	int rlen = -1;
 	char rbuf[requested->len];
 	struct sockaddr_in *saddr;
-	memset(rbuf, 0, requested->len);
+	Memset(rbuf, 0, requested->len);
 
 	saddr = requested->contain_addr ? &requested->addr: NULL;
 
@@ -227,7 +227,7 @@ ipc_write(int sockfd, struct ipc_msg *msg)
 	int rc = -1;
 	int dlen = payload->len - IPC_BUFLEN;
 	char buf[payload->len];
-	memset(buf, 0, payload->len);
+	Memset(buf, 0, payload->len);
 	Memcpy(buf, payload->buf, payload->len > IPC_BUFLEN ? IPC_BUFLEN : payload->len);
 
 	if (payload->len > IPC_BUFLEN) {
@@ -421,7 +421,7 @@ start_ipc_listener()
 		exit(EXIT_FAILURE);
 	}
 
-	memset(&un, 0, sizeof(struct sockaddr_un));
+	Memset(&un, 0, sizeof(struct sockaddr_un));
 	un.sun_family = AF_UNIX;
 
 	strncpy(un.sun_path, sockname, sizeof(un.sun_path) - 1);

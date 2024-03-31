@@ -104,7 +104,7 @@ tcp_udp_checksum(uint32_t saddr, uint32_t daddr, uint8_t proto,
 	/* we need to ensure that saddr and daadr are in netowrk byte order */
 	uint32_t sum = 0;
 	struct pseudo_head head;
-	memset(&head, 0, sizeof(struct pseudo_head));
+	Memset(&head, 0, sizeof(struct pseudo_head));
 	/* 需要保证传入的daddr以及saddr是网络字节序 */
 	head.daddr = daddr;
 	head.saddr = saddr;

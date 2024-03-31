@@ -259,7 +259,7 @@ struct sock *
 	udp_alloc_sock()
 {
 	struct udp_sock *usk = sys_malloc(sizeof(struct udp_sock));
-	memset(usk, 0, sizeof(struct udp_sock));
+	Memset(usk, 0, sizeof(struct udp_sock));
 	usk->sk.ops = &udp_ops;
 	usk->sk.state = UDP_UNCONNECTED;
 	return &usk->sk;
@@ -282,7 +282,7 @@ udp_read(struct sock *sk, void *buf, const uint len)
 	struct udp_sock *usk = udp_sk(sk);
 	int rlen = 0;
 
-	memset(buf, 0, len);
+	Memset(buf, 0, len);
 
 	for (;;) {
 		rlen = udp_data_dequeue(usk, buf, len, NULL);
