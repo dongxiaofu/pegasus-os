@@ -10,8 +10,8 @@ enum intr_status {       // 中断状态
 #define GET_EFLAGS(EFLAG_VAR) asm volatile("pushfl; popl %0" : "=g" (EFLAG_VAR))
 
 void DriverInitialize();
-void DriverSend();
-void PCtoNIC();
+void DriverSend(char *buf, unsigned int len);
+void PCtoNIC(char *buf, unsigned int len);
 unsigned int NICtoPC(char *buf);
 unsigned char get_interrupt_status();
 void debug_ticks();
