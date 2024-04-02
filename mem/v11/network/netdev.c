@@ -65,7 +65,11 @@ netdev_transmit(struct sk_buff *skb, uint8_t *dst_hw, uint16_t ethertype)
 	//eth_dbg("out", hdr);
 	hdr->ethertype = htons(ethertype);	/* 帧类型 */
 	/* 回复,直接写即可 */
-	ret = tun_write((char *)skb->data, skb->len);
+	// ret = tun_write((char *)skb->data, skb->len);
+	DriverSend((char *)skb->data, skb->len);
+	
+	// TODO 暂时返回1。
+	return 1;
 }
 
 static int 
