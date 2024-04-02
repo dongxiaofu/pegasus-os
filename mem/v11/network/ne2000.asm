@@ -518,7 +518,7 @@ get_curr_page:
 ; cx 4 byte count
 ; ax 4 NIC buffer page to transfer from
 ;***********************************************************************
-;unsigned int NICtoPC(char *buf)
+;unsigned int NICtoPC(char *buf, unsigned int len)
 NICtoPC:
 	;保存栈
 	push esi
@@ -528,7 +528,8 @@ NICtoPC:
 	push ecx
 	mov ebp, esp
 
-	mov bx, LOOP_NUM_LESS
+	;[ebb + 28]是NICtoPC的参数len。
+	mov bx, [ebp + 28]
     mov dx,REMOTEBYTECOUNT0
     mov al,bl
     out dx,al
@@ -550,12 +551,10 @@ NICtoPC:
 	;call SetPageStart
 
     mov dx,IOPORT
-    ;shr cx,1 ; need to loop half as many times
-	mov cx, LOOP_NUM_LESS
+	;[ebb + 28]是NICtoPC的参数len。
+	mov cx, [ebp + 28]
 	;inc cx
     shr cx,1 ; need to loop half as many times
-	;mov edi, [hello]
-	mov edi, Buf
 	;[ebb + 24]是NICtoPC的参数buf。
 	mov edi, [ebp + 24]
 	;mov edi,0xc0503000

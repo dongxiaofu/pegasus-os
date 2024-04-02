@@ -104,7 +104,8 @@ netdev_rx_loop()
 		struct sk_buff *skb = alloc_skb(BUFLEN);		/* 1600 */
 		/* skb是对数据的一个简单封装,真正的数据在skb->data中,skb的其他域是对数据的一些描述 */
 		/* tun_read每一次会读取一个数据报,即使该数据长度达不到1600 */
-		int len = tun_read((char *)skb->data, BUFLEN);  
+		// int len = tun_read((char *)skb->data, BUFLEN);  
+		int len = NICtoPC((char *)skb->data, BUFLEN);
 		if (len < 0) {									
 			perror("ERR: Read from tun_fd");
 			free_skb(skb);
