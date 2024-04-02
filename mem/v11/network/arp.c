@@ -74,7 +74,7 @@ void arp_rcv(struct sk_buff *skb)
 	arphdr->hwtype = ntohs(arphdr->hwtype);		// 硬件类型
 	arphdr->protype = ntohs(arphdr->protype);	// 协议类型
 	arphdr->opcode = ntohs(arphdr->opcode);		// 操作类型
-	arp_dbg("in", arphdr);
+	//arp_dbg("in", arphdr);
 
 	if (arphdr->hwtype != ARP_ETHERNET) {		// 1代表以太网地址
 		Printf("ARP: Unsupported HW type\n");
@@ -150,7 +150,7 @@ arp_request(uint32_t sip, uint32_t dip, struct netdev *netdev)
 
 	arp = (struct arp_hdr *)skb_push(skb, ARP_HDR_LEN);
 
-	arp_dbg("req", arp);
+	//arp_dbg("req", arp);
 	arp->opcode = htons(ARP_REQUEST);
 	arp->hwtype = htons(ARP_ETHERNET);
 	arp->protype = htons(ETH_P_IP);
@@ -196,7 +196,7 @@ arp_reply(struct sk_buff *skb, struct netdev *netdev)
 
 	arphdr->opcode = ARP_REPLY; // 0x0002
 
-	arp_dbg("reply", arphdr);
+	//arp_dbg("reply", arphdr);
 
 	arphdr->opcode = htons(arphdr->opcode);
 	arphdr->hwtype = htons(arphdr->hwtype);
