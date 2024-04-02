@@ -37,7 +37,7 @@ ipc_alloc_thread(int sock)
 	
 	ipc_connections_enqueue(th);
 	
-	ipc_dbg("New IPC socket allocated", th);
+	//ipc_dbg("New IPC socket allocated", th);
 	return th;
 }
 
@@ -54,7 +54,7 @@ ipc_free_thread(int sock)
 		if (th->sock == sock) {		/* sock类似于文件描述符 */
 			list_del_init(&th->list);
 			conn_count--;
-			ipc_dbg("IPC socket deleted", th);
+			//ipc_dbg("IPC socket deleted", th);
 			close(th->sock);
 			free(th);
 			break;
