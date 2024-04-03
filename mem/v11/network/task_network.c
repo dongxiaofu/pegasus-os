@@ -31,7 +31,20 @@ void task_network() {
 
     while (1) {
 		Memset(msg, 0, sizeof(Message));
-        network_handle(msg);
+		send_rec(RECEIVE, msg, ANY);
+		unsigned int type = msg->TYPE;
+		unsigned int source = msg->source;
+		if(type != NET_IPC){
+			continue;
+		}
+		char *buf = msg->BUF;
+        rc = demux_ipc_socket_call(sockfd, buf, blen);	/* 分发 */
+
+		if (rc == -1) {
+			Printf("Error on demuxing IPC socket call\n");
+			close(sockfd);
+			return NULL;
+		}
     }
 }
 

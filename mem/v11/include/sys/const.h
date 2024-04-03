@@ -282,6 +282,8 @@
 #define STACK_MAGIC	0x99ABCDE0
 
 // 网络协议
+#define NET_IPC 3001
+
 #define IPC_SOCKET	 0x0001
 #define IPC_CONNECT  0x0002
 #define IPC_WRITE    0x0003
