@@ -118,6 +118,9 @@ EXTERN TSS tss;
 #define INIT_PID  6
 
 #define PROC_A	5
+// TODO 设置成7不知道行不行。太久了，我不记得设置进程的PID有什么规则。
+#define TASK_NETWORK    7
+
 
 #define reassembly(val1, offset1, val2, offset2, val3) \
         ((val1 << offset1) + (val2 << offset2) + val3)

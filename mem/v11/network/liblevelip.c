@@ -89,22 +89,33 @@ free_socket(int lvlfd)
     return close(lvlfd);
 }
 
+// TODO lvlfd已经没有作用了，暂时不处理它。
 static int 
 transmit_lvlip(int lvlfd, struct ipc_msg *msg, int msglen)
 {
-    char *buf[RCBUF_LEN];
+	unsigned int msg_size = sizeof(Message);
+	//	asm ("xchgw %bx, %bx");		
+	Message *msg = (Message *)sys_malloc(msg_size);
 
-    // Send mocked syscall to lvl-ip
-    if (write(lvlfd, (char *)msg, msglen) == -1) {
-        perror("Error on writing IPC");
-    }
+	//	asm ("xchgw %bx, %bx");		
+	unsigned int phy_buf = get_physical_address(msg);
+	// unsigned int phy_buf = buf;
+	//	asm ("xchgw %bx, %bx");		
 
-    // Read return value from lvl-ip
-    if (read(lvlfd, buf, RCBUF_LEN) == -1) {
-        perror("Could not read IPC response");
-    }
+	msg->TYPE = WRITE;
+	msg->FD = fd;
+	msg->BUF = phy_buf;
+	msg->CNT = count;
+
+	//	asm ("xchgw %bx, %bx");		
+	send_rec(BOTH, msg, TASK_NETWORK);
+	//	asm ("xchgw %bx, %bx");		
+
+	// unsigned int cnt = msg->CNT;
+
+	// sys_free(msg, msg_size);
     
-    struct ipc_msg *response = (struct ipc_msg *) buf;
+    struct ipc_msg *response = (struct ipc_msg *)(msg->BUF);
 
     if (response->type != msg->type || response->pid != msg->pid) {
         printf("ERR: IPC msg response expected type %d, pid %d\n"
