@@ -184,7 +184,7 @@ lvl_close(int fd)
         return -1;
     }
 
-    lvlip_dbg("Close called", sock);
+    // lvlip_dbg("Close called", sock);
     
     int pid = getpid();
     int msglen = sizeof(struct ipc_msg) + sizeof(struct ipc_close);
@@ -221,7 +221,7 @@ lvl_connect(int sockfd, const struct sockaddr_in *addr)
         return -1;
     }
 
-    lvlip_dbg("Connect called", sock);
+    // lvlip_dbg("Connect called", sock);
     
     msglen = sizeof(struct ipc_msg) + sizeof(struct ipc_connect);
     pid = getpid();
@@ -250,7 +250,7 @@ lvl_bind(int sockfd, const struct sockaddr_in *addr)
 		return -1;
 	}
 
-	lvlip_dbg("Bind called", sock);
+	// lvlip_dbg("Bind called", sock);
 
 	int msglen = sizeof(struct ipc_msg) + sizeof(struct ipc_bind);
 	int pid = getpid();
@@ -279,7 +279,7 @@ lvl_write(int sockfd, const void *buf, size_t len)
         return -1;
     }
 
-    lvlip_dbg("Write called", sock);
+    // lvlip_dbg("Write called", sock);
     int msglen = sizeof(struct ipc_msg) + sizeof(struct ipc_write) + len;
     int pid = getpid();
 
@@ -312,7 +312,7 @@ lvl_read(int sockfd, void *buf, size_t len)
         return -1;
     }
 
-    lvlip_dbg("Read called", sock);
+    // lvlip_dbg("Read called", sock);
 
     pid = getpid();
     msglen = sizeof(struct ipc_msg) + sizeof(struct ipc_read);
@@ -377,7 +377,7 @@ lvl_sendto(int fd, const void *buf, size_t len,  const struct sockaddr_in *saddr
 	struct lvlip_sock *sock = lvlip_get_sock(fd);
 	if (sock == NULL) return -1;
 	
-	lvlip_dbg("Sendto called", sock);
+	// lvlip_dbg("Sendto called", sock);
 	int msglen = sizeof(struct ipc_msg) + sizeof(struct ipc_sendto) + len;
 	int pid = getpid();
 
@@ -410,7 +410,7 @@ lvl_recvfrom(int sockfd, void * buf, size_t len, struct sockaddr_in * address)
 	struct ipc_recvfrom *rf;
 	if (!sock) return -1;
 	
-	lvlip_dbg("Recvfrom called", sock);
+	// lvlip_dbg("Recvfrom called", sock);
 	pid = getpid();
 	
 	msglen = sizeof(struct ipc_msg) + sizeof(struct ipc_recvfrom);
@@ -486,7 +486,7 @@ lvl_accept(int sockfd, struct sockaddr_in *addr)
 		return -1;
 	}
 
-	lvlip_dbg("Accept called", sock);
+	// lvlip_dbg("Accept called", sock);
 	msglen = sizeof(struct ipc_msg) + sizeof(struct ipc_accept);
 	pid = getpid();
 	msg = alloca(msglen);
@@ -549,7 +549,7 @@ lvl_listen(int sockfd, int backoff)
 		return -1;
 	}
 
-	lvlip_dbg("Listen called", sock);
+	// lvlip_dbg("Listen called", sock);
 
 	int msglen = sizeof(struct ipc_msg) + sizeof(struct ipc_listen);
 	int pid = getpid();
