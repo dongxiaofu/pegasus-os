@@ -15,34 +15,34 @@ static pthread_rwlock_t es_lock = PTHREAD_RWLOCK_INITIALIZER;
 inline void
 tcp_established_or_syn_recvd_socks_enqueue(struct sock *sk)
 {
-	pthread_rwlock_wrlock(&es_lock);
+	//pthread_rwlock_wrlock(&es_lock);
 	list_add_tail(&sk->link, &tcp_establised_or_syn_recvd_socks);
-	pthread_rwlock_unlock(&es_lock);
+	//pthread_rwlock_unlock(&es_lock);
 }
 
 
 inline void
 tcp_established_or_syn_recvd_socks_remove(struct sock *sk)
 {
-	pthread_rwlock_wrlock(&es_lock);
+	//pthread_rwlock_wrlock(&es_lock);
 	list_del_init(&sk->link);
-	pthread_rwlock_unlock(&es_lock);
+	//pthread_rwlock_unlock(&es_lock);
 }
 
 inline void
 tcp_connecting_or_listening_socks_enqueue(struct sock *sk)
 {
-	pthread_rwlock_wrlock(&cl_lock);
+	//pthread_rwlock_wrlock(&cl_lock);
 	list_add_tail(&sk->link, &tcp_connecting_or_listening_socks);
-	pthread_rwlock_unlock(&cl_lock);
+	//pthread_rwlock_unlock(&cl_lock);
 }
 
 inline void
 tcp_connecting_or_listening_socks_remove(struct sock *sk)
 {
-	pthread_rwlock_wrlock(&cl_lock);
+	//pthread_rwlock_wrlock(&cl_lock);
 	list_del_init(&sk->link);
-	pthread_rwlock_unlock(&cl_lock);
+	//pthread_rwlock_unlock(&cl_lock);
 }
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -99,9 +99,9 @@ struct sock *
 static void
 tcp_clear_queues(struct tcp_sock *tsk) 
 {
-	pthread_mutex_lock(&tsk->ofo_queue.lock);
+	//pthread_mutex_lock(&tsk->ofo_queue.lock);
 	skb_queue_free(&tsk->ofo_queue);
-	pthread_mutex_unlock(&tsk->ofo_queue.lock);
+	//pthread_mutex_unlock(&tsk->ofo_queue.lock);
 
 }
 
@@ -109,11 +109,11 @@ int
 tcp_free_sock(struct sock *sk)
 {
 	struct tcp_sock *tsk = tcp_sk(sk);
-	pthread_mutex_lock(&sk->lock);
+	//pthread_mutex_lock(&sk->lock);
 	tcp_set_state(sk, TCP_CLOSE);
 	tcp_clear_timers(sk);
 	tcp_clear_queues(tsk);
-	pthread_mutex_unlock(&sk->lock);
+	//pthread_mutex_unlock(&sk->lock);
 	if (sk->sock) sk->sock->sk = NULL;
 	sk_free(sk);
 	free(tsk);
@@ -352,11 +352,11 @@ tcp_lookup_establised_or_syn_recvd_sock(uint32_t src, uint16_t sport, uint32_t d
 		sk = list_entry(item, struct sock, link);
 		if ((sk->saddr == src) && (sk->sport == sport) &&
 			(sk->daddr == dst) && (sk->dport == dport)) {
-			pthread_rwlock_unlock(&es_lock);
+			//pthread_rwlock_unlock(&es_lock);
 			return sk;
 		}
 	}
-	pthread_rwlock_unlock(&es_lock);
+	//pthread_rwlock_unlock(&es_lock);
 	return NULL;
 }
 
@@ -373,11 +373,11 @@ static struct sock *
 	list_for_each(item, &tcp_connecting_or_listening_socks) {
 		sk = list_entry(item, struct sock, link);
 		if ((sk->saddr == src) && (sk->sport == sport)) {
-			pthread_rwlock_unlock(&cl_lock);
+			//pthread_rwlock_unlock(&cl_lock);
 			return sk;
 		}
 	}
-	pthread_rwlock_unlock(&cl_lock);
+	//pthread_rwlock_unlock(&cl_lock);
 	return NULL;
 }
 

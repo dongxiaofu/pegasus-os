@@ -13,19 +13,19 @@ static int conn_count = 0;
 static inline void
 ipc_connections_enqueue(struct ipc_thread* th)
 {
-	pthread_rwlock_wrlock(&lock);
+	//pthread_rwlock_wrlock(&lock);
 	list_add_tail(&th->list, &connections); /* 将th->list加入到connections的尾部 */
 	conn_count++;
-	pthread_rwlock_unlock(&lock);
+	//pthread_rwlock_unlock(&lock);
 }
 
 static inline void
 ipc_connections_remove(struct ipc_thread *th)
 {
-	pthread_rwlock_wrlock(&lock);
+	//pthread_rwlock_wrlock(&lock);
 	list_del_init(&th->list);
 	conn_count--;
-	pthread_rwlock_unlock(&lock);
+	//pthread_rwlock_unlock(&lock);
 }
 
 static struct ipc_thread *
@@ -60,7 +60,7 @@ ipc_free_thread(int sock)
 			break;
 		}
 	}
-	pthread_rwlock_unlock(&lock);
+	//pthread_rwlock_unlock(&lock);
 }
 
 /**\

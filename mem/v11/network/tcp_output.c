@@ -109,7 +109,7 @@ tcp_queue_transmit_skb(struct sock *sk, struct sk_buff *skb)
 	struct tcb *tcb = &tsk->tcb;  /* 传输控制块 */
 	int rc = 0;
 
-	pthread_mutex_lock(&sk->write_queue.lock);
+	//pthread_mutex_lock(&sk->write_queue.lock);
 
 	if (skb_queue_empty(&sk->write_queue)) {
 		tcp_reset_retransmission_timer(tsk);
@@ -118,7 +118,7 @@ tcp_queue_transmit_skb(struct sock *sk, struct sk_buff *skb)
 	skb_queue_tail(&sk->write_queue, skb);	/* 将skb加入到发送队列的尾部 */
 	rc = tcp_transmit_skb(sk, skb, tcb->snd_nxt); /* 首先将数据发送一遍 */
 	tcb->snd_nxt += skb->dlen;
-	pthread_mutex_unlock(&sk->write_queue.lock);
+	//pthread_mutex_unlock(&sk->write_queue.lock);
 	return rc;
 }
 
@@ -261,7 +261,7 @@ tcp_connect_rto(uint32_t ts, void *arg)
 			tcp_free_sock(sk);
 		}
 		else {
-			pthread_mutex_lock(&sk->write_queue.lock);
+			//pthread_mutex_lock(&sk->write_queue.lock);
 
 			struct sk_buff *skb = write_queue_head(sk);
 
@@ -272,7 +272,7 @@ tcp_connect_rto(uint32_t ts, void *arg)
 				tsk->backoff++;
 				tcp_reset_retransmission_timer(tsk);
 			}
-			pthread_mutex_unlock(&sk->write_queue.lock);
+			//pthread_mutex_unlock(&sk->write_queue.lock);
 		}
 	}
 	else {
@@ -293,7 +293,7 @@ tcp_retransmission_timeout(uint32_t ts, void *arg)
 	struct tcb *tcb = &tsk->tcb;
 	struct sock *sk = &tsk->sk;
 
-	pthread_mutex_lock(&sk->write_queue.lock);
+	//pthread_mutex_lock(&sk->write_queue.lock);
 	tcp_release_retransmission_timer(tsk);
 
 	struct sk_buff *skb = write_queue_head(sk);
@@ -316,7 +316,7 @@ tcp_retransmission_timeout(uint32_t ts, void *arg)
 	}
 
 unlock:
-	pthread_mutex_unlock(&sk->write_queue.lock);
+	//pthread_mutex_unlock(&sk->write_queue.lock);
 }
 
 

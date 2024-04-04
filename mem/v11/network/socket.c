@@ -12,19 +12,19 @@ static pthread_rwlock_t slock = PTHREAD_RWLOCK_INITIALIZER;
 static inline void
 socket_sockets_enqueue(struct socket *sk)
 {
-	pthread_rwlock_wrlock(&slock);
+	//pthread_rwlock_wrlock(&slock);
 	list_add_tail(&sk->list, &sockets);
 	socket_count++;
-	pthread_rwlock_unlock(&slock);
+	//pthread_rwlock_unlock(&slock);
 }
 
 static inline void
 socket_sockets_remove(struct socket *sk)
 {
-	pthread_rwlock_wrlock(&slock);
+	//pthread_rwlock_wrlock(&slock);
 	list_del_init(&sk->list);
 	socket_count--;
-	pthread_rwlock_unlock(&slock);
+	//pthread_rwlock_unlock(&slock);
 }
 
 extern struct net_family inet;
@@ -49,7 +49,7 @@ socket_debug()
 		socket_dbg(sock);
 	}
 
-	pthread_rwlock_unlock(&slock);
+	//pthread_rwlock_unlock(&slock);
 }
 #else
 void
@@ -84,7 +84,7 @@ free_socket(struct socket *sock)
 	if (sock->ops) {
 		sock->ops->free(sock);
 	}
-	pthread_rwlock_wrlock(&slock);
+	//pthread_rwlock_wrlock(&slock);
 	list_del(&sock->list);
 	/* 需要注意的是,这里并不删除struct socket中的struct sock,因为这个socket
 	对应的sock可能还需要处理一些事情. */
@@ -92,7 +92,7 @@ free_socket(struct socket *sock)
 	free(sock);
 	sock == NULL;
 
-	pthread_rwlock_unlock(&slock);
+	//pthread_rwlock_unlock(&slock);
 	return 0;
 }
 
@@ -106,11 +106,11 @@ get_socket(pid_t pid, int fd)
 	list_for_each(item, &sockets) {
 		sock = list_entry(item, struct socket, list);
 		if (sock->pid == pid && sock->fd == fd) {
-			pthread_rwlock_unlock(&slock);
+			//pthread_rwlock_unlock(&slock);
 			return sock;
 		}
 	}
-	pthread_rwlock_unlock(&slock);
+	//pthread_rwlock_unlock(&slock);
 	return NULL;
 }
 

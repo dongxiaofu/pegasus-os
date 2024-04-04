@@ -119,13 +119,13 @@ inet_close(struct socket *sock)
 	struct sock *sk = sock->sk;
 	int err = 0;
 
-	pthread_mutex_lock(&sk->lock);
+	//pthread_mutex_lock(&sk->lock);
 	if (sock->sk->ops->close(sk) != 0) {	/* 首先关闭连接 */
 		print_err("Error on sock op close\n");
 	}
 
 	err = sk->err;
-	pthread_mutex_unlock(&sk->lock);
+	//pthread_mutex_unlock(&sk->lock);
 	return err;
 }
 

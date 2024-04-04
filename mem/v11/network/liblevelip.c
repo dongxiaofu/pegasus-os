@@ -13,17 +13,17 @@ static LIST_HEAD(lvlip_socks);
 static inline void
 lvlip_socks_enqueue(struct lvlip_sock *sk)
 {
-	//pthread_rwlock_wrlock(&lvlip_lock);
+	////pthread_rwlock_wrlock(&lvlip_lock);
 	list_add_tail(&sk->list, &lvlip_socks);
-	//pthread_rwlock_unlock(&lvlip_lock);
+	////pthread_rwlock_unlock(&lvlip_lock);
 }
 
 static inline void
 lvlip_socks_remove(struct lvlip_sock *sk)
 {
-	//pthread_rwlock_wrlock(&lvlip_lock);
+	////pthread_rwlock_wrlock(&lvlip_lock);
 	list_del_init(&sk->list);
-	//pthread_rwlock_unlock(&lvlip_lock);
+	////pthread_rwlock_unlock(&lvlip_lock);
 }
 
 static inline struct lvlip_sock *
@@ -35,11 +35,11 @@ lvlip_get_sock(int fd)
     list_for_each(item, &lvlip_socks) {
         sock = list_entry(item, struct lvlip_sock, list);
 		if (sock->fd == fd) {
-			//pthread_rwlock_unlock(&lvlip_lock);
+			////pthread_rwlock_unlock(&lvlip_lock);
 			return sock;
 		}
     };
-	//pthread_rwlock_unlock(&lvlip_lock);
+	////pthread_rwlock_unlock(&lvlip_lock);
     return NULL;
 };
 

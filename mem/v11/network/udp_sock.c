@@ -13,19 +13,19 @@ void udp_free_sock(struct sock *sk);
 static void
 udp_socks_enqueue(struct sock *sk)
 {
-	pthread_rwlock_wrlock(&slock);
+	//pthread_rwlock_wrlock(&slock);
 	list_add_tail(&sk->link, &udp_socks);
 	udp_sock_amount++;
-	pthread_rwlock_unlock(&slock);
+	//pthread_rwlock_unlock(&slock);
 }
 
 static void
 udp_socks_remove(struct sock *sk)
 {
-	pthread_rwlock_wrlock(&slock);
+	//pthread_rwlock_wrlock(&slock);
 	udp_sock_amount--;
 	list_del_init(&sk->link);
-	pthread_rwlock_unlock(&slock);
+	//pthread_rwlock_unlock(&slock);
 }
 
 /**\
@@ -47,11 +47,11 @@ struct sock *
 	list_for_each(item, &udp_socks) {
 		sk = list_entry(item, struct sock, link);
 		if (sk->sport == dport) {
-			pthread_rwlock_unlock(&slock);
+			//pthread_rwlock_unlock(&slock);
 			return sk;
 		}
 	}
-	pthread_rwlock_unlock(&slock);
+	//pthread_rwlock_unlock(&slock);
 	return NULL;
 }
 
@@ -135,14 +135,14 @@ udp_clean_up_receive_queue(struct sock *sk)
 {
 	struct sk_buff *skb;
 
-	pthread_mutex_lock(&sk->receive_queue.lock);
+	//pthread_mutex_lock(&sk->receive_queue.lock);
 	while ((skb = skb_peek(&sk->receive_queue)) != NULL) {
 		/* 释放掉已经接收到了确认的数据 */
 		skb_dequeue(&sk->receive_queue);
 		skb->refcnt--;
 		free_skb(skb);
 	}
-	pthread_mutex_unlock(&sk->receive_queue.lock);
+	//pthread_mutex_unlock(&sk->receive_queue.lock);
 	return 0;
 }
 
@@ -156,7 +156,7 @@ udp_connect(struct sock *sk, const struct sockaddr_in *addr)
 
 	uint16_t dport = addr->sin_port;
 	uint32_t daddr = addr->sin_addr.s_addr;
-	pthread_rwlock_wrlock(&slock);
+	//pthread_rwlock_wrlock(&slock);
 	
 	/* 可以多次调用connnect,第一要做的是断开之前的连接 */
 	if (sk->state == UDP_CONNECTED)
@@ -176,7 +176,7 @@ udp_connect(struct sock *sk, const struct sockaddr_in *addr)
 		list_add_tail(&sk->link, &udp_socks);
 		udp_sock_amount++;
 	}
-	pthread_rwlock_unlock(&slock);
+	//pthread_rwlock_unlock(&slock);
 	return 0;
 }
 
@@ -215,14 +215,14 @@ udp_sendto(struct sock *sk, const void *buf, const uint size, const struct socka
 	}
 	/* 如果没有调用过bind函数,并且skaddr不为空 */
 	else if ((sk->state == UDP_UNCONNECTED) && (skaddr != NULL)) {
-		pthread_rwlock_wrlock(&slock);
+		//pthread_rwlock_wrlock(&slock);
 		sk->daddr = ntohl(skaddr->sin_addr.s_addr);
 		sk->dport = ntohs(skaddr->sin_port);
 		sk->sport = udp_generate_port();	/* 随机产生一个端口 */
 		sk->saddr = ip_parse(stackaddr);
 		if (!udp_sk_in_socks(sk))
 			list_add_tail(&sk->link, &udp_socks);
-		pthread_rwlock_unlock(&slock);
+		//pthread_rwlock_unlock(&slock);
 		rc = udp_send(sk, buf, size);
 	}
 	return rc;

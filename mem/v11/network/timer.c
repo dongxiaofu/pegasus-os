@@ -15,7 +15,7 @@ timer_free(struct timer *t)
 	}
 	list_del(&t->list);
 	free(t);
-	pthread_mutex_unlock(&lock);  // 解锁
+	//pthread_mutex_unlock(&lock);  // 解锁
 }
 
 static struct timer *
@@ -60,32 +60,32 @@ timer_add(uint32_t expire, void (*handler)(uint32_t, void*), void *arg)
 
 	t->handler = handler;
 	t->arg = arg;
-	pthread_mutex_lock(&lock);
+	//pthread_mutex_lock(&lock);
 	// 因为要对list进行操作,所以要加锁
 	// 插入的顺序不要紧
 	list_add_tail(&t->list, &timers); // 将t添加到timers的后面
-	pthread_mutex_unlock(&lock);
+	//pthread_mutex_unlock(&lock);
 	return t;
 }
 
 void
 timer_release(struct timer *t)
 {
-	if (pthread_mutex_lock(&lock) != 0) {
+	if (//pthread_mutex_lock(&lock) != 0) {
 		perror("Timer release lock");
 		return;
 	}
 	if (t) {
 		t->refcnt--;
 	}
-	pthread_mutex_unlock(&lock);
+	//pthread_mutex_unlock(&lock);
 }
 
 void 
 timer_cancel(struct timer *t)
 {
 	// 一旦一个timer被取消,那么在时钟滴答的过程中,这个timer将会被删除
-	if (pthread_mutex_lock(&lock) != 0) {
+	if (//pthread_mutex_lock(&lock) != 0) {
 		perror("Timer cancel lock");
 		return;
 	}
@@ -93,7 +93,7 @@ timer_cancel(struct timer *t)
 		t->refcnt--;
 		t->cancelled = 1;
 	}
-	pthread_mutex_unlock(&lock);
+	//pthread_mutex_unlock(&lock);
 }
 
 void *

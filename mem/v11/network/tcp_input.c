@@ -24,7 +24,7 @@ tcp_clean_retransmission_queue(struct sock *sk, uint32_t una)
 	struct sk_buff *skb;
 	int rc = 0;
 
-	pthread_mutex_lock(&sk->write_queue.lock);
+	//pthread_mutex_lock(&sk->write_queue.lock);
 	/* 需要注意的是,在write_queue中的数据是严格按照发送顺序排列的. 
 	 所以write_queue中skb的end_seq升序排列 */
 	while ((skb = skb_peek(&sk->write_queue)) != NULL) {
@@ -44,7 +44,7 @@ tcp_clean_retransmission_queue(struct sock *sk, uint32_t una)
 		tcp_stop_retransmission_timer(tsk);
 	}
 
-	pthread_mutex_unlock(&sk->write_queue.lock);
+	//pthread_mutex_unlock(&sk->write_queue.lock);
 	return rc;
 }
 
@@ -335,7 +335,7 @@ tcp_process(struct sock *sk, struct tcphdr *th, struct sk_buff *skb)
 
 
 	/* 7. segment text */
-	pthread_mutex_lock(&sk->receive_queue.lock);
+	//pthread_mutex_lock(&sk->receive_queue.lock);
 	switch (sk->state) {
 	case TCP_ESTABLISHED:
 	case TCP_FIN_WAIT_1:
@@ -395,7 +395,7 @@ tcp_process(struct sock *sk, struct tcphdr *th, struct sk_buff *skb)
 	}
 	free_skb(skb);
 unlock:
-	pthread_mutex_unlock(&sk->receive_queue.lock);
+	//pthread_mutex_unlock(&sk->receive_queue.lock);
 	return 0;
 drop_and_unlock:
 	tcp_drop(tsk, skb);

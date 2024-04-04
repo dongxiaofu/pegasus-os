@@ -58,7 +58,7 @@ tcp_data_dequeue(struct tcp_sock *tsk, void *user_buf, const uint userlen)
 	struct sk_buff *skb;
 	uint rlen = 0, dlen;
 
-	pthread_mutex_lock(&sk->receive_queue.lock);	/* 接受队列加锁 */
+	//pthread_mutex_lock(&sk->receive_queue.lock);	/* 接受队列加锁 */
 	while (!skb_queue_empty(&sk->receive_queue) &&
 		rlen < userlen) {
 		skb = skb_peek(&sk->receive_queue);
@@ -82,7 +82,7 @@ tcp_data_dequeue(struct tcp_sock *tsk, void *user_buf, const uint userlen)
 		}
 	}
 
-	pthread_mutex_unlock(&sk->receive_queue.lock);
+	//pthread_mutex_unlock(&sk->receive_queue.lock);
 	return rlen;
 }
 
