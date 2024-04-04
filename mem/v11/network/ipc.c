@@ -100,9 +100,15 @@ ipc_write_rc(int sockfd, pid_t pid, uint16_t type, int rc)
 
 	Memcpy(response->data, &err, sizeof(struct ipc_err));	/* 直接拷贝err */
 
-	if (write(sockfd, (char *)response, resplen) == -1) {	/* 往sock中写入数据 */
-		perror("Error on writing IPC write response");
-	}
+	// TODO 本想把这些代码封装成函数，但我想不出合适的函数名称，又不愿意在头文件中新增函数。
+	unsigned int msg_size = sizeof(Message);
+	Message *msg = (Message *)sys_malloc(msg_size);
+	unsigned int phy_buf = get_physical_address(msg);
+	msg->TYPE = NET_IPC;
+	msg->BUF = response;
+	msg->CNT = resplen;
+	send_rec(SEND, msg, TASK_NETWORK);
+
 	return 0;
 }
 
@@ -141,9 +147,18 @@ ipc_read(int sockfd, struct ipc_msg *msg)
 	actual->len = rlen;
 	Memcpy(actual->buf, rbuf, rlen > 0 ? rlen : 0);
 	
-	if (write(sockfd, (char *)response, resplen) == -1) {
-		perror("Error on writing IPC write response");
-	}
+	// if (write(sockfd, (char *)response, resplen) == -1) {
+	// 	perror("Error on writing IPC write response");
+	// }
+
+	// TODO 本想把这些代码封装成函数，但我想不出合适的函数名称，又不愿意在头文件中新增函数。
+	unsigned int msg_size = sizeof(Message);
+	Message *message = (Message *)sys_malloc(msg_size);
+	unsigned int phy_buf = get_physical_address(message);
+	message->TYPE = NET_IPC;
+	message->BUF = response;
+	message->CNT = resplen;
+	send_rec(SEND, message, TASK_NETWORK);
 
 	return 0;
 }
@@ -211,9 +226,18 @@ ipc_recvfrom(int sockfd, struct ipc_msg *msg)
 	}
 	Memcpy(actual->buf, rbuf, rlen > 0 ? rlen : 0);
 
-	if (write(sockfd, (char *)response, resplen) == -1) {
-		perror("Error on writing IPC recvfrom response");
-	}
+	// if (write(sockfd, (char *)response, resplen) == -1) {
+	// 	perror("Error on writing IPC recvfrom response");
+	// }
+
+	// TODO 本想把这些代码封装成函数，但我想不出合适的函数名称，又不愿意在头文件中新增函数。
+	unsigned int msg_size = sizeof(Message);
+	Message *message = (Message *)sys_malloc(msg_size);
+	unsigned int phy_buf = get_physical_address(message);
+	message->TYPE = NET_IPC;
+	message->BUF = response;
+	message->CNT = resplen;
+	send_rec(SEND, message, TASK_NETWORK);
 
 	return 0;
 }
@@ -231,7 +255,14 @@ ipc_write(int sockfd, struct ipc_msg *msg)
 	Memcpy(buf, payload->buf, payload->len > IPC_BUFLEN ? IPC_BUFLEN : payload->len);
 
 	if (payload->len > IPC_BUFLEN) {
-		int res = read(sockfd, buf + IPC_BUFLEN, payload->len - IPC_BUFLEN);
+		// TODO 待功能稳定后，删除下面这行代码。
+		// int res = read(sockfd, buf + IPC_BUFLEN, payload->len - IPC_BUFLEN);
+		// TODO 本想把这些代码封装成函数，但我想不出合适的函数名称，又不愿意在头文件中新增函数。
+		unsigned int msg_size = sizeof(Message);
+		Message *message = (Message *)sys_malloc(msg_size);
+		int res = send_rec(RECEIVE, message, TASK_NETWORK);
+		Memcpy(buf + IPC_BUFLEN, message->BUF, payload->len - IPC_BUFLEN);
+
 		if (res == -1) {
 			perror("Read on IPC payload guard");
 			return -1;
@@ -308,9 +339,22 @@ ipc_accept(int sockfd, struct ipc_msg *msg)
 	acc->sockfd = sockfd;
 	if (payload->contain_addr)
 		Memcpy(&acc->addr, addr, sizeof(struct sockaddr_in));
-	if (write(sockfd, (char *)response, resplen) == -1) {
+	// if (write(sockfd, (char *)response, resplen) == -1) {
+	// 	perror("Error on writing IPC accept response");
+	// }
+
+	// TODO 本想把这些代码封装成函数，但我想不出合适的函数名称，又不愿意在头文件中新增函数。
+	unsigned int msg_size = sizeof(Message);
+	Message *message = (Message *)sys_malloc(msg_size);
+	unsigned int phy_buf = get_physical_address(message);
+	message->TYPE = NET_IPC;
+	message->BUF = response;
+	message->CNT = resplen;
+	rc = send_rec(SEND, message, TASK_NETWORK);
+	if(rc == -1){
 		perror("Error on writing IPC accept response");
 	}
+
 	return 0;
 }
 
@@ -374,6 +418,7 @@ demux_ipc_socket_call(int sockfd, char *cmdbuf, int blen)
 	return 0;
 }
 
+// TODO 不要这个函数了。等功能稳定后，删除它。
 void *
 socket_ipc_open(void *args) {
 	int blen = IPC_BUFLEN;

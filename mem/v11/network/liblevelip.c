@@ -104,7 +104,7 @@ transmit_lvlip(int lvlfd, struct ipc_msg *msg, int msglen)
 
 	msg->TYPE = NET_IPC;
 	msg->BUF = phy_buf;
-	msg->LEN = msglen;
+	msg->CNT = msglen;
 
 	//	asm ("xchgw %bx, %bx");		
 	send_rec(BOTH, msg, TASK_NETWORK);
