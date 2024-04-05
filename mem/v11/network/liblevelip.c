@@ -31,7 +31,7 @@ lvlip_get_sock(int fd)
 {
     struct list_head *item;
     struct lvlip_sock *sock;
-	//pthread_rwlock_rdlock(&lvlip_lock);
+	////pthread_rwlock_rdlock(&lvlip_lock);
     list_for_each(item, &lvlip_socks) {
         sock = list_entry(item, struct lvlip_sock, list);
 		if (sock->fd == fd) {

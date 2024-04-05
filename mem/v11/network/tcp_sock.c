@@ -347,7 +347,7 @@ tcp_lookup_establised_or_syn_recvd_sock(uint32_t src, uint16_t sport, uint32_t d
 {
 	struct sock *sk;
 	struct list_head* item;
-	pthread_rwlock_rdlock(&es_lock);
+	//pthread_rwlock_rdlock(&es_lock);
 	list_for_each(item, &tcp_establised_or_syn_recvd_socks) {
 		sk = list_entry(item, struct sock, link);
 		if ((sk->saddr == src) && (sk->sport == sport) &&
@@ -369,7 +369,7 @@ static struct sock *
 {
 	struct sock *sk;
 	struct list_head *item;
-	pthread_rwlock_rdlock(&cl_lock);
+	//pthread_rwlock_rdlock(&cl_lock);
 	list_for_each(item, &tcp_connecting_or_listening_socks) {
 		sk = list_entry(item, struct sock, link);
 		if ((sk->saddr == src) && (sk->sport == sport)) {

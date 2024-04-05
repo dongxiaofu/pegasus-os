@@ -47,7 +47,7 @@ ipc_free_thread(int sock)
 	struct list_head *item, *tmp = NULL;
 	struct ipc_thread *th = NULL;
 
-	pthread_rwlock_rdlock(&lock);
+	//pthread_rwlock_rdlock(&lock);
 	list_for_each_safe(item, tmp, &connections) {
 		th = list_entry(item, struct ipc_thread, list);
 

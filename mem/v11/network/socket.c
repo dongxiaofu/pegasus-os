@@ -42,7 +42,7 @@ socket_debug()
 {
 	struct list_head *item;
 	struct socket *sock = NULL;
-	pthread_rwlock_rdlock(&slock);
+	//pthread_rwlock_rdlock(&slock);
 	
 	list_for_each(item, &sockets) {
 		sock = list_entry(item, struct socket, list);
@@ -102,7 +102,7 @@ get_socket(pid_t pid, int fd)
 {
 	struct list_head *item;
 	struct socket *sock = NULL;
-	pthread_rwlock_rdlock(&slock);
+	//pthread_rwlock_rdlock(&slock);
 	list_for_each(item, &sockets) {
 		sock = list_entry(item, struct socket, list);
 		if (sock->pid == pid && sock->fd == fd) {

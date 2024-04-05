@@ -43,7 +43,7 @@ struct sock *
 	struct sock *sk;
 	struct list_head *item;
 
-	pthread_rwlock_rdlock(&slock);
+	//pthread_rwlock_rdlock(&slock);
 	list_for_each(item, &udp_socks) {
 		sk = list_entry(item, struct sock, link);
 		if (sk->sport == dport) {
