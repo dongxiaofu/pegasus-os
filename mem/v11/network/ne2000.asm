@@ -361,7 +361,7 @@ PCtoNIC:
 	;一次循环写入两个字节，因此，循环次数是字节数/2。
     ;shr cx,1 ; need to loop half as many times
 	;获取第二个参数。
-	mov cx, dword [esp + 28]
+	mov ecx, dword [esp + 28]
 	;inc cx
     shr cx,1 ; need to loop half as many times
 	;mov esi, 0xc050d004 
