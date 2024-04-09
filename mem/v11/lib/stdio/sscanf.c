@@ -1,0 +1,112 @@
+int sscanf(const char *str, const char *format, ...)
+{
+	unsigned int str_len = strlen(str);
+	unsigned int format_len = strlen(format);
+
+	int *arg_list = (int *)((int *)&format + 1);
+	int *next_arg = arg_list;
+
+	char *ptr_str = (char *)str;
+	char *ptr_format = (char *)format;
+
+	for(int i = 0; i < format_len; i++){
+		if(*ptr_format != '%' && *ptr_str++ != *ptr_format++){
+			break;
+		}	
+
+		
+		if(*ptr_format == '%'){
+			ptr_format++;
+			// continue;
+		}else{
+			continue;
+		}
+
+		switch(*ptr_format){
+			case 'd':
+				{
+					// 解析str中的十进制数字字符串。
+					char *start = ptr_str;
+					while('0' <= *ptr_str && *ptr_str <= '9'){
+						ptr_str++;
+					}
+					unsigned int len = ptr_str - start;
+					char *buf = (char *)malloc(len + 1);
+					memset(buf, 0, len + 1);
+					memcpy(buf, start, len);
+					// 成功把十进制数字字符串解析出来了，并且存储到了buf中。
+					// TODO 怎么识别参数的数据类型？在函数内部无法识别。
+					int number = atoi(buf);
+					// *next_arg = number;
+					*(unsigned int *)(*next_arg) = number;
+					next_arg++;
+					ptr_format++;
+					break;
+				}
+			case 'c':
+				{
+					if(0 <= *ptr_str && *ptr_str <= 127){
+						if('0' <= *ptr_str && *ptr_str <= '9'){
+							*(unsigned char *)(*next_arg) = *ptr_str++ - '0';
+						}else{
+							*(unsigned char *)(*next_arg) = *ptr_str++;
+						}
+					}
+					next_arg++;
+					ptr_format++;
+					break;
+				}
+			case 's':
+				{
+					char *start = ptr_str;
+					// while(*ptr_str != '\0'){
+					// while(*ptr_str != 0){
+					while(*ptr_str != 32 && *ptr_str != '\0'){
+						ptr_str++;
+					}
+					unsigned int len = ptr_str - start;
+					memcpy((char *)(*next_arg), start, len);
+					char *dst = (char *)(*next_arg);
+					// *(dst + len + 1) = '\0';
+					// *(dst + len) = '\0';
+					*(dst + len) = 0;
+					next_arg++;
+					ptr_format++;
+					break;
+				}
+			case 'h':
+				{
+					// TODO 时间有限，对sscanf的格式字符串不是特别熟悉，所以只支持%hhu这种。
+					ptr_format++;		// 跳过h。
+					ptr_format++;		// 跳过u。
+
+					char *start = ptr_str;
+					while('0' <= *ptr_str && *ptr_str <= '9'){
+						ptr_str++;
+					}
+					unsigned int len = ptr_str - start;
+					char *buf = (char *)malloc(len + 1);
+					memset(buf, 0, len + 1);
+					memcpy(buf, start, len);
+					// 成功把十进制数字字符串解析出来了，并且存储到了buf中。
+					// TODO 怎么识别参数的数据类型？在函数内部无法识别。
+					int number = atoi(buf);
+					// *next_arg = number;
+					// *(unsigned int *)(*next_arg) = number;
+					// 上面这行代码是错误的。我花了很多时间才发现这个错误。
+					// unsigned char *决定数据占用一个字节。
+					// unsigned int *决定数据占用四个字节。
+					*(unsigned char *)(*next_arg) = (unsigned char)number;
+					next_arg++;
+					ptr_format++;
+					break;
+				}
+			default:
+				{
+
+				}
+
+		}
+
+	}
+}

@@ -193,9 +193,11 @@ SetPageStart:
 	push ecx
 	mov ebp, esp
 
+	;BX_NE2K_THIS s.remote_dma = BX_NE2K_THIS s.remote_start;
 	mov dx, CRDMA0
 	xor ax, ax
 	;mov ax, CRDA
+	;使用SetPageStart的参数pageStart。
 	mov ax, [ebp+24]
 	out dx, al
 	mov dx, CRDMA1
@@ -214,6 +216,7 @@ SetPageStart:
     ret
 
 
+;void DriverSend(char *buf, unsigned int len);
 DriverSend:
 	;xchg bx, bx
 	;保存栈
@@ -229,36 +232,58 @@ DriverSend:
     in al,dx ;read NIC command +  register
     cmp al, 26h ;transmitting?
     je QueueIt ;if so, queue packet
+	; cx是多少？
     push cx ;store byte count
 	
+	; 这是做什么？
 	and al, 0b00111111
 	out dx, al
+
+	;CRDMA0这个名字有误导性，应该为RSAR0。
+	;乍看，和NE2K的使用方法不吻合。看了bochs的NE2K的源码，
+	;我才认为CRDMA0有误导性。
+	;把CRDA分两次写入NE2K，第一次写入低8位，第二次写入高8位。
 	mov dx, CRDMA0
 	xor ax, ax
 	mov ax, CRDA
 	out dx, al
+	;上下两个操作的作用是：
+	;BX_NE2K_THIS s.remote_dma = BX_NE2K_THIS s.remote_start;
 	mov dx, CRDMA1
 	and ax, 0xFF00
 	shr ax, 8
 	out dx, al
 
+	;传递PCtoNIC的参数。
 	push dword [ebp + 24] 
     call PCtoNIC ;transfer packet to NIC buffer RAM
+	;消除因传递参数增加的栈。
 	add esp, 4
     jmp Finished
 	;call NICtoPC
+	;有什么作用？
+	;TPSR
+	;BX_NE2K_THIS s.tx_page_start = value;
     mov dx,TRANSMITPAGE
     mov al,TRANSMITBUFFER
 	mov ax, CRDA
 	shr ax, 8
     out dx,ax ;set NIC transmit page
+
+	;有什么作用？
+	;TBCR0
+	;BX_NE2K_THIS s.tx_bytes |= (value & 0xff);
     pop cx ;get byte count back
     mov dx,TRANSMITBYTECOUNT0
     mov al,cl
     out dx,al ;set transmit byte count 0 on NIC
+
+	;TBCR1
+	;BX_NE2K_THIS s.tx_bytes |= ((value & 0xff) << 8);
     mov dx,TRANSMITBYTECOUNT1
     mov al,ch
     out dx,al ;set transmit byte count 1 on NIC
+	;有什么作用？
     mov dx,COMMAND
     mov al,26h
     out dx,al ;issue transmit to COMMAND +  register
@@ -298,6 +323,8 @@ MyEnd:
 	pop esi
     ret
 
+;len是数据的长度，单位是字节。
+;void PCtoNIC(unsigned int pageStart, unsigned int len); 
 PCtoNIC:
 	;保存栈
 	push esi
@@ -309,7 +336,8 @@ PCtoNIC:
 	
 	;jmp MyEnd
 
-	mov bx, LOOP_NUM
+	;获取第二个参数。
+	mov ebx, dword [esp + 28]
     mov dx,REMOTEBYTECOUNT0 ; set byte count low byte
     mov al,bl
 	;jmp MyEnd
@@ -330,11 +358,14 @@ PCtoNIC:
     mov al,12h ; write and start
     out dx,al
     mov dx,IOPORT
+	;一次循环写入两个字节，因此，循环次数是字节数/2。
     ;shr cx,1 ; need to loop half as many times
-	mov cx, LOOP_NUM
+	;获取第二个参数。
+	mov ecx, dword [esp + 28]
 	;inc cx
     shr cx,1 ; need to loop half as many times
 	;mov esi, 0xc050d004 
+	;不知道这是在做什么。
 	mov ax, NET_TEST_DATA
 	;mov esi, [net_buf]
 	xor esi, esi
@@ -343,7 +374,9 @@ PCtoNIC:
 	; 获取参数。
 	mov esi, dword [esp + 24]
 
+	;调用SetPageStart，传递参数，消除因传递参数增加的栈。
 	push 16*1024 
+	;每次调用PCtoNIC都把pageStart设置成16*1024，正确吗？
 	call SetPageStart
 	add esp, 4
 ;	mov dx, CRDMA0
@@ -353,14 +386,17 @@ PCtoNIC:
 ;	out dx, al
     mov dx,IOPORT
 
+;写入数据到NIC。
 	;mov [esi], ax
 Writing_Word: ;because of word-wide transfers
 	;mov esi, 0xc050d004 
 	xor ax, ax
     lodsw ;load word from ds:si
     out dx,ax ;write to IOPORT on NIC board
+	;loop的循环次数由cx决定。
     loop Writing_Word
 	
+;不太理解下面的操作的必要性。
     mov cx,0
     mov dx,INTERRUPTSTATUS
 CheckDMA:
@@ -482,7 +518,7 @@ get_curr_page:
 ; cx 4 byte count
 ; ax 4 NIC buffer page to transfer from
 ;***********************************************************************
-;unsigned int NICtoPC(char *buf)
+;unsigned int NICtoPC(char *buf, unsigned int len)
 NICtoPC:
 	;保存栈
 	push esi
@@ -492,7 +528,8 @@ NICtoPC:
 	push ecx
 	mov ebp, esp
 
-	mov bx, LOOP_NUM_LESS
+	;[ebb + 28]是NICtoPC的参数len。
+	mov bx, [ebp + 28]
     mov dx,REMOTEBYTECOUNT0
     mov al,bl
     out dx,al
@@ -514,12 +551,10 @@ NICtoPC:
 	;call SetPageStart
 
     mov dx,IOPORT
-    ;shr cx,1 ; need to loop half as many times
-	mov cx, LOOP_NUM_LESS
+	;[ebb + 28]是NICtoPC的参数len。
+	mov cx, [ebp + 28]
 	;inc cx
     shr cx,1 ; need to loop half as many times
-	;mov edi, [hello]
-	mov edi, Buf
 	;[ebb + 24]是NICtoPC的参数buf。
 	mov edi, [ebp + 24]
 	;mov edi,0xc0503000

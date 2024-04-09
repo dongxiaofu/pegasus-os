@@ -10,9 +10,9 @@ enum intr_status {       // 中断状态
 #define GET_EFLAGS(EFLAG_VAR) asm volatile("pushfl; popl %0" : "=g" (EFLAG_VAR))
 
 void DriverInitialize();
-void DriverSend();
-void PCtoNIC();
-unsigned int NICtoPC(char *buf);
+void DriverSend(char *buf, unsigned int len);
+void PCtoNIC(char *buf, unsigned int len);
+unsigned int NICtoPC(char *buf, unsigned int len);
 unsigned char get_interrupt_status();
 void debug_ticks();
 void set_interrupt_status(unsigned char status);
@@ -194,9 +194,11 @@ void TaskSys();
 
 // 硬盘驱动
 void TaskHD();
+// TODO 可以去掉extern吗？
 // 文件系统
 extern void task_fs();
 extern void task_network();
+extern void task_netdev_rx();
 // 内存管理
 void TaskMM();
 // INIT进程

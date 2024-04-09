@@ -1119,6 +1119,15 @@ void Printf(char *fmt, ...)
     return;
 }
 
+int sprintf(char *str, const char *format, ...)
+{
+    // unsigned int *var_list = (unsigned int *)((unsigned int *)&fmt + 1);
+    char *var_list = (char *)((char *)&fmt + 4);
+    int len = vsprintf(buf, fmt, var_list);
+
+    return len;
+}
+
 int vsprintf(char *buf, char *fmt, char *var_list)
 {
     // 指向buf
@@ -1814,15 +1823,15 @@ void inform_int(int task_nr)
     }
 }
 
-int strcmp(char *str1, char *str2)
+int strcmp(const char *s1, const char *s2)
 {
-    if (str1 == 0 || str2 == 0)
+    if (s1 == 0 || s2 == 0)
     {
-        return (str1 - str2);
+        return (s1 - s2);
     }
 
-    char *p1 = str1;
-    char *p2 = str2;
+    char *p1 = (char *)s1;
+    char *p2 = (char *)s2;
 
     for (; *p1 && *p2; p1++, p2++)
     {

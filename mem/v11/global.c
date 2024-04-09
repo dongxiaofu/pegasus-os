@@ -29,14 +29,15 @@ Task user_task_table[USER_PROC_NUM] = {
 //        {TestC, C_STACK_SIZE}
 };
 // 系统任务元数据
-// Task sys_task_table[TASK_PROC_NUM] = {
-Task sys_task_table[6] = {
+Task sys_task_table[TASK_PROC_NUM] = {
+// Task sys_task_table[7] = {
         {"TTY", TaskTTY, TaskTTY_STACK_SIZE},
         {"SYS", TaskSys, TASK_SYS_SIZE},
         {"HD", TaskHD,  TASK_HD_SIZE},
         {"FS", task_fs, TASK_FS_SIZE},
         {"MM",TaskMM, TASK_MM_SIZE},
-        {"NET",task_network, TASK_NETWORK_SIZE}
+        {"NET",task_network, TASK_NETWORK_SIZE},
+        {"NET_DEV",task_netdev_rx, TASK_NET_DEV_SIZE}
  };
 
 // 进程的堆栈

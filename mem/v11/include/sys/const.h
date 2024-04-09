@@ -180,7 +180,7 @@
 // 用户进程的数量
 #define USER_PROC_NUM 4
 // 系统任务的数量
-#define TASK_PROC_NUM 5
+#define TASK_PROC_NUM 7
 // 用fork创建的用户进程的数量
 // todo 设置成32，合适吗？
 #define FORKED_USER_PROC_NUM 0
@@ -204,6 +204,7 @@
 #define TASK_FS_SIZE DEFAULT_STACK_SIZE
 #define TASK_MM_SIZE DEFAULT_STACK_SIZE
 #define TASK_NETWORK_SIZE DEFAULT_STACK_SIZE
+#define TASK_NET_DEV_SIZE DEFAULT_STACK_SIZE
 // #define TASK_INIT_SIZE DEFAULT_STACK_SIZE
 #define TASK_INIT_SIZE (DEFAULT_STACK_SIZE)
 //#define A_STACK_SIZE 128
@@ -217,6 +218,8 @@
         + TASK_HD_SIZE  \
         + TASK_FS_SIZE \
         + TASK_MM_SIZE \
+        + TASK_NETWORK_SIZE \
+        + TASK_NET_DEV_SIZE \
         + TASK_INIT_SIZE \
 	+ A_STACK_SIZE )
 // 进程相关 end
@@ -280,5 +283,19 @@
 #define TICKS_NUM	15
 // #define TICKS_NUM	100
 #define STACK_MAGIC	0x99ABCDE0
+
+// 网络协议
+#define NET_IPC 3001
+
+#define IPC_SOCKET	 0x0001
+#define IPC_CONNECT  0x0002
+#define IPC_WRITE    0x0003
+#define IPC_READ     0x0004
+#define IPC_CLOSE    0x0005
+#define IPC_BIND	 0x0006
+#define IPC_ACCEPT   0x0007
+#define IPC_LISTEN   0x0008
+#define IPC_SENDTO   0x0009
+#define IPC_RECVFROM 0x000a
 
 #endif
