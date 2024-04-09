@@ -28,7 +28,7 @@ wait_sleep(struct wait_lock *w) {
 	Message *msg = (Message *)sys_malloc(sizeof(Message));
 	Memset(msg, 0, sizeof(Message));
 	// TODO INTERRUPT 应该修改为解除阻塞的进程。
-    send_rec(RECEIVING, msg, INTERRUPT);
+    send_rec(RECEIVING, msg, TASK_NET_DEV_RX);
 	sys_free(msg, sizeof(Message));
 
 	return 0;

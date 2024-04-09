@@ -119,7 +119,10 @@ EXTERN TSS tss;
 
 #define PROC_A	5
 // TODO 设置成7不知道行不行。太久了，我不记得设置进程的PID有什么规则。
-#define TASK_NETWORK    7
+// 网络协议栈。
+#define TASK_NETWORK            7
+// 从网卡接收数据。
+#define TASK_NET_DEV_RX         8
 
 
 #define reassembly(val1, offset1, val2, offset2, val3) \

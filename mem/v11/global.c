@@ -29,8 +29,8 @@ Task user_task_table[USER_PROC_NUM] = {
 //        {TestC, C_STACK_SIZE}
 };
 // 系统任务元数据
-// Task sys_task_table[TASK_PROC_NUM] = {
-Task sys_task_table[6] = {
+Task sys_task_table[TASK_PROC_NUM] = {
+// Task sys_task_table[7] = {
         {"TTY", TaskTTY, TaskTTY_STACK_SIZE},
         {"SYS", TaskSys, TASK_SYS_SIZE},
         {"HD", TaskHD,  TASK_HD_SIZE},

@@ -180,7 +180,7 @@
 // 用户进程的数量
 #define USER_PROC_NUM 4
 // 系统任务的数量
-#define TASK_PROC_NUM 5
+#define TASK_PROC_NUM 7
 // 用fork创建的用户进程的数量
 // todo 设置成32，合适吗？
 #define FORKED_USER_PROC_NUM 0
@@ -218,6 +218,8 @@
         + TASK_HD_SIZE  \
         + TASK_FS_SIZE \
         + TASK_MM_SIZE \
+        + TASK_NETWORK_SIZE \
+        + TASK_NET_DEV_SIZE \
         + TASK_INIT_SIZE \
 	+ A_STACK_SIZE )
 // 进程相关 end
