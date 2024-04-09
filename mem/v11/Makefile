@@ -18,7 +18,7 @@ LIB_FILES := $(wildcard lib/*)
 ALL_FILES := $(SRCS) $(NETWORK_FILES) $(HD_FILES) $(FS_FILES) $(MM_FILES) $(MEM_FILES) $(LIB_FILES)
 
 OBJS	:= $(ALL_FILES:.c=.o)   # 将所有的.c文件名替换为.o
-LIB_OBJS	:=	$(LIB_FILES:.c=.o)
+#LIB_OBJS	:=	$(LIB_FILES:.c=.o)
 
 ASM_SOURCE := $(wildcard *.asm)
 ASM_HD_SOURCE	:=	$(wildcard hd/*.asm)
@@ -34,9 +34,11 @@ ASM_KERNEL_OBJS	:=  $(ASM_KERNEL_SOURCE:.asm=.o)
 #排除kernel_sub.o。
 ASM_KERNEL_OBJS_FILTERED	:=	$(filter-out kernel_sub.o, $(ASM_KERNEL_OBJS))
 
-LOBJS	=	lib/pegasus_crt.a
+LOBJS	=	command/pegasus_crt.a
 
-image:clean everything buildimg subsystem
+image: clean all
+
+all: everything buildimg subsystem
 
 everything:${BIN} ${LOBJS} $(ASM_BOOT_OBJS) $(ASM_KERNEL_OBJS)
 
@@ -82,7 +84,8 @@ clean:
 	rm -rvf fs/*.o
 	rm -rvf network/*.o
 	rm -rvf lib/*.o
-	rm -rvf lib/*.a
+	rm -rvf command/*.o
+	rm -rvf command/*.a
 	rm -rvf 80m.img
 	rm -rvf 80m.img.lock
-	rm -rvf k-log.asm
+	rm -rvf k-log

@@ -33,20 +33,20 @@ Removed property 0xc0010001 to merge double_link_list.o (not found) and mm/exec.
 Removed property 0xc0010002 to merge double_link_list.o (not found) and mm/exec.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and mm/main.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and mm/main.o (0x0)
-Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/exec.o (0x1)
-Removed property 0xc0010002 to merge double_link_list.o (not found) and lib/exec.o (0x0)
-Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/read.o (0x1)
-Removed property 0xc0010002 to merge double_link_list.o (not found) and lib/read.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/exit.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and lib/exit.o (0x0)
+Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/exec.o (0x1)
+Removed property 0xc0010002 to merge double_link_list.o (not found) and lib/exec.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/unlink.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and lib/unlink.o (0x0)
-Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/wait.o (0x1)
-Removed property 0xc0010002 to merge double_link_list.o (not found) and lib/wait.o (0x0)
+Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/read.o (0x1)
+Removed property 0xc0010002 to merge double_link_list.o (not found) and lib/read.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/open.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and lib/open.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/write.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and lib/write.o (0x0)
+Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/wait.o (0x1)
+Removed property 0xc0010002 to merge double_link_list.o (not found) and lib/wait.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/close.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and lib/close.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and lib/fork.o (0x1)
@@ -179,25 +179,21 @@ Discarded input sections
  .note.GNU-stack
                 0x00000000        0x0 mem/mem.o
  .note.GNU-stack
-                0x00000000        0x0 lib/exec.o
- .note.gnu.property
-                0x00000000       0x28 lib/exec.o
- .note.GNU-stack
-                0x00000000        0x0 lib/read.o
- .note.gnu.property
-                0x00000000       0x28 lib/read.o
- .note.GNU-stack
                 0x00000000        0x0 lib/exit.o
  .note.gnu.property
                 0x00000000       0x28 lib/exit.o
+ .note.GNU-stack
+                0x00000000        0x0 lib/exec.o
+ .note.gnu.property
+                0x00000000       0x28 lib/exec.o
  .note.GNU-stack
                 0x00000000        0x0 lib/unlink.o
  .note.gnu.property
                 0x00000000       0x28 lib/unlink.o
  .note.GNU-stack
-                0x00000000        0x0 lib/wait.o
+                0x00000000        0x0 lib/read.o
  .note.gnu.property
-                0x00000000       0x28 lib/wait.o
+                0x00000000       0x28 lib/read.o
  .note.GNU-stack
                 0x00000000        0x0 lib/open.o
  .note.gnu.property
@@ -206,6 +202,10 @@ Discarded input sections
                 0x00000000        0x0 lib/write.o
  .note.gnu.property
                 0x00000000       0x28 lib/write.o
+ .note.GNU-stack
+                0x00000000        0x0 lib/wait.o
+ .note.gnu.property
+                0x00000000       0x28 lib/wait.o
  .note.GNU-stack
                 0x00000000        0x0 lib/close.o
  .note.gnu.property
@@ -251,13 +251,13 @@ LOAD mm/forkexit.o
 LOAD mm/exec.o
 LOAD mm/main.o
 LOAD mem/mem.o
-LOAD lib/exec.o
-LOAD lib/read.o
 LOAD lib/exit.o
+LOAD lib/exec.o
 LOAD lib/unlink.o
-LOAD lib/wait.o
+LOAD lib/read.o
 LOAD lib/open.o
 LOAD lib/write.o
+LOAD lib/wait.o
 LOAD lib/close.o
 LOAD lib/fork.o
 LOAD lib/getpid.o
@@ -608,22 +608,22 @@ LOAD lib/getpid.o
                 0xc0109e59                init_memory_block_desc
                 0xc0109f2a                init_memory2
                 0xc010a1a1                init_memory
- .text          0xc010a2ea      0x285 lib/exec.o
-                0xc010a2ea                exec
-                0xc010a35b                execv
-                0xc010a54a                execl
- .text          0xc010a56f      0x181 lib/read.o
-                0xc010a56f                read
- .text          0xc010a6f0       0x2f lib/exit.o
-                0xc010a6f0                exit
- .text          0xc010a71f       0x42 lib/unlink.o
-                0xc010a71f                unlink
- .text          0xc010a761       0x44 lib/wait.o
-                0xc010a761                wait
- .text          0xc010a7a5       0x95 lib/open.o
-                0xc010a7a5                open
- .text          0xc010a83a       0x85 lib/write.o
-                0xc010a83a                write
+ .text          0xc010a2ea       0x2f lib/exit.o
+                0xc010a2ea                exit
+ .text          0xc010a319      0x285 lib/exec.o
+                0xc010a319                exec
+                0xc010a38a                execv
+                0xc010a579                execl
+ .text          0xc010a59e       0x42 lib/unlink.o
+                0xc010a59e                unlink
+ .text          0xc010a5e0      0x181 lib/read.o
+                0xc010a5e0                read
+ .text          0xc010a761       0x95 lib/open.o
+                0xc010a761                open
+ .text          0xc010a7f6       0x85 lib/write.o
+                0xc010a7f6                write
+ .text          0xc010a87b       0x44 lib/wait.o
+                0xc010a87b                wait
  .text          0xc010a8bf       0x52 lib/close.o
                 0xc010a8bf                close
  .text          0xc010a911       0x48 lib/fork.o
@@ -710,19 +710,19 @@ LOAD lib/getpid.o
                                  0x54 (size before relaxing)
  .eh_frame      0xc010d650      0x364 mem/mem.o
                                 0x37c (size before relaxing)
- .eh_frame      0xc010d9b4       0x60 lib/exec.o
+ .eh_frame      0xc010d9b4       0x20 lib/exit.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc010d9d4       0x60 lib/exec.o
                                  0x78 (size before relaxing)
- .eh_frame      0xc010da14       0x20 lib/read.o
+ .eh_frame      0xc010da34       0x20 lib/unlink.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010da34       0x20 lib/exit.o
+ .eh_frame      0xc010da54       0x20 lib/read.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010da54       0x20 lib/unlink.o
+ .eh_frame      0xc010da74       0x20 lib/open.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010da74       0x20 lib/wait.o
+ .eh_frame      0xc010da94       0x20 lib/write.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc010da94       0x20 lib/open.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc010dab4       0x20 lib/write.o
+ .eh_frame      0xc010dab4       0x20 lib/wait.o
                                  0x38 (size before relaxing)
  .eh_frame      0xc010dad4       0x20 lib/close.o
                                  0x38 (size before relaxing)
@@ -853,13 +853,13 @@ LOAD lib/getpid.o
  .data          0xc010e780        0x0 mm/exec.o
  .data          0xc010e780        0x0 mm/main.o
  .data          0xc010e780        0x0 mem/mem.o
- .data          0xc010e780        0x0 lib/exec.o
- .data          0xc010e780        0x0 lib/read.o
  .data          0xc010e780        0x0 lib/exit.o
+ .data          0xc010e780        0x0 lib/exec.o
  .data          0xc010e780        0x0 lib/unlink.o
- .data          0xc010e780        0x0 lib/wait.o
+ .data          0xc010e780        0x0 lib/read.o
  .data          0xc010e780        0x0 lib/open.o
  .data          0xc010e780        0x0 lib/write.o
+ .data          0xc010e780        0x0 lib/wait.o
  .data          0xc010e780        0x0 lib/close.o
  .data          0xc010e780        0x0 lib/fork.o
  .data          0xc010e780        0x0 lib/getpid.o
@@ -894,13 +894,13 @@ LOAD lib/getpid.o
  .bss           0xc010f784        0x0 mm/exec.o
  .bss           0xc010f784        0x0 mm/main.o
  .bss           0xc010f784        0x0 mem/mem.o
- .bss           0xc010f784        0x0 lib/exec.o
- .bss           0xc010f784        0x0 lib/read.o
  .bss           0xc010f784        0x0 lib/exit.o
+ .bss           0xc010f784        0x0 lib/exec.o
  .bss           0xc010f784        0x0 lib/unlink.o
- .bss           0xc010f784        0x0 lib/wait.o
+ .bss           0xc010f784        0x0 lib/read.o
  .bss           0xc010f784        0x0 lib/open.o
  .bss           0xc010f784        0x0 lib/write.o
+ .bss           0xc010f784        0x0 lib/wait.o
  .bss           0xc010f784        0x0 lib/close.o
  .bss           0xc010f784        0x0 lib/fork.o
  .bss           0xc010f784        0x0 lib/getpid.o
@@ -1008,13 +1008,13 @@ LOAD lib/getpid.o
  .comment       0x0000002c       0x2d mm/exec.o
  .comment       0x0000002c       0x2d mm/main.o
  .comment       0x0000002c       0x2d mem/mem.o
- .comment       0x0000002c       0x2d lib/exec.o
- .comment       0x0000002c       0x2d lib/read.o
  .comment       0x0000002c       0x2d lib/exit.o
+ .comment       0x0000002c       0x2d lib/exec.o
  .comment       0x0000002c       0x2d lib/unlink.o
- .comment       0x0000002c       0x2d lib/wait.o
+ .comment       0x0000002c       0x2d lib/read.o
  .comment       0x0000002c       0x2d lib/open.o
  .comment       0x0000002c       0x2d lib/write.o
+ .comment       0x0000002c       0x2d lib/wait.o
  .comment       0x0000002c       0x2d lib/close.o
  .comment       0x0000002c       0x2d lib/fork.o
  .comment       0x0000002c       0x2d lib/getpid.o
@@ -1071,19 +1071,19 @@ LOAD lib/getpid.o
  .debug_aranges
                 0x000001f8       0x20 mem/mem.o
  .debug_aranges
-                0x00000218       0x20 lib/exec.o
+                0x00000218       0x20 lib/exit.o
  .debug_aranges
-                0x00000238       0x20 lib/read.o
+                0x00000238       0x20 lib/exec.o
  .debug_aranges
-                0x00000258       0x20 lib/exit.o
+                0x00000258       0x20 lib/unlink.o
  .debug_aranges
-                0x00000278       0x20 lib/unlink.o
+                0x00000278       0x20 lib/read.o
  .debug_aranges
-                0x00000298       0x20 lib/wait.o
+                0x00000298       0x20 lib/open.o
  .debug_aranges
-                0x000002b8       0x20 lib/open.o
+                0x000002b8       0x20 lib/write.o
  .debug_aranges
-                0x000002d8       0x20 lib/write.o
+                0x000002d8       0x20 lib/wait.o
  .debug_aranges
                 0x000002f8       0x20 lib/close.o
  .debug_aranges
@@ -1113,13 +1113,13 @@ LOAD lib/getpid.o
  .debug_info    0x000116b9     0x11ca mm/exec.o
  .debug_info    0x00012883      0xdcc mm/main.o
  .debug_info    0x0001364f     0x1cfa mem/mem.o
- .debug_info    0x00015349      0xf40 lib/exec.o
- .debug_info    0x00016289      0xea1 lib/read.o
- .debug_info    0x0001712a      0xdb3 lib/exit.o
- .debug_info    0x00017edd      0xe91 lib/unlink.o
- .debug_info    0x00018d6e      0xdc1 lib/wait.o
- .debug_info    0x00019b2f      0xe02 lib/open.o
- .debug_info    0x0001a931      0xe2f lib/write.o
+ .debug_info    0x00015349      0xdb3 lib/exit.o
+ .debug_info    0x000160fc      0xf40 lib/exec.o
+ .debug_info    0x0001703c      0xe91 lib/unlink.o
+ .debug_info    0x00017ecd      0xea1 lib/read.o
+ .debug_info    0x00018d6e      0xe02 lib/open.o
+ .debug_info    0x00019b70      0xe2f lib/write.o
+ .debug_info    0x0001a99f      0xdc1 lib/wait.o
  .debug_info    0x0001b760      0xdb6 lib/close.o
  .debug_info    0x0001c516      0xda8 lib/fork.o
  .debug_info    0x0001d2be      0xda8 lib/getpid.o
@@ -1143,13 +1143,13 @@ LOAD lib/getpid.o
  .debug_abbrev  0x000020f0      0x1c4 mm/exec.o
  .debug_abbrev  0x000022b4      0x208 mm/main.o
  .debug_abbrev  0x000024bc      0x2ea mem/mem.o
- .debug_abbrev  0x000027a6      0x1e8 lib/exec.o
- .debug_abbrev  0x0000298e      0x1ef lib/read.o
- .debug_abbrev  0x00002b7d      0x19b lib/exit.o
- .debug_abbrev  0x00002d18      0x193 lib/unlink.o
- .debug_abbrev  0x00002eab      0x19f lib/wait.o
- .debug_abbrev  0x0000304a      0x1c5 lib/open.o
- .debug_abbrev  0x0000320f      0x1db lib/write.o
+ .debug_abbrev  0x000027a6      0x19b lib/exit.o
+ .debug_abbrev  0x00002941      0x1e8 lib/exec.o
+ .debug_abbrev  0x00002b29      0x193 lib/unlink.o
+ .debug_abbrev  0x00002cbc      0x1ef lib/read.o
+ .debug_abbrev  0x00002eab      0x1c5 lib/open.o
+ .debug_abbrev  0x00003070      0x1db lib/write.o
+ .debug_abbrev  0x0000324b      0x19f lib/wait.o
  .debug_abbrev  0x000033ea      0x19d lib/close.o
  .debug_abbrev  0x00003587      0x18a lib/fork.o
  .debug_abbrev  0x00003711      0x18a lib/getpid.o
@@ -1173,13 +1173,13 @@ LOAD lib/getpid.o
  .debug_line    0x00003782      0x20c mm/exec.o
  .debug_line    0x0000398e       0xec mm/main.o
  .debug_line    0x00003a7a      0x7e6 mem/mem.o
- .debug_line    0x00004260      0x18b lib/exec.o
- .debug_line    0x000043eb      0x155 lib/read.o
- .debug_line    0x00004540       0xa0 lib/exit.o
- .debug_line    0x000045e0       0xc0 lib/unlink.o
- .debug_line    0x000046a0       0xb7 lib/wait.o
- .debug_line    0x00004757       0xbd lib/open.o
- .debug_line    0x00004814       0xbc lib/write.o
+ .debug_line    0x00004260       0xa0 lib/exit.o
+ .debug_line    0x00004300      0x18b lib/exec.o
+ .debug_line    0x0000448b       0xc0 lib/unlink.o
+ .debug_line    0x0000454b      0x155 lib/read.o
+ .debug_line    0x000046a0       0xbd lib/open.o
+ .debug_line    0x0000475d       0xbc lib/write.o
+ .debug_line    0x00004819       0xb7 lib/wait.o
  .debug_line    0x000048d0       0xad lib/close.o
  .debug_line    0x0000497d       0xa5 lib/fork.o
  .debug_line    0x00004a22       0xa0 lib/getpid.o
@@ -1207,13 +1207,13 @@ LOAD lib/getpid.o
  .debug_str     0x00001f91      0x86d mm/exec.o
  .debug_str     0x00001f91      0x598 mm/main.o
  .debug_str     0x00001f91      0xa6d mem/mem.o
- .debug_str     0x00001f91      0x62c lib/exec.o
- .debug_str     0x00001f91      0x611 lib/read.o
  .debug_str     0x00001f91      0x5a5 lib/exit.o
+ .debug_str     0x00001f91      0x62c lib/exec.o
  .debug_str     0x00001f91      0x624 lib/unlink.o
- .debug_str     0x00001f91      0x5a5 lib/wait.o
+ .debug_str     0x00001f91      0x611 lib/read.o
  .debug_str     0x00001f91      0x5d8 lib/open.o
  .debug_str     0x00001f91      0x5d5 lib/write.o
+ .debug_str     0x00001f91      0x5a5 lib/wait.o
  .debug_str     0x00001f91      0x5a0 lib/close.o
  .debug_str     0x00001f91      0x59e lib/fork.o
  .debug_str     0x00001f91      0x5a2 lib/getpid.o
