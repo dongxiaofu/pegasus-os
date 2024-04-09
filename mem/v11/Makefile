@@ -70,7 +70,7 @@ buildimg:
 	sudo umount /mnt/floppy
 	cp -rvf /home/cg/os/pegasus-os/hd/80m.img ./
 	chown cg 80m.img
-	objdump -d kernel.bin > k-log.asm
+	objdump -d kernel.bin > k-log
 
 
 clean:
