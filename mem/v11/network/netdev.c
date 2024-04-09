@@ -100,7 +100,8 @@ netdev_receive(struct sk_buff *skb)
 void *
 netdev_rx_loop()
 {
-	while (running) {
+	// while (running) {
+	while (1) {
 		struct sk_buff *skb = alloc_skb(BUFLEN);		/* 1600 */
 		/* skb是对数据的一个简单封装,真正的数据在skb->data中,skb的其他域是对数据的一些描述 */
 		/* tun_read每一次会读取一个数据报,即使该数据长度达不到1600 */

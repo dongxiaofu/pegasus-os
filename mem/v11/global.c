@@ -37,6 +37,7 @@ Task sys_task_table[6] = {
         {"FS", task_fs, TASK_FS_SIZE},
         {"MM",TaskMM, TASK_MM_SIZE},
         {"NET",task_network, TASK_NETWORK_SIZE}
+        {"NET_DEV",task_netdev_rx, TASK_NET_DEV_SIZE}
  };
 
 // 进程的堆栈

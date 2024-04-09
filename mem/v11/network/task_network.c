@@ -80,3 +80,8 @@ int network_handle(Message *msg) {
     }
 }
 
+void task_netdev_rx()
+{
+	netdev_rx_loop();
+}
+

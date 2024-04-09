@@ -194,9 +194,11 @@ void TaskSys();
 
 // 硬盘驱动
 void TaskHD();
+// TODO 可以去掉extern吗？
 // 文件系统
 extern void task_fs();
 extern void task_network();
+extern void task_netdev_rx();
 // 内存管理
 void TaskMM();
 // INIT进程
