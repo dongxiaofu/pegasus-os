@@ -1,3 +1,5 @@
+#include "inet.h"
+
 uint32_t ntohl(uint32_t netlong)
 {
 	unsigned char bytes[4] = {0};

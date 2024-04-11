@@ -8,9 +8,6 @@
 static LIST_HEAD(tcp_connecting_or_listening_socks);
 static LIST_HEAD(tcp_establised_or_syn_recvd_socks);
 
-static pthread_rwlock_t cl_lock = PTHREAD_RWLOCK_INITIALIZER;
-static pthread_rwlock_t es_lock = PTHREAD_RWLOCK_INITIALIZER;
-
 
 inline void
 tcp_established_or_syn_recvd_socks_enqueue(struct sock *sk)
@@ -116,7 +113,7 @@ tcp_free_sock(struct sock *sk)
 	//pthread_mutex_unlock(&sk->lock);
 	if (sk->sock) sk->sock->sk = NULL;
 	sk_free(sk);
-	free(tsk);
+	sys_free(tsk);
 	tsk = NULL;
 	return 0;
 }
@@ -177,7 +174,7 @@ out:
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 int
-tcp_write(struct sock *sk, const void *buf, const uint len)
+tcp_write(struct sock *sk, const void *buf, const uint32_t len)
 {
 	struct tcp_sock *tsk = tcp_sk(sk);
 	int ret = -1;
@@ -198,7 +195,7 @@ out:
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 int
-tcp_read(struct sock *sk, void *buf, const uint len)
+tcp_read(struct sock *sk, void *buf, const uint32_t len)
 {
 	struct tcp_sock *tsk = tcp_sk(sk);
 	int ret = -1;

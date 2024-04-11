@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "syshead.h"
+
 #define CMDBUFLEN 100
 #define print_debug(str, ...)	\
 	printf(str" - %s:%u\n", ##__VA_ARGS__, __FILE__, __LINE__);

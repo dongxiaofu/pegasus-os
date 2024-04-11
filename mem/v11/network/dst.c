@@ -2,6 +2,7 @@
 #include "dst.h"
 #include "ip.h"
 #include "arp.h"
+#include "if_ether.h"
 
 int
 dst_neigh_output(struct sk_buff *skb)
@@ -29,7 +30,7 @@ try_agin:
 		arp_request(saddr, daddr, netdev);
         /* Inform upper layer that traffic was not sent, retry later */
 		if (count < 3) {
-			usleep(10000);
+			// usleep(10000);
 			goto try_agin;
 		}
 		return -1;

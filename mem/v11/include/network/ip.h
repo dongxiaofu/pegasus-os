@@ -1,9 +1,13 @@
 #ifndef IP_H
 #define IP_H
+
+#include "in.h"
+
 #include "syshead.h"
 #include "ethernet.h"
 #include "skbuff.h"
 #include "sock.h"
+#include "inet.h"
 
 #define IPV4	 0x04
 #define IP_TCP	 0x06

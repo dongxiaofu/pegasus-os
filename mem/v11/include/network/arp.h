@@ -68,15 +68,15 @@ struct arp_hdr
 	uint8_t hwsize;			// 硬件地址长度
 	uint8_t prosize;		// 协议地址长度
 	uint16_t opcode;		// 操作类型
-	uchar data[];
+	uint8_t data[];
 } __attribute__((packed));
 
 // ARP请求和应答分组的数据部分
 struct arp_ipv4
 {
-	uchar smac[6];  // 发送端以太网地址
+	uint8_t smac[6];  // 发送端以太网地址
 	uint32_t sip;			// 发送端ip地址
-	uchar dmac[6];  // 目的以太网地址
+	uint8_t dmac[6];  // 目的以太网地址
 	uint32_t dip;			// 目的ip地址
 } __attribute__((packed));
 
@@ -86,11 +86,11 @@ struct arp_cache_entry
 	struct list_head list;
 	uint16_t hwtype;
 	uint32_t sip;
-	uchar smac[6];
-	uint state;
+	uint8_t smac[6];
+	uint32_t state;
 };
 
-uchar* arp_get_hwaddr(uint32_t sip);
+uint8_t* arp_get_hwaddr(uint32_t sip);
 void arp_init();
 void free_arp();
 void arp_rcv(struct sk_buff *skb);

@@ -309,7 +309,7 @@ tcp_retransmission_timeout(uint32_t ts, void *arg)
 
 	tcp_transmit_skb(sk, skb, tcb->snd_una);
 	/* 每个500个时间单位检查一次. */
-	tsk->retransmit = timer_add(500, &tcp_retransmission_timeout, tsk);
+	// tsk->retransmit = timer_add(500, &tcp_retransmission_timeout, tsk);
 
 	if (th->fin) {
 		tcp_handle_fin_state(sk);
@@ -317,6 +317,7 @@ tcp_retransmission_timeout(uint32_t ts, void *arg)
 
 unlock:
 	//pthread_mutex_unlock(&sk->write_queue.lock);
+	return;
 }
 
 
@@ -330,11 +331,11 @@ tcp_reset_retransmission_timer(struct tcp_sock *tsk)
 	tcp_release_retransmission_timer(tsk);	/* 释放掉之前的重传定时器 */
 
 	if (sk->state == TCP_SYN_SENT) {	/* backoff 貌似是退避时间 */
-		tsk->retransmit = timer_add(TCP_SYN_BACKOFF << tsk->backoff, &tcp_connect_rto, tsk);
+		// tsk->retransmit = timer_add(TCP_SYN_BACKOFF << tsk->backoff, &tcp_connect_rto, tsk);
 	}
 	else {
 		/* 500秒超时重传 */
-		tsk->retransmit = timer_add(500, &tcp_retransmission_timeout, tsk);
+		// tsk->retransmit = timer_add(500, &tcp_retransmission_timeout, tsk);
 	}
 }
 

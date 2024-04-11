@@ -7,6 +7,7 @@
 #include "ip.h"
 #include "tuntap.h"
 #include "arp.h"
+#include "if_ether.h"
 
 struct netdev *loop;
 struct netdev *netdev; /* 用于记录本机地址,包括ip和mac地址 */
@@ -132,8 +133,8 @@ netdev_get(uint32_t sip)
 void 
 free_netdev()
 {
-	free(loop);
-	free(netdev);
+	sys_free(loop);
+	sys_free(netdev);
 }
 
 /**\

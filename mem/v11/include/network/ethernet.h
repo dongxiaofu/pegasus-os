@@ -3,6 +3,7 @@
 
 #include "syshead.h"
 #include "skbuff.h"
+#include "inet.h"
 
 #define ETH_HDR_LEN sizeof(struct eth_hdr)
 

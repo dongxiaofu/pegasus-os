@@ -1,3 +1,5 @@
+#include "inet.h"
+
 unsigned short htons(uint16_t hostshort)
 {
 	unsigned char low_byte = hostshort & 0xFF;

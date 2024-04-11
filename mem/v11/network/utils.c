@@ -1,6 +1,6 @@
 #include "syshead.h"
 #include "utils.h"
-#include <assert.h>
+#include "in.h"
 
 //
 // 这个文件主要用于Debug.
@@ -11,15 +11,16 @@ extern int debug;
 int 
 run_cmd(char *cmd, ...)
 {
-	va_list ap;
+	return 0;
+//	va_list ap;
 	char buf[CMDBUFLEN];
-	va_start(ap, cmd);
-	vsnPrintf(buf, CMDBUFLEN, cmd, ap);
-	va_end(ap);
-	if (debug) { // DEBUG模式下输出信息
-		Printf("EXEC: %s\n", buf);
-	}
-	return system(buf);
+//	va_start(ap, cmd);
+//	vsnPrintf(buf, CMDBUFLEN, cmd, ap);
+//	va_end(ap);
+//	if (debug) { // DEBUG模式下输出信息
+//		Printf("EXEC: %s\n", buf);
+//	}
+//	return system(buf);
 }
 
 void 
@@ -78,7 +79,7 @@ sum_every_16bits(void *addr, int count)
 		|  8  |  8  |			|xxxxx|     |
 		+-----+-----+			+-----+-----+
 		*/
-		*(uchar *)(&answer) = *(uchar *)ptr;
+		*(uint8_t *)(&answer) = *(uint8_t *)ptr;
 		sum += answer;
 	}
 

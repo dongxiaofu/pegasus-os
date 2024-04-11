@@ -1,11 +1,14 @@
+#include "stddef.h"
+#include "string.h"
+
 char *strpbrk(const char *s, const char *accept)
 {
 	if(s == NULL || accept == NULL){
 		return NULL;
 	}
 
-	unsigned int accept_len = strlen(accept);
-	unsigned int s_len = strlen(s);
+	unsigned int accept_len = Strlen(accept);
+	unsigned int s_len = Strlen(s);
 //	char *s_copy = (char *)malloc(s_len + 1);
 //	memset(s_copy, 0, s_len + 1);
 //	strcpy(s_copy, s);

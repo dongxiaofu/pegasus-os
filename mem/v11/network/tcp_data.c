@@ -51,12 +51,12 @@ tcp_consume_ofo_queue(struct tcp_sock *tsk)
  * tcp_data_dequeue 输入队列中的数据出队列.
 \**/
 int
-tcp_data_dequeue(struct tcp_sock *tsk, void *user_buf, const uint userlen)
+tcp_data_dequeue(struct tcp_sock *tsk, void *user_buf, const uint32_t userlen)
 {
 	struct sock *sk = &tsk->sk;
 	struct tcphdr *th;
 	struct sk_buff *skb;
-	uint rlen = 0, dlen;
+	uint32_t rlen = 0, dlen;
 
 	//pthread_mutex_lock(&sk->receive_queue.lock);	/* 接受队列加锁 */
 	while (!skb_queue_empty(&sk->receive_queue) &&
@@ -109,14 +109,14 @@ tcp_data_queue(struct tcp_sock *tsk, struct tcphdr *th, struct sk_buff *skb)
 		skb->refcnt++;
 		skb_queue_tail(&sk->receive_queue, skb);  /* 添加到尾部 */
 		tcp_consume_ofo_queue(tsk);
-		tcp_stop_delack_timer(tsk);
+		// tcp_stop_delack_timer(tsk);
 
 		if (th->psh || (skb->dlen == tsk->rmss && ++tsk->delacks > 1)) {
 			tsk->delacks = 0;
 			tcp_send_ack(sk);
 		}
 		else {
-			tsk->delack = timer_add(200, &tcp_send_delack, &tsk->sk);
+			// tsk->delack = timer_add(200, &tcp_send_delack, &tsk->sk);
 		}
 	}
 	else {

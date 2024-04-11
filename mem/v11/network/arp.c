@@ -3,6 +3,7 @@
 #include "list.h"
 #include "arp.h"
 #include "utils.h"
+#include "if_ether.h"
 
 static uint8_t broadcast_hw[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}; /* 广播地址 */
 
@@ -216,7 +217,7 @@ arp_reply(struct sk_buff *skb, struct netdev *netdev)
 /**\
  * arp_get_hwaddr 根据ip得到mac地址,找不到则返回NULL
 \**/
-uchar* 
+uint8_t* 
 arp_get_hwaddr(uint32_t sip)
 {
 	struct list_head *item;
@@ -243,7 +244,7 @@ free_arp()
 	list_for_each_safe(item, tmp, &arp_cache) {
 		entry = list_entry(item, struct arp_cache_entry, list);
 		list_del(item);
-		free(entry);
+		sys_free(entry);
 	}
 }
 

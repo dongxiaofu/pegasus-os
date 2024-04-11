@@ -18,7 +18,6 @@ sk_init(struct sock *sk)
 	wait_init(&sk->recv_wait);
 	skb_queue_init(&sk->receive_queue);		/* 初始化接收队列 */
 	skb_queue_init(&sk->write_queue);		/* 初始化发送队列 */
-	pthread_mutex_init(&sk->lock, NULL);	/* 初始化锁 */
 	sk->ops->init(sk);						/* net_ops做初始化工作 */
 }
 
@@ -36,5 +35,4 @@ sk_free(struct sock *sk)
 {
 	skb_queue_free(&sk->receive_queue);
 	skb_queue_free(&sk->write_queue);
-	pthread_mutex_destroy(&sk->lock);
 }

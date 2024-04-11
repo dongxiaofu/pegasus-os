@@ -1,13 +1,11 @@
 #ifndef SKBUFF_H
 #define SKBUFF_H
 
+#include "stdint.h"
 #include "syshead.h"
 #include "netdev.h"
 #include "route.h"
 #include "list.h"
-#include <inttypes.h>
-#include <pthread.h>
-#include <bits/pthreadtypes.h>
 
 struct sk_buff {
 	struct list_head list;
@@ -28,14 +26,14 @@ struct sk_buff {
 struct sk_buff_head {
 	struct list_head head;
 	uint32_t qlen;				/* 记录链表的长度 */
-	pthread_mutex_t lock;		/* 锁,避免争用 */
+	//pthread_mutex_t lock;		/* 锁,避免争用 */
 };
 
-struct sk_buff *alloc_skb(uint size);
+struct sk_buff *alloc_skb(uint32_t size);
 void free_skb(struct sk_buff *skb);
-uint8_t *skb_push(struct sk_buff *skb, uint len);
+uint8_t *skb_push(struct sk_buff *skb, uint32_t len);
 uint8_t *skb_head(struct sk_buff *skb);
-void *skb_reserve(struct sk_buff *skb, uint len);
+void *skb_reserve(struct sk_buff *skb, uint32_t len);
 void skb_reset_header(struct sk_buff *skb);
 
 static inline uint32_t 
@@ -49,7 +47,7 @@ skb_queue_init(struct sk_buff_head *list)
 {
 	list_init(&list->head);
 	list->qlen = 0;
-	pthread_mutex_init(&list->lock, NULL);
+	// pthread_mutex_init(&list->lock, NULL);
 }
 
 static inline void

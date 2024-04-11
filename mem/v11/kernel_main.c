@@ -70,6 +70,8 @@ void init()
 {
 //	DoubleLinkList pcb_list;
 //	DoubleLinkList all_pcb_list;
+	
+	char *stackaddr = "10.0.1.4";   /* 本协议栈模拟的ip地址 */
 
 	MAIN_THREAD_PAGE_DIRECTORY = 0x400000;
 	k_reenter = 99;

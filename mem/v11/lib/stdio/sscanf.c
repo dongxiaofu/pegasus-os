@@ -1,7 +1,9 @@
+#include "string.h"
+
 int sscanf(const char *str, const char *format, ...)
 {
-	unsigned int str_len = strlen(str);
-	unsigned int format_len = strlen(format);
+	unsigned int str_len = Strlen(str);
+	unsigned int format_len = Strlen(format);
 
 	int *arg_list = (int *)((int *)&format + 1);
 	int *next_arg = arg_list;
@@ -31,9 +33,9 @@ int sscanf(const char *str, const char *format, ...)
 						ptr_str++;
 					}
 					unsigned int len = ptr_str - start;
-					char *buf = (char *)malloc(len + 1);
-					memset(buf, 0, len + 1);
-					memcpy(buf, start, len);
+					char *buf = (char *)sys_malloc(len + 1);
+					Memset(buf, 0, len + 1);
+					Memcpy(buf, start, len);
 					// 成功把十进制数字字符串解析出来了，并且存储到了buf中。
 					// TODO 怎么识别参数的数据类型？在函数内部无法识别。
 					int number = atoi(buf);
@@ -65,7 +67,7 @@ int sscanf(const char *str, const char *format, ...)
 						ptr_str++;
 					}
 					unsigned int len = ptr_str - start;
-					memcpy((char *)(*next_arg), start, len);
+					Memcpy((char *)(*next_arg), start, len);
 					char *dst = (char *)(*next_arg);
 					// *(dst + len + 1) = '\0';
 					// *(dst + len) = '\0';
@@ -85,9 +87,9 @@ int sscanf(const char *str, const char *format, ...)
 						ptr_str++;
 					}
 					unsigned int len = ptr_str - start;
-					char *buf = (char *)malloc(len + 1);
-					memset(buf, 0, len + 1);
-					memcpy(buf, start, len);
+					char *buf = (char *)sys_malloc(len + 1);
+					Memset(buf, 0, len + 1);
+					Memcpy(buf, start, len);
 					// 成功把十进制数字字符串解析出来了，并且存储到了buf中。
 					// TODO 怎么识别参数的数据类型？在函数内部无法识别。
 					int number = atoi(buf);

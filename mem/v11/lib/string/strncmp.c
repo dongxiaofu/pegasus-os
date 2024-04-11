@@ -1,7 +1,10 @@
+#include "stddef.h"
+#include "string.h"
+
 int strncmp(const char *s1, const char *s2, size_t n)
 {
-	unsigned int len1 = strlen(s1);
-	unsigned int len2 = strlen(s2);
+	unsigned int len1 = Strlen(s1);
+	unsigned int len2 = Strlen(s2);
 
 	unsigned int arr[3] = {len1, len2, n};
 	

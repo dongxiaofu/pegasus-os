@@ -48,6 +48,8 @@ route_init()
 {
 	route_add(loop->addr, 0, 0xff000000, RT_LOOPBACK, 0, loop);  // 127.0.0.1
 	route_add(netdev->addr, 0, 0xffffff00, RT_HOST, 0, netdev);	 // 10.0.1.4
+	// TODO 这是我随便设置的IP地址。
+	char *tapaddr = "127.0.0.1";
 	route_add(0, ip_parse(tapaddr), 0, RT_GATEWAY, 0, netdev);   // 默认的网关
 }
 
@@ -77,6 +79,6 @@ free_routes()
 	list_for_each_safe(item, tmp, &routes) {
 		rt = list_entry(item, struct rtentry, list);
 		list_del(item);
-		free(rt);
+		sys_free(rt);
 	}
 }

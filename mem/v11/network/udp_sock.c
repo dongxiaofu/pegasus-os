@@ -2,11 +2,11 @@
 #include "utils.h"
 #include "ip.h"
 #include "udp.h"
-#include <sys/types.h>
+#include "inet.h"
 
 static int udp_sock_amount = 0;
 static LIST_HEAD(udp_socks);
-static pthread_rwlock_t slock = PTHREAD_RWLOCK_INITIALIZER;
+//static pthread_rwlock_t slock = PTHREAD_RWLOCK_INITIALIZER;
 
 void udp_free_sock(struct sock *sk);
 
@@ -113,7 +113,7 @@ udp_sock_init(struct sock *sk)
  *	udp_recvfrom 用于捕获saddr地址传递过来的数据.
 \**/
 int
-udp_recvfrom(struct sock *sk, void *buf, const uint len, struct sockaddr_in *saddr)
+udp_recvfrom(struct sock *sk, void *buf, const uint32_t len, struct sockaddr_in *saddr)
 {
 	int rlen;
 	struct udp_sock *usk = udp_sk(sk);
@@ -181,7 +181,7 @@ udp_connect(struct sock *sk, const struct sockaddr_in *addr)
 }
 
 int
-udp_write(struct sock *sk, const void *buf, const uint len)
+udp_write(struct sock *sk, const void *buf, const uint32_t len)
 {
 
 	if (len > UDP_MAX_BUFSZ)
@@ -204,7 +204,7 @@ udp_alloc_skb(int size)
 
 
 int 
-udp_sendto(struct sock *sk, const void *buf, const uint size, const struct sockaddr_in *skaddr)
+udp_sendto(struct sock *sk, const void *buf, const uint32_t size, const struct sockaddr_in *skaddr)
 {
 	extern char *stackaddr;
 	int rc = -1;
@@ -229,7 +229,7 @@ udp_sendto(struct sock *sk, const void *buf, const uint size, const struct socka
 }
 
 int
-udp_send(struct sock *sk, const void *buf, const uint len)
+udp_send(struct sock *sk, const void *buf, const uint32_t len)
 {
 	struct sk_buff *skb;
 	struct udphdr *udphd;
@@ -270,13 +270,13 @@ void
 udp_free_sock(struct sock *sk)
 {
 	struct udp_sock *usk = udp_sk(sk);
-	free(usk);
+	sys_free(usk);
 	sk = NULL;
 }
 
 
 int
-udp_read(struct sock *sk, void *buf, const uint len)
+udp_read(struct sock *sk, void *buf, const uint32_t len)
 {
 	/* udp可以读0个字节. */
 	struct udp_sock *usk = udp_sk(sk);

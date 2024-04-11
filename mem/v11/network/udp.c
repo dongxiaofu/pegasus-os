@@ -62,13 +62,13 @@ drop:
  * udp_data_dequeue 取出一个数据报.
 \**/
 int
-udp_data_dequeue(struct udp_sock *usk, void *user_buf, const uint userlen, struct sockaddr_in *saddr)
+udp_data_dequeue(struct udp_sock *usk, void *user_buf, const uint32_t userlen, struct sockaddr_in *saddr)
 {
 	struct sock *sk = &usk->sk;
 	struct udphdr *udphd;
 	struct iphdr *ih;
 	struct sk_buff *skb;
-	uint rlen = 0;
+	uint32_t rlen = 0;
 	/* udp可不是什么流式协议,而且,有一点需要注意,一旦userlen比实际的udp数据包长度要小,
 	  那么多的部分会被丢弃掉. */
 	//pthread_mutex_lock(&sk->receive_queue.lock);

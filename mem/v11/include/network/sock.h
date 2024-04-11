@@ -1,10 +1,11 @@
 #ifndef SOCK_H
 #define SOCK_H
 
+#include "syshead.h"
 #include "socket.h"
 #include "wait.h"
 #include "skbuff.h"
-#include <bits/pthreadtypes.h>
+#include "in.h"
 
 struct sock;
 
@@ -13,10 +14,10 @@ struct net_ops {
 	struct sock* (*alloc_sock)(int protocol);
 	int(*init)(struct sock *sk);
 	int(*connect)(struct sock *sk, const struct sockaddr_in *addr);
-	int(*send_buf)(struct sock *sk, const void *buf, const uint len);  
-	int(*sendto)(struct sock *sk, const void *buf, const uint len,const struct sockaddr_in* saddr);
-	int(*recv_buf)(struct sock *sk, void *buf, const uint len);
-	int(*recvfrom)(struct sock *sk, void *buf, const uint len, struct sockaddr_in *saddr);
+	int(*send_buf)(struct sock *sk, const void *buf, const uint32_t len);  
+	int(*sendto)(struct sock *sk, const void *buf, const uint32_t len,const struct sockaddr_in* saddr);
+	int(*recv_buf)(struct sock *sk, void *buf, const uint32_t len);
+	int(*recvfrom)(struct sock *sk, void *buf, const uint32_t len, struct sockaddr_in *saddr);
 	int(*bind)(struct sock *, struct sockaddr_in *);
 	int(*recv_notify)(struct sock *sk);
 	int(*close)(struct sock *sk);			
@@ -34,7 +35,6 @@ struct sock {
 	struct wait_lock recv_wait;
 	struct sk_buff_head receive_queue;	/* 接收队列  */
 	struct sk_buff_head write_queue;	/* 发送队列  */
- 	pthread_mutex_t lock;				/* 多线程下需要加锁 */
 	int protocol;						/* 协议 */
 	int state;							/* 记录下sock当前所在状态 */
 	int err;		

@@ -3,7 +3,7 @@
 #include "list.h"
 
 struct sk_buff *
-alloc_skb(uint size)
+alloc_skb(uint32_t size)
 {
 	struct sk_buff *skb = sys_malloc(sizeof(struct sk_buff));
 	Memset(skb, 0, sizeof(struct sk_buff));
@@ -22,8 +22,8 @@ free_skb(struct sk_buff *skb)
 {
 	return;
 	if (skb->refcnt < 1) {
-		free(skb->head);
-		free(skb);
+		sys_free(skb->head);
+		sys_free(skb);
 	}
 }
 
@@ -31,14 +31,14 @@ free_skb(struct sk_buff *skb)
  * skb_reserve丢弃掉前len个数据,或者说是保留前面长度为len的数据.
 \**/
 void *
-skb_reserve(struct sk_buff *skb, uint len)
+skb_reserve(struct sk_buff *skb, uint32_t len)
 {
 	skb->data += len;
 	return skb->data;
 }
 
 uint8_t *
-skb_push(struct sk_buff *skb, uint len)
+skb_push(struct sk_buff *skb, uint32_t len)
 {
 	skb->data -= len;  /* 这种数据填入的方式很有意思 */
 	skb->len += len;

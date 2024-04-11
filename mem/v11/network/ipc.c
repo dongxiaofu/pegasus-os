@@ -1,13 +1,15 @@
 #include "syshead.h"
+#include "un.h"
+#include "in.h"
 #include "utils.h"
 #include "ipc.h"
 #include "socket.h"
 #include "udp.h"
+#include "stdlib.h"
 
 #define IPC_BUFLEN 4096
 
 static LIST_HEAD(connections);	/* connections是由struct ipc_thread构成的链 */
-static pthread_rwlock_t lock = PTHREAD_RWLOCK_INITIALIZER;
 static int conn_count = 0;
 
 static inline void
@@ -56,7 +58,7 @@ ipc_free_thread(int sock)
 			conn_count--;
 			//ipc_dbg("IPC socket deleted", th);
 			close(th->sock);
-			free(th);
+			sys_free(th);
 			break;
 		}
 	}
@@ -385,7 +387,7 @@ ipc_close(int sockfd, struct ipc_msg *msg)
 /**\
  * demux_ipc_socket_call 更多的是实现消息的分发.
 \**/
-static int
+int
 demux_ipc_socket_call(int sockfd, char *cmdbuf, int blen)
 {
 	struct ipc_msg *msg = (struct ipc_msg *)cmdbuf;
@@ -416,90 +418,4 @@ demux_ipc_socket_call(int sockfd, char *cmdbuf, int blen)
 		break;
 	}
 	return 0;
-}
-
-// TODO 不要这个函数了。等功能稳定后，删除它。
-void *
-socket_ipc_open(void *args) {
-	int blen = IPC_BUFLEN;
-	char buf[IPC_BUFLEN];
-	int sockfd = *(int *)args;
-	int rc = -1;
-
-	while ((rc = read(sockfd, buf, blen)) > 0) {
-		rc = demux_ipc_socket_call(sockfd, buf, blen);	/* 分发 */
-
-		if (rc == -1) {
-			Printf("Error on demuxing IPC socket call\n");
-			close(sockfd);
-			return NULL;
-		}
-	}
-	ipc_free_thread(sockfd);
-
-	if (rc == -1)
-		perror("socket ipc read");
-
-	return NULL;
-}
-
-/**\
- * start_ipc_listener用于监听来自别的应用发送来的函数调用.
-\**/
-void *
-start_ipc_listener()
-{
-	int fd, rc, datasock;
-	struct sockaddr_un un;
-	char *sockname = "/tmp/lvlip.socket";
-
-	unlink(sockname);
-
-	if (strnlen(sockname, sizeof(un.sun_path)) == sizeof(un.sun_path)) {
-		/* 路径过长 */
-		print_err("Path for UNIX socket is too long\n");
-		exit(-1);
-	}
-
-	if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
-		perror("IPC listener UNIX socket");
-		exit(EXIT_FAILURE);
-	}
-
-	Memset(&un, 0, sizeof(struct sockaddr_un));
-	un.sun_family = AF_UNIX;
-
-	strncpy(un.sun_path, sockname, sizeof(un.sun_path) - 1);
-
-	rc = bind(fd, (const struct sockaddr *)&un, sizeof(struct sockaddr_un));
-
-	if (rc == -1) {
-		perror("IPC bind");
-		exit(EXIT_FAILURE);
-	}
-
-	rc = listen(fd, 20);
-	
-	if (rc == -1) {
-		perror("IPC listen");
-		exit(EXIT_FAILURE);
-	}
-
-	for (;;) {
-		datasock = accept(fd, NULL, NULL);
-		if (datasock == -1) {
-			perror("IPC accept");
-			exit(EXIT_FAILURE);
-		}
-
-		struct ipc_thread *th = ipc_alloc_thread(datasock);
-
-		if (pthread_create(&th->id, NULL, &socket_ipc_open, &datasock) != 0) {
-			Printf("Error on socket thread creation\n");
-			exit(1);
-		}
-	}
-	close(fd);
-	unlink(sockname);
-	return NULL;
 }

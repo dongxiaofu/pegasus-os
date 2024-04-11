@@ -4,7 +4,7 @@
 #define BUFLEN			 1600
 #define MAX_ADDR_LEN	 32  
 
-#include <inttypes.h>
+#include "stdint.h" 
 
 #define netdev_dbg(fmt, ...)					\
 do {											\

@@ -1,11 +1,10 @@
-#include "syshead.h"
-#include "inet.h"
-#include "socket.h"
 #include "sock.h"
-#include "tcp.h"
+#include "inet.h"
+#include "cg.h"
+//#include "tcp.h"
 #include "wait.h"
 #include "netdev.h"
-#include "udp.h"
+//#include "udp.h"
 
 //
 // inet 更多指的是tcp socket.
@@ -16,8 +15,11 @@ extern struct net_ops udp_ops;
 
 static int INET_OPS = 2;
 
+struct net_family;
+
 struct net_family inet = {
 	.create = inet_create,
+	// inet_create,
 };
 
 static struct sock_ops sock_ops = {
@@ -134,7 +136,7 @@ inet_free(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
 	sk_free(sk);
-	free(sock->sk);
+	sys_free(sock->sk);
 	return 0;
 }
 
@@ -230,5 +232,6 @@ inet_recvfrom(struct socket *sock, void *buf, size_t len, struct sockaddr_in *sa
 {
 	struct sock *sk = sock->sk;
 
-	return sk->ops->recvfrom(sk, buf, len, saddr);
+	return 0;
+//	return sk->ops->recvfrom(sk, buf, len, saddr);
 }

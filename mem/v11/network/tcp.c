@@ -92,14 +92,15 @@ tcp_generate_port()
 {
 	// todo: 更好的办法来设置port
 	static int port = 40000;
-	return ++port + (timer_get_tick() % 10000);
+	return ++port + (sys_get_ticks() % 10000);
 }
 
 int
 tcp_generate_isn()
 {
+	return 2000;
 	// todo: 更好的方法来产生isn
-	return (int)time(NULL) *rand();
+	// return (int)time(NULL) *rand();
 }
 
 
@@ -118,17 +119,17 @@ tcp_clear_timers(struct sock *sk)
 {
 	struct tcp_sock *tsk = tcp_sk(sk);
 	//pthread_mutex_lock(&sk->write_queue.lock);
-	tcp_stop_retransmission_timer(tsk);
-	tcp_stop_delack_timer(tsk);
-	//pthread_mutex_unlock(&sk->write_queue.lock);
-	timer_cancel(tsk->keepalive);
+//	tcp_stop_retransmission_timer(tsk);
+//	tcp_stop_delack_timer(tsk);
+//	//pthread_mutex_unlock(&sk->write_queue.lock);
+//	timer_cancel(tsk->keepalive);
 }
 
 void 
 tcp_stop_retransmission_timer(struct tcp_sock *tsk)
 {
 	if (tsk) {
-		timer_cancel(tsk->retransmit);
+		// timer_cancel(tsk->retransmit);
 		tsk->retransmit = NULL;
 	}
 }
@@ -137,7 +138,7 @@ void
 tcp_release_retransmission_timer(struct tcp_sock *tsk)
 {
 	if (tsk) {
-		timer_release(tsk->retransmit);
+		// timer_release(tsk->retransmit);
 		tsk->retransmit = NULL;
 	}
 }
@@ -145,14 +146,14 @@ tcp_release_retransmission_timer(struct tcp_sock *tsk)
 void
 tcp_stop_delack_timer(struct tcp_sock *tsk)
 {
-	timer_cancel(tsk->delack);
+	// timer_cancel(tsk->delack);
 	tsk->delack = NULL;
 }
 
 void
 tcp_release_delack_timer(struct tcp_sock *tsk)
 {
-	timer_release(tsk->delack);
+	// timer_release(tsk->delack);
 	tsk->delack = NULL;
 }
 
@@ -177,7 +178,7 @@ tcp_linger(uint32_t ts, void *arg)
 {
 	struct sock *sk = (struct sock *)arg;
 	struct tcp_sock *tsk = tcp_sk(sk);
-	timer_release(tsk->linger);		/* 释放定时器 */
+	// timer_release(tsk->linger);		/* 释放定时器 */
 	tsk->linger = NULL;
 	tcp_done(sk);		/* 彻底结束这个连接 */
 }
@@ -188,8 +189,8 @@ tcp_enter_time_wait(struct sock *sk)
 	/* 进入TIME_WAIT状态 */
 	struct tcp_sock *tsk = tcp_sk(sk);
 	tcp_set_state(sk, TCP_TIME_WAIT);
-	tcp_clear_timers(sk);
-	timer_cancel(tsk->linger);
-	tsk->linger = timer_add(3000, &tcp_linger, sk);
+	// tcp_clear_timers(sk);
+	// timer_cancel(tsk->linger);
+	// tsk->linger = timer_add(3000, &tcp_linger, sk);
 }
 

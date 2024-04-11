@@ -1122,8 +1122,8 @@ void Printf(char *fmt, ...)
 int sprintf(char *str, const char *format, ...)
 {
     // unsigned int *var_list = (unsigned int *)((unsigned int *)&fmt + 1);
-    char *var_list = (char *)((char *)&fmt + 4);
-    int len = vsprintf(buf, fmt, var_list);
+    char *var_list = (char *)((char *)&format + 4);
+    int len = vsprintf(str, format, var_list);
 
     return len;
 }
@@ -1823,7 +1823,7 @@ void inform_int(int task_nr)
     }
 }
 
-int strcmp(const char *s1, const char *s2)
+int deprecate_strcmp(const char *s1, const char *s2)
 {
     if (s1 == 0 || s2 == 0)
     {

@@ -199,6 +199,8 @@ void TaskHD();
 extern void task_fs();
 extern void task_network();
 extern void task_netdev_rx();
+//void task_network();
+//void task_netdev_rx();
 // 内存管理
 void TaskMM();
 // INIT进程

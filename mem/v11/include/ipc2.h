@@ -3,7 +3,9 @@
 
 #include "syshead.h"
 #include "list.h"
-
+#include "types.h"
+#include "in.h"
+#include "stdint.h"
 
 #define DEBUG_IPC
 #ifdef DEBUG_IPC
@@ -31,8 +33,6 @@
 struct ipc_thread {
     struct list_head list;
     int sock;
-    //pthread_t id;
-    int id;
 };
 
 struct ipc_msg {
@@ -107,5 +107,37 @@ struct ipc_read {
 struct ipc_close {
     int sockfd;
 } __attribute__((packed));
+
+static int
+ipc_read(int sockfd, struct ipc_msg *msg);
+
+static int
+ipc_sendto(int sockfd, struct ipc_msg *msg);
+
+static int
+ipc_recvfrom(int sockfd, struct ipc_msg *msg);
+
+static int
+ipc_connect(int sockfd, struct ipc_msg *msg);
+
+static int
+ipc_write(int sockfd, struct ipc_msg *msg);
+
+static int
+ipc_listen(int sockfd, struct ipc_msg *msg);
+
+static int
+ipc_bind(int sockfd, struct ipc_msg *msg);
+
+static int
+ipc_accept(int sockfd, struct ipc_msg *msg);
+
+static int
+ipc_socket(int sockfd, struct ipc_msg *msg);
+
+int 
+ipc_close(int sockfd, struct ipc_msg *msg);
+
+static int demux_ipc_socket_call(int sockfd, char *cmdbuf, int blen);
 
 #endif

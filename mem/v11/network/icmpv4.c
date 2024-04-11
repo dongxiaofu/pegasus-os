@@ -64,7 +64,7 @@ icmpv4_timestamp(struct sk_buff *skb)
 	struct iphdr *iphdr = ip_hdr(skb);  // 获得ip头部
 	struct icmp_v4_timestamp *icmp;
 	struct sock sk;
-	struct timeval tv;
+	// struct timeval tv;
 	uint32_t ts_recv;
 	Memset(&sk, 0, sizeof(struct sock));
 	uint16_t icmp_len = iphdr->len - (iphdr->ihl << 2);
@@ -75,9 +75,9 @@ icmpv4_timestamp(struct sk_buff *skb)
 	
 	icmp->type = ICMP_V4_TSTAMP_REPLY;
 
-	gettimeofday(&tv, NULL);
-	ts_recv = (tv.tv_sec % (24 * 60 * 60) * 1000 + tv.tv_usec / 1000);
-	icmp->rtime = icmp->ttime = htonl(ts_recv);
+//	gettimeofday(&tv, NULL);
+//	ts_recv = (tv.tv_sec % (24 * 60 * 60) * 1000 + tv.tv_usec / 1000);
+//	icmp->rtime = icmp->ttime = htonl(ts_recv);
 
 	icmp->csum = 0;
 	icmp->csum = checksum(icmp, icmp_len, 0);

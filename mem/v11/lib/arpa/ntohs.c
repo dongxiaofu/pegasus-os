@@ -1,3 +1,5 @@
+#include "inet.h"
+
 uint16_t ntohs(uint16_t netshort)
 {
 	unsigned char low_byte = netshort & 0xFF;

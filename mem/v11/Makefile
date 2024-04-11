@@ -3,7 +3,10 @@ CC	=	gcc
 LD	=	ld
 ASKFLAGS=	-I include/ -f elf
 CFLAGS	=	-I include/ -I include/sys -I include/mem \
-			-g -c -fno-builtin -m32	
+			-I include/arpa \
+			-I include/netinet \
+			-I include/network \
+			-g -c -fno-builtin -m32
 LDFLAGS		:= -Ttext 0xc0100000 -Map krnl.map -m elf_i386
 
 BIN	:=	kernel.bin
@@ -14,8 +17,9 @@ HD_FILES := $(wildcard hd/*.c)
 FS_FILES := $(wildcard fs/*)
 MM_FILES := $(wildcard mm/*)
 MEM_FILES := $(wildcard mem/*)
-LIB_FILES := $(wildcard lib/*)
+LIB_FILES := $(wildcard lib/*.c lib/**/*)
 ALL_FILES := $(SRCS) $(NETWORK_FILES) $(HD_FILES) $(FS_FILES) $(MM_FILES) $(MEM_FILES) $(LIB_FILES)
+#ALL_FILES := $(SRCS) $(HD_FILES) $(FS_FILES) $(MM_FILES) $(MEM_FILES) $(LIB_FILES)
 
 OBJS	:= $(ALL_FILES:.c=.o)   # 将所有的.c文件名替换为.o
 #LIB_OBJS	:=	$(LIB_FILES:.c=.o)

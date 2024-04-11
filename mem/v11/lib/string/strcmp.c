@@ -1,7 +1,10 @@
+#include "stddef.h"
+#include "string.h"
+
 int strcmp(const char *s1, const char *s2)
 {
-	unsigned int len1 = strlen(s1);
-	unsigned int len2 = strlen(s2);
+	unsigned int len1 = Strlen(s1);
+	unsigned int len2 = Strlen(s2);
 
 	unsigned int min = len1 > len2 ? len2 : len1;
 

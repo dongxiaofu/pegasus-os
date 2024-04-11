@@ -598,7 +598,7 @@ void net_handler()
 		char *buf = (char *)sys_malloc(size); 
 		Memset(buf, 0, size);
 		SetPageStart(k * 256);
-		unsigned int len = NICtoPC(buf);
+		unsigned int len = NICtoPC(buf, size);
 //		asm ("xchgw %bx, %bx");
 		// 把从NIC中读取的数据存储到单链表中。
 		unsigned int nodeSize = sizeof(struct nic_page_buf_node);

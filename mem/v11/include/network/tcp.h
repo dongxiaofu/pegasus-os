@@ -208,8 +208,8 @@ int tcp_generate_isn();
 int tcp_sock_init(struct sock *sk);
 int tcp_init();
 int tcp_v4_connect(struct sock *sk, const struct sockaddr_in *addr);
-int tcp_write(struct sock *sk, const void *buf, const uint len);
-int tcp_read(struct sock *sk, void *buf, const uint len);
+int tcp_write(struct sock *sk, const void *buf, const uint32_t len);
+int tcp_read(struct sock *sk, void *buf, const uint32_t len);
 int tcp_recv_notify(struct sock *sk);
 int tcp_close(struct sock *sk);
 int tcp_free_sock(struct sock *sk);
@@ -257,6 +257,6 @@ int tcp_send_reset(struct tcp_sock *tsk);
 
 /*tcp_data.c*/
 int tcp_data_queue(struct tcp_sock *tsk, struct tcphdr *th, struct sk_buff *skb);
-int tcp_data_dequeue(struct tcp_sock *tsk, void *user_buf, const uint userlen);
+int tcp_data_dequeue(struct tcp_sock *tsk, void *user_buf, const uint32_t userlen);
 
 #endif // !TCP_H

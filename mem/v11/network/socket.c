@@ -1,15 +1,38 @@
+#include "stdio.h"
+#include "string.h"
+#include "mem.h"
+#include "mm.h"
+#include "const.h"
+#include "type.h"
+#include "protect.h"
+//#include "fs.h"
+#include "process.h"
+#include "keyboard.h"
+#include "console.h"
+#include "proto.h"
+// global.h需要上面的头文件。我不知道它需要哪个，索性全部都复制过来了。
+#include "global.h"
+#include "network/socket.h"
+#include "inet.h"
 #include "syshead.h"
 #include "utils.h"
-#include "socket.h"
-#include "inet.h"
+//#include "network/socket.h"
+#include "list.h"
 #include "wait.h"
-#include "udp.h"
+//#include "udp.h"
 
 static LIST_HEAD(sockets);
 static int socket_count = 0;
-static pthread_rwlock_t slock = PTHREAD_RWLOCK_INITIALIZER;
 
-static inline void
+void test(struct test *t)
+{
+	int a = 5;
+
+	int c = a + 8;
+}
+
+//static inline void
+static void
 socket_sockets_enqueue(struct socket *sk)
 {
 	//pthread_rwlock_wrlock(&slock);
@@ -89,7 +112,7 @@ free_socket(struct socket *sock)
 	/* 需要注意的是,这里并不删除struct socket中的struct sock,因为这个socket
 	对应的sock可能还需要处理一些事情. */
 	if (sock->sk) sock->sk->sock = NULL;
-	free(sock);
+	sys_free(sock);
 	sock == NULL;
 
 	//pthread_rwlock_unlock(&slock);
@@ -189,7 +212,7 @@ _connect(pid_t pid, int sockfd, const struct sockaddr_in *addr)
  * write 向pid进程连接的第sockfd号文件写入数据.
 \**/
 int 
-_write(pid_t pid, int sockfd, const void *buf, const uint count)
+_write(pid_t pid, int sockfd, const void *buf, const uint32_t count)
 {
 	struct socket *sock;
 	if ((sock = get_socket(pid, sockfd)) == NULL) {
@@ -201,7 +224,7 @@ _write(pid_t pid, int sockfd, const void *buf, const uint count)
 }
 
 int
-_read(pid_t pid, int sockfd, void* buf, const uint count)
+_read(pid_t pid, int sockfd, void* buf, const uint32_t count)
 {
 	struct socket *sock;
 	if ((sock = get_socket(pid, sockfd)) == NULL) {
@@ -221,7 +244,8 @@ _recvfrom(pid_t pid, int sockfd, void *buf, int count, struct sockaddr_in *saddr
 			sockfd, pid);
 		return -1;
 	}
-	return sock->ops->recvfrom(sock, buf, count, saddr);
+	return 0;
+//	return sock->ops->recvfrom(sock, buf, count, saddr);
 }
 
 int
@@ -289,7 +313,7 @@ int
 
 	err = sock->ops->accept(sock, newsock, skaddr);
 	if (err < 0) {
-		free(newsock);
+		sys_free(newsock);
 		newsock = NULL;
 	}
 	else {

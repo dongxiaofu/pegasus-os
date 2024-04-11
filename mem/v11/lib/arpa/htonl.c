@@ -1,3 +1,5 @@
+#include "inet.h"
+
 uint32_t htonl(uint32_t hostlong)
 {
 	unsigned char bytes[4] = {0};

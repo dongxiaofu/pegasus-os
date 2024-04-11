@@ -1,14 +1,11 @@
-#ifndef SOCKET_H
-#define SOCKET_H
+#ifndef _PEGASUS_OS_SOCKET_H
+#define _PEGASUS_OS_SOCKET_H 
+
+#include "syshead.h"
 #include "sock.h"
-#include "socket.h"
+#include "in.h"
 #include "list.h"
 #include "wait.h"
-#include <inttypes.h>
-#include <bits/types.h>
-#include <unistd.h>
-#include <sys/types.h>
-
 
 #ifdef DEBUG_SOCKET
 #define socket_dbg(sock)																			\
@@ -26,7 +23,13 @@
 #endif
 
 
-struct socket;
+//
+struct test{
+	int a;
+};
+
+struct sock_ops;
+struct net_ops;
 
 struct sock_type {
 	struct sock_ops *sock_ops;	/* sock_ops记录一套对socket的操纵方法 */
@@ -35,6 +38,7 @@ struct sock_type {
 	int protocol;
 };
 
+struct socket;
 struct sock_ops {
 	int (*connect)(struct socket *sock, const struct sockaddr_in *addr);
 	int(*write) (struct socket *sock, const void *buf, int len);
@@ -44,15 +48,18 @@ struct sock_ops {
 	int(*bind)(struct socket *sock, struct sockaddr_in *);	/* 绑定到某个地址 */
 	int(*close)(struct socket *sock);
 	int(*free)(struct socket *sock);
-	int(*sendto)(struct socket *sock, const void *buf, size_t len,
-		const struct sockaddr_in *dest_addr);
-	int(*recvfrom)(struct socket *sock, void *buf, size_t len, 
-		struct sockaddr_in *src_addr);
+	int(*sendto)(struct socket *sock, const void *buf, size_t len,const struct sockaddr_in *dest_addr);
+	int(*recvfrom)(struct socket *sock, void *buf, size_t len, struct sockaddr_in *src_addr);
+	void (*t)();
 };
 
+struct socket;
 struct net_family {
 	int(*create)(struct socket *sock, int protocol);
+//	int(*create)(void *sock, int protocol);
 };
+
+struct sock;
 
 /* socket更加贴近底层,它记录了使用该协议栈的进程id,记录了这个连接的一些属性. 
   而sock更多地记录了实际的连接. sock是socket的一部分. */
@@ -66,14 +73,13 @@ struct socket {
 	struct sock_ops *ops;			/* 记录一套对socket操纵的方法 */
 };
 
-
 void * socket_ipc_open(void *args);
 
 int _socket(pid_t pid, int domain, int type, int protocol);
 int _listen(pid_t pid, int sockfd, int backlog);
 int _connect(pid_t pid, int sockfd, const struct sockaddr_in *addr);
-int _write(pid_t pid, int sockfd, const void *buf, const uint count);
-int _read(pid_t pid, int sockfd, void* buf, const uint count);
+int _write(pid_t pid, int sockfd, const void *buf, const uint32_t count);
+int _read(pid_t pid, int sockfd, void* buf, const uint32_t count);
 int _bind(pid_t pid, int sockfd, struct sockaddr_in *skaddr);
 int _close(pid_t pid, int sockfd);
 int _accept(pid_t pid, int sockfd, struct sockaddr_in *skaddr);

@@ -1,3 +1,6 @@
+#include "inet.h"
+#include "string.h"
+
 unsigned char isValidIPv4(const char *address) 
 {
 	int num, dots = 0;
@@ -58,7 +61,7 @@ int inet_pton(int af, const char *src, void *dst)
 	int result = 1;
 
 	// 检查src是不是合法的网络地址。
-	IF(isValidIPv4(src) == 0){
+	if(isValidIPv4(src) == 0){
 		return 0;
 	}
 
@@ -68,7 +71,7 @@ int inet_pton(int af, const char *src, void *dst)
 
 	uint32_t network_value = 0;
 
-	unsigned int len = strlen(src);
+	unsigned int len = Strlen(src);
 
 	if(af == AF_INET){
 		char *src_copy = (char *)sys_malloc(len + 1);
