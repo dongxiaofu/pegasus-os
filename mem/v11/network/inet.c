@@ -1,6 +1,6 @@
 #include "sock.h"
-#include "inet.h"
-#include "cg.h"
+#include "internet.h"
+//#include "cg.h"
 //#include "tcp.h"
 #include "wait.h"
 #include "netdev.h"
