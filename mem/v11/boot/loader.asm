@@ -203,170 +203,6 @@ LABEL_START:
 	pop di
 	pop ebx
 	pop eax
-	
-	;;xchg bx, bx
-	mov ax, BaseOfKernel
-	mov es, ax
-	;mov ds, ax		; lodsb、lodsw，把[ds:si]中的数据加载到ax中
-	mov ax, BaseOfLoader
-	mov ds, ax
-
-	; 读取根目录扇区
-	mov  ah, 00h
-	mov  dl, 0
-	int 13h
-	mov ax,	FirstSectorOfRootDirectory
-	mov cl, 1
-	
-	mov bx, OffSetOfLoader
-	call ReadSector
-	mov cx, 4
-	mov bx, (80 * 18 + 40) * 2
-	mov di, OffSetOfLoader
-	; mov si, LoaderBinFileName
-SEARCH_FILE_IN_ROOT_DIRECTORY:
-	cmp cx, 0
-	jz FILE_NOT_FOUND
-	push cx
-	;mov ax, cs
-	;mov es, ax
-	;mov ds, ax	
-	; mov si, bx
-	; mov di, BaseOfKernel
-	mov si, LoaderBinFileName
-	;mov cx,	[LoaderBinFileNameLength]
-	mov cx, LoaderBinFileNameLength
-	mov dx, 0
-	;mov bx, (80 * 18 + 40) * 2
-	;mov ex, (80 * 25 + 40) * 2
-COMPARE_FILENAME:
-	;cmp [es:si], [ds:di]
-	;cmp [si], [di]
-	; 把[ds:si]指向的数据装载到ax/eax/rax中。
-	; 在本程序中，es段的数据来源于前面读取的【根目录扇区】。
-	; 在本程序中，ds段的数据来源于第74、75行，把ds设置为BaseOfLoader。
-	; 所有疑团全部解开，mov si, LoaderBinFileName，[ds:si]指向 "KERNEL  BIN"。
-	; cmp al, byte [es:di] 逐字节比较"KERNEL  BIN"和根目录扇区中读取到的文件名。
-	; 太惨重的教训！花了两天，才衔接上十多天前写的汇编代码。
-	; 一定要写更详细的注释；尽量一气呵成完成汇编代码写的功能。
-	lodsb
-	cmp al, byte [es:di]
-	jnz FILENAME_DIFFIERENT
-	dec cx
-
-	inc di
-	inc dx
-	
-	cmp dx, LoaderBinFileNameLength
-	jz FILE_FOUND
-	jmp COMPARE_FILENAME		
-FILENAME_DIFFIERENT:
-	mov al, 'Y'
-        mov ah, 0Ch
-        mov [gs:bx], ax
-	add bx, 160
-
-	pop cx		; 在循环中，cx会自动减少吗？
-	cmp cx, 0
-	dec cx
-	jz FILE_NOT_FOUND
-	;;;;;;;;xhcg bx, bx
-	and di, 0xFFE0	; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置
-	add di, 32	; 增加一个根目录项的大小
-	jmp SEARCH_FILE_IN_ROOT_DIRECTORY
-FILE_FOUND:
-	mov al, 'S'
-	mov ah, 0Ah
-	mov [gs:(80 * 23 + 35) *2], ax
-	;;;;;;;xhcg bx, bx
-	; 修改段地址和偏移量后，获取的第一个簇号错了 
-	; 获取文件的第一个簇的簇号
-	and di, 0xFFE0  ; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置; 获取文件的第一个簇的簇号
-	add di, 0x1A
-	mov si, di
-	;;xchg bx, bx
-	mov ax, BaseOfKernel
-	push ds
-	mov ds, ax
-	;;;;;;;xhcg bx, bx
-	lodsw
-	pop ds	
-	push ax
-	;;;;;;;xhcg bx, bx	
-	; call GetFATEntry
-	mov bx, OffSetOfLoader
-	; 获取到文件的第一个簇号后，开始读取文件
-READ_FILE:
-	;;;;;;;xhcg bx, bx
-	push bx
-	; push ax
-	; 簇号就是FAT项的编号，把FAT项的编号换算成字节数
-	;;push bx
-	;mov dx, 0
-	;mov bx, 3
-	;mul bx
-	;mov bx, 2
-	;div bx			; 商在ax中，余数在dx中
-	;mov [FATEntryIsInt], dx
-	;
-	;; 用字节数计算出FAT项在软盘中的扇区号
-	;mov dx, 0
-	;mov bx, 512
-	;div bx			; 商在ax中，余数在dx中。商是扇区偏移量，余数是在扇区内的字节偏移量
-	
-	; 簇号就是FAT项的编号，同时也是文件块在数据区的扇区号。
-	; 用簇号计算出目标扇区在软盘中的的扇区号。
-	add ax, 19
-	add ax, 14
-	sub ax, 2
-		
-	; 读取一个扇区的数据 start
-	; add ax, SectorNumberOfFAT1
-	mov cl, 1
-	pop bx	
-	call ReadSector
-	;;;;;xhcg bx, bx
-        add bx, 512
-	jc	.1
-	jmp	.2
-	; 读取一个扇区的数据 end
-.1:
-	;;;;xhcg bx, bx
-	push ax
-	mov ax, es
-	; add ax, 0100h
-	add ax, 1000h
-	mov es, ax
-	pop ax
-.2:
-	pop ax
-	push bx
-	;;;;xhcg bx, bx
-	call GetFATEntry
-	;;;;;;;xchg	bx,	bx
-	pop bx
-	push ax
-	cmp ax, 0xFF8
-	; 注意了，ax >= 0xFF8 时跳转，使用jc 而不是jz。昨天，一定是在这里弄错了，导致浪费几个小时调试。
-	;jz READ_FILE_OVER	
-	;jc READ_FILE_OVER	
-	;add bx, 2
-	jnb READ_FILE_OVER	
-	
-	;mov al, 'A'
-	;inc al
-	;mov ah, 0Ah
-	;mov [gs:(80 * 23 + 36) *2], ax	
-	;;;;;;;;xhcg bx, bx	
-	jmp READ_FILE
-	
-FILE_NOT_FOUND:
-        mov al, 'N'
-        mov ah, 0Ah
-        mov [gs:(80 * 23 + 36) *2], ax
-	jmp OVER
-
-READ_FILE_OVER:
 
 	;分页
 	;call SetupPage
@@ -516,29 +352,29 @@ GetFATEntry:
 	; mul cx
 	; mov cx, 2
 	;div cx		; 商在al中，余数在ah中	; 
-	push bx
-	push ax
+	push ebx
+	push eax
 	MOV ah, 00h
 	mov dl, 0
 	int 13h
 	
-	pop ax	
-	mov dx, 0
-	mov bx, 3
-	mul bx
-	mov bx, 2
-	div bx
+	pop eax	
+	mov edx, 0
+	mov ebx, 3
+	mul ebx
+	mov ebx, 2
+	div ebx
 	; 用FAT项的编号计算出这个FAT项的字节偏移量 end
-	mov [FATEntryIsInt], dx
+	mov [BaseOfKernel + FATEntryIsInt], edx
 	; 用字节偏移量计算出扇区偏移量 start
-	mov dx, 0
+	mov edx, 0
 	; and ax, 0000000011111111b  ; 不知道这句的意图是啥，忘记得太快了！
 	; mov dword ax, al ; 错误用法
 	; mov cx, [BytesOfSector]
-	mov cx, 512
-	div cx
+	mov ecx, 512
+	div ecx
 	; push dx
-	add ax, SectorNumberOfFAT1	; ax 是在FAT1区域的偏移。要把它转化为在软盘中的扇区号，需加上FAT1对软盘的偏移量。
+	add eax, SectorNumberOfFAT1	; ax 是在FAT1区域的偏移。要把它转化为在软盘中的扇区号，需加上FAT1对软盘的偏移量。
 	; mov ah, 00h
 
 	; mov dl, 0
@@ -547,46 +383,47 @@ GetFATEntry:
 	; mov dword ax, al
 	; add ax,1
 	mov cl, 2 
-	mov bx, 0
+	mov ebx, 0
 	push es
-	push dx
-	push ax
-	mov ax, BaseOfFATEntry
-	mov es, ax
-	pop ax
+	push edx
+	push eax
+	xchg bx, bx
+	mov eax, BaseOfFATEntry
+	mov es, eax
+	pop eax
 	; 用扇区偏移量计算出在某柱面某磁道的扇区偏移量，可以直接调用ReadSector
 	call ReadSector
 	;pop es
 	;;;;;;;;;xhcg bx, bx
 	;pop ax
 	;mov ax, [es:bx]
-	pop dx
-	add bx, dx
-	mov ax, [es:bx]
+	pop edx
+	add ebx, edx
+	mov eax, [es:ebx]
 	pop es
 	; 根据FAT项偏移量是否占用整数个字节来计算FAT项的值
-	cmp byte [FATEntryIsInt], 0
+	cmp byte [BaseOfKernel + FATEntryIsInt], 0
 	jz FATEntry_Is_Int
-	shr ax, 4	
+	shr eax, 4	
 FATEntry_Is_Int:
-	and ax, 0x0FFF
-	pop bx
+	and eax, 0x0FFF
+	pop ebx
 	ret
 
 ; 读取扇区
 ReadSector:
-	push ax
-	push bp
-	push bx
-	mov bp, sp
-	sub sp, 2
-	mov byte [bp-2], cl
+	push eax
+	push ebp
+	push ebx
+	mov ebp, esp
+	sub esp, 2
+	mov byte [ebp-2], cl
 	; push al	; error: invalid combination of opcode and operands
 	;push cx
 	; mov bx, SectorNumberOfTrack
 	
 	; ax 存储在软盘中的扇区号
-	mov bl, SectorNumberOfTrack	; 一个磁道包含的扇区数
+	mov bl, [BaseOfKernel + SectorNumberOfTrack]	; 一个磁道包含的扇区数
 	div bl	; 商在al中，余数在ah中
 	mov ch, al
 	shr ch, 1	; ch 是柱面号
@@ -597,10 +434,11 @@ ReadSector:
 	mov cl, ah
 	;add cl, 1	; cl 是起始扇区号
 	; pop al		; al 是要读的扇区数量
-	mov al, [bp-2]
-	add sp, 2
+	mov al, [ebp-2]
+	add esp, 2
 	mov ah, 02h	; 读软盘
-	pop bx
+	;int 13h把数据从磁盘/软盘读入es:bx指向的缓冲区。
+	pop ebx
 	
 	;mov bx, BaseOfKernel	; 让es:bx指向BaseOfKernel
 	;mov ax, cs
@@ -610,8 +448,8 @@ ReadSector:
 	;pop cx
 	;;;;;;;;;xhcg bx, bx
 	; pop bx
-	pop bp
-	pop ax
+	pop ebp
+	pop eax
 	ret	
 
 
@@ -648,7 +486,7 @@ ReadSector2:
 ; 3>BaseOfKernel 和 0x30000 之间呢？
 ; 3>0x30000 这个数值，是 Makefile 中编译时设置的：ld -s -Ttext 0x30400  -o kernel.bin  kernel.o -m elf_i386 
 ;BaseOfKernel	equ	0x8000
-BaseOfKernel	equ	0x5000
+BaseOfKernel	equ	0x500000
 ;BaseOfKernel	equ	0x30000
 BaseOfKernel2	equ	0x6000
 BaseOfKernel3	equ	0x0
@@ -687,6 +525,9 @@ LABEL_PM_START:
 	mov al, 'K'
 	mov ah, 0Ah
 	mov [gs:(80 * 19 + 25) * 2], ax
+
+	call LoaderKernelFromFloppy
+
 	;;;xhcg bx, bx	
 	; 跳入16位模式（保护模式)
 	;jmp word SelectFlatX_16:0
@@ -1191,6 +1032,179 @@ OpenPaging:
 	ret
 
 BaseOfKernelPhyAddr	equ	BaseOfKernel * 10h  ; Kernel.BIN 被加载到的位置 ---- 物理地址 中的段基址部分
+
+
+;;;;;;;;;start;;;;;;;;;;;;;;
+LoaderKernelFromFloppy:
+	;;xchg bx, bx
+	mov ax, BaseOfKernel
+	mov es, ax
+	;mov ds, ax		; lodsb、lodsw，把[ds:si]中的数据加载到ax中
+	mov ax, BaseOfLoader
+	mov ds, ax
+
+	; 读取根目录扇区
+	mov  ah, 00h
+	mov  dl, 0
+	int 13h
+	mov ax,	FirstSectorOfRootDirectory
+	mov cl, 1
+	
+	;OffSetOfLoader，这个变量名，起得太差劲了！误导性太强了！
+	;mov bx, OffSetOfLoader
+	mov ebx, BaseOfKernel
+	call ReadSector
+	mov cx, 4
+	mov bx, (80 * 18 + 40) * 2
+	mov edi, BaseOfKernel
+	; mov si, LoaderBinFileName
+SEARCH_FILE_IN_ROOT_DIRECTORY:
+	cmp cx, 0
+	jz FILE_NOT_FOUND
+	push cx
+	;mov ax, cs
+	;mov es, ax
+	;mov ds, ax	
+	; mov si, bx
+	; mov di, BaseOfKernel
+	mov esi, [BaseOfKernel + LoaderBinFileName]
+	;mov cx,	[LoaderBinFileNameLength]
+	mov cx, [BaseOfKernel + LoaderBinFileNameLength]
+	mov dx, 0
+	;mov bx, (80 * 18 + 40) * 2
+	;mov ex, (80 * 25 + 40) * 2
+COMPARE_FILENAME:
+	;cmp [es:si], [ds:di]
+	;cmp [si], [di]
+	; 把[ds:si]指向的数据装载到ax/eax/rax中。
+	; 在本程序中，es段的数据来源于前面读取的【根目录扇区】。
+	; 在本程序中，ds段的数据来源于第74、75行，把ds设置为BaseOfLoader。
+	; 所有疑团全部解开，mov si, LoaderBinFileName，[ds:si]指向 "KERNEL  BIN"。
+	; cmp al, byte [es:di] 逐字节比较"KERNEL  BIN"和根目录扇区中读取到的文件名。
+	; 太惨重的教训！花了两天，才衔接上十多天前写的汇编代码。
+	; 一定要写更详细的注释；尽量一气呵成完成汇编代码写的功能。
+	lodsb
+	cmp al, byte [es:edi]
+	jnz FILENAME_DIFFIERENT
+	dec cx
+
+	inc edi
+	inc edx
+	
+	cmp dx, [BaseOfKernel + LoaderBinFileNameLength]
+	jz FILE_FOUND
+	jmp COMPARE_FILENAME		
+FILENAME_DIFFIERENT:
+	mov al, 'Y'
+    mov ah, 0Ch
+    mov [gs:bx], ax
+	add bx, 160
+
+	pop cx		; 在循环中，cx会自动减少吗？
+	cmp cx, 0
+	dec cx
+	jz FILE_NOT_FOUND
+	;;;;;;;;xhcg bx, bx
+	and edi, 0xFFE0	; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置
+	add edi, 32	; 增加一个根目录项的大小
+	jmp SEARCH_FILE_IN_ROOT_DIRECTORY
+FILE_FOUND:
+	mov al, 'S'
+	mov ah, 0Ah
+	mov [gs:(80 * 23 + 35) *2], ax
+	;;;;;;;xhcg bx, bx
+	; 修改段地址和偏移量后，获取的第一个簇号错了 
+	; 获取文件的第一个簇的簇号
+	and edi, 0xFFE0  ; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置; 获取文件的第一个簇的簇号
+	add edi, 0x1A
+	mov esi, edi
+	;;xchg bx, bx
+	mov ax, BaseOfKernel
+	push ds
+	;mov ds, ax
+	;;;;;;;xhcg bx, bx
+	lodsw
+	pop ds	
+	push ax
+	;;;;;;;xhcg bx, bx	
+	; call GetFATEntry
+	;mov bx, OffSetOfLoader
+	mov ebx, BaseOfKernel
+	; 获取到文件的第一个簇号后，开始读取文件
+READ_FILE:
+	;;;;;;;xhcg bx, bx
+	push ebx
+	; push ax
+	; 簇号就是FAT项的编号，把FAT项的编号换算成字节数
+	;;push bx
+	;mov dx, 0
+	;mov bx, 3
+	;mul bx
+	;mov bx, 2
+	;div bx			; 商在ax中，余数在dx中
+	;mov [FATEntryIsInt], dx
+	;
+	;; 用字节数计算出FAT项在软盘中的扇区号
+	;mov dx, 0
+	;mov bx, 512
+	;div bx			; 商在ax中，余数在dx中。商是扇区偏移量，余数是在扇区内的字节偏移量
+	
+	; 簇号就是FAT项的编号，同时也是文件块在数据区的扇区号。
+	; 用簇号计算出目标扇区在软盘中的的扇区号。
+	add ax, 19
+	add ax, 14
+	sub ax, 2
+		
+	; 读取一个扇区的数据 start
+	; add ax, SectorNumberOfFAT1
+	mov cl, 1
+	pop ebx	
+	call ReadSector
+	;;;;;xhcg bx, bx
+    add ebx, 512
+	jc	.1
+	jmp	.2
+	; 读取一个扇区的数据 end
+.1:
+	;;;;xhcg bx, bx
+	push ax
+	mov ax, es
+	; add ax, 0100h
+	add ax, 1000h
+	mov es, ax
+	pop ax
+.2:
+	pop ax
+	push ebx
+	;;;;xhcg bx, bx
+	call GetFATEntry
+	;;;;;;;xchg	bx,	bx
+	pop ebx
+	push ax
+	cmp ax, 0xFF8
+	; 注意了，ax >= 0xFF8 时跳转，使用jc 而不是jz。昨天，一定是在这里弄错了，导致浪费几个小时调试。
+	;jz READ_FILE_OVER	
+	;jc READ_FILE_OVER	
+	;add bx, 2
+	jnb READ_FILE_OVER	
+	
+	;mov al, 'A'
+	;inc al
+	;mov ah, 0Ah
+	;mov [gs:(80 * 23 + 36) *2], ax	
+	;;;;;;;;xhcg bx, bx	
+	jmp READ_FILE
+	
+FILE_NOT_FOUND:
+    mov al, 'N'
+    mov ah, 0Ah
+    mov [gs:(80 * 23 + 36) *2], ax
+	jmp $
+
+READ_FILE_OVER:
+
+	ret
+;;;;;;;;;;end;;;;;;;;;;;;;;;
 
 [SECTION .s16]
 [BITS 16]
