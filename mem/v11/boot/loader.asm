@@ -174,7 +174,7 @@ CopyKernelTo5MBMemory:
 ;	je	equal
 ;	jne not_equal
 ;not_equal:
-;	xchg bx, bx
+;	;;xchg bx, bx
 ;equal:
 ;	pop ax
 ;	pop bx
@@ -202,10 +202,10 @@ Label_Mov_Kernel:
 
 LABEL_START:
 	; 设置fs
-	;xchg bx, bx
+	;;;xchg bx, bx
 	call OPEN_A20
 	;调试mov中的标识符start
-	;;;xchg bx, bx	
+	;;;;;xchg bx, bx	
 	mov ax, 2
 	mov ax, 2
 	mov ax, 2
@@ -225,7 +225,7 @@ LABEL_START:
 	;调试mov中的标识符end
 	mov	ax,	cs
 	mov	ds,	ax
-	;;;;xchg bx, bx	
+	;;;;;;xchg bx, bx	
 	xor		eax,	eax
 	mov		ax,		cs
 	movzx	eax, ax
@@ -268,7 +268,7 @@ LABEL_START:
 	push ecx
 	push edx		
 	; 设置fs
-	;;xchg bx, bx
+	;;;;xchg bx, bx
 	;call OPEN_A20
 
 	mov di, MemCheckBuf
@@ -296,7 +296,7 @@ LABEL_START:
 	pop ebx
 	pop eax
 	
-	;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	mov ax, BaseOfKernel
 	mov es, ax
 	;mov ds, ax		; lodsb、lodsw，把[ds:si]中的数据加载到ax中
@@ -376,7 +376,7 @@ FILE_FOUND:
 	and di, 0xFFE0  ; 低5位设置为0，其余位数保持原状。回到正在遍历的根目录项的初始位置; 获取文件的第一个簇的簇号
 	add di, 0x1A
 	mov si, di
-	;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	mov ax, BaseOfKernel
 	push ds
 	mov ds, ax
@@ -416,10 +416,10 @@ READ_FILE:
 	; add ax, SectorNumberOfFAT1
 	mov cl, 1
 	pop bx	
-	;xchg bx, bx
+	;;xchg bx, bx
 	call ReadSector
 	call CopyKernelTo5MBMemory
-	;;;;;xhcg bx, bx
+	;;xchg bx, bx
     ;add bx, 512
 	jc	.1
 	jmp	.2
@@ -435,9 +435,9 @@ READ_FILE:
 .2:
 	pop ax
 	push bx
-	;xchg bx, bx
+	;;;xchg bx, bx
 	call GetFATEntry
-	;;;;;;;;;xchg	bx,	bx
+	;;;;;;;;;;;xchg	bx,	bx
 	pop bx
 	push ax
 	cmp ax, 0xFF8
@@ -465,14 +465,14 @@ READ_FILE_OVER:
 	;分页
 	;call SetupPage
 
-	;;;;;;;;xchg	bx, bx
+	;;;;;;;;;;xchg	bx, bx
 	;mov al, 'O'
 	;mov ah, 0Dh
 	;mov [gs:(80 * 23 + 33) * 2], ax
 	; 开启保护模式 start
 	;cli
 	;mov dx, BaseOfLoaderPhyAddr + 0	
-	xchg bx, bx
+	;;xchg bx, bx
 	mov 	dword [GdtPtr + 2], BaseOfLoaderPhyAddr + LABEL_GDT
 	lgdt [GdtPtr]	
 	
@@ -773,7 +773,7 @@ ALIGN	32
 [BITS	32]
 
 LABEL_PM_START:
-	xchg bx, bx
+	;xchg bx, bx
 	mov ax, SelectFlatWR
 	mov ds, ax
 	mov es, ax
@@ -789,10 +789,12 @@ LABEL_PM_START:
 	; 跳入16位模式（保护模式)
 	;jmp word SelectFlatX_16:0
 	;分页
-	;;;;;xchg bx, bx
+	;;;;;;;xchg bx, bx
+	;xchg bx, bx
 	call SetupPage
 	;call SetupUserPage
 	;开启分页
+	;xchg bx, bx
 	call OpenPaging
 	;设置cr3的值
 ;	mov eax, PageDirectoryTablePhysicalAddress
@@ -843,7 +845,7 @@ LABEL_PM_START:
 	add edx, 20
 	loop .DispMem
 	mov eax, [_RamSize]
-	;;;;;;;xchg bx, bx
+	;;;;;;;;;xchg bx, bx
 	pop eax
 	pop ebx
 	pop edi
@@ -852,25 +854,25 @@ LABEL_PM_START:
 	; --------------------获取物理内存容量end--------------------------
 
 
-	xchg bx, bx	
+	;;xchg bx, bx	
 	call Init_8259A
 	call Init8253
 
 	mov esp, 0xc02FFFFF
-	;;xhcg bx, bx
+	;xchg bx, bx
 	call InitKernel
-	;;;;;;xchg bx, bx	
+	;;;;;;;;xchg bx, bx	
 
 	;mov gs, ax
 	mov al, 'J'
 	mov ah, 0Ah
 	mov [gs:(80 * 19 + 20) * 2], ax
 	
-	;;xchg bx, bx
+	;;;;xchg bx, bx
 	;jmp SelectFlatX:0x30400
 	;jmp SelectFlatX:0x1000
 	;jmp SelectFlatX:0xc0001000
-	jmp SelectFlatX:0xc0500000
+	jmp SelectFlatX:0xc0600000
 	jmp $
 	jmp $
 	jmp $
@@ -962,7 +964,6 @@ InitKernel:
 	push eax
 	push ecx
 	push esi
-	xchg bx, bx
 	;程序段的个数
 	;mov cx, word ptr ds:0x802c
 	mov cx, [BaseOfKernelPhyAddr + 2CH]
@@ -971,9 +972,10 @@ InitKernel:
 	xor esi, esi
 	mov esi, [BaseOfKernelPhyAddr + 1CH]
 	add esi, BaseOfKernelPhyAddr
-	;xhcg bx, bx
 
 .Begin:
+	;xchg bx, bx
+	xor eax, eax
 	mov eax, [esi + 10H]
 	push eax
 
@@ -982,9 +984,8 @@ InitKernel:
 	push eax
 	mov eax, [esi + 8H]
 	push eax
-	xchg bx, bx
+	;xchg bx, bx
 	call Memcpy
-	xchg bx, bx
 	; 三个参数（每个占用32位，4个字节，2个字），占用6个字,12个字节
 	add esp, 12
 	dec ecx
@@ -994,7 +995,7 @@ InitKernel:
 	jmp .Begin
 
 .NoAction:
-	;xhcg bx, bx
+	;;xchg bx, bx
 	pop esi
 	pop ecx
 	pop eax
@@ -1045,7 +1046,7 @@ Memcpy:
 	jmp .1
 
 .2:
-	mov eax, [ebp + 8]
+	;mov eax, [ebp + 8]
 
 	pop edi
 	pop esi
@@ -1082,11 +1083,19 @@ SetupPage:
 ;	or eax, PG_RW_RW
 ;	or eax, PG_US_SUPER
 	mov dword [PageDirectoryTablePhysicalAddress], eax
+	mov dword [PageDirectoryTablePhysicalAddress + 0x300 * 4], eax
+
+	add eax, 4096
+	or eax, PG_P_YES |  PG_RW_RW |  PG_US_SUPER
+	mov dword [PageDirectoryTablePhysicalAddress + 1*4], eax
+	mov dword [PageDirectoryTablePhysicalAddress + 0x301 * 4], eax
 	;mov dword [PageDirectoryTablePhysicalAddress], PageTablePhysicalAddress
 	;mov dword [PageDirectoryTablePhysicalAddress + 0xC00], PageTablePhysicalAddress
 	;mov dword [PageDirectoryTablePhysicalAddress + 0xFFC], PageTablePhysicalAddress
 	;mov dword [PageDirectoryTablePhysicalAddress + 0x300 * 4], PageTablePhysicalAddress
-	mov dword [PageDirectoryTablePhysicalAddress + 0x300 * 4], eax
+
+	;mov dword [PageDirectoryTablePhysicalAddress + 0x300 * 4], eax
+	;mov dword [PageDirectoryTablePhysicalAddress + 0x301 * 4], eax
 	mov eax, PageDirectoryTablePhysicalAddress
 	;or eax, PG_P_YES + PG_RW_RW + PG_US_SUPER
 	or eax, PG_P_YES |  PG_RW_RW |  PG_US_SUPER
@@ -1098,7 +1107,7 @@ SetupPage:
 	;mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], PageTablePhysicalAddress
 
 	;设置第一个页表的前256个PTE
-	mov ecx, 1024
+	mov ecx, 1024 * 2
 	;mov ecx, 1024
 	;mov esi, 0
 	xor esi, esi
@@ -1131,7 +1140,7 @@ SetupPage:
 	add eax, 4096
 	inc esi
 	loop .SetHigh1GBMemPDE
-	;;;;;;;xchg bx, bx
+	;;;;;;;;;xchg bx, bx
 
 	pop esp
 	pop edi
@@ -1206,7 +1215,7 @@ OpenPaging:
 	push edi
 	push esp
 
-	;;;;;xchg bx, bx
+	;;;;;;;xchg bx, bx
 	sgdt [GdtPtr]             ; 存储到原来gdt所有的位置
 ;	add dword [GdtPtr + 2], 0xc0000000
 
@@ -1230,7 +1239,7 @@ OpenPaging:
 ;	and eax, 0xFFFF
 ;	mov ebx, 2
 ;
-;	;;;;;xchg bx, bx
+;	;;;;;;;xchg bx, bx
 ;	mov eax, [GdtPtr + 2]
 ;	add eax, 56
 ;	mov ebx, 0xb800
@@ -1262,7 +1271,7 @@ OpenPaging:
 	mov cr3, eax
 
 	;设置cr0的PG位
-	;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	mov eax, cr0
 	or eax, 0x80000000
 	mov cr0, eax
@@ -1290,6 +1299,7 @@ OpenPaging:
 
 ;BaseOfKernelPhyAddr	equ	BaseOfKernel * 10h  ; Kernel.BIN 被加载到的位置 ---- 物理地址 中的段基址部分
 BaseOfKernelPhyAddr	equ	0x500000  ; Kernel.BIN 被加载到的位置 ---- 物理地址 中的段基址部分
+;BaseOfKernelPhyAddr	equ	0x400000  ; Kernel.BIN 被加载到的位置 ---- 物理地址 中的段基址部分
 
 [SECTION .s16]
 [BITS 16]
