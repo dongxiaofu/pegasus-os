@@ -179,6 +179,9 @@ LABEL_START:
 	push di
 	push ecx
 	push edx		
+	; 设置fs
+	call OPEN_A20
+
 	mov di, MemCheckBuf
 	mov ebx, 0
 .GET_MEM:
@@ -325,8 +328,9 @@ READ_FILE:
 	mov cl, 1
 	pop bx	
 	call ReadSector
+	call CopyKernelTo5MBMemory
 	;;;;;xhcg bx, bx
-        add bx, 512
+    ;add bx, 512
 	jc	.1
 	jmp	.2
 	; 读取一个扇区的数据 end
