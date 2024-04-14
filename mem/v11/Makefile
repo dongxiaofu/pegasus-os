@@ -7,7 +7,7 @@ CFLAGS	=	-I include/ -I include/sys -I include/mem \
 			-I include/netinet \
 			-I include/network \
 			-g -c -fno-builtin -m32
-LDFLAGS		:= -Ttext 0xc0100000 -Map krnl.map -m elf_i386
+LDFLAGS		:= -Ttext 0xc0500000 -Map krnl.map -m elf_i386
 
 BIN	:=	kernel.bin
 
