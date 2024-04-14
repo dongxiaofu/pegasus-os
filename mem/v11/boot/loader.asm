@@ -649,6 +649,7 @@ ReadSector2:
 ; 3>0x30000 这个数值，是 Makefile 中编译时设置的：ld -s -Ttext 0x30400  -o kernel.bin  kernel.o -m elf_i386 
 ;BaseOfKernel	equ	0x8000
 BaseOfKernel	equ	0x5000
+BaseTmpOfKernelAddr equ 0x5000
 ;BaseOfKernel	equ	0x30000
 BaseOfKernel2	equ	0x6000
 BaseOfKernel3	equ	0x0
@@ -668,11 +669,81 @@ YourMessage         db      'hello, world'
 msglen          equ     $-YourMessage
 
 
+OffsetOfKernelFile  equ 0x500000
+OffsetOfKernelFileCount dd  OffsetOfKernelFile
+
 [SECTION .s32]
 
 ALIGN	32
 
 [BITS	32]
+
+CopyKernelTo5MBMemory:
+	push	cx
+	push	eax
+	push	fs
+	push	edi
+	push	ds
+	push	esi
+
+	mov	cx,	200h
+	mov ax, 0
+	mov	fs,	ax
+	;mov edi,	dword	0x500000
+	mov edi,	[OffsetOfKernelFileCount]	
+
+	;BaseTmpOfKernelAddr是0x5000
+	mov	ax,	BaseTmpOfKernelAddr
+	mov	ds,	ax
+	mov esi,0
+
+Label_Mov_Kernel:
+	
+	mov	al,	byte	[ds:esi]
+	mov	byte	[fs:edi],	al
+
+	inc	esi
+	inc	edi
+
+	loop	Label_Mov_Kernel
+
+	mov	dword	[OffsetOfKernelFileCount],	edi
+
+	pop	esi
+	pop	ds
+	pop	edi
+	pop	fs
+	pop	eax
+	pop	cx
+
+	ret
+
+
+OPEN_A20:
+	push	ax
+	in	al,	92h
+	or	al,	00000010b
+	out	92h,	al
+	pop	ax
+
+	cli
+
+	db	0x66
+	lgdt	[GdtPtr]	
+
+	mov	eax,	cr0
+	or	eax,	1
+	mov	cr0,	eax
+
+	mov	ax,	SelectFlatWR
+	mov	fs,	ax
+	mov	eax,	cr0
+	and	al,	11111110b
+	mov	cr0,	eax
+
+	sti
+;;;;;;;;;;;;;;;;;;;
+	ret
 
 LABEL_PM_START:
 	;;;;;;;;;;;xhcg bx, bx
