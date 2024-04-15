@@ -14,10 +14,10 @@
 
 // 网络协议。
 void task_network() {
-	char tty1[10] = "dev_tty1";
-	int fd_stdout = open(tty1, O_RDWR);
-
-	Printf("------network is running\n");
+//	char tty1[10] = "dev_tty1";
+//	int fd_stdout = open(tty1, O_RDWR);
+//
+//	Printf("------network is running\n");
 
 	Message *msg = (Message *)sys_malloc(sizeof(Message));
 

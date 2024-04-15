@@ -1106,13 +1106,13 @@ SetupPage:
 	mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], eax
 	;mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], PageTablePhysicalAddress
 
-	;设置第一个页表的前256个PTE
-	mov ecx, 1024 * 2
+	;设置第一个页表的1024个PTE
+	mov ecx, 1024 * 4
 	;mov ecx, 1024
 	;mov esi, 0
 	xor esi, esi
 	xor eax, eax
-.SetPre256PTE:
+.SetFirstPagePTE:
 	;mov dword [PageTablePhysicalAddress + 4 * esi], 4096 * esi
 	;mov dword [PageTablePhysicalAddress + 4 * esi], 4096
 	;or eax, PG_P_YES + PG_RW_RW + PG_US_SUPER
@@ -1123,9 +1123,24 @@ SetupPage:
 	mov dword [PageTablePhysicalAddress + 4 * esi], eax
 	add eax, 4096
 	inc esi
-	loop .SetPre256PTE
+	loop .SetFirstPagePTE
 
-	;设置页目录的第769到1022个PDE
+
+;;;;;;;;;;;;;Start;;;;;;;;;;;;;;;
+	;设置第二个页表的1024个PTE
+	mov ecx, 1024 * 4
+	xor esi, esi
+	xor eax, eax
+	mov eax, 0x400000
+.SetSecondPagePTE:
+	or eax, PG_P_YES |  PG_RW_RW |  PG_US_SUPER
+	mov dword [PageTablePhysicalAddress + 4096 + 4 * esi], eax
+	add eax, 4096
+	inc esi
+	loop .SetSecondPagePTE
+;;;;;;;;;;;;;;end;;;;;;;;;;;;;;;
+
+	;设置页目录的第770到1022个PDE
 	;mov ecx, 254
 	;这里是3GB以上的1GB内存的映射。本来应该是1024/4=256个页目录项。
 	;可是，已经初始化了三个页目录项，它们是0x300、0x301、1023页目录项。

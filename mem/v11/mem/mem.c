@@ -706,6 +706,7 @@ void init_memory(int total_memory)
 	
 	int map_base_addr = 0xC0020000;
 	// 					0xc0100000;
+	// int k_v_addr 	  = 0xc0400000;
 	int k_v_addr 	  = 0xc0400000;
 	
 
