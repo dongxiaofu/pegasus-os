@@ -26,7 +26,7 @@ org 0x7c00
 
 
 LABEL_START:
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	mov ax,	0B800h
 	mov gs,	ax
 
@@ -106,7 +106,7 @@ FILENAME_DIFFIERENT:
 	add di, 32	; 增加一个根目录项的大小
 	jmp SEARCH_FILE_IN_ROOT_DIRECTORY
 FILE_FOUND:
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	mov al, 'S'
 	mov ah, 0Ah
 	mov [gs:(80 * 24 + 35) *2], ax

@@ -461,8 +461,10 @@ unsigned int sys_malloc2(unsigned int size)
 
 		unsigned int block_addr;
 //		mem_block_desc desc = desc_array[index];
+//		asm ("xchgw %bx, %bx");
 		mem_block_desc *desc = (mem_block_desc *)alloc_memory(1,pool_type);
 		Memcpy(desc,desc_array + index, sizeof(mem_block_desc)); 
+//		asm ("xchgw %bx, %bx");
 		// if(isListEmpty(&desc->free_list) == 1){
 		
 		int flag = 0;
@@ -704,14 +706,17 @@ void init_memory(int total_memory)
 //	asm ("xchgw %bx, %bx");
 	// int map_base_addr = 0xC009F000;
 	
-	int map_base_addr = 0xC0020000;
+	// 为什么把位图设置在这里？像这样有问题吗？
+	//int map_base_addr = 0xC0020000;
+	int map_base_addr = 0xC0100000;
 	// 					0xc0100000;
 	// int k_v_addr 	  = 0xc0400000;
-	int k_v_addr 	  = 0xc0400000;
+	int k_v_addr 	  = 0xc0800000;
 	
 
 	int page_table_size = PAGE_SIZE * 256;
-	int used_memory = 0x400000 + page_table_size;	
+	// int used_memory = 0x400000 + page_table_size;	
+	int used_memory = k_v_addr; 
 
 	int all_free_page_cnt = (total_memory - used_memory) / PAGE_SIZE;
 	int kernel_pool_free_pages = all_free_page_cnt / 2;

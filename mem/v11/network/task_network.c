@@ -32,6 +32,7 @@ void task_network() {
 		char *buf = msg->BUF;
 		int blen = 256;
 		int sockfd = 0;
+		continue;
         int rc = demux_ipc_socket_call(sockfd, buf, blen);	/* 分发 */
 
 		if (rc == -1) {
@@ -44,6 +45,7 @@ void task_network() {
 
 void task_netdev_rx()
 {
+	while(1);
 	netdev_rx_loop();
 }
 
