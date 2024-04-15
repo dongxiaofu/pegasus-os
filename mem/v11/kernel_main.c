@@ -162,12 +162,12 @@ void user_proc_a()
 	//enable_8259A_slave_net_irq();
 //
 	net_data = 4;
-	DriverInitialize();
-//	//asm ("xchgw %bx, %bx");
-//	while(1){
-	for(int i = 0; i < 1; i++){
- 		DriverSend(net_buf, size);
-	}
+///	DriverInitialize();
+/////	//asm ("xchgw %bx, %bx");
+/////	while(1){
+///	for(int i = 0; i < 1; i++){
+/// 		DriverSend(net_buf, size);
+///	}
 	//asm ("xchgw %bx, %bx");
 //	disp_str(net_buf);
 //	disp_str(helloStr);

@@ -1126,8 +1126,12 @@ SetupPage:
 	loop .SetPre256PTE
 
 	;设置页目录的第769到1022个PDE
-	mov ecx, 254
-	mov esi, 769
+	;mov ecx, 254
+	;这里是3GB以上的1GB内存的映射。本来应该是1024/4=256个页目录项。
+	;可是，已经初始化了三个页目录项，它们是0x300、0x301、1023页目录项。
+	mov ecx, 253
+	;mov esi, 769
+	mov esi, 770
 	mov eax, PageTablePhysicalAddress + 4096
 .SetHigh1GBMemPDE:
 	;mov dword [PageDirectoryTablePhysicalAddress + 4 * esi], PageTablePhysicalAddress + 4096 * esi 
