@@ -1107,8 +1107,39 @@ SetupPage:
 	mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], eax
 	;mov dword [PageDirectoryTablePhysicalAddress + 0x3FF * 4], PageTablePhysicalAddress
 
+;清空两个页表
+	xor esi, esi
+	;mov ecx, 1024 * 4
+	mov ecx, 1024 * 1
+.ClearFirstPage:
+	mov dword [PageTablePhysicalAddress + 4 * esi], 0
+	add eax, 4096
+	inc esi
+	loop .ClearFirstPage
+
+;清空两个页表
+	xor esi, esi
+	;mov ecx, 1024 * 4
+	mov ecx, 1024 * 1
+.ClearSecondPage:
+	mov dword [PageTablePhysicalAddress + 4096 + 4 * esi], 0
+	add eax, 4096
+	inc esi
+	loop .ClearSecondPage
+
+	xor esi, esi
+	;mov ecx, 1024 * 4
+	mov ecx, 1024 * 1
+.ClearSecondPage3:
+	mov dword [PageTablePhysicalAddress + 4096 * 2 + 4 * esi], 0
+	add eax, 4096
+	inc esi
+	loop .ClearSecondPage3
+
+	xchg bx,bx
 	;设置第一个页表的1024个PTE
-	mov ecx, 1024 * 4
+	;mov ecx, 1024 * 4
+	mov ecx, 1024 * 1
 	;mov ecx, 1024
 	;mov esi, 0
 	xor esi, esi
@@ -1127,9 +1158,11 @@ SetupPage:
 	loop .SetFirstPagePTE
 
 
+	xchg bx,bx
 ;;;;;;;;;;;;;Start;;;;;;;;;;;;;;;
 	;设置第二个页表的1024个PTE
-	mov ecx, 1024 * 4
+	;mov ecx, 1024 * 4
+	mov ecx, 1024 * 1
 	xor esi, esi
 	xor eax, eax
 	mov eax, 0x400000
@@ -1140,6 +1173,7 @@ SetupPage:
 	inc esi
 	loop .SetSecondPagePTE
 ;;;;;;;;;;;;;;end;;;;;;;;;;;;;;;
+	xchg bx,bx
 
 	;设置页目录的第770到1022个PDE
 	;mov ecx, 254
@@ -1148,7 +1182,8 @@ SetupPage:
 	mov ecx, 253
 	;mov esi, 769
 	mov esi, 770
-	mov eax, PageTablePhysicalAddress + 4096
+	;mov eax, PageTablePhysicalAddress + 4096 + 4096
+	mov eax, PageTablePhysicalAddress + 4096 * 3
 .SetHigh1GBMemPDE:
 	;mov dword [PageDirectoryTablePhysicalAddress + 4 * esi], PageTablePhysicalAddress + 4096 * esi 
 	;or eax, PG_P_YES + PG_RW_RW + PG_US_SUPER

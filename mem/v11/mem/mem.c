@@ -221,6 +221,7 @@ void add_map_entry(unsigned int vaddr, unsigned int phy_addr)
 	unsigned int *pte = ptr_pte(vaddr);
 	
 	if(*pde & PG_P_YES){
+		// assert((*pte & PG_P_YES == 0));
 		if(*pte & PG_P_YES){
 			// do nothing
 			// 这种情况，应该报错。如果pte已经和一个物理页框建立了映射，就不应该再把这个虚拟地址和
@@ -711,12 +712,13 @@ void init_memory(int total_memory)
 	int map_base_addr = 0xC0100000;
 	// 					0xc0100000;
 	// int k_v_addr 	  = 0xc0400000;
-	int k_v_addr 	  = 0xc0800000;
+	int k_v_addr 	  = 0xc0700000;
 	
 
 	int page_table_size = PAGE_SIZE * 256;
 	// int used_memory = 0x400000 + page_table_size;	
-	int used_memory = k_v_addr; 
+	//int used_memory = k_v_addr; 
+	int used_memory = 0x00700000;
 
 	int all_free_page_cnt = (total_memory - used_memory) / PAGE_SIZE;
 	int kernel_pool_free_pages = all_free_page_cnt / 2;
@@ -740,7 +742,7 @@ void init_memory(int total_memory)
 
 	KernelVirtualMemory.map.length = kbm_length;
 	KernelVirtualMemory.map.bits = (char *)(map_base_addr + kbm_length + ubm_length);
-	KernelVirtualMemory.start_addr = k_v_addr + 1024 * 1024;
+	KernelVirtualMemory.start_addr = k_v_addr + 1024 * 1024 * 0;
 	Memset(KernelVirtualMemory.map.bits, 0, kbm_length);
 
 	Memset(kernel_mem_block_decs_array, 0, sizeof(mem_block_desc) * MEM_BLOCK_DESC_KIND_NUM); 
