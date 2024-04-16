@@ -47,7 +47,7 @@ void task_network() {
 void task_netdev_rx()
 {
 	disp_str("------netdev_rx_loop is running\n");
-//	while(1);
+	while(1);
 	netdev_rx_loop();
 }
 

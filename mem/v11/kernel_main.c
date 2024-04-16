@@ -88,7 +88,7 @@ void init()
 	disp_str("init\n");
 	init_keyboard();
 	init_memory(64*1024*1024);
-	DriverInitialize();
+//	DriverInitialize();
 //	//asm ("xchgw %bx, %bx");
 //	DriverSend();
 //	//asm ("xchgw %bx, %bx");
