@@ -463,6 +463,9 @@ int do_open(Message *msg)
             break;
         }
     }
+	if(j == -1){
+		Printf("pathname = %s\n", pathname);
+	}
     assert(j != -1);
 
     struct inode pinode;

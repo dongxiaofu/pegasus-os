@@ -1111,11 +1111,20 @@ void Printf(char *fmt, ...)
     // 理解这句，耗费了大量时间。
     char *var_list = (char *)((char *)&fmt + 4);
     int len = vsprintf(buf, fmt, var_list);
-    //char str[2] = {'A', 0};
-    //len = 2;
     // todo 想办法不使用硬编码0。0是文件描述符。
-    write(0, buf, len);
-//    write2(buf, len);
+    // 在屏幕打印数据必须使用dev_tty1。
+    // 使用open打开dev_tty1，如果此文件不存在，就创建一个。
+    // 如果存在，就直接打开它。
+    // 不知道我写的open函数是否靠谱。
+    char tty1[10] = "dev_tty1";
+	int fd_stdout = open(tty1, O_RDWR);
+	if(fd_stdout == -1){
+		fd_stdout = open(tty1, O_CREAT);
+	}
+	assert(fd_stdout != -1);
+
+    write(fd_stdout, buf, len);
+
     return;
 }
 
