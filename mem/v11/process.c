@@ -72,11 +72,9 @@ Proc *pid2proc(int pid)
 {
 	int t = 0;
 	Proc *proc = 0x0;
-	ListElement head = all_pcb_list.head;
-	ListElement tail = all_pcb_list.tail;
-	// ListElement *cur = head.next;
-	ListElement *cur = all_pcb_list.head.next;
-	while(cur != &all_pcb_list.tail){
+
+	ListElement *cur = all_pcb_list.next;
+	while(cur != &all_pcb_list){
 		proc = (Proc *)((unsigned int)cur & 0xFFFFF000);
 		if(proc == 0x0){
 			t = 4;

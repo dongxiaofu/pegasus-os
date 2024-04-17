@@ -101,7 +101,9 @@ netdev_receive(struct sk_buff *skb)
 void *
 netdev_rx_loop()
 {
-	// while (running) {
+	netdev_init();
+	route_init();
+
 	while (1) {
 		struct sk_buff *skb = alloc_skb(BUFLEN);		/* 1600 */
 		/* skb是对数据的一个简单封装,真正的数据在skb->data中,skb的其他域是对数据的一些描述 */

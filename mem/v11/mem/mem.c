@@ -453,7 +453,9 @@ unsigned int sys_malloc2(unsigned int size)
 	}else{
 		// 从小往大，开始寻找大于size的内存块。
 		unsigned int index = 0;
-		for(int i = 0; i < MEM_BLOCK_DESC_KIND_NUM; i++){
+		// for(int i = 0; i < MEM_BLOCK_DESC_KIND_NUM; i++){
+		// TODO 暂时把最小内存块设置为8个字节。
+		for(int i = 2; i < MEM_BLOCK_DESC_KIND_NUM; i++){
 			if(desc_array[i].size >= size){
 				index = i;
 				break;
@@ -480,13 +482,21 @@ unsigned int sys_malloc2(unsigned int size)
 			unsigned int arena_size = sizeof(arena);
 			// unsigned int cnt = (PAGE_SIZE - arena_size) / arena_size; 
 			unsigned int cnt = (PAGE_SIZE - arena_size) / mem_block_size; 
+			a->cnt = cnt - 1;
 			unsigned int start_addr = page_addr + arena_size;
 
+			int y = 4;
 			// for(int i = 0; i < cnt; i++){
 			// TODO cnt为什么要减去1？
 			// for(int i = 0; i < cnt - 1; i++){
-			for(int i = 0; i < cnt; i++){
+			for(int i = 0; i < cnt - 1; i++){
+				if(i == cnt - 3){
+					y = 5;
+				}
 				block_addr = start_addr + mem_block_size * i; 
+				if(block_addr == 0x8056014){
+					y = 8;
+				}
 				appendToDoubleLinkList(&(desc_array[index].free_list), (void *)block_addr);
 			}
 		}
