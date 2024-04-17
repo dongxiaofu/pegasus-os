@@ -227,7 +227,7 @@ void untar(const char *filename)
 	Printf("untar end\n");
 }
 
-void atoi(char *str, int num)
+void num_to_string(char *str, int num)
 {
     //	char str2[20];
     char *p = str;
@@ -268,7 +268,7 @@ void disp_int(int num)
     //char *str = "";
     char str[10];
     //	Memset(str, 0, sizeof(str));
-    atoi(str, num);
+    num_to_string(str, num);
     //disp_str_colour("ABC", 0x0A);
     // disp_str(str);
     //char str2[20] = "0x57";
@@ -1186,7 +1186,7 @@ int vsprintf(char *buf, char *fmt, char *var_list)
             break;
         }
         case 'x':
-            atoi(tmp, *(int *)next_arg);
+            num_to_string(tmp, *(int *)next_arg);
             //Strcpy(buf, tmp);
             Strcpy(p, tmp);
             next_arg += 4;

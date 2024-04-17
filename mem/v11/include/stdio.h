@@ -31,7 +31,7 @@ int sprintf(char *str, const char *format, ...);
 // void itoa(int value, char **str, int base);
 char *itoa(int value, char **str, int base);
 
-void atoi(char *str, int num);
+void num_to_string(char *str, int num);
 void disp_int(int num);
 
 int sscanf(const char *str, const char *format, ...);
