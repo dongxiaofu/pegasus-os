@@ -657,9 +657,6 @@ void init_memory2()
 	KernelPool.length = total_memory / 2;	
 	disp_int(KernelPool.length);
 	UserPool.length = total_memory - KernelPool.length;
-	disp_str("\n");
-	disp_int(UserPool.length);
-	disp_str("\n");
 	// 设置内核内存池的位图。
 	// 用户内存池池有多少个页？
 	// int page_cnt = (KernelPool.length + PAGE_SIZE - 1)/ PAGE_SIZE;

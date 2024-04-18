@@ -17,7 +17,7 @@ pegasus_crt.a(exec.o)         pegasus_crt.a(kernel_main_old.o) (execl)
 pegasus_crt.a(exit.o)         start.o (exit)
 pegasus_crt.a(wait.o)         pegasus_crt.a(kernel_main_old.o) (wait)
 pegasus_crt.a(fork.o)         pegasus_crt.a(kernel_main_old.o) (fork)
-pegasus_crt.a(strcmp.o)       pegasus_crt.a(fs_main.o) (strcmp)
+pegasus_crt.a(strcmp.o)       pegasus_crt.a(process.o) (strcmp)
 pegasus_crt.a(read.o)         pegasus_crt.a(kernel_main_old.o) (read)
 pegasus_crt.a(open.o)         pegasus_crt.a(kernel_main_old.o) (open)
 pegasus_crt.a(write.o)        pegasus_crt.a(kernel_main_old.o) (write)
@@ -29,36 +29,36 @@ pegasus_crt.a(syscall.o)      pegasus_crt.a(kernel_main_old.o) (write_debug)
 pegasus_crt.a(hd_rdwt.o)      pegasus_crt.a(hd.o) (read_port)
 pegasus_crt.a(double_link_list.o)
                               pegasus_crt.a(mem.o) (initDoubleLinkList)
-pegasus_crt.a(netdev.o)       pegasus_crt.a(task_network.o) (netdev_rx_loop)
-pegasus_crt.a(arp.o)          pegasus_crt.a(netdev.o) (arp_rcv)
+pegasus_crt.a(netdev.o)       pegasus_crt.a(kernel.o) (net_handler)
 pegasus_crt.a(route.o)        pegasus_crt.a(netdev.o) (route_init)
-pegasus_crt.a(utils.o)        pegasus_crt.a(arp.o) (print_err)
 pegasus_crt.a(forkexit.o)     pegasus_crt.a(main.o) (do_fork)
 pegasus_crt.a(exec.o)         pegasus_crt.a(main.o) (do_exec)
 pegasus_crt.a(perror.o)       pegasus_crt.a(netdev.o) (perror)
 pegasus_crt.a(sscanf.o)       pegasus_crt.a(netdev.o) (sscanf)
 pegasus_crt.a(ntohs.o)        pegasus_crt.a(netdev.o) (ntohs)
-pegasus_crt.a(htonl.o)        pegasus_crt.a(arp.o) (htonl)
 pegasus_crt.a(htons.o)        pegasus_crt.a(netdev.o) (htons)
 pegasus_crt.a(inet_pton.o)    pegasus_crt.a(netdev.o) (inet_pton)
 pegasus_crt.a(ntohl.o)        pegasus_crt.a(netdev.o) (ntohl)
-pegasus_crt.a(ne2000.o)       pegasus_crt.a(netdev.o) (SetPageStart)
+pegasus_crt.a(ne2000.o)       pegasus_crt.a(netdev.o) (DriverSend)
 pegasus_crt.a(my_process.o)   pegasus_crt.a(forkexit.o) (fork_process)
-pegasus_crt.a(skbuff.o)       pegasus_crt.a(netdev.o) (alloc_skb)
 pegasus_crt.a(ip_input.o)     pegasus_crt.a(netdev.o) (ip_rcv)
 pegasus_crt.a(tcp.o)          pegasus_crt.a(ip_input.o) (tcp_in)
+pegasus_crt.a(arp.o)          pegasus_crt.a(netdev.o) (arp_rcv)
 pegasus_crt.a(tcp_sock.o)     pegasus_crt.a(tcp.o) (tcp_established_or_syn_recvd_socks_remove)
 pegasus_crt.a(icmpv4.o)       pegasus_crt.a(ip_input.o) (icmpv4_incoming)
 pegasus_crt.a(ip_output.o)    pegasus_crt.a(icmpv4.o) (ip_output)
-pegasus_crt.a(dst.o)          pegasus_crt.a(ip_output.o) (dst_neigh_output)
+pegasus_crt.a(skbuff.o)       pegasus_crt.a(netdev.o) (alloc_skb)
 pegasus_crt.a(tcp_input.o)    pegasus_crt.a(tcp.o) (tcp_process)
 pegasus_crt.a(udp.o)          pegasus_crt.a(ip_input.o) (udp_in)
 pegasus_crt.a(tcp_data.o)     pegasus_crt.a(tcp_input.o) (tcp_data_dequeue)
+pegasus_crt.a(utils.o)        pegasus_crt.a(ip_input.o) (print_err)
 pegasus_crt.a(atoi.o)         pegasus_crt.a(sscanf.o) (atoi)
 pegasus_crt.a(strtok.o)       pegasus_crt.a(inet_pton.o) (strtok)
 pegasus_crt.a(strpbrk.o)      pegasus_crt.a(strtok.o) (strpbrk)
+pegasus_crt.a(htonl.o)        pegasus_crt.a(arp.o) (htonl)
 pegasus_crt.a(thread.o)       pegasus_crt.a(my_process.o) (thread_init)
 pegasus_crt.a(udp_sock.o)     pegasus_crt.a(udp.o) (udp_lookup_sock)
+pegasus_crt.a(dst.o)          pegasus_crt.a(ip_output.o) (dst_neigh_output)
 pegasus_crt.a(sock.o)         pegasus_crt.a(tcp_sock.o) (sk_free)
 pegasus_crt.a(tcp_output.o)   pegasus_crt.a(tcp_input.o) (tcp_send_synack)
 
@@ -110,12 +110,8 @@ Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(double
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(double_link_list.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(netdev.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(netdev.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(arp.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(arp.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(route.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(route.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(utils.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(utils.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(forkexit.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(forkexit.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(exec.o) (0x1)
@@ -126,8 +122,6 @@ Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(sscanf
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(sscanf.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(ntohs.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(ntohs.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(htonl.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(htonl.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(htons.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(htons.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(inet_pton.o) (0x1)
@@ -136,36 +130,42 @@ Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(ntohl.
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(ntohl.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(my_process.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(my_process.o) (0x1)
-Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(skbuff.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(skbuff.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(ip_input.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(ip_input.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(tcp.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(tcp.o) (0x0)
+Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(arp.o) (0x1)
+Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(arp.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(tcp_sock.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(tcp_sock.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(icmpv4.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(icmpv4.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(ip_output.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(ip_output.o) (0x0)
-Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(dst.o) (0x1)
-Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(dst.o) (0x0)
+Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(skbuff.o) (0x1)
+Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(skbuff.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(tcp_input.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(tcp_input.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(udp.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(udp.o) (0x1)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(tcp_data.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(tcp_data.o) (0x0)
+Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(utils.o) (0x1)
+Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(utils.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(atoi.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(atoi.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(strtok.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(strtok.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(strpbrk.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(strpbrk.o) (0x0)
+Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(htonl.o) (0x1)
+Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(htonl.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(thread.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(thread.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(udp_sock.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(udp_sock.o) (0x0)
+Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(dst.o) (0x1)
+Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(dst.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(sock.o) (0x1)
 Removed property 0xc0010002 to merge test.o (not found) and pegasus_crt.a(sock.o) (0x0)
 Removed property 0xc0010001 to merge test.o (not found) and pegasus_crt.a(tcp_output.o) (0x1)
@@ -226,7 +226,7 @@ is_disp             0x1               pegasus_crt.a(kernel_main_old.o)
 MAIN_THREAD_PAGE_DIRECTORY
                     0x4               pegasus_crt.a(kernel_main_old.o)
 helloStr            0xc               pegasus_crt.a(kernel_main_old.o)
-proc_table          0x1aa4            pegasus_crt.a(global.o)
+proc_table          0x1a78            pegasus_crt.a(global.o)
 hd_cache            0x200             pegasus_crt.a(hd.o)
 
 Discarded input sections
@@ -324,17 +324,9 @@ Discarded input sections
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(netdev.o)
  .note.GNU-stack
-                0x00000000        0x0 pegasus_crt.a(arp.o)
- .note.gnu.property
-                0x00000000       0x28 pegasus_crt.a(arp.o)
- .note.GNU-stack
                 0x00000000        0x0 pegasus_crt.a(route.o)
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(route.o)
- .note.GNU-stack
-                0x00000000        0x0 pegasus_crt.a(utils.o)
- .note.gnu.property
-                0x00000000       0x28 pegasus_crt.a(utils.o)
  .note.GNU-stack
                 0x00000000        0x0 pegasus_crt.a(forkexit.o)
  .note.gnu.property
@@ -356,10 +348,6 @@ Discarded input sections
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(ntohs.o)
  .note.GNU-stack
-                0x00000000        0x0 pegasus_crt.a(htonl.o)
- .note.gnu.property
-                0x00000000       0x28 pegasus_crt.a(htonl.o)
- .note.GNU-stack
                 0x00000000        0x0 pegasus_crt.a(htons.o)
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(htons.o)
@@ -376,10 +364,6 @@ Discarded input sections
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(my_process.o)
  .note.GNU-stack
-                0x00000000        0x0 pegasus_crt.a(skbuff.o)
- .note.gnu.property
-                0x00000000       0x28 pegasus_crt.a(skbuff.o)
- .note.GNU-stack
                 0x00000000        0x0 pegasus_crt.a(ip_input.o)
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(ip_input.o)
@@ -387,6 +371,10 @@ Discarded input sections
                 0x00000000        0x0 pegasus_crt.a(tcp.o)
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(tcp.o)
+ .note.GNU-stack
+                0x00000000        0x0 pegasus_crt.a(arp.o)
+ .note.gnu.property
+                0x00000000       0x28 pegasus_crt.a(arp.o)
  .note.GNU-stack
                 0x00000000        0x0 pegasus_crt.a(tcp_sock.o)
  .note.gnu.property
@@ -400,9 +388,9 @@ Discarded input sections
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(ip_output.o)
  .note.GNU-stack
-                0x00000000        0x0 pegasus_crt.a(dst.o)
+                0x00000000        0x0 pegasus_crt.a(skbuff.o)
  .note.gnu.property
-                0x00000000       0x28 pegasus_crt.a(dst.o)
+                0x00000000       0x28 pegasus_crt.a(skbuff.o)
  .note.GNU-stack
                 0x00000000        0x0 pegasus_crt.a(tcp_input.o)
  .note.gnu.property
@@ -416,6 +404,10 @@ Discarded input sections
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(tcp_data.o)
  .note.GNU-stack
+                0x00000000        0x0 pegasus_crt.a(utils.o)
+ .note.gnu.property
+                0x00000000       0x28 pegasus_crt.a(utils.o)
+ .note.GNU-stack
                 0x00000000        0x0 pegasus_crt.a(atoi.o)
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(atoi.o)
@@ -428,6 +420,10 @@ Discarded input sections
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(strpbrk.o)
  .note.GNU-stack
+                0x00000000        0x0 pegasus_crt.a(htonl.o)
+ .note.gnu.property
+                0x00000000       0x28 pegasus_crt.a(htonl.o)
+ .note.GNU-stack
                 0x00000000        0x0 pegasus_crt.a(thread.o)
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(thread.o)
@@ -435,6 +431,10 @@ Discarded input sections
                 0x00000000        0x0 pegasus_crt.a(udp_sock.o)
  .note.gnu.property
                 0x00000000       0x28 pegasus_crt.a(udp_sock.o)
+ .note.GNU-stack
+                0x00000000        0x0 pegasus_crt.a(dst.o)
+ .note.gnu.property
+                0x00000000       0x28 pegasus_crt.a(dst.o)
  .note.GNU-stack
                 0x00000000        0x0 pegasus_crt.a(sock.o)
  .note.gnu.property
@@ -527,7 +527,7 @@ LOAD pegasus_crt.a
 .plt.sec
  *(.plt.sec)
 
-.text           0xb0800000    0x101f2
+.text           0xb0800000    0x10071
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
@@ -626,333 +626,333 @@ LOAD pegasus_crt.a
                 0xb0803da9                keyboard_read
                 0xb0803f28                init_keyboard_handler
                 0xb0803f3c                in_process
- .text          0xb08040ce      0x1f9 pegasus_crt.a(process.o)
+ .text          0xb08040ce      0x28b pegasus_crt.a(process.o)
                 0xb08040ce                schedule_process
-                0xb08041db                clock_handler
-                0xb080424c                pid2proc
-                0xb08042b0                proc2pid
- .text          0xb08042c7       0x9e pegasus_crt.a(task_network.o)
-                0xb08042c7                task_network
-                0xb0804347                task_netdev_rx
- .text          0xb0804365      0xe5b pegasus_crt.a(hd.o)
-                0xb0804365                TaskHD
-                0xb08043aa                init_hd
-                0xb08043c4                hd_handle
-                0xb08044c9                hd_cmd_out
-                0xb08045cb                hd_identify
-                0xb0804682                print_hdinfo
-                0xb0804810                print_dpt_entry
-                0xb080487c                get_partition_table
-                0xb080495b                partition
-                0xb0804b75                hd_open
-                0xb0804c1c                get_hd_ioctl
-                0xb0804ccd                wait_for
-                0xb0804cfe                interrupt_wait
-                0xb0804d4e                hd_rdwt
-                0xb0804fed                hd_handler
-                0xb0805019                debug_ticks
-                0xb0805057                waitfor
-                0xb080509b                print_hd_info
-                0xb0805188                is_empty
- .text          0xb08051c0     0x2069 pegasus_crt.a(fs_main.o)
-                0xb08051c0                task_fs
-                0xb08053cb                rd_wt
-                0xb08054a4                mkfs
-                0xb0805a86                init_fs
-                0xb0805ada                do_open
-                0xb0805ce3                search_file
-                0xb0805e15                strip_path
-                0xb0805ee1                get_inode
-                0xb08060a3                create_file
-                0xb08061ae                alloc_imap_bit
-                0xb08062ab                alloc_smap_bit
-                0xb080644c                new_inode
-                0xb080656a                new_dir_entry
-                0xb0806776                do_unlink
-                0xb0806c52                do_rdwt
-                0xb0806fdd                sync_inode
-                0xb0807131                put_inode
-                0xb080716f                do_close
-                0xb08071c1                get_super_block
- .text          0xb0807229      0x148 pegasus_crt.a(main.o)
-                0xb0807229                TaskMM
-                0xb0807352                alloc_mem
- .text          0xb0807371     0x1247 pegasus_crt.a(mem.o)
-                0xb0807371                init_bitmap
-                0xb0807394                test_bit_val
-                0xb08073fd                set_bit_val
-                0xb0807478                set_bits
-                0xb08074b2                get_first_free_bit
-                0xb08074f6                get_bits
-                0xb08075be                get_a_page
-                0xb0807672                get_virtual_address_start_with_addr
-                0xb080770c                get_virtual_address
-                0xb080779c                ptr_pde
-                0xb08077af                ptr_pte
-                0xb08077d6                add_map_entry
-                0xb0807867                alloc_virtual_memory
-                0xb080793a                get_physical_address_proc
-                0xb08079b6                get_physical_address
-                0xb08079e8                alloc_physical_memory_of_proc
-                0xb0807ad7                alloc_physical_memory
-                0xb0807b9f                alloc_memory
-                0xb0807c01                get_a_virtual_page
-                0xb0807c39                block2arena
-                0xb0807c4f                sys_malloc2
-                0xb0807f1f                remove_map_entry
-                0xb0807f40                free_a_page
-                0xb0807fe7                sys_free2
-                0xb0808151                init_memory_block_desc
-                0xb0808201                init_memory2
-                0xb0808478                init_memory
- .text          0xb08085b8      0x285 pegasus_crt.a(exec.o)
-                0xb08085b8                exec
-                0xb0808629                execv
-                0xb0808818                execl
- .text          0xb080883d       0x2f pegasus_crt.a(exit.o)
-                0xb080883d                exit
- .text          0xb080886c       0x44 pegasus_crt.a(wait.o)
-                0xb080886c                wait
- .text          0xb08088b0       0x48 pegasus_crt.a(fork.o)
-                0xb08088b0                fork
- .text          0xb08088f8       0xa8 pegasus_crt.a(strcmp.o)
-                0xb08088f8                strcmp
- .text          0xb08089a0      0x181 pegasus_crt.a(read.o)
-                0xb08089a0                read
- .text          0xb0808b21       0x95 pegasus_crt.a(open.o)
-                0xb0808b21                open
- .text          0xb0808bb6       0x85 pegasus_crt.a(write.o)
-                0xb0808bb6                write
- .text          0xb0808c3b       0x52 pegasus_crt.a(close.o)
-                0xb0808c3b                close
- *fill*         0xb0808c8d        0x3 
- .text          0xb0808c90      0x3d7 pegasus_crt.a(kernel.o)
-                0xb0808c90                InterruptTest
-                0xb0808c9c                disp_str_len
-                0xb0808ce9                disp_str
-                0xb0808d24                disp_str_colour
-                0xb0808d60                divide_zero_fault
-                0xb0808d66                single_step_fault
-                0xb0808d6c                non_maskable_interrupt
-                0xb0808d72                breakpoint_trap
-                0xb0808d78                overflow_trap
-                0xb0808d7e                bound_range_exceeded_fault
-                0xb0808d84                invalid_opcode_fault
-                0xb0808d8a                coprocessor_not_available_fault
-                0xb0808d90                double_fault_exception_abort
-                0xb0808d94                coprocessor_segment_overrun
-                0xb0808d9a                invalid_task_state_segment_fault
-                0xb0808d9e                segment_not_present_fault
-                0xb0808da2                stack_exception_fault
-                0xb0808da6                general_protection_exception_fault
-                0xb0808db1                page_fault
-                0xb0808db5                coprocessor_error_fault
-                0xb0808dbb                align_check_fault
-                0xb0808dbf                simd_float_exception_fault
-                0xb0808dce                hwint0
-                0xb0808dfe                hwint1
-                0xb0808e41                hwint14
-                0xb0808e87                hwint10
-                0xb0808eca                sys_call
-                0xb0808f10                fork_restart
-                0xb0808f1f                restart
-                0xb0808f42                in_byte
-                0xb0808f4e                out_byte
-                0xb0808f70                disable_int
-                0xb0808f72                enable_int
-                0xb0809008                enable_8259A_casecade_irq
-                0xb0809012                disable_8259A_casecade_irq
-                0xb080901c                enable_8259A_slave_winchester_irq
-                0xb0809026                disable_8259A_slave_winchester_irq
-                0xb0809030                update_cr3
-                0xb080903d                update_tss
-                0xb080904c                get_running_thread_pcb
-                0xb0809054                sys_call_test
-                0xb0809057                enable_8259A_slave_net_irq
- *fill*         0xb0809067        0x9 
- .text          0xb0809070       0x15 pegasus_crt.a(switch_to.o)
-                0xb0809070                switch_to
- *fill*         0xb0809085        0xb 
- .text          0xb0809090       0x69 pegasus_crt.a(syscall.o)
-                0xb0809090                write_debug
-                0xb08090a0                send_msg
-                0xb08090b6                receive_msg
-                0xb08090cc                sys_malloc
-                0xb08090e1                sys_free
- .text          0xb08090f9      0x29e pegasus_crt.a(double_link_list.o)
-                0xb08090f9                initDoubleLinkList
-                0xb0809135                isListEmpty
-                0xb0809151                findElementInList
-                0xb08091f4                appendToDoubleLinkList
-                0xb08092ca                insertToDoubleLinkList
-                0xb0809359                popFromDoubleLinkList
- .text          0xb0809397      0x679 pegasus_crt.a(netdev.o)
-                0xb08094a9                netdev_init
-                0xb08094f0                netdev_transmit
-                0xb0809641                netdev_rx_loop
-                0xb08096bb                netdev_get
-                0xb08096d8                free_netdev
-                0xb0809703                local_ipaddress
-                0xb0809740                net_handler
- .text          0xb0809a10      0x6dc pegasus_crt.a(arp.o)
-                0xb0809bdd                arp_init
-                0xb0809be3                arp_rcv
-                0xb0809d95                arp_request
-                0xb0809eff                arp_reply
-                0xb080a04f                arp_get_hwaddr
-                0xb080a09b                free_arp
- .text          0xb080a0ec      0x295 pegasus_crt.a(route.o)
-                0xb080a219                route_add
-                0xb080a25e                route_init
-                0xb080a2e5                route_lookup
-                0xb080a330                free_routes
- .text          0xb080a381      0x1e7 pegasus_crt.a(utils.o)
-                0xb080a381                run_cmd
-                0xb080a38e                print_err
-                0xb080a3a5                parse_ipv4_string
-                0xb080a404                ip_pton
-                0xb080a44c                sum_every_16bits
-                0xb080a4a3                checksum
-                0xb080a4e4                tcp_udp_checksum
- .text          0xb080a568      0x24f pegasus_crt.a(forkexit.o)
-                0xb080a568                do_fork
-                0xb080a5d6                do_exit
-                0xb080a660                do_wait
-                0xb080a75d                cleanup
- .text          0xb080a7b7      0x419 pegasus_crt.a(exec.o)
-                0xb080a7b7                do_exec
- .text          0xb080abd0       0x17 pegasus_crt.a(perror.o)
-                0xb080abd0                perror
- .text          0xb080abe7      0x2c1 pegasus_crt.a(sscanf.o)
-                0xb080abe7                sscanf
- .text          0xb080aea8       0x38 pegasus_crt.a(ntohs.o)
-                0xb080aea8                ntohs
- .text          0xb080aee0       0x7c pegasus_crt.a(htonl.o)
-                0xb080aee0                htonl
- .text          0xb080af5c       0x38 pegasus_crt.a(htons.o)
-                0xb080af5c                htons
- .text          0xb080af94      0x295 pegasus_crt.a(inet_pton.o)
-                0xb080af94                isValidIPv4
-                0xb080b11e                inet_pton
- .text          0xb080b229       0x7c pegasus_crt.a(ntohl.o)
-                0xb080b229                ntohl
- *fill*         0xb080b2a5        0xb 
- .text          0xb080b2b0      0x259 pegasus_crt.a(ne2000.o)
-                0xb080b2d3                DriverInitialize
-                0xb080b35d                SetPageStart
-                0xb080b385                DriverSend
-                0xb080b3fa                PCtoNIC
-                0xb080b468                get_interrupt_status
-                0xb080b47e                set_interrupt_status
-                0xb080b497                get_curr_page
-                0xb080b4b4                NICtoPC
- .text          0xb080b509      0x730 pegasus_crt.a(my_process.o)
-                0xb080b509                create_user_process_address_space
-                0xb080b599                user_process
-                0xb080b6c6                clone_pcb
-                0xb080b838                build_body_stack
-                0xb080b96b                build_process_kernel_stack
-                0xb080ba2e                fork_process
-                0xb080babf                process_execute
- .text          0xb080bc39      0x12e pegasus_crt.a(skbuff.o)
-                0xb080bc52                alloc_skb
-                0xb080bce3                free_skb
-                0xb080bce9                skb_reserve
-                0xb080bd05                skb_push
-                0xb080bd34                skb_head
-                0xb080bd3f                skb_reset_header
- .text          0xb080bd67      0x2da pegasus_crt.a(ip_input.o)
-                0xb080bef1                ip_rcv
- .text          0xb080c041      0x448 pegasus_crt.a(tcp.o)
-                0xb080c236                tcp_in
-                0xb080c2ea                tcp_checksum
-                0xb080c316                __tcp_set_state
-                0xb080c325                tcp_generate_port
-                0xb080c36e                tcp_generate_isn
-                0xb080c378                tcp_done
-                0xb080c3a1                tcp_clear_timers
-                0xb080c3b0                tcp_stop_retransmission_timer
-                0xb080c3c9                tcp_release_retransmission_timer
-                0xb080c3e2                tcp_stop_delack_timer
-                0xb080c3f5                tcp_release_delack_timer
-                0xb080c408                tcp_handle_fin_state
-                0xb080c46d                tcp_enter_time_wait
- .text          0xb080c489      0xa16 pegasus_crt.a(tcp_sock.o)
-                0xb080c737                tcp_established_or_syn_recvd_socks_enqueue
-                0xb080c74e                tcp_established_or_syn_recvd_socks_remove
-                0xb080c760                tcp_connecting_or_listening_socks_enqueue
-                0xb080c777                tcp_connecting_or_listening_socks_remove
-                0xb080c789                tcp_alloc_sock
-                0xb080c89f                tcp_free_sock
-                0xb080c918                tcp_init
-                0xb080c922                tcp_sock_init
-                0xb080c9c5                tcp_write
-                0xb080ca06                tcp_read
-                0xb080cab9                tcp_close
-                0xb080cb77                tcp_recv_notify
-                0xb080cba2                tcp_v4_connect
-                0xb080cdf2                tcp_lookup_sock
- .text          0xb080ce9f      0x234 pegasus_crt.a(icmpv4.o)
-                0xb080cead                icmpv4_incoming
-                0xb080cf21                icmpv4_reply
-                0xb080cffa                icmpv4_timestamp
- .text          0xb080d0d3      0x1d3 pegasus_crt.a(ip_output.o)
-                0xb080d0e1                ip_output
- .text          0xb080d2a6       0xd8 pegasus_crt.a(dst.o)
-                0xb080d2b4                dst_neigh_output
- .text          0xb080d37e      0xb6f pegasus_crt.a(tcp_input.o)
-                0xb080da65                tcp_process
-                0xb080de2b                tcp_receive
- .text          0xb080deed      0x3e0 pegasus_crt.a(udp.o)
-                0xb080dff8                udp_generate_port
-                0xb080e041                udp_checksum
-                0xb080e10f                udp_in
-                0xb080e1a0                udp_data_dequeue
-                0xb080e2a8                udp_data_enqueue
- .text          0xb080e2cd      0x54a pegasus_crt.a(tcp_data.o)
-                0xb080e5b8                tcp_data_dequeue
-                0xb080e6e5                tcp_data_queue
- .text          0xb080e817       0x9c pegasus_crt.a(atoi.o)
-                0xb080e817                atoi
- .text          0xb080e8b3       0x85 pegasus_crt.a(strtok.o)
-                0xb080e8b3                strtok
- .text          0xb080e938       0x90 pegasus_crt.a(strpbrk.o)
-                0xb080e938                strpbrk
- .text          0xb080e9c8      0x1b2 pegasus_crt.a(thread.o)
-                0xb080e9c8                kernel_thread
-                0xb080e9e0                thread_init
-                0xb080ea8d                thread_create
-                0xb080eac2                thread_start
- .text          0xb080eb7a      0x8bc pegasus_crt.a(udp_sock.o)
-                0xb080eda7                udp_lookup_sock
-                0xb080edee                udp_init
-                0xb080ee1f                udp_close
-                0xb080ee45                udp_sock_init
-                0xb080ee4f                udp_recvfrom
-                0xb080eee8                udp_connect
-                0xb080efc1                udp_write
-                0xb080efed                udp_alloc_skb
-                0xb080f037                udp_sendto
-                0xb080f12b                udp_send
-                0xb080f269                udp_alloc_sock
-                0xb080f2aa                udp_free_sock
-                0xb080f2ce                udp_read
- .text          0xb080f436      0x203 pegasus_crt.a(sock.o)
-                0xb080f568                sk_alloc
-                0xb080f58f                sk_init
-                0xb080f5e3                sk_init_with_socket
-                0xb080f60c                sk_free
- .text          0xb080f639      0xbb9 pegasus_crt.a(tcp_output.o)
-                0xb080fafa                tcp_send_synack
-                0xb080fb9d                tcp_send_delack
-                0xb080fbd8                tcp_send_ack
-                0xb080fd24                tcp_send_fin
-                0xb080fd99                tcp_select_initial_window
-                0xb080ff4b                tcp_reset_retransmission_timer
-                0xb080ff68                tcp_begin_connect
-                0xb0810012                tcp_send
-                0xb08100f7                tcp_send_reset
-                0xb0810177                tcp_queue_fin
+                0xb080426d                clock_handler
+                0xb08042de                pid2proc
+                0xb0804342                proc2pid
+ .text          0xb0804359       0xeb pegasus_crt.a(task_network.o)
+                0xb0804359                task_network
+                0xb08043d9                task_netdev_rx
+ .text          0xb0804444      0xe5b pegasus_crt.a(hd.o)
+                0xb0804444                TaskHD
+                0xb0804489                init_hd
+                0xb08044a3                hd_handle
+                0xb08045a8                hd_cmd_out
+                0xb08046aa                hd_identify
+                0xb0804761                print_hdinfo
+                0xb08048ef                print_dpt_entry
+                0xb080495b                get_partition_table
+                0xb0804a3a                partition
+                0xb0804c54                hd_open
+                0xb0804cfb                get_hd_ioctl
+                0xb0804dac                wait_for
+                0xb0804ddd                interrupt_wait
+                0xb0804e2d                hd_rdwt
+                0xb08050cc                hd_handler
+                0xb08050f8                debug_ticks
+                0xb0805136                waitfor
+                0xb080517a                print_hd_info
+                0xb0805267                is_empty
+ .text          0xb080529f     0x2069 pegasus_crt.a(fs_main.o)
+                0xb080529f                task_fs
+                0xb08054aa                rd_wt
+                0xb0805583                mkfs
+                0xb0805b65                init_fs
+                0xb0805bb9                do_open
+                0xb0805dc2                search_file
+                0xb0805ef4                strip_path
+                0xb0805fc0                get_inode
+                0xb0806182                create_file
+                0xb080628d                alloc_imap_bit
+                0xb080638a                alloc_smap_bit
+                0xb080652b                new_inode
+                0xb0806649                new_dir_entry
+                0xb0806855                do_unlink
+                0xb0806d31                do_rdwt
+                0xb08070bc                sync_inode
+                0xb0807210                put_inode
+                0xb080724e                do_close
+                0xb08072a0                get_super_block
+ .text          0xb0807308      0x148 pegasus_crt.a(main.o)
+                0xb0807308                TaskMM
+                0xb0807431                alloc_mem
+ .text          0xb0807450     0x1216 pegasus_crt.a(mem.o)
+                0xb0807450                init_bitmap
+                0xb0807473                test_bit_val
+                0xb08074dc                set_bit_val
+                0xb0807557                set_bits
+                0xb0807591                get_first_free_bit
+                0xb08075d5                get_bits
+                0xb080769d                get_a_page
+                0xb0807751                get_virtual_address_start_with_addr
+                0xb08077eb                get_virtual_address
+                0xb080787b                ptr_pde
+                0xb080788e                ptr_pte
+                0xb08078b5                add_map_entry
+                0xb0807946                alloc_virtual_memory
+                0xb0807a19                get_physical_address_proc
+                0xb0807a95                get_physical_address
+                0xb0807ac7                alloc_physical_memory_of_proc
+                0xb0807bb6                alloc_physical_memory
+                0xb0807c7e                alloc_memory
+                0xb0807ce0                get_a_virtual_page
+                0xb0807d18                block2arena
+                0xb0807d2e                sys_malloc2
+                0xb0807ffe                remove_map_entry
+                0xb080801f                free_a_page
+                0xb08080c6                sys_free2
+                0xb0808230                init_memory_block_desc
+                0xb08082e0                init_memory2
+                0xb0808526                init_memory
+ .text          0xb0808666      0x285 pegasus_crt.a(exec.o)
+                0xb0808666                exec
+                0xb08086d7                execv
+                0xb08088c6                execl
+ .text          0xb08088eb       0x2f pegasus_crt.a(exit.o)
+                0xb08088eb                exit
+ .text          0xb080891a       0x44 pegasus_crt.a(wait.o)
+                0xb080891a                wait
+ .text          0xb080895e       0x48 pegasus_crt.a(fork.o)
+                0xb080895e                fork
+ .text          0xb08089a6       0xa8 pegasus_crt.a(strcmp.o)
+                0xb08089a6                strcmp
+ .text          0xb0808a4e      0x181 pegasus_crt.a(read.o)
+                0xb0808a4e                read
+ .text          0xb0808bcf       0x95 pegasus_crt.a(open.o)
+                0xb0808bcf                open
+ .text          0xb0808c64       0x85 pegasus_crt.a(write.o)
+                0xb0808c64                write
+ .text          0xb0808ce9       0x52 pegasus_crt.a(close.o)
+                0xb0808ce9                close
+ *fill*         0xb0808d3b        0x5 
+ .text          0xb0808d40      0x3d7 pegasus_crt.a(kernel.o)
+                0xb0808d40                InterruptTest
+                0xb0808d4c                disp_str_len
+                0xb0808d99                disp_str
+                0xb0808dd4                disp_str_colour
+                0xb0808e10                divide_zero_fault
+                0xb0808e16                single_step_fault
+                0xb0808e1c                non_maskable_interrupt
+                0xb0808e22                breakpoint_trap
+                0xb0808e28                overflow_trap
+                0xb0808e2e                bound_range_exceeded_fault
+                0xb0808e34                invalid_opcode_fault
+                0xb0808e3a                coprocessor_not_available_fault
+                0xb0808e40                double_fault_exception_abort
+                0xb0808e44                coprocessor_segment_overrun
+                0xb0808e4a                invalid_task_state_segment_fault
+                0xb0808e4e                segment_not_present_fault
+                0xb0808e52                stack_exception_fault
+                0xb0808e56                general_protection_exception_fault
+                0xb0808e61                page_fault
+                0xb0808e65                coprocessor_error_fault
+                0xb0808e6b                align_check_fault
+                0xb0808e6f                simd_float_exception_fault
+                0xb0808e7e                hwint0
+                0xb0808eae                hwint1
+                0xb0808ef1                hwint14
+                0xb0808f37                hwint10
+                0xb0808f7a                sys_call
+                0xb0808fc0                fork_restart
+                0xb0808fcf                restart
+                0xb0808ff2                in_byte
+                0xb0808ffe                out_byte
+                0xb0809020                disable_int
+                0xb0809022                enable_int
+                0xb08090b8                enable_8259A_casecade_irq
+                0xb08090c2                disable_8259A_casecade_irq
+                0xb08090cc                enable_8259A_slave_winchester_irq
+                0xb08090d6                disable_8259A_slave_winchester_irq
+                0xb08090e0                update_cr3
+                0xb08090ed                update_tss
+                0xb08090fc                get_running_thread_pcb
+                0xb0809104                sys_call_test
+                0xb0809107                enable_8259A_slave_net_irq
+ *fill*         0xb0809117        0x9 
+ .text          0xb0809120       0x15 pegasus_crt.a(switch_to.o)
+                0xb0809120                switch_to
+ *fill*         0xb0809135        0xb 
+ .text          0xb0809140       0x69 pegasus_crt.a(syscall.o)
+                0xb0809140                write_debug
+                0xb0809150                send_msg
+                0xb0809166                receive_msg
+                0xb080917c                sys_malloc
+                0xb0809191                sys_free
+ .text          0xb08091a9      0x2f9 pegasus_crt.a(double_link_list.o)
+                0xb08091a9                initDoubleLinkList
+                0xb08091e5                isListEmpty
+                0xb0809201                findElementInList
+                0xb08092a4                appendToDoubleLinkList
+                0xb080937a                insertToDoubleLinkList
+                0xb0809409                popFromDoubleLinkList
+ .text          0xb08094a2      0x3f1 pegasus_crt.a(netdev.o)
+                0xb08095b4                netdev_init
+                0xb08095fb                netdev_transmit
+                0xb080974c                netdev_rx_loop
+                0xb08097c6                netdev_get
+                0xb08097e3                free_netdev
+                0xb080980e                local_ipaddress
+                0xb080984b                net_handler
+ .text          0xb0809893      0x295 pegasus_crt.a(route.o)
+                0xb08099c0                route_add
+                0xb0809a05                route_init
+                0xb0809a8c                route_lookup
+                0xb0809ad7                free_routes
+ .text          0xb0809b28      0x24f pegasus_crt.a(forkexit.o)
+                0xb0809b28                do_fork
+                0xb0809b96                do_exit
+                0xb0809c20                do_wait
+                0xb0809d1d                cleanup
+ .text          0xb0809d77      0x419 pegasus_crt.a(exec.o)
+                0xb0809d77                do_exec
+ .text          0xb080a190       0x17 pegasus_crt.a(perror.o)
+                0xb080a190                perror
+ .text          0xb080a1a7      0x2c1 pegasus_crt.a(sscanf.o)
+                0xb080a1a7                sscanf
+ .text          0xb080a468       0x38 pegasus_crt.a(ntohs.o)
+                0xb080a468                ntohs
+ .text          0xb080a4a0       0x38 pegasus_crt.a(htons.o)
+                0xb080a4a0                htons
+ .text          0xb080a4d8      0x295 pegasus_crt.a(inet_pton.o)
+                0xb080a4d8                isValidIPv4
+                0xb080a662                inet_pton
+ .text          0xb080a76d       0x7c pegasus_crt.a(ntohl.o)
+                0xb080a76d                ntohl
+ *fill*         0xb080a7e9        0x7 
+ .text          0xb080a7f0      0x259 pegasus_crt.a(ne2000.o)
+                0xb080a813                DriverInitialize
+                0xb080a89d                SetPageStart
+                0xb080a8c5                DriverSend
+                0xb080a93a                PCtoNIC
+                0xb080a9a8                get_interrupt_status
+                0xb080a9be                set_interrupt_status
+                0xb080a9d7                get_curr_page
+                0xb080a9f4                NICtoPC
+ .text          0xb080aa49      0x730 pegasus_crt.a(my_process.o)
+                0xb080aa49                create_user_process_address_space
+                0xb080aad9                user_process
+                0xb080ac06                clone_pcb
+                0xb080ad78                build_body_stack
+                0xb080aeab                build_process_kernel_stack
+                0xb080af6e                fork_process
+                0xb080afff                process_execute
+ .text          0xb080b179      0x2da pegasus_crt.a(ip_input.o)
+                0xb080b303                ip_rcv
+ .text          0xb080b453      0x448 pegasus_crt.a(tcp.o)
+                0xb080b648                tcp_in
+                0xb080b6fc                tcp_checksum
+                0xb080b728                __tcp_set_state
+                0xb080b737                tcp_generate_port
+                0xb080b780                tcp_generate_isn
+                0xb080b78a                tcp_done
+                0xb080b7b3                tcp_clear_timers
+                0xb080b7c2                tcp_stop_retransmission_timer
+                0xb080b7db                tcp_release_retransmission_timer
+                0xb080b7f4                tcp_stop_delack_timer
+                0xb080b807                tcp_release_delack_timer
+                0xb080b81a                tcp_handle_fin_state
+                0xb080b87f                tcp_enter_time_wait
+ .text          0xb080b89b      0x6dc pegasus_crt.a(arp.o)
+                0xb080ba68                arp_init
+                0xb080ba6e                arp_rcv
+                0xb080bc20                arp_request
+                0xb080bd8a                arp_reply
+                0xb080beda                arp_get_hwaddr
+                0xb080bf26                free_arp
+ .text          0xb080bf77      0xa16 pegasus_crt.a(tcp_sock.o)
+                0xb080c225                tcp_established_or_syn_recvd_socks_enqueue
+                0xb080c23c                tcp_established_or_syn_recvd_socks_remove
+                0xb080c24e                tcp_connecting_or_listening_socks_enqueue
+                0xb080c265                tcp_connecting_or_listening_socks_remove
+                0xb080c277                tcp_alloc_sock
+                0xb080c38d                tcp_free_sock
+                0xb080c406                tcp_init
+                0xb080c410                tcp_sock_init
+                0xb080c4b3                tcp_write
+                0xb080c4f4                tcp_read
+                0xb080c5a7                tcp_close
+                0xb080c665                tcp_recv_notify
+                0xb080c690                tcp_v4_connect
+                0xb080c8e0                tcp_lookup_sock
+ .text          0xb080c98d      0x234 pegasus_crt.a(icmpv4.o)
+                0xb080c99b                icmpv4_incoming
+                0xb080ca0f                icmpv4_reply
+                0xb080cae8                icmpv4_timestamp
+ .text          0xb080cbc1      0x1d3 pegasus_crt.a(ip_output.o)
+                0xb080cbcf                ip_output
+ .text          0xb080cd94      0x12e pegasus_crt.a(skbuff.o)
+                0xb080cdad                alloc_skb
+                0xb080ce3e                free_skb
+                0xb080ce44                skb_reserve
+                0xb080ce60                skb_push
+                0xb080ce8f                skb_head
+                0xb080ce9a                skb_reset_header
+ .text          0xb080cec2      0xb6f pegasus_crt.a(tcp_input.o)
+                0xb080d5a9                tcp_process
+                0xb080d96f                tcp_receive
+ .text          0xb080da31      0x3e0 pegasus_crt.a(udp.o)
+                0xb080db3c                udp_generate_port
+                0xb080db85                udp_checksum
+                0xb080dc53                udp_in
+                0xb080dce4                udp_data_dequeue
+                0xb080ddec                udp_data_enqueue
+ .text          0xb080de11      0x54a pegasus_crt.a(tcp_data.o)
+                0xb080e0fc                tcp_data_dequeue
+                0xb080e229                tcp_data_queue
+ .text          0xb080e35b      0x1e7 pegasus_crt.a(utils.o)
+                0xb080e35b                run_cmd
+                0xb080e368                print_err
+                0xb080e37f                parse_ipv4_string
+                0xb080e3de                ip_pton
+                0xb080e426                sum_every_16bits
+                0xb080e47d                checksum
+                0xb080e4be                tcp_udp_checksum
+ .text          0xb080e542       0x9c pegasus_crt.a(atoi.o)
+                0xb080e542                atoi
+ .text          0xb080e5de       0x85 pegasus_crt.a(strtok.o)
+                0xb080e5de                strtok
+ .text          0xb080e663       0x90 pegasus_crt.a(strpbrk.o)
+                0xb080e663                strpbrk
+ .text          0xb080e6f3       0x7c pegasus_crt.a(htonl.o)
+                0xb080e6f3                htonl
+ .text          0xb080e76f      0x1b2 pegasus_crt.a(thread.o)
+                0xb080e76f                kernel_thread
+                0xb080e787                thread_init
+                0xb080e834                thread_create
+                0xb080e869                thread_start
+ .text          0xb080e921      0x8bc pegasus_crt.a(udp_sock.o)
+                0xb080eb4e                udp_lookup_sock
+                0xb080eb95                udp_init
+                0xb080ebc6                udp_close
+                0xb080ebec                udp_sock_init
+                0xb080ebf6                udp_recvfrom
+                0xb080ec8f                udp_connect
+                0xb080ed68                udp_write
+                0xb080ed94                udp_alloc_skb
+                0xb080edde                udp_sendto
+                0xb080eed2                udp_send
+                0xb080f010                udp_alloc_sock
+                0xb080f051                udp_free_sock
+                0xb080f075                udp_read
+ .text          0xb080f1dd       0xd8 pegasus_crt.a(dst.o)
+                0xb080f1eb                dst_neigh_output
+ .text          0xb080f2b5      0x203 pegasus_crt.a(sock.o)
+                0xb080f3e7                sk_alloc
+                0xb080f40e                sk_init
+                0xb080f462                sk_init_with_socket
+                0xb080f48b                sk_free
+ .text          0xb080f4b8      0xbb9 pegasus_crt.a(tcp_output.o)
+                0xb080f979                tcp_send_synack
+                0xb080fa1c                tcp_send_delack
+                0xb080fa57                tcp_send_ack
+                0xb080fba3                tcp_send_fin
+                0xb080fc18                tcp_select_initial_window
+                0xb080fdca                tcp_reset_retransmission_timer
+                0xb080fde7                tcp_begin_connect
+                0xb080fe91                tcp_send
+                0xb080ff76                tcp_send_reset
+                0xb080fff6                tcp_queue_fin
  *(.gnu.warning)
 
 .fini
@@ -963,62 +963,60 @@ LOAD pegasus_crt.a
                 0xb0811000                        . = ALIGN (CONSTANT (MAXPAGESIZE))
                 0xb0811000                        . = SEGMENT_START ("rodata-segment", (ALIGN (CONSTANT (MAXPAGESIZE)) + (. & (CONSTANT (MAXPAGESIZE) - 0x1))))
 
-.rodata         0xb0811000     0x16fb
+.rodata         0xb0811000     0x16f7
  *(.rodata .rodata.* .gnu.linkonce.r.*)
  .rodata        0xb0811000       0x10 test.o
  *fill*         0xb0811010       0x10 
  .rodata        0xb0811020      0xb85 pegasus_crt.a(kernel_main_old.o)
  .rodata        0xb0811ba5       0x22 pegasus_crt.a(console.o)
- .rodata        0xb0811bc7       0x26 pegasus_crt.a(process.o)
- *fill*         0xb0811bed        0x3 
- .rodata        0xb0811bf0       0x3d pegasus_crt.a(task_network.o)
- *fill*         0xb0811c2d        0x3 
- .rodata        0xb0811c30      0x19c pegasus_crt.a(hd.o)
- .rodata        0xb0811dcc      0x1fb pegasus_crt.a(fs_main.o)
-                0xb0811dcc                FSBUF_SIZE
- .rodata        0xb0811fc7       0x11 pegasus_crt.a(main.o)
- .rodata        0xb0811fd8       0x41 pegasus_crt.a(mem.o)
- .rodata        0xb0812019       0x2d pegasus_crt.a(exec.o)
- .rodata        0xb0812046       0x2a pegasus_crt.a(close.o)
- .rodata        0xb0812070       0x36 pegasus_crt.a(double_link_list.o)
- *fill*         0xb08120a6        0x2 
- .rodata        0xb08120a8      0x161 pegasus_crt.a(netdev.o)
- *fill*         0xb0812209        0x3 
- .rodata        0xb081220c       0x9c pegasus_crt.a(arp.o)
- .rodata        0xb08122a8       0x37 pegasus_crt.a(route.o)
- *fill*         0xb08122df        0x1 
- .rodata        0xb08122e0       0x41 pegasus_crt.a(utils.o)
- .rodata        0xb0812321       0x21 pegasus_crt.a(forkexit.o)
- .rodata        0xb0812342       0x10 pegasus_crt.a(exec.o)
- .rodata        0xb0812352        0x3 pegasus_crt.a(inet_pton.o)
- .rodata        0xb0812355        0x9 pegasus_crt.a(skbuff.o)
- *fill*         0xb081235e        0x2 
- .rodata        0xb0812360       0xb5 pegasus_crt.a(ip_input.o)
- *fill*         0xb0812415        0x3 
- .rodata        0xb0812418       0x31 pegasus_crt.a(tcp.o)
- *fill*         0xb0812449        0x3 
- .rodata        0xb081244c       0xe8 pegasus_crt.a(tcp_sock.o)
- .rodata        0xb0812534       0x32 pegasus_crt.a(icmpv4.o)
- .rodata        0xb0812566        0x9 pegasus_crt.a(ip_output.o)
- .rodata        0xb081256f        0x9 pegasus_crt.a(dst.o)
- .rodata        0xb0812578       0x60 pegasus_crt.a(tcp_input.o)
- .rodata        0xb08125d8        0x9 pegasus_crt.a(udp.o)
- .rodata        0xb08125e1       0x1e pegasus_crt.a(tcp_data.o)
- *fill*         0xb08125ff        0x1 
- .rodata        0xb0812600       0x2d pegasus_crt.a(udp_sock.o)
- .rodata        0xb081262d        0x9 pegasus_crt.a(sock.o)
- *fill*         0xb0812636        0x2 
- .rodata        0xb0812638       0xc3 pegasus_crt.a(tcp_output.o)
+ .rodata        0xb0811bc7       0x39 pegasus_crt.a(process.o)
+ .rodata        0xb0811c00       0x91 pegasus_crt.a(task_network.o)
+ *fill*         0xb0811c91        0x3 
+ .rodata        0xb0811c94      0x19c pegasus_crt.a(hd.o)
+ .rodata        0xb0811e30      0x1fb pegasus_crt.a(fs_main.o)
+                0xb0811e30                FSBUF_SIZE
+ .rodata        0xb081202b       0x11 pegasus_crt.a(main.o)
+ .rodata        0xb081203c       0x3f pegasus_crt.a(mem.o)
+ .rodata        0xb081207b       0x2d pegasus_crt.a(exec.o)
+ .rodata        0xb08120a8       0x2a pegasus_crt.a(close.o)
+ .rodata        0xb08120d2       0x36 pegasus_crt.a(double_link_list.o)
+ .rodata        0xb0812108       0xfd pegasus_crt.a(netdev.o)
+ *fill*         0xb0812205        0x3 
+ .rodata        0xb0812208       0x37 pegasus_crt.a(route.o)
+ .rodata        0xb081223f       0x21 pegasus_crt.a(forkexit.o)
+ .rodata        0xb0812260       0x10 pegasus_crt.a(exec.o)
+ .rodata        0xb0812270        0x3 pegasus_crt.a(inet_pton.o)
+ *fill*         0xb0812273        0x1 
+ .rodata        0xb0812274       0xb5 pegasus_crt.a(ip_input.o)
+ *fill*         0xb0812329        0x3 
+ .rodata        0xb081232c       0x31 pegasus_crt.a(tcp.o)
+ *fill*         0xb081235d        0x3 
+ .rodata        0xb0812360       0x9c pegasus_crt.a(arp.o)
+ .rodata        0xb08123fc       0xe8 pegasus_crt.a(tcp_sock.o)
+ .rodata        0xb08124e4       0x32 pegasus_crt.a(icmpv4.o)
+ .rodata        0xb0812516        0x9 pegasus_crt.a(ip_output.o)
+ .rodata        0xb081251f        0x9 pegasus_crt.a(skbuff.o)
+ .rodata        0xb0812528       0x60 pegasus_crt.a(tcp_input.o)
+ .rodata        0xb0812588        0x9 pegasus_crt.a(udp.o)
+ .rodata        0xb0812591       0x1e pegasus_crt.a(tcp_data.o)
+ *fill*         0xb08125af        0x1 
+ .rodata        0xb08125b0       0x41 pegasus_crt.a(utils.o)
+ *fill*         0xb08125f1        0x3 
+ .rodata        0xb08125f4       0x2d pegasus_crt.a(udp_sock.o)
+ .rodata        0xb0812621        0x9 pegasus_crt.a(dst.o)
+ .rodata        0xb081262a        0x9 pegasus_crt.a(sock.o)
+ *fill*         0xb0812633        0x1 
+ .rodata        0xb0812634       0xc3 pegasus_crt.a(tcp_output.o)
 
-.txt            0xb08126fb       0xaa
- .txt           0xb08126fb       0x82 pegasus_crt.a(string.o)
-                0xb08126fb                Memcpy2
-                0xb0812729                Memset
-                0xb0812748                Strcpy
-                0xb0812762                Strlen
- .txt           0xb081277d       0x28 pegasus_crt.a(hd_rdwt.o)
-                0xb081277d                read_port
-                0xb0812791                write_port
+.txt            0xb08126f7       0xaa
+ .txt           0xb08126f7       0x82 pegasus_crt.a(string.o)
+                0xb08126f7                Memcpy2
+                0xb0812725                Memset
+                0xb0812744                Strcpy
+                0xb081275e                Strlen
+ .txt           0xb0812779       0x28 pegasus_crt.a(hd_rdwt.o)
+                0xb0812779                read_port
+                0xb081278d                write_port
 
 .rodata1
  *(.rodata1)
@@ -1027,110 +1025,110 @@ LOAD pegasus_crt.a
  *(.eh_frame_hdr)
  *(.eh_frame_entry .eh_frame_entry.*)
 
-.eh_frame       0xb08127a8     0x38d8
+.eh_frame       0xb08127a4     0x38d4
  *(.eh_frame)
- .eh_frame      0xb08127a8       0x44 test.o
- .eh_frame      0xb08127ec      0x6cc pegasus_crt.a(kernel_main_old.o)
+ .eh_frame      0xb08127a4       0x44 test.o
+ .eh_frame      0xb08127e8      0x6cc pegasus_crt.a(kernel_main_old.o)
                                 0x6e4 (size before relaxing)
- .eh_frame      0xb0812eb8      0x100 pegasus_crt.a(protect.o)
+ .eh_frame      0xb0812eb4      0x100 pegasus_crt.a(protect.o)
                                 0x118 (size before relaxing)
- .eh_frame      0xb0812fb8      0x1e0 pegasus_crt.a(console.o)
+ .eh_frame      0xb0812fb4      0x1e0 pegasus_crt.a(console.o)
                                 0x1f8 (size before relaxing)
- .eh_frame      0xb0813198       0xa0 pegasus_crt.a(keyboard.o)
+ .eh_frame      0xb0813194       0xa0 pegasus_crt.a(keyboard.o)
                                  0xb8 (size before relaxing)
- .eh_frame      0xb0813238       0x80 pegasus_crt.a(process.o)
+ .eh_frame      0xb0813234       0x80 pegasus_crt.a(process.o)
                                  0x98 (size before relaxing)
- .eh_frame      0xb08132b8       0x3c pegasus_crt.a(task_network.o)
-                                 0x54 (size before relaxing)
- .eh_frame      0xb08132f4      0x264 pegasus_crt.a(hd.o)
+ .eh_frame      0xb08132b4       0x38 pegasus_crt.a(task_network.o)
+                                 0x50 (size before relaxing)
+ .eh_frame      0xb08132ec      0x264 pegasus_crt.a(hd.o)
                                 0x27c (size before relaxing)
- .eh_frame      0xb0813558      0x27c pegasus_crt.a(fs_main.o)
+ .eh_frame      0xb0813550      0x27c pegasus_crt.a(fs_main.o)
                                 0x294 (size before relaxing)
- .eh_frame      0xb08137d4       0x3c pegasus_crt.a(main.o)
+ .eh_frame      0xb08137cc       0x3c pegasus_crt.a(main.o)
                                  0x54 (size before relaxing)
- .eh_frame      0xb0813810      0x364 pegasus_crt.a(mem.o)
+ .eh_frame      0xb0813808      0x364 pegasus_crt.a(mem.o)
                                 0x37c (size before relaxing)
- .eh_frame      0xb0813b74       0x60 pegasus_crt.a(exec.o)
+ .eh_frame      0xb0813b6c       0x60 pegasus_crt.a(exec.o)
                                  0x78 (size before relaxing)
- .eh_frame      0xb0813bd4       0x20 pegasus_crt.a(exit.o)
+ .eh_frame      0xb0813bcc       0x20 pegasus_crt.a(exit.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0813bf4       0x20 pegasus_crt.a(wait.o)
+ .eh_frame      0xb0813bec       0x20 pegasus_crt.a(wait.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0813c14       0x20 pegasus_crt.a(fork.o)
+ .eh_frame      0xb0813c0c       0x20 pegasus_crt.a(fork.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0813c34       0x20 pegasus_crt.a(strcmp.o)
+ .eh_frame      0xb0813c2c       0x20 pegasus_crt.a(strcmp.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0813c54       0x20 pegasus_crt.a(read.o)
+ .eh_frame      0xb0813c4c       0x20 pegasus_crt.a(read.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0813c74       0x20 pegasus_crt.a(open.o)
+ .eh_frame      0xb0813c6c       0x20 pegasus_crt.a(open.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0813c94       0x20 pegasus_crt.a(write.o)
+ .eh_frame      0xb0813c8c       0x20 pegasus_crt.a(write.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0813cb4       0x20 pegasus_crt.a(close.o)
+ .eh_frame      0xb0813cac       0x20 pegasus_crt.a(close.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0813cd4       0xc0 pegasus_crt.a(double_link_list.o)
+ .eh_frame      0xb0813ccc       0xc0 pegasus_crt.a(double_link_list.o)
                                  0xd8 (size before relaxing)
- .eh_frame      0xb0813d94      0x16c pegasus_crt.a(netdev.o)
+ .eh_frame      0xb0813d8c      0x16c pegasus_crt.a(netdev.o)
                                 0x184 (size before relaxing)
- .eh_frame      0xb0813f00      0x1c0 pegasus_crt.a(arp.o)
-                                0x1d8 (size before relaxing)
- .eh_frame      0xb08140c0      0x124 pegasus_crt.a(route.o)
+ .eh_frame      0xb0813ef8      0x124 pegasus_crt.a(route.o)
                                 0x13c (size before relaxing)
- .eh_frame      0xb08141e4       0xe4 pegasus_crt.a(utils.o)
-                                 0xfc (size before relaxing)
- .eh_frame      0xb08142c8       0x80 pegasus_crt.a(forkexit.o)
+ .eh_frame      0xb081401c       0x80 pegasus_crt.a(forkexit.o)
                                  0x98 (size before relaxing)
- .eh_frame      0xb0814348       0x20 pegasus_crt.a(exec.o)
+ .eh_frame      0xb081409c       0x20 pegasus_crt.a(exec.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0814368       0x20 pegasus_crt.a(perror.o)
+ .eh_frame      0xb08140bc       0x20 pegasus_crt.a(perror.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0814388       0x20 pegasus_crt.a(sscanf.o)
+ .eh_frame      0xb08140dc       0x20 pegasus_crt.a(sscanf.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb08143a8       0x20 pegasus_crt.a(ntohs.o)
+ .eh_frame      0xb08140fc       0x20 pegasus_crt.a(ntohs.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb08143c8       0x20 pegasus_crt.a(htonl.o)
+ .eh_frame      0xb081411c       0x20 pegasus_crt.a(htons.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb08143e8       0x20 pegasus_crt.a(htons.o)
-                                 0x38 (size before relaxing)
- .eh_frame      0xb0814408       0x40 pegasus_crt.a(inet_pton.o)
+ .eh_frame      0xb081413c       0x40 pegasus_crt.a(inet_pton.o)
                                  0x58 (size before relaxing)
- .eh_frame      0xb0814448       0x20 pegasus_crt.a(ntohl.o)
+ .eh_frame      0xb081417c       0x20 pegasus_crt.a(ntohl.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0814468       0xe0 pegasus_crt.a(my_process.o)
+ .eh_frame      0xb081419c       0xe0 pegasus_crt.a(my_process.o)
                                  0xf8 (size before relaxing)
- .eh_frame      0xb0814548       0xe0 pegasus_crt.a(skbuff.o)
-                                 0xf8 (size before relaxing)
- .eh_frame      0xb0814628      0x104 pegasus_crt.a(ip_input.o)
+ .eh_frame      0xb081427c      0x104 pegasus_crt.a(ip_input.o)
                                 0x11c (size before relaxing)
- .eh_frame      0xb081472c      0x268 pegasus_crt.a(tcp.o)
+ .eh_frame      0xb0814380      0x268 pegasus_crt.a(tcp.o)
                                 0x280 (size before relaxing)
- .eh_frame      0xb0814994      0x4c0 pegasus_crt.a(tcp_sock.o)
+ .eh_frame      0xb08145e8      0x1c0 pegasus_crt.a(arp.o)
+                                0x1d8 (size before relaxing)
+ .eh_frame      0xb08147a8      0x4c0 pegasus_crt.a(tcp_sock.o)
                                 0x4d8 (size before relaxing)
- .eh_frame      0xb0814e54       0x80 pegasus_crt.a(icmpv4.o)
+ .eh_frame      0xb0814c68       0x80 pegasus_crt.a(icmpv4.o)
                                  0x98 (size before relaxing)
- .eh_frame      0xb0814ed4       0x40 pegasus_crt.a(ip_output.o)
+ .eh_frame      0xb0814ce8       0x40 pegasus_crt.a(ip_output.o)
                                  0x58 (size before relaxing)
- .eh_frame      0xb0814f14       0x40 pegasus_crt.a(dst.o)
-                                 0x58 (size before relaxing)
- .eh_frame      0xb0814f54      0x300 pegasus_crt.a(tcp_input.o)
+ .eh_frame      0xb0814d28       0xe0 pegasus_crt.a(skbuff.o)
+                                 0xf8 (size before relaxing)
+ .eh_frame      0xb0814e08      0x300 pegasus_crt.a(tcp_input.o)
                                 0x318 (size before relaxing)
- .eh_frame      0xb0815254      0x1e4 pegasus_crt.a(udp.o)
+ .eh_frame      0xb0815108      0x1e4 pegasus_crt.a(udp.o)
                                 0x1fc (size before relaxing)
- .eh_frame      0xb0815438      0x200 pegasus_crt.a(tcp_data.o)
+ .eh_frame      0xb08152ec      0x200 pegasus_crt.a(tcp_data.o)
                                 0x218 (size before relaxing)
- .eh_frame      0xb0815638       0x20 pegasus_crt.a(atoi.o)
+ .eh_frame      0xb08154ec       0xe4 pegasus_crt.a(utils.o)
+                                 0xfc (size before relaxing)
+ .eh_frame      0xb08155d0       0x20 pegasus_crt.a(atoi.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0815658       0x20 pegasus_crt.a(strtok.o)
+ .eh_frame      0xb08155f0       0x20 pegasus_crt.a(strtok.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0815678       0x20 pegasus_crt.a(strpbrk.o)
+ .eh_frame      0xb0815610       0x20 pegasus_crt.a(strpbrk.o)
                                  0x38 (size before relaxing)
- .eh_frame      0xb0815698       0x80 pegasus_crt.a(thread.o)
+ .eh_frame      0xb0815630       0x20 pegasus_crt.a(htonl.o)
+                                 0x38 (size before relaxing)
+ .eh_frame      0xb0815650       0x80 pegasus_crt.a(thread.o)
                                  0x98 (size before relaxing)
- .eh_frame      0xb0815718      0x404 pegasus_crt.a(udp_sock.o)
+ .eh_frame      0xb08156d0      0x404 pegasus_crt.a(udp_sock.o)
                                 0x41c (size before relaxing)
- .eh_frame      0xb0815b1c      0x1a0 pegasus_crt.a(sock.o)
+ .eh_frame      0xb0815ad4       0x40 pegasus_crt.a(dst.o)
+                                 0x58 (size before relaxing)
+ .eh_frame      0xb0815b14      0x1a0 pegasus_crt.a(sock.o)
                                 0x1b8 (size before relaxing)
- .eh_frame      0xb0815cbc      0x3c4 pegasus_crt.a(tcp_output.o)
+ .eh_frame      0xb0815cb4      0x3c4 pegasus_crt.a(tcp_output.o)
                                 0x3dc (size before relaxing)
  *(.eh_frame.*)
 
@@ -1226,7 +1224,7 @@ LOAD pegasus_crt.a
  *(.igot.plt)
  .igot.plt      0xb0817000        0x0 test.o
 
-.data           0xb0817000      0x89c
+.data           0xb0817000      0x880
  *(.data .data.* .gnu.linkonce.d.*)
  .data          0xb0817000        0x0 test.o
  .data          0xb0817000        0x0 pegasus_crt.a(kernel_main_old.o)
@@ -1258,175 +1256,174 @@ LOAD pegasus_crt.a
  .data          0xb0817770        0x0 pegasus_crt.a(syscall.o)
  .data          0xb0817770        0x0 pegasus_crt.a(double_link_list.o)
  .data          0xb0817770        0x4 pegasus_crt.a(netdev.o)
- .data          0xb0817774       0x14 pegasus_crt.a(arp.o)
- .data          0xb0817788        0xc pegasus_crt.a(route.o)
- .data          0xb0817794        0x4 pegasus_crt.a(utils.o)
- .data          0xb0817798        0x0 pegasus_crt.a(forkexit.o)
- .data          0xb0817798        0x0 pegasus_crt.a(exec.o)
- .data          0xb0817798        0x0 pegasus_crt.a(perror.o)
- .data          0xb0817798        0x0 pegasus_crt.a(sscanf.o)
- .data          0xb0817798        0x0 pegasus_crt.a(ntohs.o)
- .data          0xb0817798        0x0 pegasus_crt.a(htonl.o)
- .data          0xb0817798        0x0 pegasus_crt.a(htons.o)
- .data          0xb0817798        0x0 pegasus_crt.a(inet_pton.o)
- .data          0xb0817798        0x0 pegasus_crt.a(ntohl.o)
- .data          0xb0817798        0x0 pegasus_crt.a(my_process.o)
- .data          0xb0817798        0x4 pegasus_crt.a(skbuff.o)
- .data          0xb081779c        0x4 pegasus_crt.a(ip_input.o)
- .data          0xb08177a0        0x8 pegasus_crt.a(tcp.o)
- *fill*         0xb08177a8       0x18 
- .data          0xb08177c0       0x54 pegasus_crt.a(tcp_sock.o)
-                0xb08177e0                tcp_ops
- .data          0xb0817814        0x4 pegasus_crt.a(icmpv4.o)
- .data          0xb0817818        0x4 pegasus_crt.a(ip_output.o)
- .data          0xb081781c        0x4 pegasus_crt.a(dst.o)
- .data          0xb0817820        0x4 pegasus_crt.a(tcp_input.o)
- .data          0xb0817824        0x8 pegasus_crt.a(udp.o)
- .data          0xb081782c        0x4 pegasus_crt.a(tcp_data.o)
- .data          0xb0817830        0x0 pegasus_crt.a(atoi.o)
- .data          0xb0817830        0x0 pegasus_crt.a(strtok.o)
- .data          0xb0817830        0x0 pegasus_crt.a(strpbrk.o)
- .data          0xb0817830        0x0 pegasus_crt.a(thread.o)
- *fill*         0xb0817830       0x10 
- .data          0xb0817840       0x54 pegasus_crt.a(udp_sock.o)
-                0xb0817860                udp_ops
- .data          0xb0817894        0x4 pegasus_crt.a(sock.o)
- .data          0xb0817898        0x4 pegasus_crt.a(tcp_output.o)
+ .data          0xb0817774        0xc pegasus_crt.a(route.o)
+ .data          0xb0817780        0x0 pegasus_crt.a(forkexit.o)
+ .data          0xb0817780        0x0 pegasus_crt.a(exec.o)
+ .data          0xb0817780        0x0 pegasus_crt.a(perror.o)
+ .data          0xb0817780        0x0 pegasus_crt.a(sscanf.o)
+ .data          0xb0817780        0x0 pegasus_crt.a(ntohs.o)
+ .data          0xb0817780        0x0 pegasus_crt.a(htons.o)
+ .data          0xb0817780        0x0 pegasus_crt.a(inet_pton.o)
+ .data          0xb0817780        0x0 pegasus_crt.a(ntohl.o)
+ .data          0xb0817780        0x0 pegasus_crt.a(my_process.o)
+ .data          0xb0817780        0x4 pegasus_crt.a(ip_input.o)
+ .data          0xb0817784        0x8 pegasus_crt.a(tcp.o)
+ .data          0xb081778c       0x14 pegasus_crt.a(arp.o)
+ .data          0xb08177a0       0x54 pegasus_crt.a(tcp_sock.o)
+                0xb08177c0                tcp_ops
+ .data          0xb08177f4        0x4 pegasus_crt.a(icmpv4.o)
+ .data          0xb08177f8        0x4 pegasus_crt.a(ip_output.o)
+ .data          0xb08177fc        0x4 pegasus_crt.a(skbuff.o)
+ .data          0xb0817800        0x4 pegasus_crt.a(tcp_input.o)
+ .data          0xb0817804        0x8 pegasus_crt.a(udp.o)
+ .data          0xb081780c        0x4 pegasus_crt.a(tcp_data.o)
+ .data          0xb0817810        0x4 pegasus_crt.a(utils.o)
+ .data          0xb0817814        0x0 pegasus_crt.a(atoi.o)
+ .data          0xb0817814        0x0 pegasus_crt.a(strtok.o)
+ .data          0xb0817814        0x0 pegasus_crt.a(strpbrk.o)
+ .data          0xb0817814        0x0 pegasus_crt.a(htonl.o)
+ .data          0xb0817814        0x0 pegasus_crt.a(thread.o)
+ *fill*         0xb0817814        0xc 
+ .data          0xb0817820       0x54 pegasus_crt.a(udp_sock.o)
+                0xb0817840                udp_ops
+ .data          0xb0817874        0x4 pegasus_crt.a(dst.o)
+ .data          0xb0817878        0x4 pegasus_crt.a(sock.o)
+ .data          0xb081787c        0x4 pegasus_crt.a(tcp_output.o)
 
 .data1
  *(.data1)
-                0xb081789c                        _edata = .
+                0xb0817880                        _edata = .
                 [!provide]                        PROVIDE (edata = .)
-                0xb081789c                        . = .
-                0xb081789c                        __bss_start = .
+                0xb0817880                        . = .
+                0xb0817880                        __bss_start = .
 
-.bss            0xb08178a0    0x94e28
+.bss            0xb0817880    0x94de8
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0xb08178a0        0x0 test.o
- .bss           0xb08178a0        0x0 pegasus_crt.a(kernel_main_old.o)
- .bss           0xb08178a0        0x0 pegasus_crt.a(protect.o)
- .bss           0xb08178a0        0x0 pegasus_crt.a(console.o)
- .bss           0xb08178a0        0x0 pegasus_crt.a(global.o)
- .bss           0xb08178a0        0x0 pegasus_crt.a(keyboard.o)
- .bss           0xb08178a0        0x0 pegasus_crt.a(process.o)
- .bss           0xb08178a0        0x0 pegasus_crt.a(task_network.o)
- .bss           0xb08178a0        0x0 pegasus_crt.a(hd.o)
- .bss           0xb08178a0        0x4 pegasus_crt.a(fs_main.o)
-                0xb08178a0                c
- .bss           0xb08178a4        0x0 pegasus_crt.a(main.o)
- .bss           0xb08178a4        0x0 pegasus_crt.a(mem.o)
- .bss           0xb08178a4        0x0 pegasus_crt.a(exec.o)
- .bss           0xb08178a4        0x0 pegasus_crt.a(exit.o)
- .bss           0xb08178a4        0x0 pegasus_crt.a(wait.o)
- .bss           0xb08178a4        0x0 pegasus_crt.a(fork.o)
- .bss           0xb08178a4        0x0 pegasus_crt.a(strcmp.o)
- .bss           0xb08178a4        0x0 pegasus_crt.a(read.o)
- .bss           0xb08178a4        0x0 pegasus_crt.a(open.o)
- .bss           0xb08178a4        0x0 pegasus_crt.a(write.o)
- .bss           0xb08178a4        0x0 pegasus_crt.a(close.o)
- .bss           0xb08178a4      0x800 pegasus_crt.a(kernel.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(double_link_list.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(netdev.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(arp.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(route.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(utils.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(forkexit.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(exec.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(perror.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(sscanf.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(ntohs.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(htonl.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(htons.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(inet_pton.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(ntohl.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(my_process.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(skbuff.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(ip_input.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(tcp.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(tcp_sock.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(icmpv4.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(ip_output.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(dst.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(tcp_input.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(udp.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(tcp_data.o)
- .bss           0xb08180a4        0x0 pegasus_crt.a(atoi.o)
- .bss           0xb08180a4        0x4 pegasus_crt.a(strtok.o)
- .bss           0xb08180a8        0x0 pegasus_crt.a(strpbrk.o)
- .bss           0xb08180a8        0x0 pegasus_crt.a(thread.o)
- .bss           0xb08180a8        0x4 pegasus_crt.a(udp_sock.o)
- .bss           0xb08180ac        0x0 pegasus_crt.a(sock.o)
- .bss           0xb08180ac        0x0 pegasus_crt.a(tcp_output.o)
+ .bss           0xb0817880        0x0 test.o
+ .bss           0xb0817880        0x0 pegasus_crt.a(kernel_main_old.o)
+ .bss           0xb0817880        0x0 pegasus_crt.a(protect.o)
+ .bss           0xb0817880        0x0 pegasus_crt.a(console.o)
+ .bss           0xb0817880        0x0 pegasus_crt.a(global.o)
+ .bss           0xb0817880        0x0 pegasus_crt.a(keyboard.o)
+ .bss           0xb0817880        0x0 pegasus_crt.a(process.o)
+ .bss           0xb0817880        0x0 pegasus_crt.a(task_network.o)
+ .bss           0xb0817880        0x0 pegasus_crt.a(hd.o)
+ .bss           0xb0817880        0x4 pegasus_crt.a(fs_main.o)
+                0xb0817880                c
+ .bss           0xb0817884        0x0 pegasus_crt.a(main.o)
+ .bss           0xb0817884        0x0 pegasus_crt.a(mem.o)
+ .bss           0xb0817884        0x0 pegasus_crt.a(exec.o)
+ .bss           0xb0817884        0x0 pegasus_crt.a(exit.o)
+ .bss           0xb0817884        0x0 pegasus_crt.a(wait.o)
+ .bss           0xb0817884        0x0 pegasus_crt.a(fork.o)
+ .bss           0xb0817884        0x0 pegasus_crt.a(strcmp.o)
+ .bss           0xb0817884        0x0 pegasus_crt.a(read.o)
+ .bss           0xb0817884        0x0 pegasus_crt.a(open.o)
+ .bss           0xb0817884        0x0 pegasus_crt.a(write.o)
+ .bss           0xb0817884        0x0 pegasus_crt.a(close.o)
+ .bss           0xb0817884      0x800 pegasus_crt.a(kernel.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(double_link_list.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(netdev.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(route.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(forkexit.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(exec.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(perror.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(sscanf.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(ntohs.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(htons.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(inet_pton.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(ntohl.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(my_process.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(ip_input.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(tcp.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(arp.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(tcp_sock.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(icmpv4.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(ip_output.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(skbuff.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(tcp_input.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(udp.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(tcp_data.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(utils.o)
+ .bss           0xb0818084        0x0 pegasus_crt.a(atoi.o)
+ .bss           0xb0818084        0x4 pegasus_crt.a(strtok.o)
+ .bss           0xb0818088        0x0 pegasus_crt.a(strpbrk.o)
+ .bss           0xb0818088        0x0 pegasus_crt.a(htonl.o)
+ .bss           0xb0818088        0x0 pegasus_crt.a(thread.o)
+ .bss           0xb0818088        0x4 pegasus_crt.a(udp_sock.o)
+ .bss           0xb081808c        0x0 pegasus_crt.a(dst.o)
+ .bss           0xb081808c        0x0 pegasus_crt.a(sock.o)
+ .bss           0xb081808c        0x0 pegasus_crt.a(tcp_output.o)
  *(COMMON)
- *fill*         0xb08180ac       0x14 
- COMMON         0xb08180c0     0x17a8 pegasus_crt.a(kernel_main_old.o)
-                0xb08180c0                current_tty
-                0xb08180c4                is_e0
-                0xb08180c8                idt_ptr
-                0xb08180d0                pid
-                0xb08180d4                KernelVirtualMemory
-                0xb08180e0                current_dis_pos
-                0xb08180e4                dis_pos
-                0xb08180e8                k_reenter
-                0xb0818100                gdt
-                0xb0818500                proc_ready_table
-                0xb0818504                test_ticks
-                0xb0818508                pcaller
-                0xb0818520                keyboard_buffer
-                0xb081872c                gdt_index
-                0xb0818740                tty_table
-                0xb0818f80                tss
-                0xb0818fec                KernelPool
-                0xb0818ffc                net_buf
-                0xb0819000                nic_current_page
-                0xb0819004                counter
-                0xb0819008                key_pressed
-                0xb081900c                fork_pid
-                0xb0819010                is_shift
-                0xb0819011                net_data
-                0xb0819014                gdt_ptr
-                0xb0819020                idt
-                0xb0819820                main_thread
-                0xb0819828                ticks
-                0xb0819830                is_init
-                0xb0819834                UserPool
-                0xb0819844                console_table
-                0xb0819854                is_disp
-                0xb0819858                MAIN_THREAD_PAGE_DIRECTORY
-                0xb081985c                helloStr
- *fill*         0xb0819868       0x18 
- COMMON         0xb0819880    0x91aa4 pegasus_crt.a(global.o)
-                0xb0819880                proc_stack
-                0xb08a9880                proc_table
- *fill*         0xb08ab324       0x1c 
- COMMON         0xb08ab340      0x440 pegasus_crt.a(hd.o)
-                0xb08ab340                hd_info
-                0xb08ab580                hd_cache
- COMMON         0xb08ab780      0xe68 pegasus_crt.a(fs_main.o)
-                0xb08ab780                file_desc_table
-                0xb08abb80                phy_super_block_buf
-                0xb08abb84                phy_fsbuf
-                0xb08abba0                inode_table
-                0xb08ac5a0                super_block_buf
-                0xb08ac5a4                fsbuf
-                0xb08ac5c0                root
- *fill*         0xb08ac5e8       0x18 
- COMMON         0xb08ac600       0xa0 pegasus_crt.a(mem.o)
-                0xb08ac600                kernel_mem_block_decs_array
- COMMON         0xb08ac6a0       0x20 pegasus_crt.a(read.o)
-                0xb08ac6a0                pcb_list
-                0xb08ac6b0                all_pcb_list
- COMMON         0xb08ac6c0        0x8 pegasus_crt.a(netdev.o)
-                0xb08ac6c0                loop
-                0xb08ac6c4                netdev
-                0xb08ac6c8                        . = ALIGN ((. != 0x0)?0x4:0x1)
-                0xb08ac6c8                        . = ALIGN (0x4)
-                0xb08ac6c8                        . = SEGMENT_START ("ldata-segment", .)
-                0xb08ac6c8                        . = ALIGN (0x4)
-                0xb08ac6c8                        _end = .
+ *fill*         0xb081808c       0x14 
+ COMMON         0xb08180a0     0x17a8 pegasus_crt.a(kernel_main_old.o)
+                0xb08180a0                current_tty
+                0xb08180a4                is_e0
+                0xb08180a8                idt_ptr
+                0xb08180b0                pid
+                0xb08180b4                KernelVirtualMemory
+                0xb08180c0                current_dis_pos
+                0xb08180c4                dis_pos
+                0xb08180c8                k_reenter
+                0xb08180e0                gdt
+                0xb08184e0                proc_ready_table
+                0xb08184e4                test_ticks
+                0xb08184e8                pcaller
+                0xb0818500                keyboard_buffer
+                0xb081870c                gdt_index
+                0xb0818720                tty_table
+                0xb0818f60                tss
+                0xb0818fcc                KernelPool
+                0xb0818fdc                net_buf
+                0xb0818fe0                nic_current_page
+                0xb0818fe4                counter
+                0xb0818fe8                key_pressed
+                0xb0818fec                fork_pid
+                0xb0818ff0                is_shift
+                0xb0818ff1                net_data
+                0xb0818ff4                gdt_ptr
+                0xb0819000                idt
+                0xb0819800                main_thread
+                0xb0819808                ticks
+                0xb0819810                is_init
+                0xb0819814                UserPool
+                0xb0819824                console_table
+                0xb0819834                is_disp
+                0xb0819838                MAIN_THREAD_PAGE_DIRECTORY
+                0xb081983c                helloStr
+ *fill*         0xb0819848       0x18 
+ COMMON         0xb0819860    0x91a78 pegasus_crt.a(global.o)
+                0xb0819860                proc_stack
+                0xb08a9860                proc_table
+ *fill*         0xb08ab2d8        0x8 
+ COMMON         0xb08ab2e0      0x440 pegasus_crt.a(hd.o)
+                0xb08ab2e0                hd_info
+                0xb08ab520                hd_cache
+ COMMON         0xb08ab720      0xe68 pegasus_crt.a(fs_main.o)
+                0xb08ab720                file_desc_table
+                0xb08abb20                phy_super_block_buf
+                0xb08abb24                phy_fsbuf
+                0xb08abb40                inode_table
+                0xb08ac540                super_block_buf
+                0xb08ac544                fsbuf
+                0xb08ac560                root
+ *fill*         0xb08ac588       0x18 
+ COMMON         0xb08ac5a0       0xa0 pegasus_crt.a(mem.o)
+                0xb08ac5a0                kernel_mem_block_decs_array
+ COMMON         0xb08ac640       0x20 pegasus_crt.a(read.o)
+                0xb08ac640                pcb_list
+                0xb08ac650                all_pcb_list
+ COMMON         0xb08ac660        0x8 pegasus_crt.a(netdev.o)
+                0xb08ac660                loop
+                0xb08ac664                netdev
+                0xb08ac668                        . = ALIGN ((. != 0x0)?0x4:0x1)
+                0xb08ac668                        . = ALIGN (0x4)
+                0xb08ac668                        . = SEGMENT_START ("ldata-segment", .)
+                0xb08ac668                        . = ALIGN (0x4)
+                0xb08ac668                        _end = .
                 [!provide]                        PROVIDE (end = .)
-                0xb08ac6c8                        . = DATA_SEGMENT_END (.)
+                0xb08ac668                        . = DATA_SEGMENT_END (.)
 
 .stab
  *(.stab)
@@ -1472,34 +1469,34 @@ LOAD pegasus_crt.a
  .comment       0x0000002c       0x2d pegasus_crt.a(close.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(double_link_list.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(netdev.o)
- .comment       0x0000002c       0x2d pegasus_crt.a(arp.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(route.o)
- .comment       0x0000002c       0x2d pegasus_crt.a(utils.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(forkexit.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(exec.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(perror.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(sscanf.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(ntohs.o)
- .comment       0x0000002c       0x2d pegasus_crt.a(htonl.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(htons.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(inet_pton.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(ntohl.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(my_process.o)
- .comment       0x0000002c       0x2d pegasus_crt.a(skbuff.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(ip_input.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(tcp.o)
+ .comment       0x0000002c       0x2d pegasus_crt.a(arp.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(tcp_sock.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(icmpv4.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(ip_output.o)
- .comment       0x0000002c       0x2d pegasus_crt.a(dst.o)
+ .comment       0x0000002c       0x2d pegasus_crt.a(skbuff.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(tcp_input.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(udp.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(tcp_data.o)
+ .comment       0x0000002c       0x2d pegasus_crt.a(utils.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(atoi.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(strtok.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(strpbrk.o)
+ .comment       0x0000002c       0x2d pegasus_crt.a(htonl.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(thread.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(udp_sock.o)
+ .comment       0x0000002c       0x2d pegasus_crt.a(dst.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(sock.o)
  .comment       0x0000002c       0x2d pegasus_crt.a(tcp_output.o)
 
@@ -1565,61 +1562,61 @@ LOAD pegasus_crt.a
  .debug_aranges
                 0x00000298       0x20 pegasus_crt.a(netdev.o)
  .debug_aranges
-                0x000002b8       0x20 pegasus_crt.a(arp.o)
+                0x000002b8       0x20 pegasus_crt.a(route.o)
  .debug_aranges
-                0x000002d8       0x20 pegasus_crt.a(route.o)
+                0x000002d8       0x20 pegasus_crt.a(forkexit.o)
  .debug_aranges
-                0x000002f8       0x20 pegasus_crt.a(utils.o)
+                0x000002f8       0x20 pegasus_crt.a(exec.o)
  .debug_aranges
-                0x00000318       0x20 pegasus_crt.a(forkexit.o)
+                0x00000318       0x20 pegasus_crt.a(perror.o)
  .debug_aranges
-                0x00000338       0x20 pegasus_crt.a(exec.o)
+                0x00000338       0x20 pegasus_crt.a(sscanf.o)
  .debug_aranges
-                0x00000358       0x20 pegasus_crt.a(perror.o)
+                0x00000358       0x20 pegasus_crt.a(ntohs.o)
  .debug_aranges
-                0x00000378       0x20 pegasus_crt.a(sscanf.o)
+                0x00000378       0x20 pegasus_crt.a(htons.o)
  .debug_aranges
-                0x00000398       0x20 pegasus_crt.a(ntohs.o)
+                0x00000398       0x20 pegasus_crt.a(inet_pton.o)
  .debug_aranges
-                0x000003b8       0x20 pegasus_crt.a(htonl.o)
+                0x000003b8       0x20 pegasus_crt.a(ntohl.o)
  .debug_aranges
-                0x000003d8       0x20 pegasus_crt.a(htons.o)
+                0x000003d8       0x20 pegasus_crt.a(my_process.o)
  .debug_aranges
-                0x000003f8       0x20 pegasus_crt.a(inet_pton.o)
+                0x000003f8       0x20 pegasus_crt.a(ip_input.o)
  .debug_aranges
-                0x00000418       0x20 pegasus_crt.a(ntohl.o)
+                0x00000418       0x20 pegasus_crt.a(tcp.o)
  .debug_aranges
-                0x00000438       0x20 pegasus_crt.a(my_process.o)
+                0x00000438       0x20 pegasus_crt.a(arp.o)
  .debug_aranges
-                0x00000458       0x20 pegasus_crt.a(skbuff.o)
+                0x00000458       0x20 pegasus_crt.a(tcp_sock.o)
  .debug_aranges
-                0x00000478       0x20 pegasus_crt.a(ip_input.o)
+                0x00000478       0x20 pegasus_crt.a(icmpv4.o)
  .debug_aranges
-                0x00000498       0x20 pegasus_crt.a(tcp.o)
+                0x00000498       0x20 pegasus_crt.a(ip_output.o)
  .debug_aranges
-                0x000004b8       0x20 pegasus_crt.a(tcp_sock.o)
+                0x000004b8       0x20 pegasus_crt.a(skbuff.o)
  .debug_aranges
-                0x000004d8       0x20 pegasus_crt.a(icmpv4.o)
+                0x000004d8       0x20 pegasus_crt.a(tcp_input.o)
  .debug_aranges
-                0x000004f8       0x20 pegasus_crt.a(ip_output.o)
+                0x000004f8       0x20 pegasus_crt.a(udp.o)
  .debug_aranges
-                0x00000518       0x20 pegasus_crt.a(dst.o)
+                0x00000518       0x20 pegasus_crt.a(tcp_data.o)
  .debug_aranges
-                0x00000538       0x20 pegasus_crt.a(tcp_input.o)
+                0x00000538       0x20 pegasus_crt.a(utils.o)
  .debug_aranges
-                0x00000558       0x20 pegasus_crt.a(udp.o)
+                0x00000558       0x20 pegasus_crt.a(atoi.o)
  .debug_aranges
-                0x00000578       0x20 pegasus_crt.a(tcp_data.o)
+                0x00000578       0x20 pegasus_crt.a(strtok.o)
  .debug_aranges
-                0x00000598       0x20 pegasus_crt.a(atoi.o)
+                0x00000598       0x20 pegasus_crt.a(strpbrk.o)
  .debug_aranges
-                0x000005b8       0x20 pegasus_crt.a(strtok.o)
+                0x000005b8       0x20 pegasus_crt.a(htonl.o)
  .debug_aranges
-                0x000005d8       0x20 pegasus_crt.a(strpbrk.o)
+                0x000005d8       0x20 pegasus_crt.a(thread.o)
  .debug_aranges
-                0x000005f8       0x20 pegasus_crt.a(thread.o)
+                0x000005f8       0x20 pegasus_crt.a(udp_sock.o)
  .debug_aranges
-                0x00000618       0x20 pegasus_crt.a(udp_sock.o)
+                0x00000618       0x20 pegasus_crt.a(dst.o)
  .debug_aranges
                 0x00000638       0x20 pegasus_crt.a(sock.o)
  .debug_aranges
@@ -1628,62 +1625,62 @@ LOAD pegasus_crt.a
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000    0x3360f
+.debug_info     0x00000000    0x33436
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000     0x2810 pegasus_crt.a(kernel_main_old.o)
- .debug_info    0x00002810     0x1184 pegasus_crt.a(protect.o)
- .debug_info    0x00003994     0x1259 pegasus_crt.a(console.o)
- .debug_info    0x00004bed      0xe59 pegasus_crt.a(global.o)
- .debug_info    0x00005a46      0xfad pegasus_crt.a(keyboard.o)
- .debug_info    0x000069f3      0xf24 pegasus_crt.a(process.o)
- .debug_info    0x00007917      0x65b pegasus_crt.a(task_network.o)
- .debug_info    0x00007f72     0x17c8 pegasus_crt.a(hd.o)
- .debug_info    0x0000973a     0x1f0a pegasus_crt.a(fs_main.o)
- .debug_info    0x0000b644      0xd9b pegasus_crt.a(main.o)
- .debug_info    0x0000c3df     0x1d30 pegasus_crt.a(mem.o)
- .debug_info    0x0000e10f      0xf0f pegasus_crt.a(exec.o)
- .debug_info    0x0000f01e      0xd82 pegasus_crt.a(exit.o)
- .debug_info    0x0000fda0      0xd90 pegasus_crt.a(wait.o)
- .debug_info    0x00010b30      0xd77 pegasus_crt.a(fork.o)
- .debug_info    0x000118a7       0xc1 pegasus_crt.a(strcmp.o)
- .debug_info    0x00011968      0xea1 pegasus_crt.a(read.o)
- .debug_info    0x00012809      0xe02 pegasus_crt.a(open.o)
- .debug_info    0x0001360b      0xe2f pegasus_crt.a(write.o)
- .debug_info    0x0001443a      0xdb6 pegasus_crt.a(close.o)
- .debug_info    0x000151f0      0xfe8 pegasus_crt.a(double_link_list.o)
- .debug_info    0x000161d8     0x1532 pegasus_crt.a(netdev.o)
- .debug_info    0x0001770a      0x76e pegasus_crt.a(arp.o)
- .debug_info    0x00017e78     0x1251 pegasus_crt.a(route.o)
- .debug_info    0x000190c9      0x367 pegasus_crt.a(utils.o)
- .debug_info    0x00019430      0xf6d pegasus_crt.a(forkexit.o)
- .debug_info    0x0001a39d     0x1199 pegasus_crt.a(exec.o)
- .debug_info    0x0001b536       0x5c pegasus_crt.a(perror.o)
- .debug_info    0x0001b592      0x20e pegasus_crt.a(sscanf.o)
- .debug_info    0x0001b7a0       0xa8 pegasus_crt.a(ntohs.o)
- .debug_info    0x0001b848       0xcb pegasus_crt.a(htonl.o)
- .debug_info    0x0001b913       0xa8 pegasus_crt.a(htons.o)
- .debug_info    0x0001b9bb      0x260 pegasus_crt.a(inet_pton.o)
- .debug_info    0x0001bc1b       0xcb pegasus_crt.a(ntohl.o)
- .debug_info    0x0001bce6     0x146c pegasus_crt.a(my_process.o)
- .debug_info    0x0001d152      0x39f pegasus_crt.a(skbuff.o)
- .debug_info    0x0001d4f1     0x1a7a pegasus_crt.a(ip_input.o)
- .debug_info    0x0001ef6b     0x1ddd pegasus_crt.a(tcp.o)
- .debug_info    0x00020d48     0x21ce pegasus_crt.a(tcp_sock.o)
- .debug_info    0x00022f16     0x18d8 pegasus_crt.a(icmpv4.o)
- .debug_info    0x000247ee     0x1714 pegasus_crt.a(ip_output.o)
- .debug_info    0x00025f02     0x11b9 pegasus_crt.a(dst.o)
- .debug_info    0x000270bb     0x20e0 pegasus_crt.a(tcp_input.o)
- .debug_info    0x0002919b     0x1add pegasus_crt.a(udp.o)
- .debug_info    0x0002ac78     0x1d46 pegasus_crt.a(tcp_data.o)
- .debug_info    0x0002c9be       0xc9 pegasus_crt.a(atoi.o)
- .debug_info    0x0002ca87       0xae pegasus_crt.a(strtok.o)
- .debug_info    0x0002cb35       0xcf pegasus_crt.a(strpbrk.o)
- .debug_info    0x0002cc04     0x1038 pegasus_crt.a(thread.o)
- .debug_info    0x0002dc3c     0x1eac pegasus_crt.a(udp_sock.o)
- .debug_info    0x0002fae8     0x182f pegasus_crt.a(sock.o)
- .debug_info    0x00031317     0x22f8 pegasus_crt.a(tcp_output.o)
+ .debug_info    0x00002810     0x1174 pegasus_crt.a(protect.o)
+ .debug_info    0x00003984     0x1249 pegasus_crt.a(console.o)
+ .debug_info    0x00004bcd      0xe49 pegasus_crt.a(global.o)
+ .debug_info    0x00005a16      0xf9d pegasus_crt.a(keyboard.o)
+ .debug_info    0x000069b3      0xf30 pegasus_crt.a(process.o)
+ .debug_info    0x000078e3      0x676 pegasus_crt.a(task_network.o)
+ .debug_info    0x00007f59     0x17b8 pegasus_crt.a(hd.o)
+ .debug_info    0x00009711     0x1efa pegasus_crt.a(fs_main.o)
+ .debug_info    0x0000b60b      0xd8b pegasus_crt.a(main.o)
+ .debug_info    0x0000c396     0x1d20 pegasus_crt.a(mem.o)
+ .debug_info    0x0000e0b6      0xeff pegasus_crt.a(exec.o)
+ .debug_info    0x0000efb5      0xd72 pegasus_crt.a(exit.o)
+ .debug_info    0x0000fd27      0xd80 pegasus_crt.a(wait.o)
+ .debug_info    0x00010aa7      0xd67 pegasus_crt.a(fork.o)
+ .debug_info    0x0001180e       0xc1 pegasus_crt.a(strcmp.o)
+ .debug_info    0x000118cf      0xea1 pegasus_crt.a(read.o)
+ .debug_info    0x00012770      0xe02 pegasus_crt.a(open.o)
+ .debug_info    0x00013572      0xe2f pegasus_crt.a(write.o)
+ .debug_info    0x000143a1      0xdb6 pegasus_crt.a(close.o)
+ .debug_info    0x00015157     0x100c pegasus_crt.a(double_link_list.o)
+ .debug_info    0x00016163     0x14ce pegasus_crt.a(netdev.o)
+ .debug_info    0x00017631     0x1241 pegasus_crt.a(route.o)
+ .debug_info    0x00018872      0xf5d pegasus_crt.a(forkexit.o)
+ .debug_info    0x000197cf     0x1199 pegasus_crt.a(exec.o)
+ .debug_info    0x0001a968       0x5c pegasus_crt.a(perror.o)
+ .debug_info    0x0001a9c4      0x20e pegasus_crt.a(sscanf.o)
+ .debug_info    0x0001abd2       0xa8 pegasus_crt.a(ntohs.o)
+ .debug_info    0x0001ac7a       0xa8 pegasus_crt.a(htons.o)
+ .debug_info    0x0001ad22      0x260 pegasus_crt.a(inet_pton.o)
+ .debug_info    0x0001af82       0xcb pegasus_crt.a(ntohl.o)
+ .debug_info    0x0001b04d     0x145c pegasus_crt.a(my_process.o)
+ .debug_info    0x0001c4a9     0x1a6a pegasus_crt.a(ip_input.o)
+ .debug_info    0x0001df13     0x1dcd pegasus_crt.a(tcp.o)
+ .debug_info    0x0001fce0      0x76e pegasus_crt.a(arp.o)
+ .debug_info    0x0002044e     0x21be pegasus_crt.a(tcp_sock.o)
+ .debug_info    0x0002260c     0x18c8 pegasus_crt.a(icmpv4.o)
+ .debug_info    0x00023ed4     0x1704 pegasus_crt.a(ip_output.o)
+ .debug_info    0x000255d8      0x39f pegasus_crt.a(skbuff.o)
+ .debug_info    0x00025977     0x20d0 pegasus_crt.a(tcp_input.o)
+ .debug_info    0x00027a47     0x1acd pegasus_crt.a(udp.o)
+ .debug_info    0x00029514     0x1d36 pegasus_crt.a(tcp_data.o)
+ .debug_info    0x0002b24a      0x367 pegasus_crt.a(utils.o)
+ .debug_info    0x0002b5b1       0xc9 pegasus_crt.a(atoi.o)
+ .debug_info    0x0002b67a       0xae pegasus_crt.a(strtok.o)
+ .debug_info    0x0002b728       0xcf pegasus_crt.a(strpbrk.o)
+ .debug_info    0x0002b7f7       0xcb pegasus_crt.a(htonl.o)
+ .debug_info    0x0002b8c2     0x1028 pegasus_crt.a(thread.o)
+ .debug_info    0x0002c8ea     0x1e9c pegasus_crt.a(udp_sock.o)
+ .debug_info    0x0002e786     0x11a9 pegasus_crt.a(dst.o)
+ .debug_info    0x0002f92f     0x181f pegasus_crt.a(sock.o)
+ .debug_info    0x0003114e     0x22e8 pegasus_crt.a(tcp_output.o)
 
-.debug_abbrev   0x00000000     0x6636
+.debug_abbrev   0x00000000     0x6662
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x452 pegasus_crt.a(kernel_main_old.o)
  .debug_abbrev  0x00000452      0x227 pegasus_crt.a(protect.o)
@@ -1705,152 +1702,152 @@ LOAD pegasus_crt.a
  .debug_abbrev  0x000023c4      0x1c5 pegasus_crt.a(open.o)
  .debug_abbrev  0x00002589      0x1db pegasus_crt.a(write.o)
  .debug_abbrev  0x00002764      0x19d pegasus_crt.a(close.o)
- .debug_abbrev  0x00002901      0x216 pegasus_crt.a(double_link_list.o)
- .debug_abbrev  0x00002b17      0x2a0 pegasus_crt.a(netdev.o)
- .debug_abbrev  0x00002db7      0x210 pegasus_crt.a(arp.o)
- .debug_abbrev  0x00002fc7      0x24e pegasus_crt.a(route.o)
- .debug_abbrev  0x00003215      0x17a pegasus_crt.a(utils.o)
- .debug_abbrev  0x0000338f      0x204 pegasus_crt.a(forkexit.o)
- .debug_abbrev  0x00003593      0x1c4 pegasus_crt.a(exec.o)
- .debug_abbrev  0x00003757       0x5c pegasus_crt.a(perror.o)
- .debug_abbrev  0x000037b3       0xdd pegasus_crt.a(sscanf.o)
- .debug_abbrev  0x00003890       0x6c pegasus_crt.a(ntohs.o)
- .debug_abbrev  0x000038fc       0xa5 pegasus_crt.a(htonl.o)
- .debug_abbrev  0x000039a1       0x6c pegasus_crt.a(htons.o)
- .debug_abbrev  0x00003a0d      0x116 pegasus_crt.a(inet_pton.o)
- .debug_abbrev  0x00003b23       0xa5 pegasus_crt.a(ntohl.o)
- .debug_abbrev  0x00003bc8      0x260 pegasus_crt.a(my_process.o)
- .debug_abbrev  0x00003e28      0x15f pegasus_crt.a(skbuff.o)
- .debug_abbrev  0x00003f87      0x2d1 pegasus_crt.a(ip_input.o)
- .debug_abbrev  0x00004258      0x332 pegasus_crt.a(tcp.o)
- .debug_abbrev  0x0000458a      0x3e6 pegasus_crt.a(tcp_sock.o)
- .debug_abbrev  0x00004970      0x236 pegasus_crt.a(icmpv4.o)
- .debug_abbrev  0x00004ba6      0x213 pegasus_crt.a(ip_output.o)
- .debug_abbrev  0x00004db9      0x204 pegasus_crt.a(dst.o)
- .debug_abbrev  0x00004fbd      0x355 pegasus_crt.a(tcp_input.o)
- .debug_abbrev  0x00005312      0x2d3 pegasus_crt.a(udp.o)
- .debug_abbrev  0x000055e5      0x2a6 pegasus_crt.a(tcp_data.o)
- .debug_abbrev  0x0000588b       0x94 pegasus_crt.a(atoi.o)
- .debug_abbrev  0x0000591f       0x91 pegasus_crt.a(strtok.o)
- .debug_abbrev  0x000059b0       0xa5 pegasus_crt.a(strpbrk.o)
- .debug_abbrev  0x00005a55      0x222 pegasus_crt.a(thread.o)
- .debug_abbrev  0x00005c77      0x3b1 pegasus_crt.a(udp_sock.o)
- .debug_abbrev  0x00006028      0x273 pegasus_crt.a(sock.o)
- .debug_abbrev  0x0000629b      0x39b pegasus_crt.a(tcp_output.o)
+ .debug_abbrev  0x00002901      0x22e pegasus_crt.a(double_link_list.o)
+ .debug_abbrev  0x00002b2f      0x2b4 pegasus_crt.a(netdev.o)
+ .debug_abbrev  0x00002de3      0x24e pegasus_crt.a(route.o)
+ .debug_abbrev  0x00003031      0x204 pegasus_crt.a(forkexit.o)
+ .debug_abbrev  0x00003235      0x1c4 pegasus_crt.a(exec.o)
+ .debug_abbrev  0x000033f9       0x5c pegasus_crt.a(perror.o)
+ .debug_abbrev  0x00003455       0xdd pegasus_crt.a(sscanf.o)
+ .debug_abbrev  0x00003532       0x6c pegasus_crt.a(ntohs.o)
+ .debug_abbrev  0x0000359e       0x6c pegasus_crt.a(htons.o)
+ .debug_abbrev  0x0000360a      0x116 pegasus_crt.a(inet_pton.o)
+ .debug_abbrev  0x00003720       0xa5 pegasus_crt.a(ntohl.o)
+ .debug_abbrev  0x000037c5      0x260 pegasus_crt.a(my_process.o)
+ .debug_abbrev  0x00003a25      0x2d1 pegasus_crt.a(ip_input.o)
+ .debug_abbrev  0x00003cf6      0x332 pegasus_crt.a(tcp.o)
+ .debug_abbrev  0x00004028      0x210 pegasus_crt.a(arp.o)
+ .debug_abbrev  0x00004238      0x3e6 pegasus_crt.a(tcp_sock.o)
+ .debug_abbrev  0x0000461e      0x236 pegasus_crt.a(icmpv4.o)
+ .debug_abbrev  0x00004854      0x213 pegasus_crt.a(ip_output.o)
+ .debug_abbrev  0x00004a67      0x15f pegasus_crt.a(skbuff.o)
+ .debug_abbrev  0x00004bc6      0x355 pegasus_crt.a(tcp_input.o)
+ .debug_abbrev  0x00004f1b      0x2d3 pegasus_crt.a(udp.o)
+ .debug_abbrev  0x000051ee      0x2a6 pegasus_crt.a(tcp_data.o)
+ .debug_abbrev  0x00005494      0x17a pegasus_crt.a(utils.o)
+ .debug_abbrev  0x0000560e       0x94 pegasus_crt.a(atoi.o)
+ .debug_abbrev  0x000056a2       0x91 pegasus_crt.a(strtok.o)
+ .debug_abbrev  0x00005733       0xa5 pegasus_crt.a(strpbrk.o)
+ .debug_abbrev  0x000057d8       0xa5 pegasus_crt.a(htonl.o)
+ .debug_abbrev  0x0000587d      0x222 pegasus_crt.a(thread.o)
+ .debug_abbrev  0x00005a9f      0x3b1 pegasus_crt.a(udp_sock.o)
+ .debug_abbrev  0x00005e50      0x204 pegasus_crt.a(dst.o)
+ .debug_abbrev  0x00006054      0x273 pegasus_crt.a(sock.o)
+ .debug_abbrev  0x000062c7      0x39b pegasus_crt.a(tcp_output.o)
 
-.debug_line     0x00000000     0x8414
+.debug_line     0x00000000     0x83d2
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0xe29 pegasus_crt.a(kernel_main_old.o)
  .debug_line    0x00000e29      0x1ff pegasus_crt.a(protect.o)
  .debug_line    0x00001028      0x54e pegasus_crt.a(console.o)
  .debug_line    0x00001576       0x95 pegasus_crt.a(global.o)
  .debug_line    0x0000160b      0x296 pegasus_crt.a(keyboard.o)
- .debug_line    0x000018a1      0x176 pegasus_crt.a(process.o)
- .debug_line    0x00001a17       0xca pegasus_crt.a(task_network.o)
- .debug_line    0x00001ae1      0x62b pegasus_crt.a(hd.o)
- .debug_line    0x0000210c      0xc23 pegasus_crt.a(fs_main.o)
- .debug_line    0x00002d2f       0xec pegasus_crt.a(main.o)
- .debug_line    0x00002e1b      0x7f2 pegasus_crt.a(mem.o)
- .debug_line    0x0000360d      0x18b pegasus_crt.a(exec.o)
- .debug_line    0x00003798       0xa0 pegasus_crt.a(exit.o)
- .debug_line    0x00003838       0xb7 pegasus_crt.a(wait.o)
- .debug_line    0x000038ef       0xa5 pegasus_crt.a(fork.o)
- .debug_line    0x00003994       0x9c pegasus_crt.a(strcmp.o)
- .debug_line    0x00003a30      0x15b pegasus_crt.a(read.o)
- .debug_line    0x00003b8b       0xc3 pegasus_crt.a(open.o)
- .debug_line    0x00003c4e       0xc2 pegasus_crt.a(write.o)
- .debug_line    0x00003d10       0xb3 pegasus_crt.a(close.o)
- .debug_line    0x00003dc3      0x1ca pegasus_crt.a(double_link_list.o)
- .debug_line    0x00003f8d      0x343 pegasus_crt.a(netdev.o)
- .debug_line    0x000042d0      0x34c pegasus_crt.a(arp.o)
- .debug_line    0x0000461c      0x209 pegasus_crt.a(route.o)
- .debug_line    0x00004825      0x13c pegasus_crt.a(utils.o)
- .debug_line    0x00004961      0x174 pegasus_crt.a(forkexit.o)
- .debug_line    0x00004ad5      0x20c pegasus_crt.a(exec.o)
- .debug_line    0x00004ce1       0x48 pegasus_crt.a(perror.o)
- .debug_line    0x00004d29      0x1d2 pegasus_crt.a(sscanf.o)
- .debug_line    0x00004efb       0x6c pegasus_crt.a(ntohs.o)
- .debug_line    0x00004f67       0xc1 pegasus_crt.a(htonl.o)
- .debug_line    0x00005028       0x6c pegasus_crt.a(htons.o)
- .debug_line    0x00005094      0x167 pegasus_crt.a(inet_pton.o)
- .debug_line    0x000051fb       0xc1 pegasus_crt.a(ntohl.o)
- .debug_line    0x000052bc      0x33b pegasus_crt.a(my_process.o)
- .debug_line    0x000055f7      0x121 pegasus_crt.a(skbuff.o)
- .debug_line    0x00005718      0x272 pegasus_crt.a(ip_input.o)
- .debug_line    0x0000598a      0x2f5 pegasus_crt.a(tcp.o)
- .debug_line    0x00005c7f      0x57b pegasus_crt.a(tcp_sock.o)
- .debug_line    0x000061fa      0x225 pegasus_crt.a(icmpv4.o)
- .debug_line    0x0000641f      0x1fe pegasus_crt.a(ip_output.o)
- .debug_line    0x0000661d      0x15e pegasus_crt.a(dst.o)
- .debug_line    0x0000677b      0x658 pegasus_crt.a(tcp_input.o)
- .debug_line    0x00006dd3      0x2ec pegasus_crt.a(udp.o)
- .debug_line    0x000070bf      0x3e9 pegasus_crt.a(tcp_data.o)
- .debug_line    0x000074a8       0xad pegasus_crt.a(atoi.o)
- .debug_line    0x00007555       0x6e pegasus_crt.a(strtok.o)
- .debug_line    0x000075c3       0xb0 pegasus_crt.a(strpbrk.o)
- .debug_line    0x00007673      0x145 pegasus_crt.a(thread.o)
- .debug_line    0x000077b8      0x4b0 pegasus_crt.a(udp_sock.o)
- .debug_line    0x00007c68      0x222 pegasus_crt.a(sock.o)
- .debug_line    0x00007e8a      0x58a pegasus_crt.a(tcp_output.o)
+ .debug_line    0x000018a1      0x1ac pegasus_crt.a(process.o)
+ .debug_line    0x00001a4d       0xf5 pegasus_crt.a(task_network.o)
+ .debug_line    0x00001b42      0x62b pegasus_crt.a(hd.o)
+ .debug_line    0x0000216d      0xc23 pegasus_crt.a(fs_main.o)
+ .debug_line    0x00002d90       0xec pegasus_crt.a(main.o)
+ .debug_line    0x00002e7c      0x7ec pegasus_crt.a(mem.o)
+ .debug_line    0x00003668      0x18b pegasus_crt.a(exec.o)
+ .debug_line    0x000037f3       0xa0 pegasus_crt.a(exit.o)
+ .debug_line    0x00003893       0xb7 pegasus_crt.a(wait.o)
+ .debug_line    0x0000394a       0xa5 pegasus_crt.a(fork.o)
+ .debug_line    0x000039ef       0x9c pegasus_crt.a(strcmp.o)
+ .debug_line    0x00003a8b      0x15b pegasus_crt.a(read.o)
+ .debug_line    0x00003be6       0xc3 pegasus_crt.a(open.o)
+ .debug_line    0x00003ca9       0xc2 pegasus_crt.a(write.o)
+ .debug_line    0x00003d6b       0xb3 pegasus_crt.a(close.o)
+ .debug_line    0x00003e1e      0x202 pegasus_crt.a(double_link_list.o)
+ .debug_line    0x00004020      0x26e pegasus_crt.a(netdev.o)
+ .debug_line    0x0000428e      0x209 pegasus_crt.a(route.o)
+ .debug_line    0x00004497      0x174 pegasus_crt.a(forkexit.o)
+ .debug_line    0x0000460b      0x20c pegasus_crt.a(exec.o)
+ .debug_line    0x00004817       0x48 pegasus_crt.a(perror.o)
+ .debug_line    0x0000485f      0x1d2 pegasus_crt.a(sscanf.o)
+ .debug_line    0x00004a31       0x6c pegasus_crt.a(ntohs.o)
+ .debug_line    0x00004a9d       0x6c pegasus_crt.a(htons.o)
+ .debug_line    0x00004b09      0x167 pegasus_crt.a(inet_pton.o)
+ .debug_line    0x00004c70       0xc1 pegasus_crt.a(ntohl.o)
+ .debug_line    0x00004d31      0x33b pegasus_crt.a(my_process.o)
+ .debug_line    0x0000506c      0x272 pegasus_crt.a(ip_input.o)
+ .debug_line    0x000052de      0x2f5 pegasus_crt.a(tcp.o)
+ .debug_line    0x000055d3      0x34c pegasus_crt.a(arp.o)
+ .debug_line    0x0000591f      0x57b pegasus_crt.a(tcp_sock.o)
+ .debug_line    0x00005e9a      0x225 pegasus_crt.a(icmpv4.o)
+ .debug_line    0x000060bf      0x1fe pegasus_crt.a(ip_output.o)
+ .debug_line    0x000062bd      0x121 pegasus_crt.a(skbuff.o)
+ .debug_line    0x000063de      0x658 pegasus_crt.a(tcp_input.o)
+ .debug_line    0x00006a36      0x2ec pegasus_crt.a(udp.o)
+ .debug_line    0x00006d22      0x3e9 pegasus_crt.a(tcp_data.o)
+ .debug_line    0x0000710b      0x13c pegasus_crt.a(utils.o)
+ .debug_line    0x00007247       0xad pegasus_crt.a(atoi.o)
+ .debug_line    0x000072f4       0x6e pegasus_crt.a(strtok.o)
+ .debug_line    0x00007362       0xb0 pegasus_crt.a(strpbrk.o)
+ .debug_line    0x00007412       0xc1 pegasus_crt.a(htonl.o)
+ .debug_line    0x000074d3      0x145 pegasus_crt.a(thread.o)
+ .debug_line    0x00007618      0x4b0 pegasus_crt.a(udp_sock.o)
+ .debug_line    0x00007ac8      0x15e pegasus_crt.a(dst.o)
+ .debug_line    0x00007c26      0x222 pegasus_crt.a(sock.o)
+ .debug_line    0x00007e48      0x58a pegasus_crt.a(tcp_output.o)
 
 .debug_frame
  *(.debug_frame)
 
-.debug_str      0x00000000     0x3205
+.debug_str      0x00000000     0x3212
  *(.debug_str)
- .debug_str     0x00000000     0x3205 pegasus_crt.a(kernel_main_old.o)
+ .debug_str     0x00000000     0x3212 pegasus_crt.a(kernel_main_old.o)
                                 0xb6c (size before relaxing)
- .debug_str     0x00003205      0x75b pegasus_crt.a(protect.o)
- .debug_str     0x00003205      0x74f pegasus_crt.a(console.o)
- .debug_str     0x00003205      0x600 pegasus_crt.a(global.o)
- .debug_str     0x00003205      0x68c pegasus_crt.a(keyboard.o)
- .debug_str     0x00003205      0x63a pegasus_crt.a(process.o)
- .debug_str     0x00003205      0x28f pegasus_crt.a(task_network.o)
- .debug_str     0x00003205      0x909 pegasus_crt.a(hd.o)
- .debug_str     0x00003205      0xaea pegasus_crt.a(fs_main.o)
- .debug_str     0x00003205      0x588 pegasus_crt.a(main.o)
- .debug_str     0x00003205      0xa88 pegasus_crt.a(mem.o)
- .debug_str     0x00003205      0x61c pegasus_crt.a(exec.o)
- .debug_str     0x00003205      0x595 pegasus_crt.a(exit.o)
- .debug_str     0x00003205      0x595 pegasus_crt.a(wait.o)
- .debug_str     0x00003205      0x58e pegasus_crt.a(fork.o)
- .debug_str     0x00003205       0xb1 pegasus_crt.a(strcmp.o)
- .debug_str     0x00003205      0x617 pegasus_crt.a(read.o)
- .debug_str     0x00003205      0x5de pegasus_crt.a(open.o)
- .debug_str     0x00003205      0x5db pegasus_crt.a(write.o)
- .debug_str     0x00003205      0x5a6 pegasus_crt.a(close.o)
- .debug_str     0x00003205      0x6d1 pegasus_crt.a(double_link_list.o)
- .debug_str     0x00003205      0x820 pegasus_crt.a(netdev.o)
- .debug_str     0x00003205      0x2f6 pegasus_crt.a(arp.o)
- .debug_str     0x00003205      0x733 pegasus_crt.a(route.o)
- .debug_str     0x00003205      0x1b8 pegasus_crt.a(utils.o)
- .debug_str     0x00003205      0x607 pegasus_crt.a(forkexit.o)
- .debug_str     0x00003205      0x85d pegasus_crt.a(exec.o)
- .debug_str     0x00003205       0x99 pegasus_crt.a(perror.o)
- .debug_str     0x00003205      0x102 pegasus_crt.a(sscanf.o)
- .debug_str     0x00003205      0x101 pegasus_crt.a(ntohs.o)
- .debug_str     0x00003205       0xf4 pegasus_crt.a(htonl.o)
- .debug_str     0x00003205      0x102 pegasus_crt.a(htons.o)
- .debug_str     0x00003205      0x14c pegasus_crt.a(inet_pton.o)
- .debug_str     0x00003205       0xf3 pegasus_crt.a(ntohl.o)
- .debug_str     0x00003205      0x8ee pegasus_crt.a(my_process.o)
- .debug_str     0x00003205      0x1d8 pegasus_crt.a(skbuff.o)
- .debug_str     0x00003205      0x98b pegasus_crt.a(ip_input.o)
- .debug_str     0x00003205      0xb1d pegasus_crt.a(tcp.o)
- .debug_str     0x00003205      0xcb0 pegasus_crt.a(tcp_sock.o)
- .debug_str     0x00003205      0x90a pegasus_crt.a(icmpv4.o)
- .debug_str     0x00003205      0x846 pegasus_crt.a(ip_output.o)
- .debug_str     0x00003205      0x712 pegasus_crt.a(dst.o)
- .debug_str     0x00003205      0xb7d pegasus_crt.a(tcp_input.o)
- .debug_str     0x00003205      0x93d pegasus_crt.a(udp.o)
- .debug_str     0x00003205      0xa39 pegasus_crt.a(tcp_data.o)
- .debug_str     0x00003205       0xad pegasus_crt.a(atoi.o)
- .debug_str     0x00003205       0xb9 pegasus_crt.a(strtok.o)
- .debug_str     0x00003205       0xc1 pegasus_crt.a(strpbrk.o)
- .debug_str     0x00003205      0x707 pegasus_crt.a(thread.o)
- .debug_str     0x00003205      0xa61 pegasus_crt.a(udp_sock.o)
- .debug_str     0x00003205      0x8a6 pegasus_crt.a(sock.o)
- .debug_str     0x00003205      0xc0d pegasus_crt.a(tcp_output.o)
+ .debug_str     0x00003212      0x75b pegasus_crt.a(protect.o)
+ .debug_str     0x00003212      0x74f pegasus_crt.a(console.o)
+ .debug_str     0x00003212      0x600 pegasus_crt.a(global.o)
+ .debug_str     0x00003212      0x68c pegasus_crt.a(keyboard.o)
+ .debug_str     0x00003212      0x640 pegasus_crt.a(process.o)
+ .debug_str     0x00003212      0x28f pegasus_crt.a(task_network.o)
+ .debug_str     0x00003212      0x909 pegasus_crt.a(hd.o)
+ .debug_str     0x00003212      0xaea pegasus_crt.a(fs_main.o)
+ .debug_str     0x00003212      0x588 pegasus_crt.a(main.o)
+ .debug_str     0x00003212      0xa88 pegasus_crt.a(mem.o)
+ .debug_str     0x00003212      0x61c pegasus_crt.a(exec.o)
+ .debug_str     0x00003212      0x595 pegasus_crt.a(exit.o)
+ .debug_str     0x00003212      0x595 pegasus_crt.a(wait.o)
+ .debug_str     0x00003212      0x58e pegasus_crt.a(fork.o)
+ .debug_str     0x00003212       0xb1 pegasus_crt.a(strcmp.o)
+ .debug_str     0x00003212      0x617 pegasus_crt.a(read.o)
+ .debug_str     0x00003212      0x5de pegasus_crt.a(open.o)
+ .debug_str     0x00003212      0x5db pegasus_crt.a(write.o)
+ .debug_str     0x00003212      0x5a6 pegasus_crt.a(close.o)
+ .debug_str     0x00003212      0x6e0 pegasus_crt.a(double_link_list.o)
+ .debug_str     0x00003212      0x820 pegasus_crt.a(netdev.o)
+ .debug_str     0x00003212      0x733 pegasus_crt.a(route.o)
+ .debug_str     0x00003212      0x607 pegasus_crt.a(forkexit.o)
+ .debug_str     0x00003212      0x85d pegasus_crt.a(exec.o)
+ .debug_str     0x00003212       0x99 pegasus_crt.a(perror.o)
+ .debug_str     0x00003212      0x102 pegasus_crt.a(sscanf.o)
+ .debug_str     0x00003212      0x101 pegasus_crt.a(ntohs.o)
+ .debug_str     0x00003212      0x102 pegasus_crt.a(htons.o)
+ .debug_str     0x00003212      0x14c pegasus_crt.a(inet_pton.o)
+ .debug_str     0x00003212       0xf3 pegasus_crt.a(ntohl.o)
+ .debug_str     0x00003212      0x8ee pegasus_crt.a(my_process.o)
+ .debug_str     0x00003212      0x98b pegasus_crt.a(ip_input.o)
+ .debug_str     0x00003212      0xb1d pegasus_crt.a(tcp.o)
+ .debug_str     0x00003212      0x2f6 pegasus_crt.a(arp.o)
+ .debug_str     0x00003212      0xcb0 pegasus_crt.a(tcp_sock.o)
+ .debug_str     0x00003212      0x90a pegasus_crt.a(icmpv4.o)
+ .debug_str     0x00003212      0x846 pegasus_crt.a(ip_output.o)
+ .debug_str     0x00003212      0x1d8 pegasus_crt.a(skbuff.o)
+ .debug_str     0x00003212      0xb7d pegasus_crt.a(tcp_input.o)
+ .debug_str     0x00003212      0x93d pegasus_crt.a(udp.o)
+ .debug_str     0x00003212      0xa39 pegasus_crt.a(tcp_data.o)
+ .debug_str     0x00003212      0x1b8 pegasus_crt.a(utils.o)
+ .debug_str     0x00003212       0xad pegasus_crt.a(atoi.o)
+ .debug_str     0x00003212       0xb9 pegasus_crt.a(strtok.o)
+ .debug_str     0x00003212       0xc1 pegasus_crt.a(strpbrk.o)
+ .debug_str     0x00003212       0xf4 pegasus_crt.a(htonl.o)
+ .debug_str     0x00003212      0x707 pegasus_crt.a(thread.o)
+ .debug_str     0x00003212      0xa61 pegasus_crt.a(udp_sock.o)
+ .debug_str     0x00003212      0x712 pegasus_crt.a(dst.o)
+ .debug_str     0x00003212      0x8a6 pegasus_crt.a(sock.o)
+ .debug_str     0x00003212      0xc0d pegasus_crt.a(tcp_output.o)
 
 .debug_loc
  *(.debug_loc)

@@ -113,8 +113,10 @@ typedef struct proc{
 	int exit_status;	// wait、exit系列中的退出状态码
 	
         // ipc end
-		char tag[10];
-		char all_tag[10];
+	//	char tag[10];
+	//	char all_tag[10];
+		ListElement tag;
+		ListElement all_tag;
         
 		// 为了兼容，先保留这个成员。
 		Regs s_reg;

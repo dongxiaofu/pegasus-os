@@ -167,9 +167,28 @@ void *popFromDoubleLinkList(DoubleLinkList *list)
 
 	// list->prev是最后一个节点。
 	ListElement *lastNode = list->prev;
-	// 倒数第二个节点是lastNode->prev.
-	list->prev = lastNode->prev;
-	lastNode->prev->next = list;
+
+	// 发现奇怪的数据，重建链表。
+	if(lastNode->prev == list && lastNode->next == list){
+		// 找到倒数第二个数据。
+		ListElement *preNode = NULL;
+		ListElement *cur = list->next;
+		while(cur != lastNode){
+			preNode = cur;
+			cur = cur->next;
+		}
+
+		list->prev = preNode;
+		preNode->next = list;	
+
+		if(preNode == NULL) goto normal;
+
+	}else{
+normal:
+		// 倒数第二个节点是lastNode->prev.
+		list->prev = lastNode->prev;
+		lastNode->prev->next = list;
+	}
 
 	return lastNode;
 }

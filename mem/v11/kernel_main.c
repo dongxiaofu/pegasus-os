@@ -40,7 +40,7 @@ void kernel_main()
 	Strcpy(main_thread->name, "main_thread");
 	proc_ready_table = main_thread;
 
-	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->tag));
+//	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->tag));
 	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->all_tag));
 
 	process_execute(TaskMM, "task_mm\n", "TaskMM", 0, init_ticks);
@@ -48,7 +48,7 @@ void kernel_main()
 	process_execute(TaskHD, "task_hd\n", "TaskHD", 0, init_ticks);
 	process_execute(TaskTTY, "task_tty\n", "TaskTTY", 0, init_ticks);
 	process_execute(task_network, "task_network\n", "task_network", 0, init_ticks);
-//	process_execute(task_netdev_rx, "task_netdev_rx\n", "task_netdev_rx", 0, init_ticks);
+	process_execute(task_netdev_rx, "task_netdev_rx\n", "task_netdev_rx", 0, init_ticks);
 	process_execute(user_proc_a, "user_proc_a\n", "process_a", 1, init_ticks - 2);
 	process_execute(user_proc_b, "user_proc_b\n", "process_b", 1, init_ticks - 3);
 
@@ -88,7 +88,7 @@ void init()
 	disp_str("init\n");
 	init_keyboard();
 	init_memory(64*1024*1024);
-	DriverInitialize();
+//	DriverInitialize();
 //	//asm ("xchgw %bx, %bx");
 //	DriverSend();
 //	//asm ("xchgw %bx, %bx");

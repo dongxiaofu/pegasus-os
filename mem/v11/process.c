@@ -10,6 +10,7 @@
 #include "console.h"
 #include "proto.h"
 #include "global.h"
+#include "string.h"
 
 // 进程调度次数
 void schedule_process()
@@ -17,14 +18,36 @@ void schedule_process()
 	int page_directory = 0x400000;
     Proc *next, *cur;
 
+	int k = 2;
+
+	Proc *first = (Proc *)((unsigned int)(pcb_list.next) & 0xFFFFF000);
+//	disp_str(first->name);
+//	disp_str("#");
+	if(strcmp(first->name, "TaskHD") == 0){
+		k = 9;
+	}
+
 	// 脏数据太多，怎么办？
 	cur = (Proc *)get_running_thread_pcb();
 	if(cur->p_flag == RUNNING){
 		cur->ticks = cur->init_ticks;
 		cur->p_flag = HANGING;
-		insertToDoubleLinkList(&pcb_list, &cur->tag);
+//		if(findElementInList(&pcb_list, cur) == 0){
+//			insertToDoubleLinkList(&pcb_list, &cur->tag);
+	if(strcmp(first->name, "main_thread") == 0){
+		k = 9;
+	}
+//		}
+			insertToDoubleLinkList(&pcb_list, &cur->tag);
+			if(isListEmpty(&pcb_list)){
+				k = 9;
+			}
 	}else{
 
+	}
+	
+	if(isListEmpty(&pcb_list)){
+		k = 5;
 	}
 
 	assert(isListEmpty(&pcb_list) == 0);
