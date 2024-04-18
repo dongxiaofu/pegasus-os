@@ -165,4 +165,23 @@ EXTERN TSS tss;
 // 向上取整
 #define ROUND_UP(length, size)  ((length + size - 1) / size)
 
+// 网络协议。
+// TODO 暂时放在这里。
+typedef struct nic_page_buf_node{
+	unsigned char *buf;
+	struct nic_page_buf_node *next;
+} *NIC_PAGE_BUF_NODE;
+
+// 以太网帧结构体。
+#define ETH_ALEN	6
+// 16位大端法。
+// typedef _be16 unsigned short;
+typedef unsigned short _be16;
+
+typedef struct ethhdr{
+	unsigned char   h_dest[ETH_ALEN];   /* destination eth addr */
+	unsigned char   h_source[ETH_ALEN];   /* source eth addr */
+	_be16      h_proto;        /* packet type ID field */
+} *ETHHDR;
+
 #endif

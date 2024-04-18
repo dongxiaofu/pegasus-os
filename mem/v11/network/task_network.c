@@ -8,9 +8,6 @@
 #include "keyboard.h"
 #include "console.h"
 #include "proto.h"
-#include "global.h"
-
-// 网络协议。
 
 // 网络协议。
 void task_network() {
@@ -51,4 +48,3 @@ void task_netdev_rx()
 //	while(1);
 	netdev_rx_loop();
 }
-

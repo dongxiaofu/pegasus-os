@@ -580,7 +580,7 @@ CheckDMA_NICtoPC:
     in al,dx
     test al,40h
     jnz ReadEnd
-    jmp CheckDMA_NICtoPC
+    ;jmp CheckDMA_NICtoPC
 ReadEnd:
     out dx,al ; clear RDMA bit in NIC ISR
 	;NICtoPC的返回值，是数据的长度。

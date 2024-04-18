@@ -18,21 +18,6 @@ ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
 ata0-master: type=disk, path="80m.img", mode=flat
 #ata0-slave: type=disk, path="80n.img", mode=flat
 
-# 配置网卡
-#ne2k: enabled=1,ioaddr=0x300, irq=10, mac=b0:c4:20:00:00:00, ethmod=tuntap, ethdev=/dev/net/tun, script=tun-tunconfig.conf
-ne2k: enabled=1,ioaddr=0x300, irq=10, mac=b0:c4:20:00:00:00, ethmod=tuntap, ethdev=/dev/net/tun, script=tun.conf
-
-
-
-#ne2k: enabled=1, ioaddr=0x310, irq=10, mac=ce:a2:22:ec:29:a9, ethmod=tuntap, ethdev=/dev/net/tap4, script="tunconfig.sh" 
-
-#ne2k: enabled=1, ioaddr=0x300, irq=10, mac=b0:c4:20:00:00:00, ethmod=slirp, ethdev=vnet
-# 设置 IP 地址
-# 设置 IP 地址
-#slirp: enabled=1, dhcp=false, addr=192.168.1.2, mask=255.255.255.0
-# Configure network
-#dhcp: enabled=1, force=1
-#bootp: bootfile="pxelinux.0"
 
 # choose the boot disk.
 boot: a
@@ -45,7 +30,9 @@ debug: action=report, pci=report
 
 # disable the mouse
 mouse: enabled=0
+#gdbstub: enabled=1, port=1234, text_base=0, data_base=0, bss_base=0
 #magic_break:enabled=1
+
 # enable key mapping, using US layout as default.
 
 keyboard: keymap=/usr/local/share/bochs/keymaps/x11-pc-us.map
