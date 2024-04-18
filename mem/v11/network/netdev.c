@@ -94,9 +94,7 @@ netdev_receive(struct sk_buff *skb)
 		break;
 	case ETH_P_IPV6: /* IPv6 0x86dd -- not supported! */
 	default:
-		// Printf("Unsupported ethertype %x\n", hdr->ethertype);
-		disp_str("Unsupported ethertype %x\n");
-		disp_int(hdr->ethertype);
+		Printf("Unsupported ethertype %x\n", hdr->ethertype);
 		free_skb(skb);
 		break;
 	}
@@ -206,8 +204,7 @@ void net_handler()
 		// Printf("before NICtoPC\n");
 		disp_str("before NICtoPC\n");
 		unsigned int len = NICtoPC(buf, size);
-		// Printf("buf = %s\n", buf);
-		disp_str(buf);
+//		Printf("buf = %s\n", buf);
 //		asm ("xchgw %bx, %bx");
 		// 把从NIC中读取的数据存储到单链表中。
 		unsigned int nodeSize = sizeof(struct nic_page_buf_node);
@@ -234,7 +231,7 @@ void net_handler()
 			current_node = current_node->next;
 		}
 
-		disp_str(buf);
+//		Printf(buf);
 
 		struct sk_buff *skb = alloc_skb(bufSize);		/* 1600 */
 		Memcpy((char *)skb->data, buf, bufSize);
