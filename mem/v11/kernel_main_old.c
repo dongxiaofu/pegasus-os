@@ -856,9 +856,9 @@ void test_shell()
 // exec测试用例
 void test_exec()
 {
-	disp_str("DriverInitialize\n");
-	disp_str("DriverInitialize2\n");
-	disp_int(7);
+//	disp_str("DriverInitialize\n");
+//	disp_str("DriverInitialize2\n");
+//	disp_int(7);
 //	char filename2[20] = "install.tar";
 //    int fd = open(filename2, O_RDONLY);
 //    char buf[SECTOR_SIZE];
@@ -1389,6 +1389,14 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 	if(receiver != 0){
 		assert(receiver->stack_magic == STACK_MAGIC);
 	}
+
+	if(sender->stack_magic != STACK_MAGIC){
+	//	disp_int(sender->pid);
+	//	disp_str("#");
+	//	disp_int(sender->stack_magic);
+	//	j = 4;
+	}
+
 	assert(sender->stack_magic == STACK_MAGIC);
 
 	if(receiver == 0x0){

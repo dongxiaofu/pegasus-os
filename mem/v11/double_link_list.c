@@ -18,64 +18,24 @@
 #include "console.h"
 #include "proto.h"
 #include "global.h"
-// #define MALLOC(size)	malloc(size)
-#define MALLOC(size)	alloc_memory(1, KERNEL)
+#include "stddef.h"
 
-/**************************************test case start****************************/
-// void printList(DoubleLinkList list)
-// {
-// 	ListElement node = list->head->next;
-// 	while(node != list->tail){
-// 		// printf("%d,", *(node->element));
-// 		printf("e = %d\n", *((int *)(node->element)));
-// 		node = node->next;
-// 	}
-// 
-// 	printf("\n\n");
-// }	
-// 
-// int main2(int argc, char **argv)
-// {
-// 	DoubleLinkList list = initDoubleLinkList();
-// 	int a,b,c, d;
-// 	a = 8;
-// 	b = 9;
-// 	c = 10;
-// 	d = 11;
-// 
-// 	ListElement nodeA = (ListElement)MALLOC(sizeof(ListElement));
-// 	ListElement nodeB = (ListElement)MALLOC(sizeof(ListElement));
-// 	ListElement nodeC = (ListElement)MALLOC(sizeof(ListElement));
-// 	ListElement nodeD = (ListElement)MALLOC(sizeof(ListElement));
-// 	nodeA->val = &a;
-// 	nodeB->val = &b;
-// 	nodeC->val = &c;
-// 	nodeD->val = &d;
-// 	ListElement nodeE;
-// 
-// 	appendToDoubleLinkList(list,nodeA);
-// 	appendToDoubleLinkList(list,nodeB);
-// 	appendToDoubleLinkList(list,nodeC);
-// 	printList(list);
-// 	insertToDoubleLinkList(list,nodeD);
-// 	printList(list);
-// 	nodeE = popFromDoubleLinkList(list);
-// 	printf("e = %d\n", *((int *)(nodeE->val)));
-// 
-// 	return 0;
-// }
-/**************************************test case end****************************/
+#define MALLOC(size)	alloc_memory(1, KERNEL)
 
 void initDoubleLinkList(DoubleLinkList *list)
 {
 	assert(list != 0);
 
-	list->prev = list->next = list;
+	list->head.prev = NULL;
+	list->tail.next = NULL;
+	list->head.next = &list->tail;
+	list->tail.prev = &list->head;
 }
 
+// 链表是空时返回1，不是空时返回0。
 char isListEmpty(DoubleLinkList *list)
 {
-	if(list->next == list){
+	if(list->head.next == &list->tail && list->tail.prev == &list->head){
 		return 1;
 	}else{
 		return 0;
@@ -87,24 +47,17 @@ char findElementInList(DoubleLinkList *list, void *value)
 	assert(list != 0x0);
 	assert(value != 0x0);
 
-	ListElement *cur = list->next;
-	// 空链表。
-	if(cur == list){
-		return 0;
-	}
-
 	char result = 0;
+	ListElement *target = (ListElement *)value;
 
 	enum intr_status old_status = intr_disable();
 
-	ListElement *target = (ListElement *)value;
-
-	while(cur != list){
+	ListElement *cur = list->head.next;
+	while(cur != &list->tail){
 		if(cur == target){
-			result = 1;
+			result = 1; 
 			break;
-		}
-
+		}		
 		cur = cur->next;
 	}
 
@@ -122,20 +75,10 @@ void appendToDoubleLinkList(DoubleLinkList *list, void *value)
 	ListElement *element = (ListElement *)value;
 
 	enum intr_status old_status = intr_disable();
-	
-	if(isListEmpty(list)){
-		list->next = element;
-		list->prev = element;
-		element->prev = list;
-		element->next = list;
-	}else{
-		list->prev->next = element;
-		element->prev = list->prev;
-	
-		element->next = list;
-		list->prev = element;
-	}
-	
+	element->prev = list->tail.prev;
+	element->next = &list->tail;
+	list->tail.prev->next = element;
+	list->tail.prev = element;
 	intr_set_status(old_status);
 }
 
@@ -146,49 +89,19 @@ void insertToDoubleLinkList(DoubleLinkList *list, void *value)
 	if(findElementInList(list, value) == 1)	return;
 
 	ListElement *element = (ListElement *)value;
-
-	if(isListEmpty(list)){
-		list->next = element;
-		list->prev = element;
-		element->prev = list;
-		element->next = list;
-	}else{
-		element->next = list->next;
-		list->next = element;
-		element->prev = list;
-	}
+	element->next = list->head.next;
+	element->prev = &list->head;
+	list->head.next = element;
 
 	intr_set_status(old_status);
 }
 
 void *popFromDoubleLinkList(DoubleLinkList *list)
 {
-	if(isListEmpty(list) == 1)	return 0x0;
-
+	if(isListEmpty(list) == 1)	return NULL;
 	// list->prev是最后一个节点。
-	ListElement *lastNode = list->prev;
-
-	// 发现奇怪的数据，重建链表。
-	if(lastNode->prev == list && lastNode->next == list){
-		// 找到倒数第二个数据。
-		ListElement *preNode = NULL;
-		ListElement *cur = list->next;
-		while(cur != lastNode){
-			preNode = cur;
-			cur = cur->next;
-		}
-
-		list->prev = preNode;
-		preNode->next = list;	
-
-		if(preNode == NULL) goto normal;
-
-	}else{
-normal:
-		// 倒数第二个节点是lastNode->prev.
-		list->prev = lastNode->prev;
-		lastNode->prev->next = list;
-	}
+	ListElement *lastNode = list->tail.prev;
+	lastNode->prev->next = &list->tail;
 
 	return lastNode;
 }

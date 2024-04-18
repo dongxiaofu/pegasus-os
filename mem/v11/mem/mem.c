@@ -485,18 +485,8 @@ unsigned int sys_malloc2(unsigned int size)
 			a->cnt = cnt - 1;
 			unsigned int start_addr = page_addr + arena_size;
 
-			int y = 4;
-			// for(int i = 0; i < cnt; i++){
-			// TODO cnt为什么要减去1？
-			// for(int i = 0; i < cnt - 1; i++){
 			for(int i = 0; i < cnt - 1; i++){
-				if(i == cnt - 3){
-					y = 5;
-				}
 				block_addr = start_addr + mem_block_size * i; 
-				if(block_addr == 0x8056014){
-					y = 8;
-				}
 				appendToDoubleLinkList(&(desc_array[index].free_list), (void *)block_addr);
 			}
 		}

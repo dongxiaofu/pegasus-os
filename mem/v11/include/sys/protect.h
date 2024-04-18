@@ -58,7 +58,12 @@ typedef struct _ListElement{
   	struct _ListElement *next;
 } ListElement;
 
-typedef ListElement DoubleLinkList;
+typedef struct _List{
+	ListElement head;
+	ListElement tail;
+} List;
+
+typedef List DoubleLinkList;
 
 // TODO 似乎还可以优化。
 //typedef struct _DoubleLinkList{

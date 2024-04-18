@@ -87,8 +87,8 @@ void do_wait(Message *msg)
 	Proc *parent_proc = pid2proc(pid);
 	assert(parent_proc != 0x0);
 
-	ListElement *cur = pcb_list.next;
-	while(cur != &pcb_list){
+	ListElement *cur = pcb_list.head.next;
+	while(cur != &pcb_list.tail){
 		proc = (Proc *)((unsigned int)cur & 0xFFFFF000);
 		if(proc->parent_pid != pid){
 			cur = cur->next;

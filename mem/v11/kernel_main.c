@@ -48,7 +48,7 @@ void kernel_main()
 	process_execute(TaskHD, "task_hd\n", "TaskHD", 0, init_ticks);
 	process_execute(TaskTTY, "task_tty\n", "TaskTTY", 0, init_ticks);
 	process_execute(task_network, "task_network\n", "task_network", 0, init_ticks);
-//	process_execute(task_netdev_rx, "task_netdev_rx\n", "task_netdev_rx", 0, init_ticks);
+	process_execute(task_netdev_rx, "task_netdev_rx\n", "task_netdev_rx", 0, init_ticks);
 	process_execute(user_proc_a, "user_proc_a\n", "process_a", 1, init_ticks - 2);
 	process_execute(user_proc_b, "user_proc_b\n", "process_b", 1, init_ticks - 3);
 
@@ -85,14 +85,15 @@ void init()
 	nic_current_page = 0x40;
 
 	asm ("xchgw %bx, %bx");
-	disp_str("init\n");
+//	disp_str("init\n");
 	init_keyboard();
+	//init_memory(64*1024*1024);
 	init_memory(64*1024*1024);
-	DriverInitialize();
+	//DriverInitialize();
 //	//asm ("xchgw %bx, %bx");
 //	DriverSend();
 //	//asm ("xchgw %bx, %bx");
-	disp_str("DriverInitialize\n");
+//	disp_str("DriverInitialize\n");
 
 	// 初始化PCB链表
 	initDoubleLinkList(&pcb_list);
@@ -173,10 +174,10 @@ void user_proc_a()
 //	disp_str(net_buf);
 //	disp_str(helloStr);
 //	disp_str("\n");
-	disp_str("DriverInitialize2\n");
-	disp_str("DriverInitialize1\n");
-	// disp_str(helloStr);
-	disp_str("\nDriverInitialize3\n");
+//	disp_str("DriverInitialize2\n");
+//	disp_str("DriverInitialize1\n");
+//	// disp_str(helloStr);
+//	disp_str("\nDriverInitialize3\n");
 	while(1);
 
 //	TestFS2();

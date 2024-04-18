@@ -165,7 +165,10 @@ void receive_msg_from_nic()
 	disp_str("receive Message\n");
 	unsigned int pageStart = 16 * 1024;
 	unsigned char curr_page = get_curr_page();
-	Printf("curr_page = %d", curr_page);
+	// Printf("curr_page = %d", curr_page);
+	Printf("curr_page = hell");
+
+	return;
 	//	asm ("xchgw %bx, %bx");
 	//	没有NULL，只能用0。略感惊讶，我的OS中还不能使用NULL。
 	//	我使用过链表，不用NULL用什么解决问题的？
@@ -175,10 +178,17 @@ void receive_msg_from_nic()
 	unsigned char endPage = curr_page;
 	nic_current_page = curr_page;
 	unsigned int pageNum = 0;
+	unsigned int size = 256;
+	//char *buf = (char *)sys_malloc(size); 
+	char buf[256];
+	unsigned int bufSize = pageNum * size;
+	//char *buf2 = (char *)sys_malloc(bufSize);
+	char buf2[4096];
+	//struct sk_buff *skb = alloc_skb(bufSize);		/* 1600 */
 	for(int k = startPage; k < endPage; k++){
 		Printf("Enter loop\n");
 		pageNum++;
-		char *buf = (char *)sys_malloc(size); 
+		//char *buf = (char *)sys_malloc(size); 
 		Memset(buf, 0, size);
 		SetPageStart(k * 256);
 		Printf("before NICtoPC\n");
@@ -186,44 +196,48 @@ void receive_msg_from_nic()
 		Printf("buf = %s\n", buf);
 		//		asm ("xchgw %bx, %bx");
 		// 把从NIC中读取的数据存储到单链表中。
-		unsigned int nodeSize = sizeof(struct nic_page_buf_node);
-		NIC_PAGE_BUF_NODE node = (NIC_PAGE_BUF_NODE)sys_malloc(nodeSize);
-		Memset(node, 0, nodeSize);
-		node->buf = buf;
-		if(bufLinkList == 0){
-			bufLinkList = node;
-		}else{
-			preNode->next = node;
-		}
-		preNode = node;
+//		unsigned int nodeSize = sizeof(struct nic_page_buf_node);
+//		NIC_PAGE_BUF_NODE node = (NIC_PAGE_BUF_NODE)sys_malloc(nodeSize);
+//		Memset(node, 0, nodeSize);
+//		node->buf = buf;
+//		if(bufLinkList == 0){
+//			bufLinkList = node;
+//		}else{
+//			preNode->next = node;
+//		}
+//		preNode = node;
 	}
+	
+	Printf("merge\n");
 
 	// 遍历链表，把数据合并到一个连续的区域中。
-	unsigned int bufSize = pageNum * size;
-	char *buf = (char *)sys_malloc(bufSize);
-	NIC_PAGE_BUF_NODE current_node = bufLinkList;
-	unsigned int start = 0;
-	while(current_node != 0){
-		Memcpy(buf+start * size, current_node->buf, size);
-		start++;
-
-		current_node = current_node->next;
-	}
+	//unsigned int bufSize = pageNum * size;
+	// char *buf2 = (char *)sys_malloc(bufSize);
+//	NIC_PAGE_BUF_NODE current_node = bufLinkList;
+//	unsigned int start = 0;
+//	while(current_node != 0){
+//		Memcpy(buf2+start * size, current_node->buf, size);
+//		start++;
+//
+//		current_node = current_node->next;
+//	}
 
 	//Printf(buf);
 
-	struct sk_buff *skb = alloc_skb(bufSize);		/* 1600 */
-	Memcpy((char *)skb->data, buf, bufSize);
-	netdev_receive(skb);
+//	struct sk_buff *skb = alloc_skb(bufSize);		/* 1600 */
+//	Memcpy((char *)skb->data, buf, bufSize);
+//	netdev_receive(skb);
 }
 
 void net_handler()
 {
+	return;
 	unsigned char status = get_interrupt_status();
 	// TODO 如果status是指针，我确定可以这样使用。如果它不是指针，我不知道能不能这样做。
 	// interrupt_status irs = (interrupt_status)status;
 	interrupt_status irs = {0};
 	Memcpy(&irs, &status, sizeof(interrupt_status));
+
 
 	int size = 256;
 //	dis_pos = 320 + 40;

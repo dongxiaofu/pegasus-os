@@ -20,12 +20,12 @@ void schedule_process()
 
 	int k = 2;
 
-	Proc *first = (Proc *)((unsigned int)(pcb_list.next) & 0xFFFFF000);
+//	Proc *first = (Proc *)((unsigned int)(pcb_list.next) & 0xFFFFF000);
 //	disp_str(first->name);
 //	disp_str("#");
-	if(strcmp(first->name, "TaskHD") == 0){
-		k = 9;
-	}
+//	if(strcmp(first->name, "TaskHD") == 0){
+//		k = 9;
+//	}
 
 	// 脏数据太多，怎么办？
 	cur = (Proc *)get_running_thread_pcb();
@@ -34,9 +34,9 @@ void schedule_process()
 		cur->p_flag = HANGING;
 //		if(findElementInList(&pcb_list, cur) == 0){
 //			insertToDoubleLinkList(&pcb_list, &cur->tag);
-	if(strcmp(first->name, "main_thread") == 0){
-		k = 9;
-	}
+//	if(strcmp(first->name, "main_thread") == 0){
+//		k = 9;
+//	}
 //		}
 			insertToDoubleLinkList(&pcb_list, &cur->tag);
 			if(isListEmpty(&pcb_list)){
@@ -52,8 +52,11 @@ void schedule_process()
 
 	assert(isListEmpty(&pcb_list) == 0);
 	unsigned int element = (unsigned int)popFromDoubleLinkList(&pcb_list);
+	//next = (Proc *)(element - offsetof(Proc,tag));
 	next = (Proc *)(element & 0xFFFFF000);
 	next->p_flag = RUNNING;
+	disp_str(next->name);
+	disp_str("#");
 
 	if(next->page_directory != page_directory){
 		update_tss((unsigned int)next + PAGE_SIZE);
@@ -96,8 +99,8 @@ Proc *pid2proc(int pid)
 	int t = 0;
 	Proc *proc = 0x0;
 
-	ListElement *cur = all_pcb_list.next;
-	while(cur != &all_pcb_list){
+	ListElement *cur = all_pcb_list.head.next;
+	while(cur != &all_pcb_list.tail){
 		proc = (Proc *)((unsigned int)cur & 0xFFFFF000);
 		if(proc == 0x0){
 			t = 4;
