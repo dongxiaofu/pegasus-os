@@ -860,7 +860,8 @@ LABEL_PM_START:
 
 	;mov esp, 0xc02FFFFF
 	;mov esp, 0xc07FFFFF
-	mov esp, 0xc03FFFFF
+	mov esp, 0xc07FF000
+	;mov esp, 0xc03FFFFF
 	;;xchg bx, bx
 	call InitKernel
 	;;;;;;;;;xchg bx, bx	

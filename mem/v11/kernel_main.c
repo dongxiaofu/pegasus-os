@@ -38,9 +38,10 @@ void kernel_main()
 	main_thread->ticks = main_thread->init_ticks = init_ticks + 2;
 	main_thread->page_directory = MAIN_THREAD_PAGE_DIRECTORY;
 	Strcpy(main_thread->name, "main_thread");
+	main_thread->stack_magic = STACK_MAGIC;
 	proc_ready_table = main_thread;
 
-	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->tag));
+//	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->tag));
 	// appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->all_tag));
 	appendToDoubleLinkList(&all_pcb_list, (ListElement *)(&main_thread->all_tag));
 
@@ -48,6 +49,7 @@ void kernel_main()
 	process_execute(task_fs, "task_fs\n", "task_fs", 0, init_ticks);
 	process_execute(TaskHD, "task_hd\n", "TaskHD", 0, init_ticks);
 	process_execute(TaskTTY, "task_tty\n", "TaskTTY", 0, init_ticks);
+	//process_execute(task_netdev_rx, "task_netdev_rx\n", "task_netdev_rx", 0, init_ticks);
 	process_execute(task_network, "task_network\n", "task_network", 0, init_ticks);
 	process_execute(task_netdev_rx, "task_netdev_rx\n", "task_netdev_rx", 0, init_ticks);
 	process_execute(user_proc_a, "user_proc_a\n", "process_a", 1, init_ticks - 2);
@@ -80,7 +82,7 @@ void init()
 	pid = 0;
 	fork_pid = 100;
 	gdt_index = 9;
-	proc_ready_table = 0x0;
+	proc_ready_table = 0xc07fe000;
 
 	// 网卡驱动用到这个数据。
 	nic_current_page = 0x40;
@@ -90,7 +92,7 @@ void init()
 	init_keyboard();
 	//init_memory(64*1024*1024);
 	init_memory(64*1024*1024);
-	DriverInitialize();
+//	DriverInitialize();
 //	//asm ("xchgw %bx, %bx");
 //	DriverSend();
 //	//asm ("xchgw %bx, %bx");
@@ -153,6 +155,12 @@ void user_proc_a()
 	unsigned int size = 22;
 	net_buf = (char *)sys_malloc(size);
 	Memset(net_buf, 0, size);
+
+	while(1){
+		if(test_ticks % 10 == 0){
+			inform_int(TASK_NET_DEV_RX, NETWORK_INT);
+		}
+	}
 
 	// char *str = "Next, what’s wealthy to you may not be wealthy to your children";
 	char *str = "Next, what’s wealthy";

@@ -189,7 +189,7 @@ void untar(const char *filename)
 //		   iobytes = -1;
  //           Memset(buf, 0, iobytes);
 //			Printf("Before read\n");
-			catch_error();
+		//	catch_error();
             bytes_read2 += read(fd, buf2, iobytes);
 //			bytes_read2 += iobytes;
 
@@ -406,6 +406,8 @@ void exception_handler(unsigned int vec_no, unsigned int error_no, unsigned int 
 	if(vec_no == 13){
 		disp_str("GP\n");
 	}
+
+	stop_here();
 
 	//asm volatile("nop;nop;nop;");
 	//asm volatile ("movl %%eax, 4(%%ebp)" : :"a"(eip));
@@ -691,7 +693,7 @@ void INIT_fork()
 		j++;
 		char buf1[40] = "Parent.Nice to meet you!\n";
 		write(fd_stdout, buf1, Strlen(buf1));			
-		catch_error();
+//		catch_error();
 		write(fd_stdout, buf1, Strlen(buf1));			
 		write(fd_stdout, buf1, Strlen(buf1));			
 //		while(1);
@@ -1395,16 +1397,16 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 	//	j = 4;
 	}
 
-  test_ticks++;
-  dis_pos = 0;
-  for(int i = 0; i < 160; i++){
-      disp_str(" ");
-      //dis_pos++;
-	  dis_pos += 2;
-  }
-
-  dis_pos = 0;
-  disp_int(test_ticks);
+//  test_ticks++;
+//  dis_pos = 0;
+//  for(int i = 0; i < 160; i++){
+//      disp_str(" ");
+//      //dis_pos++;
+//	  dis_pos += 2;
+//  }
+//
+//  dis_pos = 0;
+//  disp_int(test_ticks);
 
 	assert(sender->stack_magic == STACK_MAGIC);
 

@@ -45,12 +45,12 @@ void task_network() {
 void task_netdev_rx()
 {
 	Printf("------netdev_rx_loop is running\n");
-	for(int i = 0; i < 0; i++){
+	for(int i = 0; i < 1; i++){
 	Printf("Hello, net_handler1\n");
 	Printf("Hello, net_handler2\n");
 	Printf("Hello, net_handler3\n");
 	Printf("Hello, net_handler4\n");
 	}
-	while(1);
+//	while(1);
 	netdev_rx_loop();
 }

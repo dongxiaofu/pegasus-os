@@ -108,18 +108,42 @@ void insertToDoubleLinkList(DoubleLinkList *list, void *value)
 
 void *popFromDoubleLinkList(DoubleLinkList *list)
 {
+	enum intr_status old_status = intr_disable();
+	//asm volatile("cli");
 	if(isListEmpty(list) == 1)	return NULL;
-	// list->prev是最后一个节点。
-	ListElement *lastNode = list->tail.prev;
-	lastNode->prev->next = &list->tail;
-	list->tail.prev = lastNode->prev;
-
-	int k = 9;
-	if(isListEmpty(list) == 1){
-		k = 8;
+	ListElement *firstNode = list->head.next;
+	if(firstNode->next == 0 || firstNode == 0){
+		disp_str("head\n");
+	}	
+	list->head.next = firstNode->next;
+	firstNode->next->prev = &list->head;
+	
+	firstNode->prev = firstNode->next = NULL;
+	intr_set_status(old_status);
+	//asm volatile("sti");
+	catch_error();
+	if(test_ticks == 0x31C){
+		asm("xchgw %bx, %bx");
 	}
 
-	lastNode->prev = lastNode->next = NULL;
+	return firstNode;
 
-	return lastNode;
+
+//	enum intr_status old_status = intr_disable();
+//	if(isListEmpty(list) == 1)	return NULL;
+//	// list->prev是最后一个节点。
+//	ListElement *lastNode = list->tail.prev;
+//	lastNode->prev->next = &list->tail;
+//	if(&(list->tail) == NULL || list->tail.prev == NULL){
+//		asm ("xchgw %bx, %bx");
+//		disp_str("tail\n");
+//	}
+//	list->tail.prev = lastNode->prev;
+//
+//
+//
+//	lastNode->prev = lastNode->next = NULL;
+//	intr_set_status(old_status);
+//
+//	return lastNode;
 }

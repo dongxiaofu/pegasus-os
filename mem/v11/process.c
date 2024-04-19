@@ -42,6 +42,8 @@ void schedule_process()
 
 	// 脏数据太多，怎么办？
 	cur = (Proc *)get_running_thread_pcb();
+	assert(cur->stack_magic == STACK_MAGIC);
+
 	if(cur->p_flag == RUNNING){
 		cur->ticks = cur->init_ticks;
 		cur->p_flag = HANGING;
@@ -54,7 +56,9 @@ void schedule_process()
 			if(&cur->tag == 0xc03ff218 || &cur->tag == 0xc03ff220){
 				k = 12;
 			}
-			insertToDoubleLinkList(&pcb_list, &cur->tag);
+			// insertToDoubleLinkList(&pcb_list, &cur->tag);
+			appendToDoubleLinkList(&pcb_list, &cur->tag);
+			
 			if(isListEmpty(&pcb_list)){
 				k = 9;
 			}

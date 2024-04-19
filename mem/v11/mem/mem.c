@@ -411,7 +411,7 @@ arena *block2arena(mem_block *block)
 	return a;
 }
 
-unsigned int sys_malloc2(unsigned int size)
+unsigned int sys_malloc2(unsigned int size, int unknown, Proc *caller)
 {
 	unsigned int addr = 0x0;
 	MEMORY_POOL_TYPE pool_type;
@@ -419,7 +419,13 @@ unsigned int sys_malloc2(unsigned int size)
 	// 在后面，都是地址，所以使用指针。
 	arena *a;
 
-	Proc *current_thread = (Proc *)get_running_thread_pcb();
+	int j = 2;
+
+	Proc *current_thread2 = (Proc *)get_running_thread_pcb();
+	if(current_thread2 == 0xc0881000){
+		j = 4;
+	}
+	Proc *current_thread = caller;
 	if(current_thread->page_directory == MAIN_THREAD_PAGE_DIRECTORY){
 		pool_type = KERNEL;
 		desc_array = kernel_mem_block_decs_array;
@@ -664,13 +670,14 @@ void init_memory(int total_memory)
 	int map_base_addr = 0xC0100000;
 	// 					0xc0100000;
 	// int k_v_addr 	  = 0xc0400000;
-	int k_v_addr 	  = 0xc0700000;
+	//int k_v_addr 	  = 0xc0700000;
+	int k_v_addr 	  = 0xc0800000;
 	
 
 	int page_table_size = PAGE_SIZE * 256;
 	// int used_memory = 0x400000 + page_table_size;	
 	//int used_memory = k_v_addr; 
-	int used_memory = 0x00700000;
+	int used_memory = 0x00800000;
 
 	int all_free_page_cnt = (total_memory - used_memory) / PAGE_SIZE;
 	int kernel_pool_free_pages = all_free_page_cnt / 2;

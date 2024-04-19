@@ -35,7 +35,7 @@ wait_init(struct wait_lock *w) {
 
 static inline int 
 wait_wakeup(struct wait_lock *w) {
-	inform_int(TASK_NETWORK, NETWORK_INT);
+	inform_int(TASK_NET_DEV_RX, NETWORK_INT);
 	return 0;
 }
 

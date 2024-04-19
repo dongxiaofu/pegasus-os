@@ -24,6 +24,8 @@ Proc *thread_init()
 	// Memset(proc, 0, sizeof(*proc));
 	Memset(proc, 0, PAGE_SIZE);
 	proc->stack = (unsigned int *)((unsigned int)proc + PAGE_SIZE);
+	//依然出错。
+	// proc->stack = (unsigned int *)((unsigned int)proc + PAGE_SIZE * 2);
 	proc->page_directory = 0x0;
 	proc->parent_pid = -1;
 	proc->q_sending = proc->q_next = 0x0;

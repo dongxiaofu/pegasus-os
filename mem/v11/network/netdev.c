@@ -124,7 +124,12 @@ netdev_rx_loop()
 		// interrupt_wait();
 		wait_sleep(0);
 
+		receive_msg_from_nic();
+			continue;
+
 		struct sk_buff *skb = alloc_skb(BUFLEN);		/* 1600 */
+			perror("ERR: Read from tun_fd");
+			continue;
 		/* skb是对数据的一个简单封装,真正的数据在skb->data中,skb的其他域是对数据的一些描述 */
 		/* tun_read每一次会读取一个数据报,即使该数据长度达不到1600 */
 		// int len = tun_read((char *)skb->data, BUFLEN);  
@@ -178,13 +183,10 @@ local_ipaddress(uint32_t addr)
 void receive_msg_from_nic()
 {
 	//disp_str("receive Message\n");
-	return;
 	Printf("receive Message\n");
 	unsigned int pageStart = 16 * 1024;
-	return;
 	unsigned char curr_page = get_curr_page();
 	// Printf("curr_page = %d", curr_page);
-	return;
 	Printf("curr_page = hell");
 
 //	return;
@@ -204,7 +206,6 @@ void receive_msg_from_nic()
 	//char *buf2 = (char *)sys_malloc(bufSize);
 	char buf2[4096];
 	//struct sk_buff *skb = alloc_skb(bufSize);		/* 1600 */
-	return;
 	for(int k = startPage; k < endPage; k++){
 		Printf("Enter loop\n");
 		pageNum++;

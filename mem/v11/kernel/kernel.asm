@@ -1031,8 +1031,10 @@ update_tss:
 	ret
 
 get_running_thread_pcb:
-	mov eax, esp
-	and eax, 0xFFFFF000
+;	mov eax, esp
+;	and eax, 0xFFFFF000
+
+	mov eax, [proc_ready_table]
 
 	ret
 

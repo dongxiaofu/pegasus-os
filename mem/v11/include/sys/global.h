@@ -91,7 +91,8 @@ extern int_handle sys_call_table[];
 // 进程相关 end
 
 arena *block2arena(mem_block *block);
-unsigned int sys_malloc2(unsigned int size);
+//unsigned int sys_malloc2(unsigned int size);
+unsigned int sys_malloc2(unsigned int size, int unknown, Proc *caller);
 unsigned int sys_malloc(unsigned int size);
 
 
@@ -120,9 +121,9 @@ EXTERN TSS tss;
 #define PROC_A	5
 // TODO 设置成7不知道行不行。太久了，我不记得设置进程的PID有什么规则。
 // 网络协议栈。
-#define TASK_NETWORK            7
+#define TASK_NETWORK            5
 // 从网卡接收数据。
-#define TASK_NET_DEV_RX         8
+#define TASK_NET_DEV_RX         6
 
 
 #define reassembly(val1, offset1, val2, offset2, val3) \
