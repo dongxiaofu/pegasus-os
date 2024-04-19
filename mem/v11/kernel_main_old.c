@@ -25,11 +25,11 @@ void stop_here()
 void catch_error(){
 	test_ticks++;
 	current_dis_pos = dis_pos;
-//	dis_pos = 0;
-//	disp_str("[");
-//	disp_int(test_ticks);
-//	disp_str("]");
-//	dis_pos = current_dis_pos;
+	dis_pos = 0;
+	disp_str("[");
+	disp_int(test_ticks);
+	disp_str("]");
+	dis_pos = current_dis_pos;
 }
 
 
@@ -1123,7 +1123,7 @@ void Printf(char *fmt, ...)
 	}
 	assert(fd_stdout != -1);
 
-    write(fd_stdout, buf, len);
+ //   write(fd_stdout, buf, len);
 
     return;
 }

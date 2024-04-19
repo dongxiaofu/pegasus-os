@@ -40,7 +40,7 @@ void kernel_main()
 	Strcpy(main_thread->name, "main_thread");
 	proc_ready_table = main_thread;
 
-//	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->tag));
+	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->tag));
 	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->all_tag));
 
 	process_execute(TaskMM, "task_mm\n", "TaskMM", 0, init_ticks);
@@ -89,7 +89,7 @@ void init()
 	init_keyboard();
 	//init_memory(64*1024*1024);
 	init_memory(64*1024*1024);
-	//DriverInitialize();
+//	DriverInitialize();
 //	//asm ("xchgw %bx, %bx");
 //	DriverSend();
 //	//asm ("xchgw %bx, %bx");

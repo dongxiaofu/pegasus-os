@@ -413,23 +413,11 @@ arena *block2arena(mem_block *block)
 
 unsigned int sys_malloc2(unsigned int size)
 {
-//	test_ticks++;
-//	dis_pos = 0;
-//	for(int i = 0; i < 160; i++){
-//		disp_str(" ");
-//		dis_pos++;
-//	}
-//	
-//	dis_pos = 0;
-//	disp_int(test_ticks);
-//	if(test_ticks == 0x1B6){
-////	asm ("xchgw %bx, %bx");
-//		dis_pos = 0;
-//	}
-
 	unsigned int addr = 0x0;
 	MEMORY_POOL_TYPE pool_type;
 	mem_block_desc *desc_array;
+	// 在后面，都是地址，所以使用指针。
+	arena *a;
 
 	Proc *current_thread = (Proc *)get_running_thread_pcb();
 	if(current_thread->page_directory == MAIN_THREAD_PAGE_DIRECTORY){
@@ -445,7 +433,8 @@ unsigned int sys_malloc2(unsigned int size)
 		unsigned int cnt = ROUND_UP(size + sizeof(arena), PAGE_SIZE);
 		unsigned int page_addr = alloc_memory(cnt, pool_type);
 		// 有必要增加元数据吗？
-		arena *a = (arena *)page_addr;
+		a = (arena *)page_addr;
+		Memset(a, 0, PAGE_SIZE);
 		a->desc = (mem_block_desc *)0x0;
 		a->cnt = 1;
 		a->large = 1;
@@ -453,9 +442,7 @@ unsigned int sys_malloc2(unsigned int size)
 	}else{
 		// 从小往大，开始寻找大于size的内存块。
 		unsigned int index = 0;
-		// for(int i = 0; i < MEM_BLOCK_DESC_KIND_NUM; i++){
-		// TODO 暂时把最小内存块设置为8个字节。
-		for(int i = 2; i < MEM_BLOCK_DESC_KIND_NUM; i++){
+		for(int i = 0; i < MEM_BLOCK_DESC_KIND_NUM; i++){
 			if(desc_array[i].size >= size){
 				index = i;
 				break;
@@ -463,52 +450,51 @@ unsigned int sys_malloc2(unsigned int size)
 		}
 
 		unsigned int block_addr;
-//		mem_block_desc desc = desc_array[index];
-//		asm ("xchgw %bx, %bx");
-		mem_block_desc *desc = (mem_block_desc *)alloc_memory(1,pool_type);
-		Memcpy(desc,desc_array + index, sizeof(mem_block_desc)); 
-//		asm ("xchgw %bx, %bx");
-		// if(isListEmpty(&desc->free_list) == 1){
 		
 		int flag = 0;
 		enum intr_status old_status = intr_disable();
 		if(isListEmpty(&(desc_array[index].free_list)) == 1){
 			flag = 1;
 			unsigned int page_addr = alloc_memory(1, pool_type);
-			arena *a = block2arena((mem_block *)page_addr);
+			a = (arena *)page_addr;
+			Memset(a, 0, PAGE_SIZE);
+			a->desc = &desc_array[index];
 			a->cnt = desc_array[index].cnt;
+			a->large = 0;
+
 			// TODO 没有做容错处理。
-			unsigned int mem_block_size = desc->size;
+			unsigned int mem_block_size = a->desc->size;
 			unsigned int arena_size = sizeof(arena);
 			// unsigned int cnt = (PAGE_SIZE - arena_size) / arena_size; 
 			unsigned int cnt = (PAGE_SIZE - arena_size) / mem_block_size; 
-			a->cnt = cnt - 1;
 			unsigned int start_addr = page_addr + arena_size;
 
-			for(int i = 0; i < cnt - 1; i++){
+			for(int i = 0; i < cnt; i++){
 				block_addr = start_addr + mem_block_size * i; 
-				appendToDoubleLinkList(&(desc_array[index].free_list), (void *)block_addr);
+				mem_block *block = (mem_block *)block_addr;
+				ListElement element = block->element;
+				//appendToDoubleLinkList(&(desc_array[index].free_list), &element);
+				//和上面相比，简化了一些而已。
+				appendToDoubleLinkList(&((a->desc->free_list)), &element);
 			}
 		}
 		intr_set_status(old_status);
 
-		block_addr = (unsigned int)popFromDoubleLinkList(&(desc_array[index].free_list));
+		ListElement *element = popFromDoubleLinkList(&(desc_array[index].free_list));
+		assert(element != 0x0);
+		block_addr = (unsigned int)element - offsetof(mem_block, element); 
+
 		addr = block_addr;
 		
 		assert(block_addr != 0x0);
 		
-		arena *a = block2arena((mem_block *)block_addr);
+		a = block2arena((mem_block *)block_addr);
 		a->cnt--;
 		old_status = 4;
 	}
 
 	assert(addr != 0x0);
-//	if(test_ticks == 0x1B6){
-////	asm ("xchgw %bx, %bx");
-//		dis_pos = 0;
-//	}
 
-//	asm ("xchgw %bx, %bx");
 	return addr;
 }
 
@@ -624,7 +610,7 @@ void init_memory_block_desc(mem_block_desc *mem_block_decs_array)
 {
 	for(int i = 0; i < MEM_BLOCK_DESC_KIND_NUM; i++){
 		if(i == 0){
-			mem_block_decs_array[i].size = 2;
+			mem_block_decs_array[i].size = 16;
 		}else{
 			mem_block_decs_array[i].size = mem_block_decs_array[i-1].size * 2;
 		}

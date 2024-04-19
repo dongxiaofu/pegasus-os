@@ -15,10 +15,23 @@
 // 进程调度次数
 void schedule_process()
 {
+
+//	test_ticks++;
+//    current_dis_pos = dis_pos;
+//    dis_pos = 0;
+//    disp_str("[");
+//    disp_int(test_ticks);
+//    disp_str("]");
+//    dis_pos = current_dis_pos;	
+//
+	int k = 2;
+//	if(test_ticks == 33){
+//		k = 4;
+//	}
+
 	int page_directory = 0x400000;
     Proc *next, *cur;
 
-	int k = 2;
 
 //	Proc *first = (Proc *)((unsigned int)(pcb_list.next) & 0xFFFFF000);
 //	disp_str(first->name);
@@ -55,8 +68,8 @@ void schedule_process()
 	//next = (Proc *)(element - offsetof(Proc,tag));
 	next = (Proc *)(element & 0xFFFFF000);
 	next->p_flag = RUNNING;
-	disp_str(next->name);
-	disp_str("#");
+//	disp_str(next->name);
+//	disp_str("#");
 
 	if(next->page_directory != page_directory){
 		update_tss((unsigned int)next + PAGE_SIZE);

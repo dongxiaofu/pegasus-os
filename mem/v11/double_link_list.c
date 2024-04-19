@@ -70,7 +70,7 @@ void appendToDoubleLinkList(DoubleLinkList *list, void *value)
 {
 	assert(list != 0x0);
 	assert(value != 0x0);
-	if(findElementInList(list, value) == 1)	return;
+//	if(findElementInList(list, value) == 1)	return;
 
 	ListElement *element = (ListElement *)value;
 
@@ -86,7 +86,7 @@ void insertToDoubleLinkList(DoubleLinkList *list, void *value)
 {
 	enum intr_status old_status = intr_disable();
 	
-	if(findElementInList(list, value) == 1)	return;
+//	if(findElementInList(list, value) == 1)	return;
 
 	ListElement *element = (ListElement *)value;
 	element->next = list->head.next;
@@ -102,6 +102,7 @@ void *popFromDoubleLinkList(DoubleLinkList *list)
 	// list->prev是最后一个节点。
 	ListElement *lastNode = list->tail.prev;
 	lastNode->prev->next = &list->tail;
+	list->tail.prev = lastNode->prev;
 
 	return lastNode;
 }

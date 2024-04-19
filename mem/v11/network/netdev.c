@@ -164,11 +164,13 @@ void receive_msg_from_nic()
 {
 	disp_str("receive Message\n");
 	unsigned int pageStart = 16 * 1024;
+	return;
 	unsigned char curr_page = get_curr_page();
 	// Printf("curr_page = %d", curr_page);
+	return;
 	Printf("curr_page = hell");
 
-	return;
+//	return;
 	//	asm ("xchgw %bx, %bx");
 	//	没有NULL，只能用0。略感惊讶，我的OS中还不能使用NULL。
 	//	我使用过链表，不用NULL用什么解决问题的？
@@ -185,6 +187,7 @@ void receive_msg_from_nic()
 	//char *buf2 = (char *)sys_malloc(bufSize);
 	char buf2[4096];
 	//struct sk_buff *skb = alloc_skb(bufSize);		/* 1600 */
+	return;
 	for(int k = startPage; k < endPage; k++){
 		Printf("Enter loop\n");
 		pageNum++;
@@ -231,6 +234,8 @@ void receive_msg_from_nic()
 
 void net_handler()
 {
+	return;
+		disp_str("write Message\n");
 	return;
 	unsigned char status = get_interrupt_status();
 	// TODO 如果status是指针，我确定可以这样使用。如果它不是指针，我不知道能不能这样做。

@@ -14,8 +14,9 @@ void task_network() {
 //	char tty1[10] = "dev_tty1";
 //	int fd_stdout = open(tty1, O_RDWR);
 
-	Printf("------network is running\n");
-	//disp_str("------network is running\n");
+	//Printf("------network is running\n");
+	disp_str("------network is running\n");
+	while(1);
 
 	Message *msg = (Message *)sys_malloc(sizeof(Message));
 
@@ -44,12 +45,12 @@ void task_network() {
 void task_netdev_rx()
 {
 	Printf("------netdev_rx_loop is running\n");
-//	for(int i = 0; i < 20; i++){
-//	Printf("Hello, net_handler1\n");
-//	Printf("Hello, net_handler2\n");
-//	Printf("Hello, net_handler3\n");
-//	Printf("Hello, net_handler4\n");
-//	}
+	for(int i = 0; i < 0; i++){
+	Printf("Hello, net_handler1\n");
+	Printf("Hello, net_handler2\n");
+	Printf("Hello, net_handler3\n");
+	Printf("Hello, net_handler4\n");
+	}
 	while(1);
 	netdev_rx_loop();
 }
