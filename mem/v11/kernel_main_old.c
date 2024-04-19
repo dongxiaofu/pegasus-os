@@ -901,8 +901,6 @@ void test_exec()
 ////		//asm ("xchgw %bx, %bx");
 ////		}
 //	}
-		disp_str("[");
-		disp_str("]");
 //		Printf("My child exit %d\n", 4);
 //	while(1){};
 
@@ -1123,7 +1121,7 @@ void Printf(char *fmt, ...)
 	}
 	assert(fd_stdout != -1);
 
- //   write(fd_stdout, buf, len);
+    write(fd_stdout, buf, len);
 
     return;
 }

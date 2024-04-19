@@ -14,8 +14,8 @@ void task_network() {
 //	char tty1[10] = "dev_tty1";
 //	int fd_stdout = open(tty1, O_RDWR);
 
-	//Printf("------network is running\n");
-	disp_str("------network is running\n");
+	Printf("------network is running\n");
+	// disp_str("------network is running\n");
 	while(1);
 
 	Message *msg = (Message *)sys_malloc(sizeof(Message));

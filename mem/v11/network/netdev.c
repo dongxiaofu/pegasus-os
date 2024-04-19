@@ -234,8 +234,7 @@ void receive_msg_from_nic()
 
 void net_handler()
 {
-	return;
-		disp_str("write Message\n");
+	Printf("write Message\n");
 	return;
 	unsigned char status = get_interrupt_status();
 	// TODO 如果status是指针，我确定可以这样使用。如果它不是指针，我不知道能不能这样做。

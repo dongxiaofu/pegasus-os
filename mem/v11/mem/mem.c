@@ -601,7 +601,6 @@ void init_memory2()
 	// KernelPool.start_addr = 0x100000 + (0x1000 + 0x1000 + 0x1000 + 0x1000);
 	total_memory = total_memory - KernelPool.start_addr;
 	KernelPool.length = total_memory / 2;	
-	disp_int(KernelPool.length);
 	UserPool.length = total_memory - KernelPool.length;
 	// 设置内核内存池的位图。
 	// 用户内存池池有多少个页？
