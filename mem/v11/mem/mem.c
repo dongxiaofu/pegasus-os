@@ -434,9 +434,9 @@ unsigned int sys_malloc2(unsigned int size)
 		unsigned int page_addr = alloc_memory(cnt, pool_type);
 		// 有必要增加元数据吗？
 		a = (arena *)page_addr;
-		Memset(a, 0, PAGE_SIZE);
+		Memset(a, 0, PAGE_SIZE * cnt);
 		a->desc = (mem_block_desc *)0x0;
-		a->cnt = 1;
+		a->cnt = cnt;
 		a->large = 1;
 		addr = (unsigned int)(a + sizeof(arena));
 	}else{
@@ -466,16 +466,20 @@ unsigned int sys_malloc2(unsigned int size)
 			unsigned int mem_block_size = a->desc->size;
 			unsigned int arena_size = sizeof(arena);
 			// unsigned int cnt = (PAGE_SIZE - arena_size) / arena_size; 
-			unsigned int cnt = (PAGE_SIZE - arena_size) / mem_block_size; 
+			// unsigned int cnt = (PAGE_SIZE - arena_size) / mem_block_size; 
+			unsigned int cnt = a->desc->cnt;
 			unsigned int start_addr = page_addr + arena_size;
 
 			for(int i = 0; i < cnt; i++){
 				block_addr = start_addr + mem_block_size * i; 
 				mem_block *block = (mem_block *)block_addr;
-				ListElement element = block->element;
-				//appendToDoubleLinkList(&(desc_array[index].free_list), &element);
+				// 这条错误语句，太隐蔽了。没法根据报错信息找问题。
+				// 断点调试也没有发现问题。看代码时发现这样写不是我的本意。
+				// ListElement element = block->element;
+				ListElement *element = &(block->element);
+				appendToDoubleLinkList(&(desc_array[index].free_list), element);
 				//和上面相比，简化了一些而已。
-				appendToDoubleLinkList(&((a->desc->free_list)), &element);
+				//appendToDoubleLinkList(&((a->desc->free_list)), &element);
 			}
 		}
 		intr_set_status(old_status);
@@ -489,6 +493,7 @@ unsigned int sys_malloc2(unsigned int size)
 		assert(block_addr != 0x0);
 		
 		a = block2arena((mem_block *)block_addr);
+		assert(a->cnt != 0);
 		a->cnt--;
 		old_status = 4;
 	}
@@ -529,27 +534,16 @@ void free_a_page(unsigned int vaddr, MEMORY_POOL_TYPE pool_type)
 	remove_map_entry(vaddr); 
 }
 
+// TODO size没有使用。有空时去掉。
 void sys_free2(unsigned int addr, unsigned int size)
 {
-//	return;	
+	return;
 	MEMORY_POOL_TYPE pool_type;
 	mem_block_desc *desc_array;
 
 	Proc *current_thread = (Proc *)get_running_thread_pcb();
 
 	enum intr_status old_status = intr_disable();
-//	test_ticks++;
-//	dis_pos = 0;
-//	for(int i = 0; i < 160; i++){
-//		disp_str(" ");
-//		dis_pos++;
-//	}
-//	
-//	dis_pos = 0;
-//	disp_int(test_ticks);
-//	if(test_ticks == 0x15){
-//		dis_pos = 0;
-//	}
 
 	if(current_thread->page_directory == MAIN_THREAD_PAGE_DIRECTORY){
 		pool_type = KERNEL;
@@ -559,47 +553,23 @@ void sys_free2(unsigned int addr, unsigned int size)
 		desc_array = current_thread->mem_block_desc_array;
 	}	
 
-	if(size > 1024){
-		unsigned int page_addr = addr - sizeof(arena);
-		size += sizeof(arena);
-		unsigned int page_cnt = ROUND_UP(size, PAGE_SIZE);
+	arena *a = block2arena((mem_block *)addr);
+	if(a->large == 1 && a->desc == 0){
+		arena *a = block2arena((mem_block *)addr);
+		unsigned int page_cnt = a->cnt;
+		unsigned int page_addr = (unsigned int)a;
 		for(int i = 0; i < page_cnt; i++){
 			free_a_page(page_addr, pool_type);
 			page_addr += PAGE_SIZE;
 		}
 	}else{
-		unsigned int index = 0;
-		for(int i = 0; i < MEM_BLOCK_DESC_KIND_NUM; i++){
-			// if(kernel_mem_block_decs_array[i].size >= size){
-			if(desc_array[i].size >= size){
-				index = i;
-				break;
-			}
-		}
-
-		// mem_block_desc desc = kernel_mem_block_decs_array[index];
-		mem_block_desc desc = desc_array[index];
 		mem_block *block = (mem_block *)addr;
-		arena *a = block2arena(block);
-		// appendToDoubleLinkList(&desc.free_list, (void *)block); 
-		// appendToDoubleLinkList(&(kernel_mem_block_decs_array[index].free_list), (void *)block);
-		appendToDoubleLinkList(&(desc_array[index].free_list), (void *)block);
-		a->cnt++;
-		// 当一个内存元仓库中的所有小内存块都是空闲状态时，释放这个内存元仓库。
-		// 我不理解这样做的原因。
-		if(a->cnt == desc.cnt){
-//			for(int i = 0; i < desc.cnt; i++){
-//			TODO 我不知道为什么要这样做。碰碰运气，把cnt减去1试试看。
-//			for(int i = 0; i < desc.cnt - 2; i++){
-////				popFromDoubleLinkList(&desc.free_list);
-//				// popFromDoubleLinkList(&(kernel_mem_block_decs_array[index].free_list));
-//				// popFromDoubleLinkList(&(desc_array[index].free_list));
-//				initDoubleLinkList(&(desc_array[index].free_list));
-//			}
-
-//			initDoubleLinkList(&(desc_array[index].free_list));
-
-			free_a_page((unsigned int)a, pool_type);
+		ListElement *element = &(block->element); 
+		appendToDoubleLinkList(&(a->desc->free_list), element); 
+		if(++a->cnt == a->desc->cnt){
+			// TODO 为什么要逐个移除free_list中的节点？
+			// 把页框释放掉，不就完事了吗？
+			free_a_page(a, pool_type);
 		}
 	}
 

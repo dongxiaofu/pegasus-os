@@ -111,6 +111,7 @@ sys_malloc:
 	ret
 
 sys_free:
+	ret
 	;保存栈
 	push esi
 	push edi
