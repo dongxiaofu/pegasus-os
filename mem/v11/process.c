@@ -51,6 +51,9 @@ void schedule_process()
 //		k = 9;
 //	}
 //		}
+			if(&cur->tag == 0xc03ff218 || &cur->tag == 0xc03ff220){
+				k = 12;
+			}
 			insertToDoubleLinkList(&pcb_list, &cur->tag);
 			if(isListEmpty(&pcb_list)){
 				k = 9;

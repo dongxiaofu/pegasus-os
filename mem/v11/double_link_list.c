@@ -70,11 +70,15 @@ void appendToDoubleLinkList(DoubleLinkList *list, void *value)
 {
 	assert(list != 0x0);
 	assert(value != 0x0);
-//	if(findElementInList(list, value) == 1)	return;
+	if(findElementInList(list, value) == 1)	return;
 
 	ListElement *element = (ListElement *)value;
 
 	enum intr_status old_status = intr_disable();
+			int k = 8;
+			if(value == 0xc03ff218 || value == 0xc03ff220){
+				k = 12;
+			}
 	element->prev = list->tail.prev;
 	element->next = &list->tail;
 	list->tail.prev->next = element;
@@ -85,12 +89,18 @@ void appendToDoubleLinkList(DoubleLinkList *list, void *value)
 void insertToDoubleLinkList(DoubleLinkList *list, void *value) 
 {
 	enum intr_status old_status = intr_disable();
+			int k = 8;
+			if(value == 0xc03ff218 || value == 0xc03ff220){
+				k = 12;
+			}
 	
-//	if(findElementInList(list, value) == 1)	return;
+	if(findElementInList(list, value) == 1)	return;
 
 	ListElement *element = (ListElement *)value;
 	element->next = list->head.next;
 	element->prev = &list->head;
+	// 花了不少时间才发现这个错误。
+	list->head.next->prev = element;
 	list->head.next = element;
 
 	intr_set_status(old_status);
@@ -103,6 +113,13 @@ void *popFromDoubleLinkList(DoubleLinkList *list)
 	ListElement *lastNode = list->tail.prev;
 	lastNode->prev->next = &list->tail;
 	list->tail.prev = lastNode->prev;
+
+	int k = 9;
+	if(isListEmpty(list) == 1){
+		k = 8;
+	}
+
+	lastNode->prev = lastNode->next = NULL;
 
 	return lastNode;
 }

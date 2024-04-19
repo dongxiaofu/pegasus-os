@@ -41,7 +41,8 @@ void kernel_main()
 	proc_ready_table = main_thread;
 
 	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->tag));
-	appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->all_tag));
+	// appendToDoubleLinkList(&pcb_list, (ListElement *)(&main_thread->all_tag));
+	appendToDoubleLinkList(&all_pcb_list, (ListElement *)(&main_thread->all_tag));
 
 	process_execute(TaskMM, "task_mm\n", "TaskMM", 0, init_ticks);
 	process_execute(task_fs, "task_fs\n", "task_fs", 0, init_ticks);
