@@ -91,7 +91,7 @@ void clock_handler()
 	Proc *cur = get_running_thread_pcb();
 //	assert(cur->stack_magic == STACK_MAGIC);
 	if(key_pressed){
-		inform_int(TASK_TTY);
+		inform_int(TASK_TTY, KEYBOARD_INT);
 	}
 
 	// 第一次时钟中断时，处理k_reenter

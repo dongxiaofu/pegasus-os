@@ -536,7 +536,7 @@ void hd_handler() {
 //		current_dis_pos = 7;
 //	}
     int t = in_byte(0x1F7);
-    inform_int(TASK_HD);
+    inform_int(TASK_HD, HARD_INT);
 }
 
 void debug_ticks()

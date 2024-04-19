@@ -247,6 +247,8 @@
 #define DEV_WRITE 2003
 #define DEV_CLOSE 2004
 #define HARD_INT 2005
+#define KEYBOARD_INT 2006
+#define NETWORK_INT 2007
 
 // 终端文件
 #define IS_CHAR_SPECIAL 0

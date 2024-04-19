@@ -1395,6 +1395,17 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 	//	j = 4;
 	}
 
+  test_ticks++;
+  dis_pos = 0;
+  for(int i = 0; i < 160; i++){
+      disp_str(" ");
+      //dis_pos++;
+	  dis_pos += 2;
+  }
+
+  dis_pos = 0;
+  disp_int(test_ticks);
+
 	assert(sender->stack_magic == STACK_MAGIC);
 
 	if(receiver == 0x0){
@@ -1800,7 +1811,8 @@ char *i2a(int val, int base, char **ps)
     return *ps;
 }
 
-void inform_int(int task_nr)
+// 进程ID，中断类型。
+void inform_int(int task_nr, int interrupt_type)
 {
     Proc *current = pid2proc(task_nr);
     // 思路：
@@ -1819,7 +1831,8 @@ void inform_int(int task_nr)
 		Message *vaddr_msg = (Message *)alloc_virtual_memory(current->p_msg, msg_size);
 
 		vaddr_msg->source = INTERRUPT;
-		vaddr_msg->TYPE = HARD_INT;
+		// vaddr_msg->TYPE = HARD_INT;
+		vaddr_msg->TYPE = interrupt_type;
 		// todo 怎么往进程中塞进去一个变量？此处使用了未声明的变量msg，行不通。
 		//      phycopy(v2l(current, msg), &msg2tty, sizeof(Message));
 		// 只有一个办法通知TTY，接收到识别不了的TYPE，不终止进程。

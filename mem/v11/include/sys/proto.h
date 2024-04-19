@@ -175,7 +175,7 @@ void enable_8259A_casecade_irq();
 void enable_8259A_slave_winchester_irq();
 void enable_8259A_slave_net_irq();
 
-void inform_int(int task_nr);
+void inform_int(int task_nr, int interrupt_type);
 
 // 硬盘驱动
 void hd_handle(Message *msg);

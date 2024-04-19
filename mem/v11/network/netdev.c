@@ -11,6 +11,7 @@
 
 #include "global.h"
 #include "net.h"
+#include "wait.h"
 
 struct netdev *loop;
 struct netdev *netdev; /* 用于记录本机地址,包括ip和mac地址 */
@@ -101,6 +102,16 @@ netdev_receive(struct sk_buff *skb)
 	return 0;
 }
 
+
+void interrupt_wait2() {
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+    Memset(msg, 0, sizeof(Message));
+    // todo INTERRUPT 拼写正确吗？
+    send_rec(RECEIVING, msg, INTERRUPT);
+    sys_free(msg, sizeof(Message));
+}
+
+
 /* netdev_rx_loop */
 void *
 netdev_rx_loop()
@@ -109,6 +120,10 @@ netdev_rx_loop()
 	route_init();
 
 	while (1) {
+	
+		// interrupt_wait();
+		wait_sleep(0);
+
 		struct sk_buff *skb = alloc_skb(BUFLEN);		/* 1600 */
 		/* skb是对数据的一个简单封装,真正的数据在skb->data中,skb的其他域是对数据的一些描述 */
 		/* tun_read每一次会读取一个数据报,即使该数据长度达不到1600 */
@@ -162,7 +177,9 @@ local_ipaddress(uint32_t addr)
 
 void receive_msg_from_nic()
 {
-	disp_str("receive Message\n");
+	//disp_str("receive Message\n");
+	return;
+	Printf("receive Message\n");
 	unsigned int pageStart = 16 * 1024;
 	return;
 	unsigned char curr_page = get_curr_page();
@@ -235,6 +252,7 @@ void receive_msg_from_nic()
 void net_handler()
 {
 	Printf("write Message\n");
+	wait_wakeup(0);
 	return;
 	unsigned char status = get_interrupt_status();
 	// TODO 如果status是指针，我确定可以这样使用。如果它不是指针，我不知道能不能这样做。
