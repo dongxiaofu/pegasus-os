@@ -12,7 +12,7 @@
 // 网络协议。
 void task_network() {
 	Printf("------network is running\n");
-	while(1);
+//	while(1);
 	Message *msg = (Message *)sys_malloc(sizeof(Message));
     while (1) {
 		Memset(msg, 0, sizeof(Message));
@@ -39,12 +39,5 @@ void task_network() {
 void task_netdev_rx()
 {
 	Printf("------netdev_rx_loop is running\n");
-	for(int i = 0; i < 1; i++){
-	Printf("Hello, net_handler1\n");
-	Printf("Hello, net_handler2\n");
-	Printf("Hello, net_handler3\n");
-	Printf("Hello, net_handler4\n");
-	}
-//	while(1);
 	netdev_rx_loop();
 }

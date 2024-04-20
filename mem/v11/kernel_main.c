@@ -76,6 +76,8 @@ void init()
 
 	// 网卡驱动用到这个数据。
 	nic_current_page = 0x40;
+	// 初始化NIC。
+	DriverInitialize();
 
 	init_keyboard();
 	init_memory(64*1024*1024);
@@ -123,6 +125,8 @@ void kernel_thread_d(void *msg)
 
 void user_proc_a()
 {
+	Printf("hello,A\n");
+	while(1);
 	disp_str("-------------I am user_proc_a\n");
 	net_data = 0;
 	unsigned int size = 22;

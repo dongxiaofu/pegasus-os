@@ -43,6 +43,8 @@ void schedule_process()
 	// 脏数据太多，怎么办？
 	cur = (Proc *)get_running_thread_pcb();
 	assert(cur->stack_magic == STACK_MAGIC);
+	disp_str(cur->name);
+	disp_str("$$$");
 
 	if(cur->p_flag == RUNNING){
 		cur->ticks = cur->init_ticks;
@@ -75,8 +77,8 @@ void schedule_process()
 	//next = (Proc *)(element - offsetof(Proc,tag));
 	next = (Proc *)(element & 0xFFFFF000);
 	next->p_flag = RUNNING;
-//	disp_str(next->name);
-//	disp_str("#");
+	disp_str(next->name);
+	disp_str("#");
 
 	if(next->page_directory != page_directory){
 		update_tss((unsigned int)next + PAGE_SIZE);

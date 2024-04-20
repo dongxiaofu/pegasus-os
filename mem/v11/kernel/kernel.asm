@@ -375,7 +375,6 @@ exception:
 %endmacro
 
 hwint0:
-	;xhcg bx, bx
 	;inc byte [gs:(80*20 + 41)*2]
         ; 发送EOF
         ;mov al, 20h

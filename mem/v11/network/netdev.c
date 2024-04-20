@@ -17,6 +17,7 @@ struct netdev *loop;
 struct netdev *netdev; /* 用于记录本机地址,包括ip和mac地址 */
 extern int running;
 
+char *receive_msg_from_nic();
 //
 // addr表示ip地址, hwadddr表示mac地址, mtu表示最大传输单元的大小
 static struct netdev *
@@ -82,7 +83,8 @@ netdev_receive(struct sk_buff *skb)
 {
 	struct eth_hdr *hdr = eth_hdr(skb);  /* 获得以太网头部信息,以太网头部包括
 										 目的mac地址,源mac地址,以及类型信息 */
-	disp_int(hdr->ethertype);
+	// disp_int(hdr->ethertype);
+	Printf("hdr->ethertype = %x\n", hdr->ethertype);
 	//eth_dbg("in", hdr);
 	/* 以太网头部的Type(类型)字段 0x86dd表示IPv6 0x0800表示IPv4
 	0x0806表示ARP */
@@ -121,23 +123,34 @@ netdev_rx_loop()
 
 	while (1) {
 		wait_sleep(0);
-		receive_msg_from_nic();
-			continue;
 
+		unsigned char status = get_interrupt_status();
+		// TODO 如果status是指针，我确定可以这样使用。如果它不是指针，我不知道能不能这样做。
+		// interrupt_status irs = (interrupt_status)status;
+		interrupt_status irs = {0};
+		Memcpy(&irs, &status, sizeof(interrupt_status));
+//	disp_int(irs.prx);
+//	disp_int(irs.ptx);
+//	disp_int(irs.rxe);
+//	disp_int(irs.rdc);
+//	disp_str("\n=====================\n");
+
+	int size = 256;
+	if(irs.prx == 1){
+		char *buf = receive_msg_from_nic();
 		struct sk_buff *skb = alloc_skb(BUFLEN);		/* 1600 */
-			perror("ERR: Read from tun_fd");
-			continue;
 		/* skb是对数据的一个简单封装,真正的数据在skb->data中,skb的其他域是对数据的一些描述 */
 		/* tun_read每一次会读取一个数据报,即使该数据长度达不到1600 */
 		// int len = tun_read((char *)skb->data, BUFLEN);  
-		int len = NICtoPC((char *)skb->data, BUFLEN);
-		// int len = 2;
+		Memcpy((char *)skb->data, buf, BUFLEN);
+		int len = 2;
 		if (len < 0) {									
 			perror("ERR: Read from tun_fd");
 			free_skb(skb);
 			return NULL;
 		}
 		netdev_receive(skb);
+	}
 	}
 	return NULL;
 }
@@ -177,14 +190,68 @@ local_ipaddress(uint32_t addr)
 	return 0;
 }
 
-void receive_msg_from_nic()
+char *receive_msg_from_nic()
 {
-	//disp_str("receive Message\n");
+	unsigned int pageStart = 16 * 1024;
+	unsigned char curr_page = get_curr_page();
+	disp_str("#");
+	disp_int(curr_page);
+	disp_str("#\n");
+//	没有NULL，只能用0。略感惊讶，我的OS中还不能使用NULL。
+//	我使用过链表，不用NULL用什么解决问题的？
+	NIC_PAGE_BUF_NODE bufLinkList = 0;	
+	NIC_PAGE_BUF_NODE preNode = 0;
+	unsigned int size = 256;
+	unsigned char startPage = nic_current_page;
+	unsigned char endPage = curr_page;
+	nic_current_page = curr_page;
+	unsigned int pageNum = 0;
+	for(int k = startPage; k < endPage; k++){
+		pageNum++;
+		char *buf = (char *)sys_malloc(size); 
+		Memset(buf, 0, size);
+		SetPageStart(k * size);
+		unsigned int len = NICtoPC(buf, size);
+		// 把从NIC中读取的数据存储到单链表中。
+		unsigned int nodeSize = sizeof(struct nic_page_buf_node);
+		NIC_PAGE_BUF_NODE node = (NIC_PAGE_BUF_NODE)sys_malloc(nodeSize);
+		Memset(node, 0, nodeSize);
+		node->buf = buf;
+		if(bufLinkList == 0){
+			bufLinkList = node;
+		}else{
+			preNode->next = node;
+		}
+		preNode = node;
+	}
+
+	// 遍历链表，把数据合并到一个连续的区域中。
+	unsigned int bufSize = pageNum * size;
+	char *buf = (char *)sys_malloc(bufSize);
+	NIC_PAGE_BUF_NODE current_node = bufLinkList;
+	unsigned int start = 0;
+	while(current_node != 0){
+		Memcpy(buf+start * size, current_node->buf, size);
+		start++;
+
+		current_node = current_node->next;
+	}
+
+	for(int i = 0; i < bufSize; i++){
+	//	disp_int((unsigned char)(buf[i]));
+	//	disp_str(" ");
+	}
+//	disp_str(buf);
+
+	return buf;
+}
+
+void receive_msg_from_nic2()
+{
 	Printf("receive Message\n");
 	unsigned int pageStart = 16 * 1024;
 	unsigned char curr_page = get_curr_page();
-	// Printf("curr_page = %d", curr_page);
-	Printf("curr_page = hell");
+	Printf("curr_page = %d", curr_page);
 
 //	return;
 	//	asm ("xchgw %bx, %bx");
@@ -195,7 +262,7 @@ void receive_msg_from_nic()
 	unsigned char startPage = nic_current_page;
 	unsigned char endPage = curr_page;
 	nic_current_page = curr_page;
-	unsigned int pageNum = 0;
+	unsigned int pageNum = 1;
 	unsigned int size = 256;
 	//char *buf = (char *)sys_malloc(size); 
 	char buf[256];
@@ -249,29 +316,8 @@ void receive_msg_from_nic()
 
 void net_handler()
 {
-	Printf("write Message\n");
+//	非常奇怪。从hwint10进入此函数后，如果调用Printf，连时钟中断都不能发生了。
+//	不知道原因。
+//	Printf("write Message\n");
 	wait_wakeup(0);
-	return;
-	unsigned char status = get_interrupt_status();
-	// TODO 如果status是指针，我确定可以这样使用。如果它不是指针，我不知道能不能这样做。
-	// interrupt_status irs = (interrupt_status)status;
-	interrupt_status irs = {0};
-	Memcpy(&irs, &status, sizeof(interrupt_status));
-
-
-	int size = 256;
-//	dis_pos = 320 + 40;
-	if(irs.prx == 1){
-		receive_msg_from_nic();
-	}
-
-//	if(irs.ptx == 1){
-	// if(irs.rdma_done == 1){
-	if(irs.rdc == 1){
-		disp_str("\n===0000@@@@@@@@@==================\n");
-		disp_str("write Message\n");
-		disp_str("===11111@@@@@@@@@==================\n");
-	}
-
-	set_interrupt_status(status);
 }
