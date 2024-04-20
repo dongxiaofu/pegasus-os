@@ -49,18 +49,11 @@ void kernel_main()
 	process_execute(task_fs, "task_fs\n", "task_fs", 0, init_ticks);
 	process_execute(TaskHD, "task_hd\n", "TaskHD", 0, init_ticks);
 	process_execute(TaskTTY, "task_tty\n", "TaskTTY", 0, init_ticks);
-	//process_execute(task_netdev_rx, "task_netdev_rx\n", "task_netdev_rx", 0, init_ticks);
 	process_execute(task_network, "task_network\n", "task_network", 0, init_ticks);
 	process_execute(task_netdev_rx, "task_netdev_rx\n", "task_netdev_rx", 0, init_ticks);
 	process_execute(user_proc_a, "user_proc_a\n", "process_a", 1, init_ticks - 2);
 	process_execute(user_proc_b, "user_proc_b\n", "process_b", 1, init_ticks - 3);
 
-//	enable_int();
-//	thread_start(kernel_thread_a, "thread a\n");
-//	thread_start(kernel_thread_b, "thread b\n");
-//	thread_start(kernel_thread_c, "thread c\n");
-//	thread_start(kernel_thread_d, "thread d\n");
-//	process_execute(user_proc_b, "user_proc_b\n");
 	disp_str("main end\n");
 
 	asm volatile ("sti");
@@ -71,9 +64,6 @@ void kernel_main()
 
 void init()
 {
-//	DoubleLinkList pcb_list;
-//	DoubleLinkList all_pcb_list;
-	
 	char *stackaddr = "10.0.1.4";   /* 本协议栈模拟的ip地址 */
 
 	MAIN_THREAD_PAGE_DIRECTORY = 0x400000;
@@ -87,29 +77,12 @@ void init()
 	// 网卡驱动用到这个数据。
 	nic_current_page = 0x40;
 
-	asm ("xchgw %bx, %bx");
-//	disp_str("init\n");
 	init_keyboard();
-	//init_memory(64*1024*1024);
 	init_memory(64*1024*1024);
-//	DriverInitialize();
-//	//asm ("xchgw %bx, %bx");
-//	DriverSend();
-//	//asm ("xchgw %bx, %bx");
-//	disp_str("DriverInitialize\n");
 
 	// 初始化PCB链表
 	initDoubleLinkList(&pcb_list);
 	initDoubleLinkList(&all_pcb_list);
-
-	// 用下面的代码清屏，不晓得为啥没效果。已经在boot.asm用汇编代码清屏了。
-	// 清屏
-//	dis_pos = 0;
-//	for(int i = 0; i < 80*25*4; i++){
-//		disp_str("");
-//	}
-//
-//	dis_pos = 0;
 }
 
 void kernel_thread_a(void *msg)

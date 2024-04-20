@@ -120,10 +120,7 @@ netdev_rx_loop()
 	route_init();
 
 	while (1) {
-	
-		// interrupt_wait();
 		wait_sleep(0);
-
 		receive_msg_from_nic();
 			continue;
 

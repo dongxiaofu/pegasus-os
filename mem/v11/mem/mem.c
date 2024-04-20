@@ -421,10 +421,12 @@ unsigned int sys_malloc2(unsigned int size, int unknown, Proc *caller)
 
 	int j = 2;
 
+	// TODO 这是调试代码。以后要删除。
 	Proc *current_thread2 = (Proc *)get_running_thread_pcb();
 	if(current_thread2 == 0xc0881000){
 		j = 4;
 	}
+
 	Proc *current_thread = caller;
 	if(current_thread->page_directory == MAIN_THREAD_PAGE_DIRECTORY){
 		pool_type = KERNEL;
@@ -501,6 +503,7 @@ unsigned int sys_malloc2(unsigned int size, int unknown, Proc *caller)
 		a = block2arena((mem_block *)block_addr);
 		assert(a->cnt != 0);
 		a->cnt--;
+		// TODO 可能无用。
 		old_status = 4;
 	}
 
