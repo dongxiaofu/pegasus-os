@@ -12,7 +12,7 @@ enum intr_status {       // 中断状态
 void DriverInitialize();
 void DriverSend(char *buf, unsigned int len);
 void PCtoNIC(char *buf, unsigned int len);
-unsigned int NICtoPC(char *buf, unsigned int len);
+unsigned int NICtoPC(char *buf, unsigned int len, unsigned int pageStart);
 unsigned char get_interrupt_status();
 void debug_ticks();
 void set_interrupt_status(unsigned char status);

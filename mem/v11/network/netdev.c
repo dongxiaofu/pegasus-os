@@ -47,7 +47,7 @@ netdev_init()
 	/* 本地环回地址 */
 	loop = netdev_alloc("127.0.0.1", "00:00:00:00:00:00", 1500);
 	/* 下面的mac地址是捏造的. */
-	netdev = netdev_alloc("10.0.1.4", "00:0c:29:6d:50:25", 1500);
+	netdev = netdev_alloc("10.0.0.4", "00:0c:29:6d:50:25", 1500);
 }
 
 /**\
@@ -72,7 +72,8 @@ netdev_transmit(struct sk_buff *skb, uint8_t *dst_hw, uint16_t ethertype)
 	hdr->ethertype = htons(ethertype);	/* 帧类型 */
 	/* 回复,直接写即可 */
 	// ret = tun_write((char *)skb->data, skb->len);
-	DriverSend((char *)skb->data, skb->len);
+	//DriverSend((char *)skb->data, skb->len);
+	DriverSend(skb->data, skb->len);
 	
 	// TODO 暂时返回1。
 	return 1;
@@ -129,16 +130,16 @@ netdev_rx_loop()
 		// interrupt_status irs = (interrupt_status)status;
 		interrupt_status irs = {0};
 		Memcpy(&irs, &status, sizeof(interrupt_status));
-//	disp_int(irs.prx);
-//	disp_int(irs.ptx);
-//	disp_int(irs.rxe);
-//	disp_int(irs.rdc);
-//	disp_str("\n=====================\n");
+	Printf("prx = %x, ptx = %x, rxe = %x, rdc = %x\n", irs.prx, irs.ptx, irs.rxe, irs.rdc);
+	disp_str("\n=====================\n");
+
+//	asm("xchgw %bx, %bx");
 
 	int size = 256;
 	if(irs.prx == 1){
 		char *buf = receive_msg_from_nic();
 		struct sk_buff *skb = alloc_skb(BUFLEN);		/* 1600 */
+		Printf("skb0 = %x\n", skb);
 		/* skb是对数据的一个简单封装,真正的数据在skb->data中,skb的其他域是对数据的一些描述 */
 		/* tun_read每一次会读取一个数据报,即使该数据长度达不到1600 */
 		// int len = tun_read((char *)skb->data, BUFLEN);  
@@ -152,12 +153,14 @@ netdev_rx_loop()
 		netdev_receive(skb);
 	}
 	}
+
 	return NULL;
 }
 
 struct netdev* 
 netdev_get(uint32_t sip)
 {
+	Printf("sip = %x, addr = %x\n", sip, netdev->addr);
 	if (netdev->addr == sip) {
 		return netdev; /* 将static local variable的地址传递出去, netdev包含mac地址信息 */
 	}
@@ -204,22 +207,31 @@ char *receive_msg_from_nic()
 	unsigned int size = 256;
 	unsigned char startPage = nic_current_page;
 	unsigned char endPage = curr_page;
+	Printf("nic_current_page = %x, endPage = %x\n", nic_current_page, endPage);
 	nic_current_page = curr_page;
 	unsigned int pageNum = 0;
+	//unsigned int endPage = 1516 / 256;
+	unsigned int cnt = 1516/256;
 	for(int k = startPage; k < endPage; k++){
+	//for(int k = 0; k < cnt; k++){
 		pageNum++;
 		char *buf = (char *)sys_malloc(size); 
 		Memset(buf, 0, size);
+		Printf("k * size = %x\n", (startPage + k) * size);
 		SetPageStart(k * size);
-		unsigned int len = NICtoPC(buf, size);
+//		asm("xchgw %bx, %bx");
+		unsigned int len = NICtoPC(buf, size, (startPage + k) * size);
+		disp_int(buf[16]);
+		disp_int(buf[17]);
 		// 把从NIC中读取的数据存储到单链表中。
 		unsigned int nodeSize = sizeof(struct nic_page_buf_node);
 		NIC_PAGE_BUF_NODE node = (NIC_PAGE_BUF_NODE)sys_malloc(nodeSize);
 		Memset(node, 0, nodeSize);
-		node->buf = buf;
 		if(bufLinkList == 0){
 			bufLinkList = node;
+			node->buf = buf + 4;
 		}else{
+			node->buf = buf;
 			preNode->next = node;
 		}
 		preNode = node;
@@ -237,10 +249,10 @@ char *receive_msg_from_nic()
 		current_node = current_node->next;
 	}
 
-	for(int i = 0; i < bufSize; i++){
-	//	disp_int((unsigned char)(buf[i]));
-	//	disp_str(" ");
-	}
+//	for(int i = 0; i < bufSize; i++){
+//		disp_int((unsigned char)(buf[i]));
+//		disp_str(" ");
+//	}
 //	disp_str(buf);
 
 	return buf;
@@ -277,7 +289,7 @@ void receive_msg_from_nic2()
 		Memset(buf, 0, size);
 		SetPageStart(k * 256);
 		Printf("before NICtoPC\n");
-		unsigned int len = NICtoPC(buf, size);
+		unsigned int len = NICtoPC(buf, size, 3);
 		Printf("buf = %s\n", buf);
 		//		asm ("xchgw %bx, %bx");
 		// 把从NIC中读取的数据存储到单链表中。

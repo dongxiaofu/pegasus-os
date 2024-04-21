@@ -91,10 +91,11 @@ void arp_rcv(struct sk_buff *skb)
 
 	arpdata->sip = ntohl(arpdata->sip);		// 发送方ip地址
 	arpdata->dip = ntohl(arpdata->dip);		// 接收方ip地址
+	Printf("sip = %x, dip = %x, addr = %x\n", arpdata->sip, arpdata->dip, 33); 
 	//arpdata_dbg("receive", arpdata);
 
 	merge = update_arp_translation_table(arphdr, arpdata); // 更新arp缓存
-
+	
 	if (!(netdev = netdev_get(arpdata->dip))) {
 		Printf("ARP was not for us\n");
 		goto drop_pkt;
@@ -175,6 +176,7 @@ arp_request(uint32_t sip, uint32_t dip, struct netdev *netdev)
 void 
 arp_reply(struct sk_buff *skb, struct netdev *netdev)
 {
+	Printf("arp_reply\n");
 	/* netdev中包含了本机的地址信息,包括ip地址和mac地址 */
 	struct arp_hdr *arphdr;
 	struct arp_ipv4 *arpdata;

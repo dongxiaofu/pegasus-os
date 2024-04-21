@@ -255,6 +255,7 @@ DriverSend:
 	out dx, al
 
 	;传递PCtoNIC的参数。
+	push dword [ebp + 28] 
 	push dword [ebp + 24] 
     call PCtoNIC ;transfer packet to NIC buffer RAM
 	;消除因传递参数增加的栈。
@@ -518,7 +519,7 @@ get_curr_page:
 ; cx 4 byte count
 ; ax 4 NIC buffer page to transfer from
 ;***********************************************************************
-;unsigned int NICtoPC(char *buf, unsigned int len)
+;unsigned int NICtoPC(char *buf, unsigned int len, unsigned int pageStart)
 NICtoPC:
 	;保存栈
 	push esi
@@ -547,7 +548,7 @@ NICtoPC:
     out dx,al
     mov dx,IOPORT
 
-	;push 16*1024 
+	;mov ax, [ebp + 32]
 	;call SetPageStart
 
     mov dx,IOPORT
@@ -580,7 +581,7 @@ CheckDMA_NICtoPC:
     in al,dx
     test al,40h
     jnz ReadEnd
-    ;jmp CheckDMA_NICtoPC
+    jmp CheckDMA_NICtoPC
 ReadEnd:
     out dx,al ; clear RDMA bit in NIC ISR
 	;NICtoPC的返回值，是数据的长度。

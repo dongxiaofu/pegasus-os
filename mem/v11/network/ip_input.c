@@ -36,6 +36,8 @@ ip_pkt_for_us(struct iphdr *ih)
 int
 ip_rcv(struct sk_buff *skb)
 {
+	Printf("ip_rcv\n");
+
 	struct iphdr *ih = ip_hdr(skb);
 	uint16_t csum = -1;
 

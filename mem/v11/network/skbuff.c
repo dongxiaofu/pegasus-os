@@ -20,7 +20,7 @@ alloc_skb(uint32_t size)
 void 
 free_skb(struct sk_buff *skb)
 {
-	return;
+//	return;
 	if (skb->refcnt < 1) {
 		sys_free(skb->head);
 		sys_free(skb);

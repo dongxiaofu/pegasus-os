@@ -8,6 +8,7 @@
 #include "skbuff.h"
 #include "sock.h"
 #include "inet.h"
+#include "stdio.h"
 
 #define IPV4	 0x04
 #define IP_TCP	 0x06
@@ -71,10 +72,13 @@ static inline uint32_t
 ip_parse(char *addr)
 {
 	uint32_t dst = 0;
+	//char *addr2 = "10.0.0.4";
 	if (inet_pton(AF_INET, addr, &dst) != 1) {
 		perror("ERR: Parsing inet address failed");
 		exit(1);
 	}
+	//dst = 0x400000a;
+	// Printf("dst = %x\n", dst);
 	/* 需要注意的是inet_pton将字符形式的ip地址转换为网络字节序形式的ip地址 */
 	return ntohl(dst);
 }
