@@ -35,7 +35,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
     msg->BUF =  phy_ipc_msg;
     msg->BUF_LEN = ipc_msg_size;
 
-    send_rec(BOTH, msg, TASK_FS);
+    send_rec(BOTH, msg, TASK_NETWORK);
 
     //assert(msg.type == SYSCALL_RET);
     //

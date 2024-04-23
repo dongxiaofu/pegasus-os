@@ -85,7 +85,7 @@ struct ipc_bind {
 struct ipc_write {
     int sockfd;
     size_t len;
-    uint8_t buf[];
+    uint8_t *buf;
 } __attribute__((packed));
 
 struct ipc_sendto {
