@@ -20,6 +20,8 @@ int socket_close(int sockfd)
 
     Message *msg = (Message *)sys_malloc(sizeof(Message));
     msg->TYPE = IPC_SOCKET_CALL;
+	msg->SOCKET_FD = sockfd;
+
 	unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
     msg->BUF =  phy_ipc_msg;
     msg->BUF_LEN = ipc_msg_size;

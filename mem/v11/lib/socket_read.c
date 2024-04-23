@@ -34,6 +34,7 @@ ssize_t socket_read(int fildes, void *buf, size_t nbyte)
 
     Message *msg = (Message *)sys_malloc(sizeof(Message));
     msg->TYPE = IPC_SOCKET_CALL;
+	msg->SOCKET_FD = fildes;
 	// TODO 能直接在用户进程中使用get_physical_address吗？
 	// 当然，在我的OS中，从语法层面看，能使用。可是，那还需要系统调用做什么呢？
 	unsigned int phy_ipc_msg = get_physical_address(ipc_msg);

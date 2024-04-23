@@ -24,13 +24,14 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 	struct ipc_connect *playload = (struct ipc_connect *)sys_malloc(sizeof(struct ipc_connect));
 	playload->sockfd = sockfd;
 	Memcpy(&playload->addr, addr, sizeof(struct sockaddr));
-	sys_free(playload);
 	
 	ipc_msg->data = (char *)playload;
 
     Message *msg = (Message *)sys_malloc(sizeof(Message));
 	Memset(msg, 0, sizeof(Message));
     msg->TYPE = IPC_SOCKET_CALL;
+	msg->SOCKET_FD = sockfd;
+
 	unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
     msg->BUF =  phy_ipc_msg;
     msg->BUF_LEN = ipc_msg_size;
@@ -41,5 +42,6 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
     //
     sys_free(msg, sizeof(Message));
 
+	// TODO 需要修改成什么？
     return msg->FD;
 }

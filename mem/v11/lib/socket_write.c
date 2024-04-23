@@ -37,6 +37,7 @@ ssize_t socket_write(int fildes, const void *buf, size_t nbyte)
 	unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
     msg->BUF =  phy_ipc_msg;
     msg->BUF_LEN = ipc_msg_size;
+	msg->SOCKET_FD = fildes;
 
     send_rec(BOTH, msg, TASK_NETWORK);
 

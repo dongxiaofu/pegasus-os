@@ -22,6 +22,7 @@ typedef struct {
     unsigned int m48;
     unsigned int m49;
     unsigned int m50;
+    unsigned int m51;
 } u4;
 
 typedef struct {
@@ -111,6 +112,7 @@ typedef struct {
 #define POS u0.u40.m48
 #define FLAGS u0.u40.m49
 #define TYPE u0.u40.m50
+#define SOCKET_FD u0.u40.m51
 
 
 // elf start
