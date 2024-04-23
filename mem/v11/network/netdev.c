@@ -86,6 +86,7 @@ netdev_receive(struct sk_buff *skb)
 										 目的mac地址,源mac地址,以及类型信息 */
 	// disp_int(hdr->ethertype);
 	Printf("hdr->ethertype = %x\n", hdr->ethertype);
+	return 0;
 	//eth_dbg("in", hdr);
 	/* 以太网头部的Type(类型)字段 0x86dd表示IPv6 0x0800表示IPv4
 	0x0806表示ARP */
@@ -98,7 +99,7 @@ netdev_receive(struct sk_buff *skb)
 		break;
 	case ETH_P_IPV6: /* IPv6 0x86dd -- not supported! */
 	default:
-		Printf("Unsupported ethertype %x\n", hdr->ethertype);
+		//Printf("Unsupported ethertype %x\n", hdr->ethertype);
 		free_skb(skb);
 		break;
 	}
@@ -139,7 +140,7 @@ netdev_rx_loop()
 	if(irs.prx == 1){
 		char *buf = receive_msg_from_nic();
 		struct sk_buff *skb = alloc_skb(BUFLEN);		/* 1600 */
-		Printf("skb0 = %x\n", skb);
+		//Printf("skb0 = %x\n", skb);
 		/* skb是对数据的一个简单封装,真正的数据在skb->data中,skb的其他域是对数据的一些描述 */
 		/* tun_read每一次会读取一个数据报,即使该数据长度达不到1600 */
 		// int len = tun_read((char *)skb->data, BUFLEN);  
@@ -152,6 +153,8 @@ netdev_rx_loop()
 		}
 		netdev_receive(skb);
 	}
+
+		set_interrupt_status(status);
 	}
 
 	return NULL;
@@ -217,12 +220,12 @@ char *receive_msg_from_nic()
 		pageNum++;
 		char *buf = (char *)sys_malloc(size); 
 		Memset(buf, 0, size);
-		Printf("k * size = %x\n", (startPage + k) * size);
+	//	Printf("k * size = %x\n", (startPage + k) * size);
 		SetPageStart(k * size);
 //		asm("xchgw %bx, %bx");
 		unsigned int len = NICtoPC(buf, size, (startPage + k) * size);
-		disp_int(buf[16]);
-		disp_int(buf[17]);
+	//	disp_int(buf[16]);
+	//	disp_int(buf[17]);
 		// 把从NIC中读取的数据存储到单链表中。
 		unsigned int nodeSize = sizeof(struct nic_page_buf_node);
 		NIC_PAGE_BUF_NODE node = (NIC_PAGE_BUF_NODE)sys_malloc(nodeSize);
