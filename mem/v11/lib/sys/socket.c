@@ -21,7 +21,8 @@ int socket(int domain, int type, int protocol)
 	playload->type = type;
 	playload->protocol = protocol;
 	
-	ipc_msg->data = (unsigned char *)playload;
+	ipc_msg->data = (unsigned char *)get_physical_address(playload);
+	ipc_msg->data_size = sizeof(struct ipc_socket);
 	
     Message *msg = (Message *)sys_malloc(sizeof(Message));
 	Memset(msg, 0, sizeof(Message));
@@ -35,16 +36,17 @@ int socket(int domain, int type, int protocol)
 
 
     assert(msg->type == SYSCALL_RET);
-	ipc_msg = (struct ipc_msg *)msg->BUF;
+	phy_ipc_msg = msg->BUF;
 	// TODO 像这样在进程之间传递数据实在是比较麻烦。通用做法是怎样的？
-	unsigned int phy_playload = ipc_msg;
-	unsigned int vaddr_playload = alloc_virtual_memory(phy_playload, msg->BUF_LEN);
+	unsigned int vaddr_ipc_msg = alloc_virtual_memory(phy_ipc_msg, msg->BUF_LEN);
 	asm("xchgw %bx, %bx");
-	// TODO 一个进程的栈空间只有4KB是合理的吗？
+	ipc_msg = (struct ipc_msg *)vaddr_ipc_msg;
+	unsigned int phy_playload = (unsigned int)ipc_msg->data;
 	unsigned int ipc_err_size = sizeof(struct ipc_err);
+	unsigned int vaddr_playload = alloc_virtual_memory(phy_playload, ipc_err_size);
+	// TODO 一个进程的栈空间只有4KB是合理的吗？
 	struct ipc_err *err = (struct ipc_err *)alloca(ipc_err_size);
 	Memcpy(err, vaddr_playload, ipc_err_size);
-	asm("xchgw %bx, %bx");
 	int sockefd = err->rc;
 
     sys_free(msg, sizeof(Message));

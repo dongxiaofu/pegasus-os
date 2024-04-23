@@ -102,8 +102,10 @@ ipc_write_rc(int sockfd, pid_t pid, uint16_t type, int rc)
 
 	int ipc_err_size = sizeof(struct ipc_err);
 	// 不为response->data分配内存会导致page fault。
-	response->data = (char *)alloca(ipc_err_size);
-	Memcpy(response->data, &err, ipc_err_size);	/* 直接拷贝err */
+	char *data = (char *)alloca(ipc_err_size);
+	Memcpy(data, &err, ipc_err_size);	/* 直接拷贝err */
+	// TODO 在不同的进程之间传递数据。这是业界的通用方法吗？
+	response->data = get_physical_address(data);
 
 	// TODO 本想把这些代码封装成函数，但我想不出合适的函数名称，又不愿意在头文件中新增函数。
 	unsigned int msg_size = sizeof(Message);
@@ -288,7 +290,9 @@ ipc_connect(int sockfd, struct ipc_msg *msg)
 	struct ipc_connect *payload = (struct ipc_connect *)msg->data;
 	pid_t pid = msg->pid;
 	int rc = -1;
-	rc = _connect(pid, payload->sockfd, &payload->addr);
+	// rc = _connect(pid, payload->sockfd, &payload->addr);
+	rc = _connect(pid, sockfd, &payload->addr);
+	asm("xchgw %bx, %bx");
 	return ipc_write_rc(sockfd, pid, IPC_CONNECT, rc); /* 所谓的IPC,只是自己定义的一套规则吗? */
 }
 
@@ -399,6 +403,11 @@ demux_ipc_socket_call(int source, int sockfd, char *cmdbuf, int blen)
 	// 没有办法。移植别人的代码，只能像这样打补丁。
 	// 有时候，结构不是一次性设计出来的。
 	msg->pid = source;
+	// TODO 这种共享内存的方法实在太麻烦了。
+	unsigned int data_size = msg->data_size;
+	char *data = (char *)sys_malloc(data_size);
+	Memcpy(data, alloc_virtual_memory(msg->data, data_size), data_size);
+	msg->data = data;
 
 	switch (msg->type) {
 	case IPC_SOCKET:

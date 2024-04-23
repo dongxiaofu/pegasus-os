@@ -25,7 +25,8 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 	playload->sockfd = sockfd;
 	Memcpy(&playload->addr, addr, sizeof(struct sockaddr));
 	
-	ipc_msg->data = (char *)playload;
+	ipc_msg->data = (char *)get_physical_address(playload);
+	ipc_msg->data_size = sizeof(struct ipc_connect);
 
     Message *msg = (Message *)sys_malloc(sizeof(Message));
 	Memset(msg, 0, sizeof(Message));

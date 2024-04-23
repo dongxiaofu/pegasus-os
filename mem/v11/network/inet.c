@@ -35,7 +35,8 @@ static struct sock_ops sock_ops = {
 	.recvfrom = &inet_recvfrom,
 };
 
-static struct sock_type inet_ops[] = {
+//static struct sock_type inet_ops[] = {
+static struct sock_type inet_ops[2] = {
 	{ 
 	  .sock_ops = &sock_ops, .net_ops = &tcp_ops,
 	  .type = SOCK_STREAM, .protocol = IPPROTO_TCP,

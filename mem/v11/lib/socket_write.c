@@ -28,7 +28,8 @@ ssize_t socket_write(int fildes, const void *buf, size_t nbyte)
 	// TODO 不能在这里使用。
 	// sys_free(playload);
 	
-	ipc_msg->data = (char *)playload;
+	ipc_msg->data = (char *)get_physical_address(playload);
+	ipc_msg->data_size = sizeof(struct ipc_write);
 
     Message *msg = (Message *)sys_malloc(sizeof(Message));
     msg->TYPE = IPC_SOCKET_CALL;

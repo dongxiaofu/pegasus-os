@@ -42,6 +42,7 @@ struct ipc_msg {
 	//error: invalid use of flexible array member
     //uint8_t data[];
     uint8_t *data;
+	uint32_t data_size;
 } __attribute__((packed));
 
 struct ipc_err {

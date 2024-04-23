@@ -30,7 +30,8 @@ ssize_t socket_read(int fildes, void *buf, size_t nbyte)
 	playload->buf = get_physical_address(vaddr_buf);
 	playload->len = nbyte;
 	
-	ipc_msg->data = (char *)playload;
+	ipc_msg->data = (char *)get_physical_address(playload);
+	ipc_msg->data_size = sizeof(struct ipc_read);
 
     Message *msg = (Message *)sys_malloc(sizeof(Message));
     msg->TYPE = IPC_SOCKET_CALL;

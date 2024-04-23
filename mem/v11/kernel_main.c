@@ -80,7 +80,7 @@ void init()
 	// 网卡驱动用到这个数据。
 	nic_current_page = 0x40;
 	// 初始化NIC。
-	DriverInitialize();
+	//DriverInitialize();
 
 	init_keyboard();
 	init_memory(64*1024*1024);
@@ -186,20 +186,29 @@ static void tcp_client()
 	int sock = socket(AF_INET, SOCK_STREAM, 0);	
 	Printf("sock = %x\n", sock);
 
-	struct sockaddr addr;
+	struct sockaddr_in addr;
 	int addrlen = 0;
 
+	char *host = "10.0.0.4";
+	char port = 80;
+	Memset(&addr, 0, sizeof(struct sockaddr_in));
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);;
+	addr.sin_addr.s_addr = inet_pton(host); 
+
+	assert(sock == 4097);
 	if (connect(sock, (struct sockaddr_in*)&addr, addrlen) == -1) {
         perror("Curl could not establish connection");
         return 1;
     }
 
 	char str[512] = {0};
-	char *host = "82.156.59.186";
-	char *port = "80";
-	sprintf(str, "GET / HTTP/1.1\r\nHost: %s:%s\r\nConnection: close\r\n\r\n", host, port);
+	char *dst_host = "82.156.59.186";
+	char *dst_port = "80";
+	sprintf(str, "GET / HTTP/1.1\r\nHost: %s:%s\r\nConnection: close\r\n\r\n", dst_host, dst_port);
     int len = Strlen(str);
 
+	asm("xchgw %bx, %bx");
     if (socket_write(sock, str, len) != len) {
         Printf("Write error\n");
         return 1;
