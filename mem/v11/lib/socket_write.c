@@ -31,7 +31,6 @@ ssize_t socket_write(int fildes, const void *buf, size_t nbyte)
 	ipc_msg->data = (char *)playload;
 
     Message *msg = (Message *)sys_malloc(sizeof(Message));
-	Memset(msg, 0, sizeof(Message));
     msg->TYPE = IPC_SOCKET_CALL;
 	// TODO 能直接在用户进程中使用get_physical_address吗？
 	// 当然，在我的OS中，从语法层面看，能使用。可是，那还需要系统调用做什么呢？
