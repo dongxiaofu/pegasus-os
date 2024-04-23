@@ -12,6 +12,9 @@
 #include "proto.h"
 #include "global.h"
 
+#include "sys/socket.h"
+#include "in.h"
+
 unsigned int fork_pid;
 DoubleLinkList pcb_list;
 DoubleLinkList all_pcb_list;
@@ -180,7 +183,43 @@ void user_proc_a()
 static void tcp_client()
 {
 	// 创建socket
-	
+	int sock = socket(AF_INET, SOCK_STREAM, 0);	
+
+	struct sockaddr addr;
+	int addrlen = 0;
+
+	if (connect(sock, (struct sockaddr_in*)&addr, addrlen) == -1) {
+        perror("Curl could not establish connection");
+        return 1;
+    }
+
+	char str[512] = {0};
+	char *host = "82.156.59.186";
+	char *port = "80";
+	sprintf(str, "GET / HTTP/1.1\r\nHost: %s:%s\r\nConnection: close\r\n\r\n", host, port);
+    int len = Strlen(str);
+
+    if (socket_write(sock, str, len) != len) {
+        Printf("Write error\n");
+        return 1;
+    }
+
+	// TODO 一个进程的栈只有4096字节。新建一个4KB的局部变量，恐怕不行。
+    // char buf[4096] = { 0 };
+    unsigned int buf_len = 4096;
+    char *buf = (char *)sys_malloc(buf_len);
+    int rlen = 0;
+
+    while ((rlen = socket_read(sock, buf, buf_len)) > 0) {
+        Printf("%s", buf);
+    }
+
+    if (rlen == -1) {
+        perror("Curl read error");
+        return 1;
+    }
+
+    socket_close(sock);	
 }
 
 void user_proc_b()
