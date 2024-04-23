@@ -184,6 +184,7 @@ static void tcp_client()
 {
 	// 创建socket
 	int sock = socket(AF_INET, SOCK_STREAM, 0);	
+	Printf("sock = %x\n", sock);
 
 	struct sockaddr addr;
 	int addrlen = 0;

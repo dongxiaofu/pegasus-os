@@ -78,9 +78,9 @@ ipc_write_rc(int sockfd, pid_t pid, uint16_t type, int rc)
 	 +----------+----------+
 	 
 	 */
-	int resplen = sizeof(struct ipc_msg) + sizeof(struct ipc_err);
+	int resplen = sizeof(struct ipc_msg);
 	struct ipc_msg *response = alloca(resplen);	 /* 在栈上动态分配内存 */
-
+	
 	if (response == NULL) {
 		print_err("Could not allocate memory for IPC write response\n");
 		return -1;
@@ -100,16 +100,21 @@ ipc_write_rc(int sockfd, pid_t pid, uint16_t type, int rc)
 		err.rc = rc;
 	}
 
-	Memcpy(response->data, &err, sizeof(struct ipc_err));	/* 直接拷贝err */
+	int ipc_err_size = sizeof(struct ipc_err);
+	// 不为response->data分配内存会导致page fault。
+	response->data = (char *)alloca(ipc_err_size);
+	Memcpy(response->data, &err, ipc_err_size);	/* 直接拷贝err */
 
 	// TODO 本想把这些代码封装成函数，但我想不出合适的函数名称，又不愿意在头文件中新增函数。
 	unsigned int msg_size = sizeof(Message);
 	Message *msg = (Message *)sys_malloc(msg_size);
-	unsigned int phy_buf = get_physical_address(msg);
-	msg->TYPE = NET_IPC;
-	msg->BUF = response;
-	msg->CNT = resplen;
-	send_rec(SEND, msg, TASK_NETWORK);
+	// TODO 需要返回数据给请求方。我现在还没有理清全部逻辑，搁置。
+	msg->type = SYSCALL_RET;
+	msg->BUF = get_physical_address(response) ;
+	msg->BUF_LEN = resplen;
+	// TODO 需要判断返回值吗？
+	asm("xchgw %bx, %bx");
+	send_rec(SEND, msg, pid);
 
 	return 0;
 }
@@ -388,9 +393,12 @@ ipc_close(int sockfd, struct ipc_msg *msg)
  * demux_ipc_socket_call 更多的是实现消息的分发.
 \**/
 int
-demux_ipc_socket_call(int sockfd, char *cmdbuf, int blen)
+demux_ipc_socket_call(int source, int sockfd, char *cmdbuf, int blen)
 {
 	struct ipc_msg *msg = (struct ipc_msg *)cmdbuf;
+	// 没有办法。移植别人的代码，只能像这样打补丁。
+	// 有时候，结构不是一次性设计出来的。
+	msg->pid = source;
 
 	switch (msg->type) {
 	case IPC_SOCKET:
