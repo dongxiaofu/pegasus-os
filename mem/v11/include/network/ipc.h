@@ -2,6 +2,7 @@
 #define IPC_H_
 
 #include "syshead.h"
+#include "in.h"
 #include "list.h"
 
 

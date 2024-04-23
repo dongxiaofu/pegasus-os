@@ -3,4 +3,6 @@
 
 typedef	unsigned int socklen_t;
 
+int socket(int domain, int type, int protocol);
+
 #endif

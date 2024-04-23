@@ -176,8 +176,18 @@ void user_proc_a()
 	while(1);
 }
 
- void user_proc_b()
- {
- 	disp_str("\n-------------I am user_proc_b\n");
- 	while(1);
- }
+// 实现TCP客户端
+static void tcp_client()
+{
+	// 创建socket
+	
+}
+
+void user_proc_b()
+{
+ 	// disp_str("\n-------------I am user_proc_b\n");
+	Printf("\n-------------I am user_proc_b\n");
+	while(1){
+		tcp_client();	
+	}
+}

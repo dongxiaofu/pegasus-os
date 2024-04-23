@@ -236,6 +236,7 @@
 #define WAIT    9
 #define WRITE 10
 #define GET_HD_IOCTL 11	// 获取文件系统所在分区的扇区数量
+#define IPC_SOCKET_CALL 12
 
 #define SYSCALL_RET 101
 #define RESUME_PROC 102
