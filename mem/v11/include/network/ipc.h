@@ -104,7 +104,7 @@ struct ipc_listen {
 struct ipc_read {
     int sockfd;
     size_t len;
-    uint8_t buf[];
+    uint8_t *buf;
 } __attribute__((packed));
 
 struct ipc_close {
