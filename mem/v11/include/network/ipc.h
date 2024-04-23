@@ -39,7 +39,9 @@ struct ipc_thread {
 struct ipc_msg {
     uint16_t type;
     pid_t pid;
-    uint8_t data[];
+	//error: invalid use of flexible array member
+    //uint8_t data[];
+    uint8_t *data;
 } __attribute__((packed));
 
 struct ipc_err {
