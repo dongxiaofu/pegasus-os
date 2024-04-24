@@ -5,7 +5,7 @@
 #include "const.h"
 #include "type.h"
 #include "protect.h"
-#include "double_link_list.h"
+//#include "double_link_list.h"
 #include "process.h"
 #include "keyboard.h"
 #include "console.h"
@@ -67,7 +67,7 @@ void kernel_main()
 
 void init()
 {
-	char *stackaddr = "10.0.1.4";   /* 本协议栈模拟的ip地址 */
+	char *stackaddr = "10.0.0.4";   /* 本协议栈模拟的ip地址 */
 
 	MAIN_THREAD_PAGE_DIRECTORY = 0x400000;
 	k_reenter = 99;
@@ -77,13 +77,23 @@ void init()
 	gdt_index = 9;
 	proc_ready_table = 0xc07fe000;
 
+	init_memory(64*1024*1024);
+
 	// 网卡驱动用到这个数据。
 	nic_current_page = 0x40;
+	// static struct list_head name;
+//	static struct netdev *loop;
+//	static struct netdev *netdev; /* 用于记录本机地址,包括ip和mac地址 */
 	// 初始化NIC。
 	//DriverInitialize();
+	//在这里调用这两个函数必然出错。它们使用了sys_malloc。
+	//内存都没有初始化，怎么能分配内存？
+	//可以先初始化内存，再试试这两个函数。
+//	netdev_init();
+//    route_init();
 
 	init_keyboard();
-	init_memory(64*1024*1024);
+//	init_memory(64*1024*1024);
 
 	// 初始化PCB链表
 	initDoubleLinkList(&pcb_list);
@@ -194,7 +204,7 @@ static void tcp_client()
 	Memset(&addr, 0, sizeof(struct sockaddr_in));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);;
-	addr.sin_addr.s_addr = inet_pton(host); 
+	inet_pton(AF_INET, host, &addr.sin_addr.s_addr);
 
 	assert(sock == 4097);
 	if (connect(sock, (struct sockaddr_in*)&addr, addrlen) == -1) {

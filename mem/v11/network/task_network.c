@@ -12,6 +12,10 @@
 // 网络协议。
 void task_network() {
 	Printf("------network is running\n");
+
+	netdev_init();
+	route_init();
+
 	Message *msg = (Message *)sys_malloc(sizeof(Message));
     while (1) {
 		Memset(msg, 0, sizeof(Message));

@@ -1,15 +1,31 @@
 #ifndef _LIST_H
 #define _LIST_H
 #include "stddef.h"
+// 头文件名能重名吗？
+//#include "list.h"
+#include "double_link_list.h"
 
-struct list_head {
-    struct list_head *next;
-    struct list_head *prev;
-};
+// TODO 使用global.h似乎必须同时使用这些头文件。找机会优化。
+#include "mem.h"
+#include "mm.h"
+#include "const.h"
+#include "type.h"
+#include "protect.h"
+#include "process.h"
+#include "keyboard.h"
+#include "console.h"
+#include "proto.h"
+#include "global.h"
 
-/* 新建一个list头部 */
-#define LIST_HEAD(name)		\
-    struct list_head name = { &(name), &(name) }
+// 移动到list.h中了。
+//struct list_head {
+//    struct list_head *next;
+//    struct list_head *prev;
+//};
+//
+///* 新建一个list头部 */
+//#define LIST_HEAD(name)		\
+//    struct list_head name = { &(name), &(name) }
 
 static inline void 
 list_init(struct list_head *head)

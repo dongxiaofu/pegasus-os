@@ -13,8 +13,8 @@
 #include "net.h"
 #include "wait.h"
 
-struct netdev *loop;
-struct netdev *netdev; /* 用于记录本机地址,包括ip和mac地址 */
+//struct netdev *loop;
+//struct netdev *netdev; /* 用于记录本机地址,包括ip和mac地址 */
 extern int running;
 
 char *receive_msg_from_nic();
@@ -120,8 +120,9 @@ void interrupt_wait2() {
 void *
 netdev_rx_loop()
 {
-	netdev_init();
-	route_init();
+// 是否注释，可能要看情况。
+//	netdev_init();
+//	route_init();
 
 	while (1) {
 		wait_sleep(0);

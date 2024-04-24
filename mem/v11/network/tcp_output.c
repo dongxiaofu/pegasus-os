@@ -70,7 +70,7 @@ tcp_transmit_skb(struct sock *sk, struct sk_buff *skb, uint32_t seq)
 	thdr->urp = 0;
 	thdr->rsvd = 0;
 
-	tcp_out_dbg(thdr, sk, skb);
+//	tcp_out_dbg(thdr, sk, skb);
 
 	/* 记录下要传递的数据包的起始和终止序号,这里主要是为了方便后面的重传
 	 具体可以参见tcp_input.c --> tcp_clean_retransmission_queue 函数. */

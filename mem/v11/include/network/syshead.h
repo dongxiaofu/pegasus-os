@@ -17,6 +17,6 @@
 ////typedef unsigned int uint32_t;
 //typedef unsigned char uint8_t;
 //
-static char *stackaddr = "10.0.1.4";   /* 本协议栈模拟的ip地址 */
+static char *stackaddr = "10.0.0.4";   /* 本协议栈模拟的ip地址 */
 
 #endif

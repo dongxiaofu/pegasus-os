@@ -1,7 +1,8 @@
-//#ifdef  GLOBAL_VARIABLES_HERE
 #ifndef _PEGASUS_OS_GLOBAL_H
 #define _PEGASUS_OS_GLOBAL_H
-//#undef  EXTERN
+
+#include "double_link_list.h"
+
 #define EXTERN
 //#endif
 
@@ -184,5 +185,14 @@ typedef struct ethhdr{
 	unsigned char   h_source[ETH_ALEN];   /* source eth addr */
 	_be16      h_proto;        /* packet type ID field */
 } *ETHHDR;
+
+// 网络协议栈。
+//static LIST_HEAD(routes);
+//static struct netdev *loop;
+//static struct netdev *netdev; /* 用于记录本机地址,包括ip和mac地址 */
+//EXTERN LIST_HEAD(routes); 
+struct list_head *routes;
+EXTERN struct netdev *loop;
+EXTERN struct netdev *netdev; /* 用于记录本机地址,包括ip和mac地址 */
 
 #endif

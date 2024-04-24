@@ -16,5 +16,13 @@
 // void appendToDoubleLinkList(DoubleLinkList list, void *value);
 // void insertToDoubleLinkList(DoubleLinkList list, void *value);
 // void *popFromDoubleLinkList(DoubleLinkList list);
+struct list_head {
+    struct list_head *next;
+    struct list_head *prev;
+};
+
+/* 新建一个list头部 */
+#define LIST_HEAD(name)		\
+    struct list_head name = { &(name), &(name) }
 
 #endif
