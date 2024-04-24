@@ -199,12 +199,16 @@ static void tcp_client()
 	struct sockaddr_in addr;
 	int addrlen = 0;
 
-	char *host = "10.0.0.4";
-	char port = 80;
+//	char *host = "10.0.0.4";
+//	char port = 80;
+
+	char *dst_host = "82.156.59.186";
+//	char *dst_port = "80";
+	unsigned short dst_port = 80;
 	Memset(&addr, 0, sizeof(struct sockaddr_in));
 	addr.sin_family = AF_INET;
-	addr.sin_port = htons(port);;
-	inet_pton(AF_INET, host, &addr.sin_addr.s_addr);
+	addr.sin_port = htons(dst_port);;
+	inet_pton(AF_INET, dst_host, &addr.sin_addr.s_addr);
 
 	assert(sock == 4097);
 	if (connect(sock, (struct sockaddr_in*)&addr, addrlen) == -1) {
@@ -213,8 +217,8 @@ static void tcp_client()
     }
 
 	char str[512] = {0};
-	char *dst_host = "82.156.59.186";
-	char *dst_port = "80";
+//	char *dst_host = "82.156.59.186";
+//	char *dst_port = "80";
 	sprintf(str, "GET / HTTP/1.1\r\nHost: %s:%s\r\nConnection: close\r\n\r\n", dst_host, dst_port);
     int len = Strlen(str);
 
