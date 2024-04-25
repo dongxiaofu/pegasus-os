@@ -155,7 +155,7 @@ netdev_rx_loop()
 		netdev_receive(skb);
 	}
 
-		set_interrupt_status(status);
+		set_interrupt_status(0x7F);
 	}
 
 	return NULL;

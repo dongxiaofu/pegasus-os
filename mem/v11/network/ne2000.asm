@@ -338,7 +338,7 @@ PCtoNIC:
 	;jmp MyEnd
 
 	;获取第二个参数。
-	mov ebx, dword [esp + 28]
+	mov ebx, dword [ebp + 28]
     mov dx,REMOTEBYTECOUNT0 ; set byte count low byte
     mov al,bl
 	;jmp MyEnd
@@ -362,7 +362,7 @@ PCtoNIC:
 	;一次循环写入两个字节，因此，循环次数是字节数/2。
     ;shr cx,1 ; need to loop half as many times
 	;获取第二个参数。
-	mov ecx, dword [esp + 28]
+	mov ecx, dword [ebp + 28]
 	;inc cx
     shr cx,1 ; need to loop half as many times
 	;mov esi, 0xc050d004 
@@ -373,7 +373,7 @@ PCtoNIC:
 	;mov esi, net_buf
 	;mov esi, My_Buf
 	; 获取参数。
-	mov esi, dword [esp + 24]
+	mov esi, dword [ebp + 24]
 
 	;调用SetPageStart，传递参数，消除因传递参数增加的栈。
 	push 16*1024 
@@ -408,7 +408,7 @@ CheckDMA:
     jmp CheckDMA ;loop until done
 toNICEND:
     mov dx,INTERRUPTSTATUS
-    mov al,0xF ;clear DMA interrupt bit in ISR
+    mov al,0x7F ;clear DMA interrupt bit in ISR
     out dx,al
 	;不清楚为什么要使用这个指令。
     clc
