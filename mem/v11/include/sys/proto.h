@@ -18,6 +18,7 @@ void debug_ticks();
 void set_interrupt_status(unsigned char status);
 unsigned char get_curr_page();
 void SetPageStart(unsigned int pageStart);
+void StartSendToPhysicalLink();
 
 enum intr_status intr_enable();
 enum intr_status intr_disable(); 

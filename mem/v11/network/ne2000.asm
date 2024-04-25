@@ -13,6 +13,7 @@ global get_interrupt_status
 global set_interrupt_status
 global get_curr_page
 global SetPageStart
+global StartSendToPhysicalLink
 
 LOOP_NUM equ 32
 NET_TEST_DATA equ 0x59
@@ -183,6 +184,29 @@ PSTART equ 46h
 PSTOP equ 80h
 TRANSMITBUFFER equ 40h
 
+StartSendToPhysicalLink:
+	;保存栈
+	push esi
+	push edi
+	push ebx
+	push ebp
+	push ecx
+	mov ebp, esp
+
+	mov dx, COMMAND
+	xor ax, ax
+	mov ax, 0x26
+	out dx, al
+
+	;出栈
+	mov esp, ebp
+	pop ecx
+	pop ebp
+	pop ebx
+	pop edi
+	pop esi
+    ret
+
 ;void SetPageStart(unsigned int pageStart)
 SetPageStart:
 	;保存栈
@@ -260,7 +284,7 @@ DriverSend:
     call PCtoNIC ;transfer packet to NIC buffer RAM
 	;消除因传递参数增加的栈。
 	add esp, 4
-    jmp Finished
+    ;jmp Finished
 	;call NICtoPC
 	;有什么作用？
 	;TPSR

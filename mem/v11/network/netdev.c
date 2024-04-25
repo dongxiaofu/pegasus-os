@@ -153,6 +153,8 @@ netdev_rx_loop()
 			return NULL;
 		}
 		netdev_receive(skb);
+	}else if(irs.rdc == 1){
+		StartSendToPhysicalLink();
 	}
 
 		set_interrupt_status(0x7F);
