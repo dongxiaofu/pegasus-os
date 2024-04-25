@@ -73,6 +73,7 @@ netdev_transmit(struct sk_buff *skb, uint8_t *dst_hw, uint16_t ethertype)
 	/* 回复,直接写即可 */
 	// ret = tun_write((char *)skb->data, skb->len);
 	//DriverSend((char *)skb->data, skb->len);
+	Printf("send to physical network\n");
 	DriverSend(skb->data, skb->len);
 	
 	// TODO 暂时返回1。
@@ -86,7 +87,6 @@ netdev_receive(struct sk_buff *skb)
 										 目的mac地址,源mac地址,以及类型信息 */
 	// disp_int(hdr->ethertype);
 	Printf("hdr->ethertype = %x\n", hdr->ethertype);
-	return 0;
 	//eth_dbg("in", hdr);
 	/* 以太网头部的Type(类型)字段 0x86dd表示IPv6 0x0800表示IPv4
 	0x0806表示ARP */
@@ -99,7 +99,7 @@ netdev_receive(struct sk_buff *skb)
 		break;
 	case ETH_P_IPV6: /* IPv6 0x86dd -- not supported! */
 	default:
-		//Printf("Unsupported ethertype %x\n", hdr->ethertype);
+		Printf("Unsupported ethertype %x\n", hdr->ethertype);
 		free_skb(skb);
 		break;
 	}

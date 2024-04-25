@@ -275,6 +275,7 @@ DriverSend:
 	;TBCR0
 	;BX_NE2K_THIS s.tx_bytes |= (value & 0xff);
     pop cx ;get byte count back
+	mov cx, word [ebp+28]
     mov dx,TRANSMITBYTECOUNT0
     mov al,cl
     out dx,al ;set transmit byte count 0 on NIC
@@ -433,6 +434,10 @@ get_interrupt_status:
 	push ecx
 	mov ebp, esp
 
+    mov al,22h ;back to page 0, start mode
+    mov dx,COMMAND
+    out dx,al
+
 	;读取INTERRUPT STATUS REGISTER
     mov dx,INTERRUPTSTATUS
 	xor eax, eax
@@ -457,6 +462,10 @@ set_interrupt_status:
 	push ebp
 	push ecx
 	mov ebp, esp
+
+    mov al,22h ;back to page 0, start mode
+    mov dx,COMMAND
+    out dx,al
 
 	;读取INTERRUPT STATUS REGISTER
     mov dx,INTERRUPTSTATUS
