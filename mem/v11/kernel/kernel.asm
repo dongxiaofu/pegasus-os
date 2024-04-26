@@ -337,7 +337,7 @@ stack_exception_fault:
 	push 12
 	jmp exception
 general_protection_exception_fault:
-	;;xchg bx, bx
+	;;;xchg bx, bx
 	push 13
 	call exception_handler
 	add esp, 4 * 2 
@@ -534,7 +534,7 @@ hwint14:
 
 ; 网络中断
 hwint10:
-	;xchg bx, bx
+	;;xchg bx, bx
 	; 建立快照
 	pushad
 	push ds
@@ -622,7 +622,7 @@ sys_call:
 	mov es, dx	
 	mov fs, dx
 	
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	inc dword [k_reenter]
 	cmp dword [k_reenter], 0
 	jne .2
@@ -640,7 +640,7 @@ sys_call:
 	push dword [proc_ready_table]
 	push ebx
 	push ecx
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	call [sys_call_table + 4 * eax]
 	; 修改请求系统调用的进程的进程表中的堆栈
 	; 获取堆栈中的eax是个难题：
@@ -654,7 +654,7 @@ sys_call:
 	mov [ebp + 11 * 4], eax
 	;mov [esi + 12 * 4], eax
 	;pop esi
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	;cli
 	; 恢复进程。不能使用restart，因为，不能使用proc_ready_table
 	; jmp restart	
@@ -781,9 +781,9 @@ reenter_restore:
 	pop es
 	pop ds
 
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	popad
-	;;;;;xchg bx, bx
+	;;;;;;xchg bx, bx
 	iretd
 
 in_byte:
@@ -1040,7 +1040,7 @@ get_running_thread_pcb:
 sys_call_test:
 	pushf
 
-	;xchg bx, bx
+	;;xchg bx, bx
 
 	popf
 	ret
@@ -1048,7 +1048,7 @@ sys_call_test:
 enable_8259A_slave_net_irq:
 	pushf; ax
 	cli
-	xchg bx, bx
+	;xchg bx, bx
 	xor al, al
 	in al, 0xA1
 	;or al, ~(1<<6)
