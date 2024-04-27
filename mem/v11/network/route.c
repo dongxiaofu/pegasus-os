@@ -50,13 +50,10 @@ route_init()
 	routes = (struct list_head *)sys_malloc(sizeof(struct list_head));
 	routes->next = routes->prev = routes;
 
-	char *loop_addr = "127.0.0.1";
-	route_add(loop->addr, 0, ip_parse(loop_addr), RT_LOOPBACK, 0, loop);  // 127.0.0.1
-	char *netdev_addr = "10.0.0.9";
-	route_add(netdev->addr, 0, ip_parse(netdev_addr), RT_HOST, 0, netdev);	 // 10.0.1.5
-	// TODO 这是我随便设置的IP地址。
-	char *tapaddr = "127.0.0.1";
-	route_add(0, ip_parse(tapaddr), 0, RT_GATEWAY, 0, netdev);   // 默认的网关
+	route_add(loop->addr, 0, 0xff000000, RT_LOOPBACK, 0, loop);  // 127.0.0.1
+    route_add(netdev->addr, 0, 0xffffff00, RT_HOST, 0, netdev);  // 10.0.1.4
+    char *tapaddr = "10.0.1.5";     /* tap设备的地址 */
+    route_add(0, ip_parse(tapaddr), 0, RT_GATEWAY, 0, netdev);   // 默认的网关
 }
 
 /**\
