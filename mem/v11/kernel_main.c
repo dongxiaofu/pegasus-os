@@ -202,6 +202,7 @@ static void tcp_client()
 //	char *host = "10.0.0.9";
 //	char port = 80;
 
+	// ifeng.com
 	char *dst_host = "82.156.59.186";
 //	char *dst_port = "80";
 	unsigned short dst_port = 80;
