@@ -110,6 +110,8 @@ void arp_rcv(struct sk_buff *skb)
 		arp_reply(skb, netdev);
 		return;
 	case ARP_REPLY:			// 0x0002 -- arp回复,这里实际上在上面已经处理了,更新了arp缓存
+		Printf("ARP_REPLY\n");
+		Printf("arp_reply sip = %x, dip = %x\n", arpdata->sip, arpdata->dip);
 		return;
 	default:
 		Printf("ARP: Opcode not supported\n");

@@ -4,6 +4,15 @@
 #include "arp.h"
 #include "if_ether.h"
 
+void print_array(uint8_t arr[], int size)
+{
+	Printf("\n");
+	for(int i = 0; i < size; i++){
+		Printf("%x,", arr[i]);
+	}
+	Printf("\n");
+}
+
 int
 dst_neigh_output(struct sk_buff *skb)
 {
@@ -23,11 +32,12 @@ try_agin:
 	dmac = arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
 
 	if (dmac) {
+		Printf("get\n");
+		//print_array(dmac, 6);
 		return netdev_transmit(skb, dmac, ETH_P_IP);
 	}
 	else {
 		count += 1;
-		Printf("saddr = %x, daddr = %x\n", saddr, daddr);
 		arp_request(saddr, daddr, netdev);
         /* Inform upper layer that traffic was not sent, retry later */
 		if (count < 3) {

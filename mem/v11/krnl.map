@@ -3,6 +3,8 @@ Merging program properties
 
 Removed property 0xc0010001 to merge double_link_list.o (0x1) and kernel/kernel_sub.o (not found)
 Removed property 0xc0010002 to merge double_link_list.o (0x0) and kernel/kernel_sub.o (not found)
+Removed property 0xc0010001 to merge double_link_list.o (not found) and kernel_main_old.o (0x1)
+Removed property 0xc0010002 to merge double_link_list.o (not found) and kernel_main_old.o (0x1)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and kernel_main.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and kernel_main.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and protect.o (0x1)
@@ -11,8 +13,6 @@ Removed property 0xc0010001 to merge double_link_list.o (not found) and console.
 Removed property 0xc0010002 to merge double_link_list.o (not found) and console.o (0x1)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and process.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and process.o (0x0)
-Removed property 0xc0010001 to merge double_link_list.o (not found) and kernel_main_old.o (0x1)
-Removed property 0xc0010002 to merge double_link_list.o (not found) and kernel_main_old.o (0x1)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and global.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and global.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and keyboard.o (0x1)
@@ -29,10 +29,8 @@ Removed property 0xc0010001 to merge double_link_list.o (not found) and network/
 Removed property 0xc0010002 to merge double_link_list.o (not found) and network/ip_input.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and network/udp_sock.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and network/udp_sock.o (0x0)
-Removed property 0xc0010001 to merge double_link_list.o (not found) and network/tcp_sock.o (0x1)
-Removed property 0xc0010002 to merge double_link_list.o (not found) and network/tcp_sock.o (0x0)
-Removed property 0xc0010001 to merge double_link_list.o (not found) and network/inet.o (0x1)
-Removed property 0xc0010002 to merge double_link_list.o (not found) and network/inet.o (0x0)
+Removed property 0xc0010001 to merge double_link_list.o (not found) and network/netdev.o (0x1)
+Removed property 0xc0010002 to merge double_link_list.o (not found) and network/netdev.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and network/tcp.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and network/tcp.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and network/sock.o (0x1)
@@ -41,16 +39,18 @@ Removed property 0xc0010001 to merge double_link_list.o (not found) and network/
 Removed property 0xc0010002 to merge double_link_list.o (not found) and network/tcp_output.o (0x1)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and network/arp.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and network/arp.o (0x0)
-Removed property 0xc0010001 to merge double_link_list.o (not found) and network/dst.o (0x1)
-Removed property 0xc0010002 to merge double_link_list.o (not found) and network/dst.o (0x0)
+Removed property 0xc0010001 to merge double_link_list.o (not found) and network/tcp_sock.o (0x1)
+Removed property 0xc0010002 to merge double_link_list.o (not found) and network/tcp_sock.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and network/ipc.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and network/ipc.o (0x1)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and network/icmpv4.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and network/icmpv4.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and network/ip_output.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and network/ip_output.o (0x0)
-Removed property 0xc0010001 to merge double_link_list.o (not found) and network/netdev.o (0x1)
-Removed property 0xc0010002 to merge double_link_list.o (not found) and network/netdev.o (0x0)
+Removed property 0xc0010001 to merge double_link_list.o (not found) and network/inet.o (0x1)
+Removed property 0xc0010002 to merge double_link_list.o (not found) and network/inet.o (0x0)
+Removed property 0xc0010001 to merge double_link_list.o (not found) and network/dst.o (0x1)
+Removed property 0xc0010002 to merge double_link_list.o (not found) and network/dst.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and network/tcp_input.o (0x1)
 Removed property 0xc0010002 to merge double_link_list.o (not found) and network/tcp_input.o (0x0)
 Removed property 0xc0010001 to merge double_link_list.o (not found) and network/task_network.o (0x1)
@@ -206,6 +206,10 @@ Discarded input sections
  .note.gnu.property
                 0x00000000       0x28 double_link_list.o
  .note.GNU-stack
+                0x00000000        0x0 kernel_main_old.o
+ .note.gnu.property
+                0x00000000       0x28 kernel_main_old.o
+ .note.GNU-stack
                 0x00000000        0x0 kernel_main.o
  .note.gnu.property
                 0x00000000       0x28 kernel_main.o
@@ -221,10 +225,6 @@ Discarded input sections
                 0x00000000        0x0 process.o
  .note.gnu.property
                 0x00000000       0x28 process.o
- .note.GNU-stack
-                0x00000000        0x0 kernel_main_old.o
- .note.gnu.property
-                0x00000000       0x28 kernel_main_old.o
  .note.GNU-stack
                 0x00000000        0x0 global.o
  .note.gnu.property
@@ -258,13 +258,9 @@ Discarded input sections
  .note.gnu.property
                 0x00000000       0x28 network/udp_sock.o
  .note.GNU-stack
-                0x00000000        0x0 network/tcp_sock.o
+                0x00000000        0x0 network/netdev.o
  .note.gnu.property
-                0x00000000       0x28 network/tcp_sock.o
- .note.GNU-stack
-                0x00000000        0x0 network/inet.o
- .note.gnu.property
-                0x00000000       0x28 network/inet.o
+                0x00000000       0x28 network/netdev.o
  .note.GNU-stack
                 0x00000000        0x0 network/tcp.o
  .note.gnu.property
@@ -282,9 +278,9 @@ Discarded input sections
  .note.gnu.property
                 0x00000000       0x28 network/arp.o
  .note.GNU-stack
-                0x00000000        0x0 network/dst.o
+                0x00000000        0x0 network/tcp_sock.o
  .note.gnu.property
-                0x00000000       0x28 network/dst.o
+                0x00000000       0x28 network/tcp_sock.o
  .note.GNU-stack
                 0x00000000        0x0 network/ipc.o
  .note.gnu.property
@@ -298,9 +294,13 @@ Discarded input sections
  .note.gnu.property
                 0x00000000       0x28 network/ip_output.o
  .note.GNU-stack
-                0x00000000        0x0 network/netdev.o
+                0x00000000        0x0 network/inet.o
  .note.gnu.property
-                0x00000000       0x28 network/netdev.o
+                0x00000000       0x28 network/inet.o
+ .note.GNU-stack
+                0x00000000        0x0 network/dst.o
+ .note.gnu.property
+                0x00000000       0x28 network/dst.o
  .note.GNU-stack
                 0x00000000        0x0 network/tcp_input.o
  .note.gnu.property
@@ -488,17 +488,17 @@ Linker script and memory map
 Address of section .text set to 0xc0600000
 LOAD kernel/kernel_sub.o
 LOAD kernel/kernel.o
+LOAD syscall.o
 LOAD switch_to.o
 LOAD string.o
-LOAD syscall.o
 LOAD hd/hd_rdwt.o
 LOAD network/ne2000.o
 LOAD double_link_list.o
+LOAD kernel_main_old.o
 LOAD kernel_main.o
 LOAD protect.o
 LOAD console.o
 LOAD process.o
-LOAD kernel_main_old.o
 LOAD global.o
 LOAD keyboard.o
 LOAD thread.o
@@ -507,17 +507,17 @@ LOAD network/skbuff.o
 LOAD network/socket.o
 LOAD network/ip_input.o
 LOAD network/udp_sock.o
-LOAD network/tcp_sock.o
-LOAD network/inet.o
+LOAD network/netdev.o
 LOAD network/tcp.o
 LOAD network/sock.o
 LOAD network/tcp_output.o
 LOAD network/arp.o
-LOAD network/dst.o
+LOAD network/tcp_sock.o
 LOAD network/ipc.o
 LOAD network/icmpv4.o
 LOAD network/ip_output.o
-LOAD network/netdev.o
+LOAD network/inet.o
+LOAD network/dst.o
 LOAD network/tcp_input.o
 LOAD network/task_network.o
 LOAD network/route.o
@@ -634,7 +634,7 @@ LOAD lib/arpa/inet_ntop.o
 .plt.sec
  *(.plt.sec)
 
-.text           0xc0600000    0x12dc7
+.text           0xc0600000    0x12e4e
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
@@ -688,16 +688,16 @@ LOAD lib/arpa/inet_ntop.o
                 0xc0600442                sys_call_test
                 0xc0600445                enable_8259A_slave_net_irq
  *fill*         0xc0600452        0xe 
- .text          0xc0600460       0x15 switch_to.o
-                0xc0600460                switch_to
- *fill*         0xc0600475        0xb 
- .text          0xc0600480       0x6a syscall.o
-                0xc0600480                write_debug
-                0xc0600490                send_msg
-                0xc06004a6                receive_msg
-                0xc06004bc                sys_malloc
-                0xc06004d1                sys_free
- *fill*         0xc06004ea        0x6 
+ .text          0xc0600460       0x6a syscall.o
+                0xc0600460                write_debug
+                0xc0600470                send_msg
+                0xc0600486                receive_msg
+                0xc060049c                sys_malloc
+                0xc06004b1                sys_free
+ *fill*         0xc06004ca        0x6 
+ .text          0xc06004d0       0x15 switch_to.o
+                0xc06004d0                switch_to
+ *fill*         0xc06004e5        0xb 
  .text          0xc06004f0      0x286 network/ne2000.o
                 0xc0600513                DriverInitialize
                 0xc060059d                StartSendToPhysicalLink
@@ -715,100 +715,100 @@ LOAD lib/arpa/inet_ntop.o
                 0xc060088b                appendToDoubleLinkList
                 0xc0600951                insertToDoubleLinkList
                 0xc06009d5                popFromDoubleLinkList
- .text          0xc0600a64      0x51d kernel_main.o
-                0xc0600a64                kernel_main
-                0xc0600c1e                init
-                0xc0600cb5                kernel_thread_a
-                0xc0600d02                kernel_thread_b
-                0xc0600d4f                kernel_thread_c
-                0xc0600d65                kernel_thread_d
-                0xc0600d7b                user_proc_a
-                0xc0600f64                user_proc_b
- .text          0xc0600f81      0x3b3 protect.o
-                0xc0600f81                InitDescriptor
-                0xc0600fee                Seg2PhyAddr
-                0xc060102f                Seg2PhyAddrLDT
-                0xc0601073                VirAddr2PhyAddr
-                0xc0601089                v2l
-                0xc06010cc                init_propt
-                0xc060124d                InitInterruptDesc
-                0xc06012a9                ReloadGDT
- .text          0xc0601334      0xad3 console.o
-                0xc0601334                select_console
-                0xc0601370                flush
-                0xc06013a9                set_cursor
-                0xc0601407                set_console_start_video_addr
-                0xc0601465                put_key
-                0xc06014d1                scroll_up
-                0xc0601513                scroll_down
-                0xc060157e                out_char
-                0xc060173b                tty_dev_read
-                0xc0601765                tty_dev_write
-                0xc0601992                tty_do_read
-                0xc0601a5a                tty_do_write
-                0xc0601bc3                init_screen
-                0xc0601c4c                init_tty
-                0xc0601d01                TaskTTY
- .text          0xc0601e07      0x2b7 process.o
-                0xc0601e07                schedule_process
-                0xc0601fcd                clock_handler
-                0xc0602043                pid2proc
-                0xc06020a7                proc2pid
- .text          0xc06020be     0x2de4 kernel_main_old.o
-                0xc06020be                stop_here
-                0xc0602102                catch_error
-                0xc0602167                intr_enable
-                0xc0602190                intr_disable
-                0xc06021b9                intr_set_status
-                0xc06021d7                intr_get_status
-                0xc06021f4                Memcpy
-                0xc0602227                untar
-                0xc0602537                num_to_string
-                0xc06025dd                disp_int
-                0xc0602606                do_page_fault
-                0xc0602743                exception_handler
-                0xc060292e                init_internal_interrupt
-                0xc0602aa3                spurious_irq
-                0xc0602b31                init_keyboard
-                0xc0602b74                TestTTY
-                0xc0602c13                TestReadReturnValue
-                0xc0602c90                TestWriteReturnValue
-                0xc0602d64                TestFS2
-                0xc0602d72                TestFS
-                0xc0603214                wait_exit
-                0xc0603312                INIT_fork
-                0xc0603605                simple_shell
-                0xc060378c                test_shell
-                0xc06037f4                test_exec
-                0xc06038e7                INIT
-                0xc06038f4                TestA
-                0xc0603929                delay
-                0xc060396d                TestB
-                0xc0603985                TestC
-                0xc06039b8                sys_get_ticks
-                0xc06039c8                sys_write
-                0xc0603a1c                milli_delay
-                0xc0603a58                TaskSys
-                0xc0603a5d                Printf
-                0xc0603b2f                sprintf
-                0xc0603b5b                vsprintf
-                0xc0603d07                printx
-                0xc0603d4a                sys_printx
-                0xc0603e16                spin
-                0xc0603e3c                panic
-                0xc0603e5a                assertion_failure
-                0xc0603ecc                assertion_failure2
-                0xc0603f41                dead_lock
-                0xc0603f4b                sys_send_msg
-                0xc060446a                sys_receive_msg
-                0xc0604aca                send_rec
-                0xc0604bc5                block
-                0xc0604c01                unblock
-                0xc0604c51                get_ticks_ipc
-                0xc0604cab                itoa
-                0xc0604d01                i2a
-                0xc0604d67                inform_int
-                0xc0604e33                deprecate_strcmp
+ .text          0xc0600a64     0x2de4 kernel_main_old.o
+                0xc0600a64                stop_here
+                0xc0600aa8                catch_error
+                0xc0600b0d                intr_enable
+                0xc0600b36                intr_disable
+                0xc0600b5f                intr_set_status
+                0xc0600b7d                intr_get_status
+                0xc0600b9a                Memcpy
+                0xc0600bcd                untar
+                0xc0600edd                num_to_string
+                0xc0600f83                disp_int
+                0xc0600fac                do_page_fault
+                0xc06010e9                exception_handler
+                0xc06012d4                init_internal_interrupt
+                0xc0601449                spurious_irq
+                0xc06014d7                init_keyboard
+                0xc060151a                TestTTY
+                0xc06015b9                TestReadReturnValue
+                0xc0601636                TestWriteReturnValue
+                0xc060170a                TestFS2
+                0xc0601718                TestFS
+                0xc0601bba                wait_exit
+                0xc0601cb8                INIT_fork
+                0xc0601fab                simple_shell
+                0xc0602132                test_shell
+                0xc060219a                test_exec
+                0xc060228d                INIT
+                0xc060229a                TestA
+                0xc06022cf                delay
+                0xc0602313                TestB
+                0xc060232b                TestC
+                0xc060235e                sys_get_ticks
+                0xc060236e                sys_write
+                0xc06023c2                milli_delay
+                0xc06023fe                TaskSys
+                0xc0602403                Printf
+                0xc06024d5                sprintf
+                0xc0602501                vsprintf
+                0xc06026ad                printx
+                0xc06026f0                sys_printx
+                0xc06027bc                spin
+                0xc06027e2                panic
+                0xc0602800                assertion_failure
+                0xc0602872                assertion_failure2
+                0xc06028e7                dead_lock
+                0xc06028f1                sys_send_msg
+                0xc0602e10                sys_receive_msg
+                0xc0603470                send_rec
+                0xc060356b                block
+                0xc06035a7                unblock
+                0xc06035f7                get_ticks_ipc
+                0xc0603651                itoa
+                0xc06036a7                i2a
+                0xc060370d                inform_int
+                0xc06037d9                deprecate_strcmp
+ .text          0xc0603848      0x51d kernel_main.o
+                0xc0603848                kernel_main
+                0xc0603a02                init
+                0xc0603a99                kernel_thread_a
+                0xc0603ae6                kernel_thread_b
+                0xc0603b33                kernel_thread_c
+                0xc0603b49                kernel_thread_d
+                0xc0603b5f                user_proc_a
+                0xc0603d48                user_proc_b
+ .text          0xc0603d65      0x3b3 protect.o
+                0xc0603d65                InitDescriptor
+                0xc0603dd2                Seg2PhyAddr
+                0xc0603e13                Seg2PhyAddrLDT
+                0xc0603e57                VirAddr2PhyAddr
+                0xc0603e6d                v2l
+                0xc0603eb0                init_propt
+                0xc0604031                InitInterruptDesc
+                0xc060408d                ReloadGDT
+ .text          0xc0604118      0xad3 console.o
+                0xc0604118                select_console
+                0xc0604154                flush
+                0xc060418d                set_cursor
+                0xc06041eb                set_console_start_video_addr
+                0xc0604249                put_key
+                0xc06042b5                scroll_up
+                0xc06042f7                scroll_down
+                0xc0604362                out_char
+                0xc060451f                tty_dev_read
+                0xc0604549                tty_dev_write
+                0xc0604776                tty_do_read
+                0xc060483e                tty_do_write
+                0xc06049a7                init_screen
+                0xc0604a30                init_tty
+                0xc0604ae5                TaskTTY
+ .text          0xc0604beb      0x2b7 process.o
+                0xc0604beb                schedule_process
+                0xc0604db1                clock_handler
+                0xc0604e27                pid2proc
+                0xc0604e8b                proc2pid
  .text          0xc0604ea2        0x0 global.o
  .text          0xc0604ea2      0x40f keyboard.o
                 0xc0604ea2                keyboard_handler
@@ -866,266 +866,267 @@ LOAD lib/arpa/inet_ntop.o
                 0xc0606d47                udp_alloc_sock
                 0xc0606d88                udp_free_sock
                 0xc0606dac                udp_read
- .text          0xc0606f14      0xa27 network/tcp_sock.o
-                0xc06071d3                tcp_established_or_syn_recvd_socks_enqueue
-                0xc06071ea                tcp_established_or_syn_recvd_socks_remove
-                0xc06071fc                tcp_connecting_or_listening_socks_enqueue
-                0xc0607213                tcp_connecting_or_listening_socks_remove
-                0xc0607225                tcp_alloc_sock
-                0xc060733b                tcp_free_sock
-                0xc06073b4                tcp_init
-                0xc06073be                tcp_sock_init
-                0xc0607461                tcp_write
-                0xc06074a2                tcp_read
-                0xc0607555                tcp_close
-                0xc0607613                tcp_recv_notify
-                0xc060763e                tcp_v4_connect
-                0xc060788e                tcp_lookup_sock
- .text          0xc060793b      0x429 network/inet.o
-                0xc060793b                inet_create
-                0xc06079eb                inet_socket
-                0xc06079f5                inet_connect
-                0xc0607a49                inet_write
-                0xc0607a75                inet_read
-                0xc0607aa1                inet_close
-                0xc0607af0                inet_free
-                0xc0607b26                inet_bind
-                0xc0607c2f                inet_listen
-                0xc0607c78                inet_accept
-                0xc0607d23                inet_sendto
-                0xc0607d4e                inet_recvfrom
- .text          0xc0607d64      0x448 network/tcp.o
-                0xc0607f59                tcp_in
-                0xc060800d                tcp_checksum
-                0xc0608039                __tcp_set_state
-                0xc0608048                tcp_generate_port
-                0xc0608091                tcp_generate_isn
-                0xc060809b                tcp_done
-                0xc06080c4                tcp_clear_timers
-                0xc06080d3                tcp_stop_retransmission_timer
-                0xc06080ec                tcp_release_retransmission_timer
-                0xc0608105                tcp_stop_delack_timer
-                0xc0608118                tcp_release_delack_timer
-                0xc060812b                tcp_handle_fin_state
-                0xc0608190                tcp_enter_time_wait
- .text          0xc06081ac      0x203 network/sock.o
-                0xc06082de                sk_alloc
-                0xc0608305                sk_init
-                0xc0608359                sk_init_with_socket
-                0xc0608382                sk_free
- .text          0xc06083af      0xbbe network/tcp_output.o
-                0xc0608875                tcp_send_synack
-                0xc0608918                tcp_send_delack
-                0xc0608953                tcp_send_ack
-                0xc0608a9f                tcp_send_fin
-                0xc0608b14                tcp_select_initial_window
-                0xc0608cc6                tcp_reset_retransmission_timer
-                0xc0608ce3                tcp_begin_connect
-                0xc0608d8d                tcp_send
-                0xc0608e72                tcp_send_reset
-                0xc0608ef2                tcp_queue_fin
- .text          0xc0608f6d      0x6ef network/arp.o
-                0xc060913a                arp_init
-                0xc0609140                arp_rcv
-                0xc06092f2                arp_request
-                0xc060945c                arp_reply
-                0xc06095bf                arp_get_hwaddr
-                0xc060960b                free_arp
- .text          0xc060965c       0xee network/dst.o
-                0xc060966a                dst_neigh_output
- .text          0xc060974a      0xd76 network/ipc.o
-                0xc060a304                ipc_close
-                0xc060a355                demux_ipc_socket_call
- .text          0xc060a4c0      0x234 network/icmpv4.o
-                0xc060a4ce                icmpv4_incoming
-                0xc060a542                icmpv4_reply
-                0xc060a61b                icmpv4_timestamp
- .text          0xc060a6f4      0x1d3 network/ip_output.o
-                0xc060a702                ip_output
- .text          0xc060a8c7      0x88a network/netdev.o
-                0xc060aa55                netdev_init
-                0xc060aa9c                netdev_transmit
-                0xc060abf7                interrupt_wait2
-                0xc060ac50                netdev_rx_loop
-                0xc060ad89                netdev_get
-                0xc060adc4                free_netdev
-                0xc060adef                local_ipaddress
-                0xc060ae2c                receive_msg_from_nic
-                0xc060b00f                receive_msg_from_nic2
-                0xc060b13b                net_handler
- .text          0xc060b151      0xb80 network/tcp_input.o
-                0xc060b849                tcp_process
-                0xc060bc0f                tcp_receive
- .text          0xc060bcd1      0x229 network/task_network.o
-                0xc060bcd1                task_network
-                0xc060be1e                task_netdev_rx
- .text          0xc060befa      0x2c8 network/route.o
-                0xc060c027                route_add
-                0xc060c06e                route_init
-                0xc060c120                route_lookup
-                0xc060c16e                free_routes
- .text          0xc060c1c2      0x3e0 network/udp.o
-                0xc060c2cd                udp_generate_port
-                0xc060c316                udp_checksum
-                0xc060c3e4                udp_in
-                0xc060c475                udp_data_dequeue
-                0xc060c57d                udp_data_enqueue
- .text          0xc060c5a2      0x54a network/tcp_data.o
-                0xc060c88d                tcp_data_dequeue
-                0xc060c9ba                tcp_data_queue
- .text          0xc060caec      0x1e7 network/utils.o
-                0xc060caec                run_cmd
-                0xc060caf9                print_err
-                0xc060cb10                parse_ipv4_string
-                0xc060cb6f                ip_pton
-                0xc060cbb7                sum_every_16bits
-                0xc060cc0e                checksum
-                0xc060cc4f                tcp_udp_checksum
- .text          0xc060ccd3      0xe84 hd/hd.o
-                0xc060ccd3                TaskHD
-                0xc060cd1e                init_hd
-                0xc060cd38                hd_handle
-                0xc060ce3d                hd_cmd_out
-                0xc060cf3f                hd_identify
-                0xc060cff6                print_hdinfo
-                0xc060d184                print_dpt_entry
-                0xc060d1f0                get_partition_table
-                0xc060d2cf                partition
-                0xc060d4e9                hd_open
-                0xc060d599                get_hd_ioctl
-                0xc060d653                wait_for
-                0xc060d684                interrupt_wait
-                0xc060d6dd                hd_rdwt
-                0xc060d97f                hd_handler
-                0xc060d9b0                debug_ticks
-                0xc060d9ee                waitfor
-                0xc060da32                print_hd_info
-                0xc060db1f                is_empty
- .text          0xc060db57     0x2081 fs/fs_main.o
-                0xc060db57                task_fs
-                0xc060dd6b                rd_wt
-                0xc060de4d                mkfs
-                0xc060e42f                init_fs
-                0xc060e489                do_open
-                0xc060e692                search_file
-                0xc060e7c4                strip_path
-                0xc060e890                get_inode
-                0xc060ea52                create_file
-                0xc060eb5d                alloc_imap_bit
-                0xc060ec5a                alloc_smap_bit
-                0xc060edfb                new_inode
-                0xc060ef19                new_dir_entry
-                0xc060f125                do_unlink
-                0xc060f601                do_rdwt
-                0xc060f98c                sync_inode
-                0xc060fae0                put_inode
-                0xc060fb1e                do_close
-                0xc060fb70                get_super_block
- .text          0xc060fbd8      0x24f mm/forkexit.o
-                0xc060fbd8                do_fork
-                0xc060fc46                do_exit
-                0xc060fcd0                do_wait
-                0xc060fdcd                cleanup
- .text          0xc060fe27      0x419 mm/exec.o
-                0xc060fe27                do_exec
- .text          0xc0610240      0x14e mm/main.o
-                0xc0610240                TaskMM
-                0xc061036f                alloc_mem
- .text          0xc061038e     0x1118 mem/mem.o
-                0xc061038e                init_bitmap
-                0xc06103b1                test_bit_val
-                0xc061041a                set_bit_val
-                0xc0610495                set_bits
-                0xc06104cf                get_first_free_bit
-                0xc0610513                get_bits
-                0xc06105db                get_a_page
-                0xc061068f                get_virtual_address_start_with_addr
-                0xc0610729                get_virtual_address
-                0xc06107b9                ptr_pde
-                0xc06107cc                ptr_pte
-                0xc06107f3                add_map_entry
-                0xc0610884                alloc_virtual_memory
-                0xc0610950                get_physical_address_proc
-                0xc06109cc                get_physical_address
-                0xc06109fe                alloc_physical_memory_of_proc
-                0xc0610aed                alloc_physical_memory
-                0xc0610bb5                alloc_memory
-                0xc0610c17                get_a_virtual_page
-                0xc0610c4f                block2arena
-                0xc0610c65                sys_malloc2
-                0xc0610f92                remove_map_entry
-                0xc0610fb3                free_a_page
-                0xc061105a                sys_free2
-                0xc0611060                init_memory_block_desc
-                0xc0611131                init_memory2
-                0xc0611366                init_memory
- .text          0xc06114a6      0x285 lib/exec.o
-                0xc06114a6                exec
-                0xc0611517                execv
-                0xc0611706                execl
- .text          0xc061172b       0x4b lib/fork.o
-                0xc061172b                fork
- .text          0xc0611776       0x2f lib/exit.o
-                0xc0611776                exit
- .text          0xc06117a5       0x42 lib/unlink.o
-                0xc06117a5                unlink
- .text          0xc06117e7       0x44 lib/wait.o
-                0xc06117e7                wait
- .text          0xc061182b       0xbe lib/socket_close.o
-                0xc061182b                socket_close
- .text          0xc06118e9      0x12a lib/socket_read.o
-                0xc06118e9                socket_read
- .text          0xc0611a13       0x29 lib/alloca.o
-                0xc0611a13                alloca
- .text          0xc0611a3c       0x46 lib/calloc.o
-                0xc0611a3c                calloc
- .text          0xc0611a82       0x49 lib/floor.o
-                0xc0611a82                floor
- .text          0xc0611acb      0x12a lib/socket_write.o
-                0xc0611acb                socket_write
- .text          0xc0611bf5       0x2b lib/getpid.o
-                0xc0611bf5                getpid
- .text          0xc0611c20       0x9c lib/stdlib/atoi.o
-                0xc0611c20                atoi
- .text          0xc0611cbc       0xca lib/stdlib/strtol.o
-                0xc0611cbc                strtol
- .text          0xc0611d86       0x85 lib/string/strtok.o
-                0xc0611d86                strtok
- .text          0xc0611e0b       0xa8 lib/string/strcmp.o
-                0xc0611e0b                strcmp
- .text          0xc0611eb3       0xd4 lib/string/strncmp.o
-                0xc0611eb3                strncmp
- .text          0xc0611f87       0x90 lib/string/strpbrk.o
-                0xc0611f87                strpbrk
- .text          0xc0612017      0x181 lib/stdio/read.o
-                0xc0612017                read
- .text          0xc0612198       0x17 lib/stdio/perror.o
-                0xc0612198                perror
- .text          0xc06121af      0x335 lib/stdio/sscanf.o
-                0xc06121af                sscanf
- .text          0xc06124e4       0x95 lib/stdio/open.o
-                0xc06124e4                open
- .text          0xc0612579       0x85 lib/stdio/write.o
-                0xc0612579                write
- .text          0xc06125fe       0x52 lib/stdio/close.o
-                0xc06125fe                close
- .text          0xc0612650      0x195 lib/sys/socket.o
-                0xc0612650                socket
- .text          0xc06127e5      0x102 lib/sys/connect.o
-                0xc06127e5                connect
- .text          0xc06128e7       0x38 lib/arpa/ntohs.o
-                0xc06128e7                ntohs
- .text          0xc061291f       0x7c lib/arpa/htonl.o
-                0xc061291f                htonl
- .text          0xc061299b       0x38 lib/arpa/htons.o
-                0xc061299b                htons
- .text          0xc06129d3      0x295 lib/arpa/inet_pton.o
-                0xc06129d3                isValidIPv4
-                0xc0612b5d                inet_pton
- .text          0xc0612c68       0x7c lib/arpa/ntohl.o
-                0xc0612c68                ntohl
- .text          0xc0612ce4       0xe3 lib/arpa/inet_ntop.o
-                0xc0612ce4                inet_ntop
+ .text          0xc0606f14      0x88a network/netdev.o
+                0xc06070a2                netdev_init
+                0xc06070e9                netdev_transmit
+                0xc0607244                interrupt_wait2
+                0xc060729d                netdev_rx_loop
+                0xc06073d6                netdev_get
+                0xc0607411                free_netdev
+                0xc060743c                local_ipaddress
+                0xc0607479                receive_msg_from_nic
+                0xc060765c                receive_msg_from_nic2
+                0xc0607788                net_handler
+ .text          0xc060779e      0x448 network/tcp.o
+                0xc0607993                tcp_in
+                0xc0607a47                tcp_checksum
+                0xc0607a73                __tcp_set_state
+                0xc0607a82                tcp_generate_port
+                0xc0607acb                tcp_generate_isn
+                0xc0607ad5                tcp_done
+                0xc0607afe                tcp_clear_timers
+                0xc0607b0d                tcp_stop_retransmission_timer
+                0xc0607b26                tcp_release_retransmission_timer
+                0xc0607b3f                tcp_stop_delack_timer
+                0xc0607b52                tcp_release_delack_timer
+                0xc0607b65                tcp_handle_fin_state
+                0xc0607bca                tcp_enter_time_wait
+ .text          0xc0607be6      0x203 network/sock.o
+                0xc0607d18                sk_alloc
+                0xc0607d3f                sk_init
+                0xc0607d93                sk_init_with_socket
+                0xc0607dbc                sk_free
+ .text          0xc0607de9      0xbbe network/tcp_output.o
+                0xc06082af                tcp_send_synack
+                0xc0608352                tcp_send_delack
+                0xc060838d                tcp_send_ack
+                0xc06084d9                tcp_send_fin
+                0xc060854e                tcp_select_initial_window
+                0xc0608700                tcp_reset_retransmission_timer
+                0xc060871d                tcp_begin_connect
+                0xc06087c7                tcp_send
+                0xc06088ac                tcp_send_reset
+                0xc060892c                tcp_queue_fin
+ .text          0xc06089a7      0x71f network/arp.o
+                0xc0608b74                arp_init
+                0xc0608b7a                arp_rcv
+                0xc0608d5c                arp_request
+                0xc0608ec6                arp_reply
+                0xc0609029                arp_get_hwaddr
+                0xc0609075                free_arp
+ .text          0xc06090c6      0xa27 network/tcp_sock.o
+                0xc0609385                tcp_established_or_syn_recvd_socks_enqueue
+                0xc060939c                tcp_established_or_syn_recvd_socks_remove
+                0xc06093ae                tcp_connecting_or_listening_socks_enqueue
+                0xc06093c5                tcp_connecting_or_listening_socks_remove
+                0xc06093d7                tcp_alloc_sock
+                0xc06094ed                tcp_free_sock
+                0xc0609566                tcp_init
+                0xc0609570                tcp_sock_init
+                0xc0609613                tcp_write
+                0xc0609654                tcp_read
+                0xc0609707                tcp_close
+                0xc06097c5                tcp_recv_notify
+                0xc06097f0                tcp_v4_connect
+                0xc0609a40                tcp_lookup_sock
+ .text          0xc0609aed      0xd76 network/ipc.o
+                0xc060a6a7                ipc_close
+                0xc060a6f8                demux_ipc_socket_call
+ .text          0xc060a863      0x234 network/icmpv4.o
+                0xc060a871                icmpv4_incoming
+                0xc060a8e5                icmpv4_reply
+                0xc060a9be                icmpv4_timestamp
+ .text          0xc060aa97      0x1d3 network/ip_output.o
+                0xc060aaa5                ip_output
+ .text          0xc060ac6a      0x429 network/inet.o
+                0xc060ac6a                inet_create
+                0xc060ad1a                inet_socket
+                0xc060ad24                inet_connect
+                0xc060ad78                inet_write
+                0xc060ada4                inet_read
+                0xc060add0                inet_close
+                0xc060ae1f                inet_free
+                0xc060ae55                inet_bind
+                0xc060af5e                inet_listen
+                0xc060afa7                inet_accept
+                0xc060b052                inet_sendto
+                0xc060b07d                inet_recvfrom
+ .text          0xc060b093      0x145 network/dst.o
+                0xc060b0a1                print_array
+                0xc060b0fe                dst_neigh_output
+ .text          0xc060b1d8      0xb80 network/tcp_input.o
+                0xc060b8d0                tcp_process
+                0xc060bc96                tcp_receive
+ .text          0xc060bd58      0x229 network/task_network.o
+                0xc060bd58                task_network
+                0xc060bea5                task_netdev_rx
+ .text          0xc060bf81      0x2c8 network/route.o
+                0xc060c0ae                route_add
+                0xc060c0f5                route_init
+                0xc060c1a7                route_lookup
+                0xc060c1f5                free_routes
+ .text          0xc060c249      0x3e0 network/udp.o
+                0xc060c354                udp_generate_port
+                0xc060c39d                udp_checksum
+                0xc060c46b                udp_in
+                0xc060c4fc                udp_data_dequeue
+                0xc060c604                udp_data_enqueue
+ .text          0xc060c629      0x54a network/tcp_data.o
+                0xc060c914                tcp_data_dequeue
+                0xc060ca41                tcp_data_queue
+ .text          0xc060cb73      0x1e7 network/utils.o
+                0xc060cb73                run_cmd
+                0xc060cb80                print_err
+                0xc060cb97                parse_ipv4_string
+                0xc060cbf6                ip_pton
+                0xc060cc3e                sum_every_16bits
+                0xc060cc95                checksum
+                0xc060ccd6                tcp_udp_checksum
+ .text          0xc060cd5a      0xe84 hd/hd.o
+                0xc060cd5a                TaskHD
+                0xc060cda5                init_hd
+                0xc060cdbf                hd_handle
+                0xc060cec4                hd_cmd_out
+                0xc060cfc6                hd_identify
+                0xc060d07d                print_hdinfo
+                0xc060d20b                print_dpt_entry
+                0xc060d277                get_partition_table
+                0xc060d356                partition
+                0xc060d570                hd_open
+                0xc060d620                get_hd_ioctl
+                0xc060d6da                wait_for
+                0xc060d70b                interrupt_wait
+                0xc060d764                hd_rdwt
+                0xc060da06                hd_handler
+                0xc060da37                debug_ticks
+                0xc060da75                waitfor
+                0xc060dab9                print_hd_info
+                0xc060dba6                is_empty
+ .text          0xc060dbde     0x2081 fs/fs_main.o
+                0xc060dbde                task_fs
+                0xc060ddf2                rd_wt
+                0xc060ded4                mkfs
+                0xc060e4b6                init_fs
+                0xc060e510                do_open
+                0xc060e719                search_file
+                0xc060e84b                strip_path
+                0xc060e917                get_inode
+                0xc060ead9                create_file
+                0xc060ebe4                alloc_imap_bit
+                0xc060ece1                alloc_smap_bit
+                0xc060ee82                new_inode
+                0xc060efa0                new_dir_entry
+                0xc060f1ac                do_unlink
+                0xc060f688                do_rdwt
+                0xc060fa13                sync_inode
+                0xc060fb67                put_inode
+                0xc060fba5                do_close
+                0xc060fbf7                get_super_block
+ .text          0xc060fc5f      0x24f mm/forkexit.o
+                0xc060fc5f                do_fork
+                0xc060fccd                do_exit
+                0xc060fd57                do_wait
+                0xc060fe54                cleanup
+ .text          0xc060feae      0x419 mm/exec.o
+                0xc060feae                do_exec
+ .text          0xc06102c7      0x14e mm/main.o
+                0xc06102c7                TaskMM
+                0xc06103f6                alloc_mem
+ .text          0xc0610415     0x1118 mem/mem.o
+                0xc0610415                init_bitmap
+                0xc0610438                test_bit_val
+                0xc06104a1                set_bit_val
+                0xc061051c                set_bits
+                0xc0610556                get_first_free_bit
+                0xc061059a                get_bits
+                0xc0610662                get_a_page
+                0xc0610716                get_virtual_address_start_with_addr
+                0xc06107b0                get_virtual_address
+                0xc0610840                ptr_pde
+                0xc0610853                ptr_pte
+                0xc061087a                add_map_entry
+                0xc061090b                alloc_virtual_memory
+                0xc06109d7                get_physical_address_proc
+                0xc0610a53                get_physical_address
+                0xc0610a85                alloc_physical_memory_of_proc
+                0xc0610b74                alloc_physical_memory
+                0xc0610c3c                alloc_memory
+                0xc0610c9e                get_a_virtual_page
+                0xc0610cd6                block2arena
+                0xc0610cec                sys_malloc2
+                0xc0611019                remove_map_entry
+                0xc061103a                free_a_page
+                0xc06110e1                sys_free2
+                0xc06110e7                init_memory_block_desc
+                0xc06111b8                init_memory2
+                0xc06113ed                init_memory
+ .text          0xc061152d      0x285 lib/exec.o
+                0xc061152d                exec
+                0xc061159e                execv
+                0xc061178d                execl
+ .text          0xc06117b2       0x4b lib/fork.o
+                0xc06117b2                fork
+ .text          0xc06117fd       0x2f lib/exit.o
+                0xc06117fd                exit
+ .text          0xc061182c       0x42 lib/unlink.o
+                0xc061182c                unlink
+ .text          0xc061186e       0x44 lib/wait.o
+                0xc061186e                wait
+ .text          0xc06118b2       0xbe lib/socket_close.o
+                0xc06118b2                socket_close
+ .text          0xc0611970      0x12a lib/socket_read.o
+                0xc0611970                socket_read
+ .text          0xc0611a9a       0x29 lib/alloca.o
+                0xc0611a9a                alloca
+ .text          0xc0611ac3       0x46 lib/calloc.o
+                0xc0611ac3                calloc
+ .text          0xc0611b09       0x49 lib/floor.o
+                0xc0611b09                floor
+ .text          0xc0611b52      0x12a lib/socket_write.o
+                0xc0611b52                socket_write
+ .text          0xc0611c7c       0x2b lib/getpid.o
+                0xc0611c7c                getpid
+ .text          0xc0611ca7       0x9c lib/stdlib/atoi.o
+                0xc0611ca7                atoi
+ .text          0xc0611d43       0xca lib/stdlib/strtol.o
+                0xc0611d43                strtol
+ .text          0xc0611e0d       0x85 lib/string/strtok.o
+                0xc0611e0d                strtok
+ .text          0xc0611e92       0xa8 lib/string/strcmp.o
+                0xc0611e92                strcmp
+ .text          0xc0611f3a       0xd4 lib/string/strncmp.o
+                0xc0611f3a                strncmp
+ .text          0xc061200e       0x90 lib/string/strpbrk.o
+                0xc061200e                strpbrk
+ .text          0xc061209e      0x181 lib/stdio/read.o
+                0xc061209e                read
+ .text          0xc061221f       0x17 lib/stdio/perror.o
+                0xc061221f                perror
+ .text          0xc0612236      0x335 lib/stdio/sscanf.o
+                0xc0612236                sscanf
+ .text          0xc061256b       0x95 lib/stdio/open.o
+                0xc061256b                open
+ .text          0xc0612600       0x85 lib/stdio/write.o
+                0xc0612600                write
+ .text          0xc0612685       0x52 lib/stdio/close.o
+                0xc0612685                close
+ .text          0xc06126d7      0x195 lib/sys/socket.o
+                0xc06126d7                socket
+ .text          0xc061286c      0x102 lib/sys/connect.o
+                0xc061286c                connect
+ .text          0xc061296e       0x38 lib/arpa/ntohs.o
+                0xc061296e                ntohs
+ .text          0xc06129a6       0x7c lib/arpa/htonl.o
+                0xc06129a6                htonl
+ .text          0xc0612a22       0x38 lib/arpa/htons.o
+                0xc0612a22                htons
+ .text          0xc0612a5a      0x295 lib/arpa/inet_pton.o
+                0xc0612a5a                isValidIPv4
+                0xc0612be4                inet_pton
+ .text          0xc0612cef       0x7c lib/arpa/ntohl.o
+                0xc0612cef                ntohl
+ .text          0xc0612d6b       0xe3 lib/arpa/inet_ntop.o
+                0xc0612d6b                inet_ntop
  *(.gnu.warning)
 
 .fini
@@ -1136,71 +1137,73 @@ LOAD lib/arpa/inet_ntop.o
                 0xc0613000                        . = ALIGN (CONSTANT (MAXPAGESIZE))
                 0xc0613000                        . = SEGMENT_START ("rodata-segment", (ALIGN (CONSTANT (MAXPAGESIZE)) + (. & (CONSTANT (MAXPAGESIZE) - 0x1))))
 
-.rodata         0xc0613000     0x1da3
+.rodata         0xc0613000     0x1dc7
  *(.rodata .rodata.* .gnu.linkonce.r.*)
  .rodata        0xc0613000       0x3c double_link_list.o
- .rodata        0xc061303c      0x1b4 kernel_main.o
- .rodata        0xc06131f0       0x22 console.o
- *fill*         0xc0613212        0x2 
- .rodata        0xc0613214       0x4c process.o
- .rodata        0xc0613260      0xb61 kernel_main_old.o
- .rodata        0xc0613dc1        0x9 network/skbuff.o
- *fill*         0xc0613dca        0x2 
- .rodata        0xc0613dcc      0x23d network/socket.o
- *fill*         0xc0614009        0x3 
- .rodata        0xc061400c       0xbd network/ip_input.o
- *fill*         0xc06140c9        0x3 
- .rodata        0xc06140cc       0x2d network/udp_sock.o
- *fill*         0xc06140f9        0x3 
- .rodata        0xc06140fc       0xe8 network/tcp_sock.o
- .rodata        0xc06141e4       0x48 network/inet.o
- .rodata        0xc061422c       0x31 network/tcp.o
- .rodata        0xc061425d        0x9 network/sock.o
- *fill*         0xc0614266        0x2 
- .rodata        0xc0614268       0xc3 network/tcp_output.o
- *fill*         0xc061432b        0x1 
- .rodata        0xc061432c       0xa7 network/arp.o
- .rodata        0xc06143d3       0x21 network/dst.o
- .rodata        0xc06143f4      0x160 network/ipc.o
- .rodata        0xc0614554       0x32 network/icmpv4.o
- .rodata        0xc0614586        0x9 network/ip_output.o
- *fill*         0xc061458f        0x1 
- .rodata        0xc0614590      0x1ae network/netdev.o
- *fill*         0xc061473e        0x2 
- .rodata        0xc0614740       0x60 network/tcp_input.o
- .rodata        0xc06147a0       0x78 network/task_network.o
- .rodata        0xc0614818       0x36 network/route.o
- .rodata        0xc061484e        0x9 network/udp.o
- .rodata        0xc0614857       0x1e network/tcp_data.o
- *fill*         0xc0614875        0x3 
- .rodata        0xc0614878       0x41 network/utils.o
- *fill*         0xc06148b9        0x3 
- .rodata        0xc06148bc      0x19c hd/hd.o
- .rodata        0xc0614a58      0x1fb fs/fs_main.o
-                0xc0614a58                FSBUF_SIZE
- .rodata        0xc0614c53       0x21 mm/forkexit.o
- .rodata        0xc0614c74       0x10 mm/exec.o
- .rodata        0xc0614c84       0x11 mm/main.o
- .rodata        0xc0614c95       0x5a mem/mem.o
- .rodata        0xc0614cef       0x2d lib/exec.o
- .rodata        0xc0614d1c        0x9 lib/socket_close.o
- .rodata        0xc0614d25        0x9 lib/socket_read.o
- .rodata        0xc0614d2e        0x9 lib/socket_write.o
- .rodata        0xc0614d37       0x2a lib/stdio/close.o
- .rodata        0xc0614d61       0x33 lib/sys/socket.o
- .rodata        0xc0614d94        0x9 lib/sys/connect.o
- .rodata        0xc0614d9d        0x3 lib/arpa/inet_pton.o
- .rodata        0xc0614da0        0x3 lib/arpa/inet_ntop.o
+ *fill*         0xc061303c        0x4 
+ .rodata        0xc0613040      0xb61 kernel_main_old.o
+ *fill*         0xc0613ba1        0x3 
+ .rodata        0xc0613ba4      0x1b4 kernel_main.o
+ .rodata        0xc0613d58       0x22 console.o
+ *fill*         0xc0613d7a        0x2 
+ .rodata        0xc0613d7c       0x4c process.o
+ .rodata        0xc0613dc8        0x9 network/skbuff.o
+ *fill*         0xc0613dd1        0x3 
+ .rodata        0xc0613dd4      0x23d network/socket.o
+ *fill*         0xc0614011        0x3 
+ .rodata        0xc0614014       0xbd network/ip_input.o
+ *fill*         0xc06140d1        0x3 
+ .rodata        0xc06140d4       0x2d network/udp_sock.o
+ *fill*         0xc0614101        0x3 
+ .rodata        0xc0614104      0x1ae network/netdev.o
+ *fill*         0xc06142b2        0x2 
+ .rodata        0xc06142b4       0x31 network/tcp.o
+ .rodata        0xc06142e5        0x9 network/sock.o
+ *fill*         0xc06142ee        0x2 
+ .rodata        0xc06142f0       0xc3 network/tcp_output.o
+ *fill*         0xc06143b3        0x1 
+ .rodata        0xc06143b4       0xd0 network/arp.o
+ .rodata        0xc0614484       0xe8 network/tcp_sock.o
+ .rodata        0xc061456c      0x160 network/ipc.o
+ .rodata        0xc06146cc       0x32 network/icmpv4.o
+ .rodata        0xc06146fe        0x9 network/ip_output.o
+ *fill*         0xc0614707        0x1 
+ .rodata        0xc0614708       0x48 network/inet.o
+ .rodata        0xc0614750       0x14 network/dst.o
+ .rodata        0xc0614764       0x60 network/tcp_input.o
+ .rodata        0xc06147c4       0x78 network/task_network.o
+ .rodata        0xc061483c       0x36 network/route.o
+ .rodata        0xc0614872        0x9 network/udp.o
+ .rodata        0xc061487b       0x1e network/tcp_data.o
+ *fill*         0xc0614899        0x3 
+ .rodata        0xc061489c       0x41 network/utils.o
+ *fill*         0xc06148dd        0x3 
+ .rodata        0xc06148e0      0x19c hd/hd.o
+ .rodata        0xc0614a7c      0x1fb fs/fs_main.o
+                0xc0614a7c                FSBUF_SIZE
+ .rodata        0xc0614c77       0x21 mm/forkexit.o
+ .rodata        0xc0614c98       0x10 mm/exec.o
+ .rodata        0xc0614ca8       0x11 mm/main.o
+ .rodata        0xc0614cb9       0x5a mem/mem.o
+ .rodata        0xc0614d13       0x2d lib/exec.o
+ .rodata        0xc0614d40        0x9 lib/socket_close.o
+ .rodata        0xc0614d49        0x9 lib/socket_read.o
+ .rodata        0xc0614d52        0x9 lib/socket_write.o
+ .rodata        0xc0614d5b       0x2a lib/stdio/close.o
+ .rodata        0xc0614d85       0x33 lib/sys/socket.o
+ .rodata        0xc0614db8        0x9 lib/sys/connect.o
+ .rodata        0xc0614dc1        0x3 lib/arpa/inet_pton.o
+ .rodata        0xc0614dc4        0x3 lib/arpa/inet_ntop.o
 
-.txt            0xc0614da3       0xaa
- .txt           0xc0614da3       0x82 string.o
-                0xc0614da3                Memcpy2
-                0xc0614dd1                Memset
-                0xc0614df0                Strcpy
-                0xc0614e0a                Strlen
- .txt           0xc0614e25       0x28 hd/hd_rdwt.o
-                0xc0614e25                read_port
-                0xc0614e39                write_port
+.txt            0xc0614dc7       0xaa
+ .txt           0xc0614dc7       0x82 string.o
+                0xc0614dc7                Memcpy2
+                0xc0614df5                Memset
+                0xc0614e14                Strcpy
+                0xc0614e2e                Strlen
+ .txt           0xc0614e49       0x28 hd/hd_rdwt.o
+                0xc0614e49                read_port
+                0xc0614e5d                write_port
 
 .rodata1
  *(.rodata1)
@@ -1209,142 +1212,142 @@ LOAD lib/arpa/inet_ntop.o
  *(.eh_frame_hdr)
  *(.eh_frame_entry .eh_frame_entry.*)
 
-.eh_frame       0xc0614e50     0x4274
+.eh_frame       0xc0614e74     0x4294
  *(.eh_frame)
- .eh_frame      0xc0614e50       0xd8 double_link_list.o
- .eh_frame      0xc0614f28      0x108 kernel_main.o
-                                0x120 (size before relaxing)
- .eh_frame      0xc0615030      0x100 protect.o
-                                0x118 (size before relaxing)
- .eh_frame      0xc0615130      0x1e0 console.o
-                                0x1f8 (size before relaxing)
- .eh_frame      0xc0615310       0x80 process.o
-                                 0x98 (size before relaxing)
- .eh_frame      0xc0615390      0x6cc kernel_main_old.o
+ .eh_frame      0xc0614e74       0xd8 double_link_list.o
+ .eh_frame      0xc0614f4c      0x6cc kernel_main_old.o
                                 0x6e4 (size before relaxing)
- .eh_frame      0xc0615a5c       0xa0 keyboard.o
+ .eh_frame      0xc0615618      0x108 kernel_main.o
+                                0x120 (size before relaxing)
+ .eh_frame      0xc0615720      0x100 protect.o
+                                0x118 (size before relaxing)
+ .eh_frame      0xc0615820      0x1e0 console.o
+                                0x1f8 (size before relaxing)
+ .eh_frame      0xc0615a00       0x80 process.o
+                                 0x98 (size before relaxing)
+ .eh_frame      0xc0615a80       0xa0 keyboard.o
                                  0xb8 (size before relaxing)
- .eh_frame      0xc0615afc       0x80 thread.o
+ .eh_frame      0xc0615b20       0x80 thread.o
                                  0x98 (size before relaxing)
- .eh_frame      0xc0615b7c       0xe0 my_process.o
+ .eh_frame      0xc0615ba0       0xe0 my_process.o
                                  0xf8 (size before relaxing)
- .eh_frame      0xc0615c5c       0xe0 network/skbuff.o
+ .eh_frame      0xc0615c80       0xe0 network/skbuff.o
                                  0xf8 (size before relaxing)
- .eh_frame      0xc0615d3c      0x2a0 network/socket.o
+ .eh_frame      0xc0615d60      0x2a0 network/socket.o
                                 0x2b8 (size before relaxing)
- .eh_frame      0xc0615fdc      0x104 network/ip_input.o
+ .eh_frame      0xc0616000      0x104 network/ip_input.o
                                 0x11c (size before relaxing)
- .eh_frame      0xc06160e0      0x404 network/udp_sock.o
+ .eh_frame      0xc0616104      0x404 network/udp_sock.o
                                 0x41c (size before relaxing)
- .eh_frame      0xc06164e4      0x4c0 network/tcp_sock.o
-                                0x4d8 (size before relaxing)
- .eh_frame      0xc06169a4      0x180 network/inet.o
-                                0x198 (size before relaxing)
- .eh_frame      0xc0616b24      0x268 network/tcp.o
-                                0x280 (size before relaxing)
- .eh_frame      0xc0616d8c      0x1a0 network/sock.o
-                                0x1b8 (size before relaxing)
- .eh_frame      0xc0616f2c      0x3c4 network/tcp_output.o
-                                0x3dc (size before relaxing)
- .eh_frame      0xc06172f0      0x1c0 network/arp.o
-                                0x1d8 (size before relaxing)
- .eh_frame      0xc06174b0       0x40 network/dst.o
-                                 0x58 (size before relaxing)
- .eh_frame      0xc06174f0      0x254 network/ipc.o
-                                0x26c (size before relaxing)
- .eh_frame      0xc0617744       0x80 network/icmpv4.o
-                                 0x98 (size before relaxing)
- .eh_frame      0xc06177c4       0x40 network/ip_output.o
-                                 0x58 (size before relaxing)
- .eh_frame      0xc0617804      0x214 network/netdev.o
+ .eh_frame      0xc0616508      0x214 network/netdev.o
                                 0x22c (size before relaxing)
- .eh_frame      0xc0617a18      0x300 network/tcp_input.o
-                                0x318 (size before relaxing)
- .eh_frame      0xc0617d18       0x40 network/task_network.o
-                                 0x58 (size before relaxing)
- .eh_frame      0xc0617d58      0x124 network/route.o
-                                0x13c (size before relaxing)
- .eh_frame      0xc0617e7c      0x1e4 network/udp.o
-                                0x1fc (size before relaxing)
- .eh_frame      0xc0618060      0x200 network/tcp_data.o
-                                0x218 (size before relaxing)
- .eh_frame      0xc0618260       0xe4 network/utils.o
-                                 0xfc (size before relaxing)
- .eh_frame      0xc0618344      0x264 hd/hd.o
-                                0x27c (size before relaxing)
- .eh_frame      0xc06185a8      0x27c fs/fs_main.o
-                                0x294 (size before relaxing)
- .eh_frame      0xc0618824       0x80 mm/forkexit.o
+ .eh_frame      0xc061671c      0x268 network/tcp.o
+                                0x280 (size before relaxing)
+ .eh_frame      0xc0616984      0x1a0 network/sock.o
+                                0x1b8 (size before relaxing)
+ .eh_frame      0xc0616b24      0x3c4 network/tcp_output.o
+                                0x3dc (size before relaxing)
+ .eh_frame      0xc0616ee8      0x1c0 network/arp.o
+                                0x1d8 (size before relaxing)
+ .eh_frame      0xc06170a8      0x4c0 network/tcp_sock.o
+                                0x4d8 (size before relaxing)
+ .eh_frame      0xc0617568      0x254 network/ipc.o
+                                0x26c (size before relaxing)
+ .eh_frame      0xc06177bc       0x80 network/icmpv4.o
                                  0x98 (size before relaxing)
- .eh_frame      0xc06188a4       0x20 mm/exec.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc06188c4       0x3c mm/main.o
-                                 0x54 (size before relaxing)
- .eh_frame      0xc0618900      0x364 mem/mem.o
-                                0x37c (size before relaxing)
- .eh_frame      0xc0618c64       0x60 lib/exec.o
-                                 0x78 (size before relaxing)
- .eh_frame      0xc0618cc4       0x20 lib/fork.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618ce4       0x20 lib/exit.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618d04       0x20 lib/unlink.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618d24       0x20 lib/wait.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618d44       0x20 lib/socket_close.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618d64       0x20 lib/socket_read.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618d84       0x20 lib/alloca.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618da4       0x20 lib/calloc.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618dc4       0x20 lib/floor.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618de4       0x20 lib/socket_write.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618e04       0x20 lib/getpid.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618e24       0x20 lib/stdlib/atoi.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618e44       0x20 lib/stdlib/strtol.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618e64       0x20 lib/string/strtok.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618e84       0x20 lib/string/strcmp.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618ea4       0x20 lib/string/strncmp.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618ec4       0x20 lib/string/strpbrk.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618ee4       0x20 lib/stdio/read.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618f04       0x20 lib/stdio/perror.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618f24       0x20 lib/stdio/sscanf.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618f44       0x20 lib/stdio/open.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618f64       0x20 lib/stdio/write.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618f84       0x20 lib/stdio/close.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618fa4       0x20 lib/sys/socket.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618fc4       0x20 lib/sys/connect.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0618fe4       0x20 lib/arpa/ntohs.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0619004       0x20 lib/arpa/htonl.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0619024       0x20 lib/arpa/htons.o
-                                 0x38 (size before relaxing)
- .eh_frame      0xc0619044       0x40 lib/arpa/inet_pton.o
+ .eh_frame      0xc061783c       0x40 network/ip_output.o
                                  0x58 (size before relaxing)
- .eh_frame      0xc0619084       0x20 lib/arpa/ntohl.o
+ .eh_frame      0xc061787c      0x180 network/inet.o
+                                0x198 (size before relaxing)
+ .eh_frame      0xc06179fc       0x60 network/dst.o
+                                 0x78 (size before relaxing)
+ .eh_frame      0xc0617a5c      0x300 network/tcp_input.o
+                                0x318 (size before relaxing)
+ .eh_frame      0xc0617d5c       0x40 network/task_network.o
+                                 0x58 (size before relaxing)
+ .eh_frame      0xc0617d9c      0x124 network/route.o
+                                0x13c (size before relaxing)
+ .eh_frame      0xc0617ec0      0x1e4 network/udp.o
+                                0x1fc (size before relaxing)
+ .eh_frame      0xc06180a4      0x200 network/tcp_data.o
+                                0x218 (size before relaxing)
+ .eh_frame      0xc06182a4       0xe4 network/utils.o
+                                 0xfc (size before relaxing)
+ .eh_frame      0xc0618388      0x264 hd/hd.o
+                                0x27c (size before relaxing)
+ .eh_frame      0xc06185ec      0x27c fs/fs_main.o
+                                0x294 (size before relaxing)
+ .eh_frame      0xc0618868       0x80 mm/forkexit.o
+                                 0x98 (size before relaxing)
+ .eh_frame      0xc06188e8       0x20 mm/exec.o
                                  0x38 (size before relaxing)
- .eh_frame      0xc06190a4       0x20 lib/arpa/inet_ntop.o
+ .eh_frame      0xc0618908       0x3c mm/main.o
+                                 0x54 (size before relaxing)
+ .eh_frame      0xc0618944      0x364 mem/mem.o
+                                0x37c (size before relaxing)
+ .eh_frame      0xc0618ca8       0x60 lib/exec.o
+                                 0x78 (size before relaxing)
+ .eh_frame      0xc0618d08       0x20 lib/fork.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618d28       0x20 lib/exit.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618d48       0x20 lib/unlink.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618d68       0x20 lib/wait.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618d88       0x20 lib/socket_close.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618da8       0x20 lib/socket_read.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618dc8       0x20 lib/alloca.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618de8       0x20 lib/calloc.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618e08       0x20 lib/floor.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618e28       0x20 lib/socket_write.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618e48       0x20 lib/getpid.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618e68       0x20 lib/stdlib/atoi.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618e88       0x20 lib/stdlib/strtol.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618ea8       0x20 lib/string/strtok.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618ec8       0x20 lib/string/strcmp.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618ee8       0x20 lib/string/strncmp.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618f08       0x20 lib/string/strpbrk.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618f28       0x20 lib/stdio/read.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618f48       0x20 lib/stdio/perror.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618f68       0x20 lib/stdio/sscanf.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618f88       0x20 lib/stdio/open.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618fa8       0x20 lib/stdio/write.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618fc8       0x20 lib/stdio/close.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0618fe8       0x20 lib/sys/socket.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0619008       0x20 lib/sys/connect.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0619028       0x20 lib/arpa/ntohs.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0619048       0x20 lib/arpa/htonl.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0619068       0x20 lib/arpa/htons.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc0619088       0x40 lib/arpa/inet_pton.o
+                                 0x58 (size before relaxing)
+ .eh_frame      0xc06190c8       0x20 lib/arpa/ntohl.o
+                                 0x38 (size before relaxing)
+ .eh_frame      0xc06190e8       0x20 lib/arpa/inet_ntop.o
                                  0x38 (size before relaxing)
  *(.eh_frame.*)
 
@@ -1440,7 +1443,7 @@ LOAD lib/arpa/inet_ntop.o
  *(.igot.plt)
  .igot.plt      0xc061a000        0x0 kernel/kernel_sub.o
 
-.data           0xc061a000      0xb90
+.data           0xc061a000      0xb94
  *(.data .data.* .gnu.linkonce.d.*)
  .data          0xc061a000        0xf kernel/kernel_sub.o
  *fill*         0xc061a00f        0x1 
@@ -1448,11 +1451,11 @@ LOAD lib/arpa/inet_ntop.o
  *fill*         0xc061a01f        0x1 
  .data          0xc061a020        0x0 syscall.o
  .data          0xc061a020        0x0 double_link_list.o
+ .data          0xc061a020        0x0 kernel_main_old.o
  .data          0xc061a020        0x0 kernel_main.o
  .data          0xc061a020        0x0 protect.o
  .data          0xc061a020        0x0 console.o
  .data          0xc061a020        0x0 process.o
- .data          0xc061a020        0x0 kernel_main_old.o
  .data          0xc061a020      0x160 global.o
                 0xc061a020                user_task_table
                 0xc061a0a0                sys_task_table
@@ -1468,72 +1471,72 @@ LOAD lib/arpa/inet_ntop.o
  *fill*         0xc061a9c8       0x18 
  .data          0xc061a9e0       0x54 network/udp_sock.o
                 0xc061aa00                udp_ops
- *fill*         0xc061aa34        0xc 
- .data          0xc061aa40       0x54 network/tcp_sock.o
-                0xc061aa60                tcp_ops
- *fill*         0xc061aa94        0xc 
- .data          0xc061aaa0       0x80 network/inet.o
-                0xc061aaa8                inet
- .data          0xc061ab20        0x8 network/tcp.o
- .data          0xc061ab28        0x4 network/sock.o
- .data          0xc061ab2c        0x4 network/tcp_output.o
- .data          0xc061ab30       0x14 network/arp.o
- .data          0xc061ab44        0x4 network/dst.o
- .data          0xc061ab48        0xc network/ipc.o
- .data          0xc061ab54        0x4 network/icmpv4.o
- .data          0xc061ab58        0x4 network/ip_output.o
- .data          0xc061ab5c        0x4 network/netdev.o
- .data          0xc061ab60        0x4 network/tcp_input.o
- .data          0xc061ab64        0x4 network/task_network.o
- .data          0xc061ab68        0x4 network/route.o
- .data          0xc061ab6c        0x8 network/udp.o
- .data          0xc061ab74        0x4 network/tcp_data.o
- .data          0xc061ab78        0x4 network/utils.o
- .data          0xc061ab7c        0x0 hd/hd.o
- .data          0xc061ab7c        0x0 fs/fs_main.o
- .data          0xc061ab7c        0x0 mm/forkexit.o
- .data          0xc061ab7c        0x0 mm/exec.o
- .data          0xc061ab7c        0x0 mm/main.o
- .data          0xc061ab7c        0x0 mem/mem.o
- .data          0xc061ab7c        0x0 lib/exec.o
- .data          0xc061ab7c        0x0 lib/fork.o
- .data          0xc061ab7c        0x0 lib/exit.o
- .data          0xc061ab7c        0x0 lib/unlink.o
- .data          0xc061ab7c        0x0 lib/wait.o
- .data          0xc061ab7c        0x4 lib/socket_close.o
- .data          0xc061ab80        0x4 lib/socket_read.o
- .data          0xc061ab84        0x0 lib/alloca.o
- .data          0xc061ab84        0x0 lib/calloc.o
- .data          0xc061ab84        0x0 lib/floor.o
- .data          0xc061ab84        0x4 lib/socket_write.o
- .data          0xc061ab88        0x0 lib/getpid.o
- .data          0xc061ab88        0x0 lib/stdlib/atoi.o
- .data          0xc061ab88        0x0 lib/stdlib/strtol.o
- .data          0xc061ab88        0x0 lib/string/strtok.o
- .data          0xc061ab88        0x0 lib/string/strcmp.o
- .data          0xc061ab88        0x0 lib/string/strncmp.o
- .data          0xc061ab88        0x0 lib/string/strpbrk.o
- .data          0xc061ab88        0x0 lib/stdio/read.o
- .data          0xc061ab88        0x0 lib/stdio/perror.o
- .data          0xc061ab88        0x0 lib/stdio/sscanf.o
- .data          0xc061ab88        0x0 lib/stdio/open.o
- .data          0xc061ab88        0x0 lib/stdio/write.o
- .data          0xc061ab88        0x0 lib/stdio/close.o
- .data          0xc061ab88        0x4 lib/sys/socket.o
- .data          0xc061ab8c        0x4 lib/sys/connect.o
- .data          0xc061ab90        0x0 lib/arpa/ntohs.o
- .data          0xc061ab90        0x0 lib/arpa/htonl.o
- .data          0xc061ab90        0x0 lib/arpa/htons.o
- .data          0xc061ab90        0x0 lib/arpa/inet_pton.o
- .data          0xc061ab90        0x0 lib/arpa/ntohl.o
- .data          0xc061ab90        0x0 lib/arpa/inet_ntop.o
+ .data          0xc061aa34        0x4 network/netdev.o
+ .data          0xc061aa38        0x8 network/tcp.o
+ .data          0xc061aa40        0x4 network/sock.o
+ .data          0xc061aa44        0x4 network/tcp_output.o
+ .data          0xc061aa48       0x14 network/arp.o
+ *fill*         0xc061aa5c        0x4 
+ .data          0xc061aa60       0x54 network/tcp_sock.o
+                0xc061aa80                tcp_ops
+ .data          0xc061aab4        0xc network/ipc.o
+ .data          0xc061aac0        0x4 network/icmpv4.o
+ .data          0xc061aac4        0x4 network/ip_output.o
+ *fill*         0xc061aac8       0x18 
+ .data          0xc061aae0       0x80 network/inet.o
+                0xc061aae8                inet
+ .data          0xc061ab60        0x4 network/dst.o
+ .data          0xc061ab64        0x4 network/tcp_input.o
+ .data          0xc061ab68        0x4 network/task_network.o
+ .data          0xc061ab6c        0x4 network/route.o
+ .data          0xc061ab70        0x8 network/udp.o
+ .data          0xc061ab78        0x4 network/tcp_data.o
+ .data          0xc061ab7c        0x4 network/utils.o
+ .data          0xc061ab80        0x0 hd/hd.o
+ .data          0xc061ab80        0x0 fs/fs_main.o
+ .data          0xc061ab80        0x0 mm/forkexit.o
+ .data          0xc061ab80        0x0 mm/exec.o
+ .data          0xc061ab80        0x0 mm/main.o
+ .data          0xc061ab80        0x0 mem/mem.o
+ .data          0xc061ab80        0x0 lib/exec.o
+ .data          0xc061ab80        0x0 lib/fork.o
+ .data          0xc061ab80        0x0 lib/exit.o
+ .data          0xc061ab80        0x0 lib/unlink.o
+ .data          0xc061ab80        0x0 lib/wait.o
+ .data          0xc061ab80        0x4 lib/socket_close.o
+ .data          0xc061ab84        0x4 lib/socket_read.o
+ .data          0xc061ab88        0x0 lib/alloca.o
+ .data          0xc061ab88        0x0 lib/calloc.o
+ .data          0xc061ab88        0x0 lib/floor.o
+ .data          0xc061ab88        0x4 lib/socket_write.o
+ .data          0xc061ab8c        0x0 lib/getpid.o
+ .data          0xc061ab8c        0x0 lib/stdlib/atoi.o
+ .data          0xc061ab8c        0x0 lib/stdlib/strtol.o
+ .data          0xc061ab8c        0x0 lib/string/strtok.o
+ .data          0xc061ab8c        0x0 lib/string/strcmp.o
+ .data          0xc061ab8c        0x0 lib/string/strncmp.o
+ .data          0xc061ab8c        0x0 lib/string/strpbrk.o
+ .data          0xc061ab8c        0x0 lib/stdio/read.o
+ .data          0xc061ab8c        0x0 lib/stdio/perror.o
+ .data          0xc061ab8c        0x0 lib/stdio/sscanf.o
+ .data          0xc061ab8c        0x0 lib/stdio/open.o
+ .data          0xc061ab8c        0x0 lib/stdio/write.o
+ .data          0xc061ab8c        0x0 lib/stdio/close.o
+ .data          0xc061ab8c        0x4 lib/sys/socket.o
+ .data          0xc061ab90        0x4 lib/sys/connect.o
+ .data          0xc061ab94        0x0 lib/arpa/ntohs.o
+ .data          0xc061ab94        0x0 lib/arpa/htonl.o
+ .data          0xc061ab94        0x0 lib/arpa/htons.o
+ .data          0xc061ab94        0x0 lib/arpa/inet_pton.o
+ .data          0xc061ab94        0x0 lib/arpa/ntohl.o
+ .data          0xc061ab94        0x0 lib/arpa/inet_ntop.o
 
 .data1
  *(.data1)
-                0xc061ab90                        _edata = .
+                0xc061ab94                        _edata = .
                 [!provide]                        PROVIDE (edata = .)
-                0xc061ab90                        . = .
-                0xc061ab90                        __bss_start = .
+                0xc061ab94                        . = .
+                0xc061ab94                        __bss_start = .
 
 .bss            0xc061aba0    0x95628
  *(.dynbss)
@@ -1541,11 +1544,11 @@ LOAD lib/arpa/inet_ntop.o
  .bss           0xc061aba0      0x800 kernel/kernel_sub.o
  .bss           0xc061b3a0      0x800 kernel/kernel.o
  .bss           0xc061bba0        0x0 double_link_list.o
+ .bss           0xc061bba0        0x0 kernel_main_old.o
  .bss           0xc061bba0        0x0 kernel_main.o
  .bss           0xc061bba0        0x0 protect.o
  .bss           0xc061bba0        0x0 console.o
  .bss           0xc061bba0        0x0 process.o
- .bss           0xc061bba0        0x0 kernel_main_old.o
  .bss           0xc061bba0        0x0 global.o
  .bss           0xc061bba0        0x0 keyboard.o
  .bss           0xc061bba0        0x0 thread.o
@@ -1554,17 +1557,17 @@ LOAD lib/arpa/inet_ntop.o
  .bss           0xc061bba0        0x4 network/socket.o
  .bss           0xc061bba4        0x0 network/ip_input.o
  .bss           0xc061bba4        0x4 network/udp_sock.o
- .bss           0xc061bba8        0x0 network/tcp_sock.o
- .bss           0xc061bba8        0x0 network/inet.o
+ .bss           0xc061bba8        0x0 network/netdev.o
  .bss           0xc061bba8        0x0 network/tcp.o
  .bss           0xc061bba8        0x0 network/sock.o
  .bss           0xc061bba8        0x0 network/tcp_output.o
  .bss           0xc061bba8        0x0 network/arp.o
- .bss           0xc061bba8        0x0 network/dst.o
+ .bss           0xc061bba8        0x0 network/tcp_sock.o
  .bss           0xc061bba8        0x4 network/ipc.o
  .bss           0xc061bbac        0x0 network/icmpv4.o
  .bss           0xc061bbac        0x0 network/ip_output.o
- .bss           0xc061bbac        0x0 network/netdev.o
+ .bss           0xc061bbac        0x0 network/inet.o
+ .bss           0xc061bbac        0x0 network/dst.o
  .bss           0xc061bbac        0x0 network/tcp_input.o
  .bss           0xc061bbac        0x0 network/task_network.o
  .bss           0xc061bbac        0x0 network/route.o
@@ -1701,11 +1704,11 @@ LOAD lib/arpa/inet_ntop.o
  *(.comment)
  .comment       0x00000000       0x2c double_link_list.o
                                  0x2d (size before relaxing)
+ .comment       0x0000002c       0x2d kernel_main_old.o
  .comment       0x0000002c       0x2d kernel_main.o
  .comment       0x0000002c       0x2d protect.o
  .comment       0x0000002c       0x2d console.o
  .comment       0x0000002c       0x2d process.o
- .comment       0x0000002c       0x2d kernel_main_old.o
  .comment       0x0000002c       0x2d global.o
  .comment       0x0000002c       0x2d keyboard.o
  .comment       0x0000002c       0x2d thread.o
@@ -1714,17 +1717,17 @@ LOAD lib/arpa/inet_ntop.o
  .comment       0x0000002c       0x2d network/socket.o
  .comment       0x0000002c       0x2d network/ip_input.o
  .comment       0x0000002c       0x2d network/udp_sock.o
- .comment       0x0000002c       0x2d network/tcp_sock.o
- .comment       0x0000002c       0x2d network/inet.o
+ .comment       0x0000002c       0x2d network/netdev.o
  .comment       0x0000002c       0x2d network/tcp.o
  .comment       0x0000002c       0x2d network/sock.o
  .comment       0x0000002c       0x2d network/tcp_output.o
  .comment       0x0000002c       0x2d network/arp.o
- .comment       0x0000002c       0x2d network/dst.o
+ .comment       0x0000002c       0x2d network/tcp_sock.o
  .comment       0x0000002c       0x2d network/ipc.o
  .comment       0x0000002c       0x2d network/icmpv4.o
  .comment       0x0000002c       0x2d network/ip_output.o
- .comment       0x0000002c       0x2d network/netdev.o
+ .comment       0x0000002c       0x2d network/inet.o
+ .comment       0x0000002c       0x2d network/dst.o
  .comment       0x0000002c       0x2d network/tcp_input.o
  .comment       0x0000002c       0x2d network/task_network.o
  .comment       0x0000002c       0x2d network/route.o
@@ -1790,15 +1793,15 @@ LOAD lib/arpa/inet_ntop.o
  .debug_aranges
                 0x00000000       0x20 double_link_list.o
  .debug_aranges
-                0x00000020       0x20 kernel_main.o
+                0x00000020       0x20 kernel_main_old.o
  .debug_aranges
-                0x00000040       0x20 protect.o
+                0x00000040       0x20 kernel_main.o
  .debug_aranges
-                0x00000060       0x20 console.o
+                0x00000060       0x20 protect.o
  .debug_aranges
-                0x00000080       0x20 process.o
+                0x00000080       0x20 console.o
  .debug_aranges
-                0x000000a0       0x20 kernel_main_old.o
+                0x000000a0       0x20 process.o
  .debug_aranges
                 0x000000c0       0x18 global.o
  .debug_aranges
@@ -1816,27 +1819,27 @@ LOAD lib/arpa/inet_ntop.o
  .debug_aranges
                 0x00000198       0x20 network/udp_sock.o
  .debug_aranges
-                0x000001b8       0x20 network/tcp_sock.o
+                0x000001b8       0x20 network/netdev.o
  .debug_aranges
-                0x000001d8       0x20 network/inet.o
+                0x000001d8       0x20 network/tcp.o
  .debug_aranges
-                0x000001f8       0x20 network/tcp.o
+                0x000001f8       0x20 network/sock.o
  .debug_aranges
-                0x00000218       0x20 network/sock.o
+                0x00000218       0x20 network/tcp_output.o
  .debug_aranges
-                0x00000238       0x20 network/tcp_output.o
+                0x00000238       0x20 network/arp.o
  .debug_aranges
-                0x00000258       0x20 network/arp.o
+                0x00000258       0x20 network/tcp_sock.o
  .debug_aranges
-                0x00000278       0x20 network/dst.o
+                0x00000278       0x20 network/ipc.o
  .debug_aranges
-                0x00000298       0x20 network/ipc.o
+                0x00000298       0x20 network/icmpv4.o
  .debug_aranges
-                0x000002b8       0x20 network/icmpv4.o
+                0x000002b8       0x20 network/ip_output.o
  .debug_aranges
-                0x000002d8       0x20 network/ip_output.o
+                0x000002d8       0x20 network/inet.o
  .debug_aranges
-                0x000002f8       0x20 network/netdev.o
+                0x000002f8       0x20 network/dst.o
  .debug_aranges
                 0x00000318       0x20 network/tcp_input.o
  .debug_aranges
@@ -1929,14 +1932,14 @@ LOAD lib/arpa/inet_ntop.o
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000    0x45ac7
+.debug_info     0x00000000    0x45b13
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000     0x10b1 double_link_list.o
- .debug_info    0x000010b1     0x11d5 kernel_main.o
- .debug_info    0x00002286     0x1224 protect.o
- .debug_info    0x000034aa     0x12f9 console.o
- .debug_info    0x000047a3      0xfd1 process.o
- .debug_info    0x00005774     0x28d0 kernel_main_old.o
+ .debug_info    0x000010b1     0x28d0 kernel_main_old.o
+ .debug_info    0x00003981     0x11d5 kernel_main.o
+ .debug_info    0x00004b56     0x1224 protect.o
+ .debug_info    0x00005d7a     0x12f9 console.o
+ .debug_info    0x00007073      0xfd1 process.o
  .debug_info    0x00008044      0xef9 global.o
  .debug_info    0x00008f3d     0x104d keyboard.o
  .debug_info    0x00009f8a     0x10d8 thread.o
@@ -1945,70 +1948,70 @@ LOAD lib/arpa/inet_ntop.o
  .debug_info    0x0000d73a     0x1c35 network/socket.o
  .debug_info    0x0000f36f     0x1ae1 network/ip_input.o
  .debug_info    0x00010e50     0x1f13 network/udp_sock.o
- .debug_info    0x00012d63     0x2235 network/tcp_sock.o
- .debug_info    0x00014f98     0x1a9a network/inet.o
- .debug_info    0x00016a32     0x1e44 network/tcp.o
- .debug_info    0x00018876     0x1896 network/sock.o
- .debug_info    0x0001a10c     0x235f network/tcp_output.o
- .debug_info    0x0001c46b     0x1593 network/arp.o
- .debug_info    0x0001d9fe     0x1220 network/dst.o
- .debug_info    0x0001ec1e     0x1d2c network/ipc.o
- .debug_info    0x0002094a     0x193f network/icmpv4.o
- .debug_info    0x00022289     0x177b network/ip_output.o
- .debug_info    0x00023a04     0x178c network/netdev.o
- .debug_info    0x00025190     0x2147 network/tcp_input.o
- .debug_info    0x000272d7     0x1065 network/task_network.o
- .debug_info    0x0002833c     0x1282 network/route.o
- .debug_info    0x000295be     0x1b44 network/udp.o
- .debug_info    0x0002b102     0x1dad network/tcp_data.o
- .debug_info    0x0002ceaf      0x367 network/utils.o
- .debug_info    0x0002d216     0x1868 hd/hd.o
- .debug_info    0x0002ea7e     0x1faa fs/fs_main.o
- .debug_info    0x00030a28     0x100d mm/forkexit.o
- .debug_info    0x00031a35     0x1249 mm/exec.o
- .debug_info    0x00032c7e      0xe3b mm/main.o
- .debug_info    0x00033ab9     0x1dcd mem/mem.o
- .debug_info    0x00035886      0xfaf lib/exec.o
- .debug_info    0x00036835      0xe17 lib/fork.o
- .debug_info    0x0003764c      0xe22 lib/exit.o
- .debug_info    0x0003846e      0xf00 lib/unlink.o
- .debug_info    0x0003936e      0xe30 lib/wait.o
- .debug_info    0x0003a19e      0xff6 lib/socket_close.o
- .debug_info    0x0003b194     0x10fe lib/socket_read.o
- .debug_info    0x0003c292       0xb6 lib/alloca.o
- .debug_info    0x0003c348      0xf28 lib/calloc.o
- .debug_info    0x0003d270       0x6b lib/floor.o
- .debug_info    0x0003d2db     0x1103 lib/socket_write.o
- .debug_info    0x0003e3de      0xe17 lib/getpid.o
- .debug_info    0x0003f1f5       0xc9 lib/stdlib/atoi.o
- .debug_info    0x0003f2be       0xd6 lib/stdlib/strtol.o
- .debug_info    0x0003f394       0xae lib/string/strtok.o
- .debug_info    0x0003f442       0xc1 lib/string/strcmp.o
- .debug_info    0x0003f503      0x110 lib/string/strncmp.o
- .debug_info    0x0003f613       0xcf lib/string/strpbrk.o
- .debug_info    0x0003f6e2      0xea1 lib/stdio/read.o
- .debug_info    0x00040583       0x5c lib/stdio/perror.o
- .debug_info    0x000405df      0x202 lib/stdio/sscanf.o
- .debug_info    0x000407e1      0xe02 lib/stdio/open.o
- .debug_info    0x000415e3      0xe9e lib/stdio/write.o
- .debug_info    0x00042481      0xdb6 lib/stdio/close.o
- .debug_info    0x00043237     0x10e3 lib/sys/socket.o
- .debug_info    0x0004431a     0x10dd lib/sys/connect.o
- .debug_info    0x000453f7       0xa8 lib/arpa/ntohs.o
- .debug_info    0x0004549f       0xcb lib/arpa/htonl.o
- .debug_info    0x0004556a       0xa8 lib/arpa/htons.o
- .debug_info    0x00045612      0x260 lib/arpa/inet_pton.o
- .debug_info    0x00045872       0xcb lib/arpa/ntohl.o
- .debug_info    0x0004593d      0x18a lib/arpa/inet_ntop.o
+ .debug_info    0x00012d63     0x178c network/netdev.o
+ .debug_info    0x000144ef     0x1e44 network/tcp.o
+ .debug_info    0x00016333     0x1896 network/sock.o
+ .debug_info    0x00017bc9     0x235f network/tcp_output.o
+ .debug_info    0x00019f28     0x1593 network/arp.o
+ .debug_info    0x0001b4bb     0x2235 network/tcp_sock.o
+ .debug_info    0x0001d6f0     0x1d2c network/ipc.o
+ .debug_info    0x0001f41c     0x193f network/icmpv4.o
+ .debug_info    0x00020d5b     0x177b network/ip_output.o
+ .debug_info    0x000224d6     0x1a9a network/inet.o
+ .debug_info    0x00023f70     0x126c network/dst.o
+ .debug_info    0x000251dc     0x2147 network/tcp_input.o
+ .debug_info    0x00027323     0x1065 network/task_network.o
+ .debug_info    0x00028388     0x1282 network/route.o
+ .debug_info    0x0002960a     0x1b44 network/udp.o
+ .debug_info    0x0002b14e     0x1dad network/tcp_data.o
+ .debug_info    0x0002cefb      0x367 network/utils.o
+ .debug_info    0x0002d262     0x1868 hd/hd.o
+ .debug_info    0x0002eaca     0x1faa fs/fs_main.o
+ .debug_info    0x00030a74     0x100d mm/forkexit.o
+ .debug_info    0x00031a81     0x1249 mm/exec.o
+ .debug_info    0x00032cca      0xe3b mm/main.o
+ .debug_info    0x00033b05     0x1dcd mem/mem.o
+ .debug_info    0x000358d2      0xfaf lib/exec.o
+ .debug_info    0x00036881      0xe17 lib/fork.o
+ .debug_info    0x00037698      0xe22 lib/exit.o
+ .debug_info    0x000384ba      0xf00 lib/unlink.o
+ .debug_info    0x000393ba      0xe30 lib/wait.o
+ .debug_info    0x0003a1ea      0xff6 lib/socket_close.o
+ .debug_info    0x0003b1e0     0x10fe lib/socket_read.o
+ .debug_info    0x0003c2de       0xb6 lib/alloca.o
+ .debug_info    0x0003c394      0xf28 lib/calloc.o
+ .debug_info    0x0003d2bc       0x6b lib/floor.o
+ .debug_info    0x0003d327     0x1103 lib/socket_write.o
+ .debug_info    0x0003e42a      0xe17 lib/getpid.o
+ .debug_info    0x0003f241       0xc9 lib/stdlib/atoi.o
+ .debug_info    0x0003f30a       0xd6 lib/stdlib/strtol.o
+ .debug_info    0x0003f3e0       0xae lib/string/strtok.o
+ .debug_info    0x0003f48e       0xc1 lib/string/strcmp.o
+ .debug_info    0x0003f54f      0x110 lib/string/strncmp.o
+ .debug_info    0x0003f65f       0xcf lib/string/strpbrk.o
+ .debug_info    0x0003f72e      0xea1 lib/stdio/read.o
+ .debug_info    0x000405cf       0x5c lib/stdio/perror.o
+ .debug_info    0x0004062b      0x202 lib/stdio/sscanf.o
+ .debug_info    0x0004082d      0xe02 lib/stdio/open.o
+ .debug_info    0x0004162f      0xe9e lib/stdio/write.o
+ .debug_info    0x000424cd      0xdb6 lib/stdio/close.o
+ .debug_info    0x00043283     0x10e3 lib/sys/socket.o
+ .debug_info    0x00044366     0x10dd lib/sys/connect.o
+ .debug_info    0x00045443       0xa8 lib/arpa/ntohs.o
+ .debug_info    0x000454eb       0xcb lib/arpa/htonl.o
+ .debug_info    0x000455b6       0xa8 lib/arpa/htons.o
+ .debug_info    0x0004565e      0x260 lib/arpa/inet_pton.o
+ .debug_info    0x000458be       0xcb lib/arpa/ntohl.o
+ .debug_info    0x00045989      0x18a lib/arpa/inet_ntop.o
 
-.debug_abbrev   0x00000000     0x8472
+.debug_abbrev   0x00000000     0x84a8
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x216 double_link_list.o
- .debug_abbrev  0x00000216      0x25e kernel_main.o
- .debug_abbrev  0x00000474      0x227 protect.o
- .debug_abbrev  0x0000069b      0x2ac console.o
- .debug_abbrev  0x00000947      0x1e0 process.o
- .debug_abbrev  0x00000b27      0x43a kernel_main_old.o
+ .debug_abbrev  0x00000216      0x43a kernel_main_old.o
+ .debug_abbrev  0x00000650      0x25e kernel_main.o
+ .debug_abbrev  0x000008ae      0x227 protect.o
+ .debug_abbrev  0x00000ad5      0x2ac console.o
+ .debug_abbrev  0x00000d81      0x1e0 process.o
  .debug_abbrev  0x00000f61      0x157 global.o
  .debug_abbrev  0x000010b8      0x1fb keyboard.o
  .debug_abbrev  0x000012b3      0x222 thread.o
@@ -2017,70 +2020,70 @@ LOAD lib/arpa/inet_ntop.o
  .debug_abbrev  0x00001974      0x327 network/socket.o
  .debug_abbrev  0x00001c9b      0x2d1 network/ip_input.o
  .debug_abbrev  0x00001f6c      0x3b1 network/udp_sock.o
- .debug_abbrev  0x0000231d      0x3e6 network/tcp_sock.o
- .debug_abbrev  0x00002703      0x24b network/inet.o
- .debug_abbrev  0x0000294e      0x332 network/tcp.o
- .debug_abbrev  0x00002c80      0x273 network/sock.o
- .debug_abbrev  0x00002ef3      0x39b network/tcp_output.o
- .debug_abbrev  0x0000328e      0x2d0 network/arp.o
- .debug_abbrev  0x0000355e      0x204 network/dst.o
- .debug_abbrev  0x00003762      0x2ee network/ipc.o
- .debug_abbrev  0x00003a50      0x236 network/icmpv4.o
- .debug_abbrev  0x00003c86      0x213 network/ip_output.o
- .debug_abbrev  0x00003e99      0x2f4 network/netdev.o
- .debug_abbrev  0x0000418d      0x355 network/tcp_input.o
- .debug_abbrev  0x000044e2      0x1d1 network/task_network.o
- .debug_abbrev  0x000046b3      0x24e network/route.o
- .debug_abbrev  0x00004901      0x2d3 network/udp.o
- .debug_abbrev  0x00004bd4      0x2a6 network/tcp_data.o
- .debug_abbrev  0x00004e7a      0x17a network/utils.o
- .debug_abbrev  0x00004ff4      0x2e3 hd/hd.o
- .debug_abbrev  0x000052d7      0x2f8 fs/fs_main.o
- .debug_abbrev  0x000055cf      0x204 mm/forkexit.o
- .debug_abbrev  0x000057d3      0x1c4 mm/exec.o
- .debug_abbrev  0x00005997      0x208 mm/main.o
- .debug_abbrev  0x00005b9f      0x330 mem/mem.o
- .debug_abbrev  0x00005ecf      0x1e8 lib/exec.o
- .debug_abbrev  0x000060b7      0x18a lib/fork.o
- .debug_abbrev  0x00006241      0x19b lib/exit.o
- .debug_abbrev  0x000063dc      0x193 lib/unlink.o
- .debug_abbrev  0x0000656f      0x19f lib/wait.o
- .debug_abbrev  0x0000670e      0x1b0 lib/socket_close.o
- .debug_abbrev  0x000068be      0x1dd lib/socket_read.o
- .debug_abbrev  0x00006a9b       0xcd lib/alloca.o
- .debug_abbrev  0x00006b68      0x191 lib/calloc.o
- .debug_abbrev  0x00006cf9       0x6a lib/floor.o
- .debug_abbrev  0x00006d63      0x1db lib/socket_write.o
- .debug_abbrev  0x00006f3e      0x18a lib/getpid.o
- .debug_abbrev  0x000070c8       0x94 lib/stdlib/atoi.o
- .debug_abbrev  0x0000715c       0x8b lib/stdlib/strtol.o
- .debug_abbrev  0x000071e7       0x91 lib/string/strtok.o
- .debug_abbrev  0x00007278       0x94 lib/string/strcmp.o
- .debug_abbrev  0x0000730c       0xbe lib/string/strncmp.o
- .debug_abbrev  0x000073ca       0xa5 lib/string/strpbrk.o
- .debug_abbrev  0x0000746f      0x1ef lib/stdio/read.o
- .debug_abbrev  0x0000765e       0x5c lib/stdio/perror.o
- .debug_abbrev  0x000076ba       0xca lib/stdio/sscanf.o
- .debug_abbrev  0x00007784      0x1c5 lib/stdio/open.o
- .debug_abbrev  0x00007949      0x1db lib/stdio/write.o
- .debug_abbrev  0x00007b24      0x19d lib/stdio/close.o
- .debug_abbrev  0x00007cc1      0x1cc lib/sys/socket.o
- .debug_abbrev  0x00007e8d      0x1b7 lib/sys/connect.o
- .debug_abbrev  0x00008044       0x6c lib/arpa/ntohs.o
- .debug_abbrev  0x000080b0       0xa5 lib/arpa/htonl.o
- .debug_abbrev  0x00008155       0x6c lib/arpa/htons.o
- .debug_abbrev  0x000081c1      0x116 lib/arpa/inet_pton.o
- .debug_abbrev  0x000082d7       0xa5 lib/arpa/ntohl.o
- .debug_abbrev  0x0000837c       0xf6 lib/arpa/inet_ntop.o
+ .debug_abbrev  0x0000231d      0x2f4 network/netdev.o
+ .debug_abbrev  0x00002611      0x332 network/tcp.o
+ .debug_abbrev  0x00002943      0x273 network/sock.o
+ .debug_abbrev  0x00002bb6      0x39b network/tcp_output.o
+ .debug_abbrev  0x00002f51      0x2d0 network/arp.o
+ .debug_abbrev  0x00003221      0x3e6 network/tcp_sock.o
+ .debug_abbrev  0x00003607      0x2ee network/ipc.o
+ .debug_abbrev  0x000038f5      0x236 network/icmpv4.o
+ .debug_abbrev  0x00003b2b      0x213 network/ip_output.o
+ .debug_abbrev  0x00003d3e      0x24b network/inet.o
+ .debug_abbrev  0x00003f89      0x23a network/dst.o
+ .debug_abbrev  0x000041c3      0x355 network/tcp_input.o
+ .debug_abbrev  0x00004518      0x1d1 network/task_network.o
+ .debug_abbrev  0x000046e9      0x24e network/route.o
+ .debug_abbrev  0x00004937      0x2d3 network/udp.o
+ .debug_abbrev  0x00004c0a      0x2a6 network/tcp_data.o
+ .debug_abbrev  0x00004eb0      0x17a network/utils.o
+ .debug_abbrev  0x0000502a      0x2e3 hd/hd.o
+ .debug_abbrev  0x0000530d      0x2f8 fs/fs_main.o
+ .debug_abbrev  0x00005605      0x204 mm/forkexit.o
+ .debug_abbrev  0x00005809      0x1c4 mm/exec.o
+ .debug_abbrev  0x000059cd      0x208 mm/main.o
+ .debug_abbrev  0x00005bd5      0x330 mem/mem.o
+ .debug_abbrev  0x00005f05      0x1e8 lib/exec.o
+ .debug_abbrev  0x000060ed      0x18a lib/fork.o
+ .debug_abbrev  0x00006277      0x19b lib/exit.o
+ .debug_abbrev  0x00006412      0x193 lib/unlink.o
+ .debug_abbrev  0x000065a5      0x19f lib/wait.o
+ .debug_abbrev  0x00006744      0x1b0 lib/socket_close.o
+ .debug_abbrev  0x000068f4      0x1dd lib/socket_read.o
+ .debug_abbrev  0x00006ad1       0xcd lib/alloca.o
+ .debug_abbrev  0x00006b9e      0x191 lib/calloc.o
+ .debug_abbrev  0x00006d2f       0x6a lib/floor.o
+ .debug_abbrev  0x00006d99      0x1db lib/socket_write.o
+ .debug_abbrev  0x00006f74      0x18a lib/getpid.o
+ .debug_abbrev  0x000070fe       0x94 lib/stdlib/atoi.o
+ .debug_abbrev  0x00007192       0x8b lib/stdlib/strtol.o
+ .debug_abbrev  0x0000721d       0x91 lib/string/strtok.o
+ .debug_abbrev  0x000072ae       0x94 lib/string/strcmp.o
+ .debug_abbrev  0x00007342       0xbe lib/string/strncmp.o
+ .debug_abbrev  0x00007400       0xa5 lib/string/strpbrk.o
+ .debug_abbrev  0x000074a5      0x1ef lib/stdio/read.o
+ .debug_abbrev  0x00007694       0x5c lib/stdio/perror.o
+ .debug_abbrev  0x000076f0       0xca lib/stdio/sscanf.o
+ .debug_abbrev  0x000077ba      0x1c5 lib/stdio/open.o
+ .debug_abbrev  0x0000797f      0x1db lib/stdio/write.o
+ .debug_abbrev  0x00007b5a      0x19d lib/stdio/close.o
+ .debug_abbrev  0x00007cf7      0x1cc lib/sys/socket.o
+ .debug_abbrev  0x00007ec3      0x1b7 lib/sys/connect.o
+ .debug_abbrev  0x0000807a       0x6c lib/arpa/ntohs.o
+ .debug_abbrev  0x000080e6       0xa5 lib/arpa/htonl.o
+ .debug_abbrev  0x0000818b       0x6c lib/arpa/htons.o
+ .debug_abbrev  0x000081f7      0x116 lib/arpa/inet_pton.o
+ .debug_abbrev  0x0000830d       0xa5 lib/arpa/ntohl.o
+ .debug_abbrev  0x000083b2       0xf6 lib/arpa/inet_ntop.o
 
-.debug_line     0x00000000     0xa728
+.debug_line     0x00000000     0xa751
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x235 double_link_list.o
- .debug_line    0x00000235      0x26b kernel_main.o
- .debug_line    0x000004a0      0x21d protect.o
- .debug_line    0x000006bd      0x56c console.o
- .debug_line    0x00000c29      0x1d8 process.o
- .debug_line    0x00000e01      0xe4d kernel_main_old.o
+ .debug_line    0x00000235      0xe4d kernel_main_old.o
+ .debug_line    0x00001082      0x26b kernel_main.o
+ .debug_line    0x000012ed      0x21d protect.o
+ .debug_line    0x0000150a      0x56c console.o
+ .debug_line    0x00001a76      0x1d8 process.o
  .debug_line    0x00001c4e       0xb3 global.o
  .debug_line    0x00001d01      0x2b4 keyboard.o
  .debug_line    0x00001fb5      0x163 thread.o
@@ -2089,137 +2092,137 @@ LOAD lib/arpa/inet_ntop.o
  .debug_line    0x0000261c      0x3c8 network/socket.o
  .debug_line    0x000029e4      0x28e network/ip_input.o
  .debug_line    0x00002c72      0x4c8 network/udp_sock.o
- .debug_line    0x0000313a      0x594 network/tcp_sock.o
- .debug_line    0x000036ce      0x326 network/inet.o
- .debug_line    0x000039f4      0x30d network/tcp.o
- .debug_line    0x00003d01      0x238 network/sock.o
- .debug_line    0x00003f39      0x5a1 network/tcp_output.o
- .debug_line    0x000044da      0x3d2 network/arp.o
- .debug_line    0x000048ac      0x16d network/dst.o
- .debug_line    0x00004a19      0x5fb network/ipc.o
- .debug_line    0x00005014      0x232 network/icmpv4.o
- .debug_line    0x00005246      0x20b network/ip_output.o
- .debug_line    0x00005451      0x424 network/netdev.o
- .debug_line    0x00005875      0x671 network/tcp_input.o
- .debug_line    0x00005ee6      0x1b1 network/task_network.o
- .debug_line    0x00006097      0x238 network/route.o
- .debug_line    0x000062cf      0x302 network/udp.o
- .debug_line    0x000065d1      0x3ff network/tcp_data.o
- .debug_line    0x000069d0      0x13c network/utils.o
- .debug_line    0x00006b0c      0x64d hd/hd.o
- .debug_line    0x00007159      0xc43 fs/fs_main.o
- .debug_line    0x00007d9c      0x192 mm/forkexit.o
- .debug_line    0x00007f2e      0x22a mm/exec.o
- .debug_line    0x00008158      0x10a mm/main.o
- .debug_line    0x00008262      0x78e mem/mem.o
- .debug_line    0x000089f0      0x1a9 lib/exec.o
- .debug_line    0x00008b99       0xc3 lib/fork.o
- .debug_line    0x00008c5c       0xbe lib/exit.o
- .debug_line    0x00008d1a       0xde lib/unlink.o
- .debug_line    0x00008df8       0xd5 lib/wait.o
- .debug_line    0x00008ecd      0x145 lib/socket_close.o
- .debug_line    0x00009012      0x186 lib/socket_read.o
- .debug_line    0x00009198       0x5f lib/alloca.o
- .debug_line    0x000091f7       0xf9 lib/calloc.o
- .debug_line    0x000092f0       0x5a lib/floor.o
- .debug_line    0x0000934a      0x189 lib/socket_write.o
- .debug_line    0x000094d3       0xbe lib/getpid.o
- .debug_line    0x00009591       0xad lib/stdlib/atoi.o
- .debug_line    0x0000963e       0xbb lib/stdlib/strtol.o
- .debug_line    0x000096f9       0x6e lib/string/strtok.o
- .debug_line    0x00009767       0x9c lib/string/strcmp.o
- .debug_line    0x00009803       0xcc lib/string/strncmp.o
- .debug_line    0x000098cf       0xb0 lib/string/strpbrk.o
- .debug_line    0x0000997f      0x15b lib/stdio/read.o
- .debug_line    0x00009ada       0x48 lib/stdio/perror.o
- .debug_line    0x00009b22      0x220 lib/stdio/sscanf.o
- .debug_line    0x00009d42       0xc3 lib/stdio/open.o
- .debug_line    0x00009e05       0xe0 lib/stdio/write.o
- .debug_line    0x00009ee5       0xb3 lib/stdio/close.o
- .debug_line    0x00009f98      0x188 lib/sys/socket.o
- .debug_line    0x0000a120      0x170 lib/sys/connect.o
- .debug_line    0x0000a290       0x6c lib/arpa/ntohs.o
- .debug_line    0x0000a2fc       0xc1 lib/arpa/htonl.o
- .debug_line    0x0000a3bd       0x6c lib/arpa/htons.o
- .debug_line    0x0000a429      0x167 lib/arpa/inet_pton.o
- .debug_line    0x0000a590       0xc1 lib/arpa/ntohl.o
- .debug_line    0x0000a651       0xd7 lib/arpa/inet_ntop.o
+ .debug_line    0x0000313a      0x424 network/netdev.o
+ .debug_line    0x0000355e      0x30d network/tcp.o
+ .debug_line    0x0000386b      0x238 network/sock.o
+ .debug_line    0x00003aa3      0x5a1 network/tcp_output.o
+ .debug_line    0x00004044      0x3cf network/arp.o
+ .debug_line    0x00004413      0x594 network/tcp_sock.o
+ .debug_line    0x000049a7      0x5fb network/ipc.o
+ .debug_line    0x00004fa2      0x232 network/icmpv4.o
+ .debug_line    0x000051d4      0x20b network/ip_output.o
+ .debug_line    0x000053df      0x326 network/inet.o
+ .debug_line    0x00005705      0x199 network/dst.o
+ .debug_line    0x0000589e      0x671 network/tcp_input.o
+ .debug_line    0x00005f0f      0x1b1 network/task_network.o
+ .debug_line    0x000060c0      0x238 network/route.o
+ .debug_line    0x000062f8      0x302 network/udp.o
+ .debug_line    0x000065fa      0x3ff network/tcp_data.o
+ .debug_line    0x000069f9      0x13c network/utils.o
+ .debug_line    0x00006b35      0x64d hd/hd.o
+ .debug_line    0x00007182      0xc43 fs/fs_main.o
+ .debug_line    0x00007dc5      0x192 mm/forkexit.o
+ .debug_line    0x00007f57      0x22a mm/exec.o
+ .debug_line    0x00008181      0x10a mm/main.o
+ .debug_line    0x0000828b      0x78e mem/mem.o
+ .debug_line    0x00008a19      0x1a9 lib/exec.o
+ .debug_line    0x00008bc2       0xc3 lib/fork.o
+ .debug_line    0x00008c85       0xbe lib/exit.o
+ .debug_line    0x00008d43       0xde lib/unlink.o
+ .debug_line    0x00008e21       0xd5 lib/wait.o
+ .debug_line    0x00008ef6      0x145 lib/socket_close.o
+ .debug_line    0x0000903b      0x186 lib/socket_read.o
+ .debug_line    0x000091c1       0x5f lib/alloca.o
+ .debug_line    0x00009220       0xf9 lib/calloc.o
+ .debug_line    0x00009319       0x5a lib/floor.o
+ .debug_line    0x00009373      0x189 lib/socket_write.o
+ .debug_line    0x000094fc       0xbe lib/getpid.o
+ .debug_line    0x000095ba       0xad lib/stdlib/atoi.o
+ .debug_line    0x00009667       0xbb lib/stdlib/strtol.o
+ .debug_line    0x00009722       0x6e lib/string/strtok.o
+ .debug_line    0x00009790       0x9c lib/string/strcmp.o
+ .debug_line    0x0000982c       0xcc lib/string/strncmp.o
+ .debug_line    0x000098f8       0xb0 lib/string/strpbrk.o
+ .debug_line    0x000099a8      0x15b lib/stdio/read.o
+ .debug_line    0x00009b03       0x48 lib/stdio/perror.o
+ .debug_line    0x00009b4b      0x220 lib/stdio/sscanf.o
+ .debug_line    0x00009d6b       0xc3 lib/stdio/open.o
+ .debug_line    0x00009e2e       0xe0 lib/stdio/write.o
+ .debug_line    0x00009f0e       0xb3 lib/stdio/close.o
+ .debug_line    0x00009fc1      0x188 lib/sys/socket.o
+ .debug_line    0x0000a149      0x170 lib/sys/connect.o
+ .debug_line    0x0000a2b9       0x6c lib/arpa/ntohs.o
+ .debug_line    0x0000a325       0xc1 lib/arpa/htonl.o
+ .debug_line    0x0000a3e6       0x6c lib/arpa/htons.o
+ .debug_line    0x0000a452      0x167 lib/arpa/inet_pton.o
+ .debug_line    0x0000a5b9       0xc1 lib/arpa/ntohl.o
+ .debug_line    0x0000a67a       0xd7 lib/arpa/inet_ntop.o
 
 .debug_frame
  *(.debug_frame)
 
-.debug_str      0x00000000     0x37c2
+.debug_str      0x00000000     0x37ce
  *(.debug_str)
- .debug_str     0x00000000     0x37c2 double_link_list.o
+ .debug_str     0x00000000     0x37ce double_link_list.o
                                 0x6fa (size before relaxing)
- .debug_str     0x000037c2      0x771 kernel_main.o
- .debug_str     0x000037c2      0x783 protect.o
- .debug_str     0x000037c2      0x777 console.o
- .debug_str     0x000037c2      0x662 process.o
- .debug_str     0x000037c2      0xba3 kernel_main_old.o
- .debug_str     0x000037c2      0x628 global.o
- .debug_str     0x000037c2      0x6b4 keyboard.o
- .debug_str     0x000037c2      0x72f thread.o
- .debug_str     0x000037c2      0x916 my_process.o
- .debug_str     0x000037c2      0x71a network/skbuff.o
- .debug_str     0x000037c2      0x946 network/socket.o
- .debug_str     0x000037c2      0x9a2 network/ip_input.o
- .debug_str     0x000037c2      0xa78 network/udp_sock.o
- .debug_str     0x000037c2      0xcc7 network/tcp_sock.o
- .debug_str     0x000037c2      0x905 network/inet.o
- .debug_str     0x000037c2      0xb34 network/tcp.o
- .debug_str     0x000037c2      0x8bd network/sock.o
- .debug_str     0x000037c2      0xc24 network/tcp_output.o
- .debug_str     0x000037c2      0x838 network/arp.o
- .debug_str     0x000037c2      0x729 network/dst.o
- .debug_str     0x000037c2      0x910 network/ipc.o
- .debug_str     0x000037c2      0x921 network/icmpv4.o
- .debug_str     0x000037c2      0x85d network/ip_output.o
- .debug_str     0x000037c2      0x89c network/netdev.o
- .debug_str     0x000037c2      0xb94 network/tcp_input.o
- .debug_str     0x000037c2      0x6d2 network/task_network.o
- .debug_str     0x000037c2      0x736 network/route.o
- .debug_str     0x000037c2      0x954 network/udp.o
- .debug_str     0x000037c2      0xa50 network/tcp_data.o
- .debug_str     0x000037c2      0x1b8 network/utils.o
- .debug_str     0x000037c2      0x931 hd/hd.o
- .debug_str     0x000037c2      0xb12 fs/fs_main.o
- .debug_str     0x000037c2      0x62f mm/forkexit.o
- .debug_str     0x000037c2      0x885 mm/exec.o
- .debug_str     0x000037c2      0x5b0 mm/main.o
- .debug_str     0x000037c2      0xad6 mem/mem.o
- .debug_str     0x000037c2      0x644 lib/exec.o
- .debug_str     0x000037c2      0x5b6 lib/fork.o
- .debug_str     0x000037c2      0x5bd lib/exit.o
- .debug_str     0x000037c2      0x63c lib/unlink.o
- .debug_str     0x000037c2      0x5bd lib/wait.o
- .debug_str     0x000037c2      0x6c6 lib/socket_close.o
- .debug_str     0x000037c2      0x742 lib/socket_read.o
- .debug_str     0x000037c2       0xce lib/alloca.o
- .debug_str     0x000037c2      0x649 lib/calloc.o
- .debug_str     0x000037c2       0xa2 lib/floor.o
- .debug_str     0x000037c2      0x745 lib/socket_write.o
- .debug_str     0x000037c2      0x5ba lib/getpid.o
- .debug_str     0x000037c2       0xad lib/stdlib/atoi.o
- .debug_str     0x000037c2       0xc6 lib/stdlib/strtol.o
- .debug_str     0x000037c2       0xb9 lib/string/strtok.o
- .debug_str     0x000037c2       0xb1 lib/string/strcmp.o
- .debug_str     0x000037c2       0xba lib/string/strncmp.o
- .debug_str     0x000037c2       0xc1 lib/string/strpbrk.o
- .debug_str     0x000037c2      0x617 lib/stdio/read.o
- .debug_str     0x000037c2       0x99 lib/stdio/perror.o
- .debug_str     0x000037c2      0x109 lib/stdio/sscanf.o
- .debug_str     0x000037c2      0x5de lib/stdio/open.o
- .debug_str     0x000037c2      0x5f3 lib/stdio/write.o
- .debug_str     0x000037c2      0x5a6 lib/stdio/close.o
- .debug_str     0x000037c2      0x716 lib/sys/socket.o
- .debug_str     0x000037c2      0x735 lib/sys/connect.o
- .debug_str     0x000037c2      0x101 lib/arpa/ntohs.o
- .debug_str     0x000037c2       0xf4 lib/arpa/htonl.o
- .debug_str     0x000037c2      0x102 lib/arpa/htons.o
- .debug_str     0x000037c2      0x14c lib/arpa/inet_pton.o
- .debug_str     0x000037c2       0xf3 lib/arpa/ntohl.o
- .debug_str     0x000037c2      0x10f lib/arpa/inet_ntop.o
+ .debug_str     0x000037ce      0xba3 kernel_main_old.o
+ .debug_str     0x000037ce      0x771 kernel_main.o
+ .debug_str     0x000037ce      0x783 protect.o
+ .debug_str     0x000037ce      0x777 console.o
+ .debug_str     0x000037ce      0x662 process.o
+ .debug_str     0x000037ce      0x628 global.o
+ .debug_str     0x000037ce      0x6b4 keyboard.o
+ .debug_str     0x000037ce      0x72f thread.o
+ .debug_str     0x000037ce      0x916 my_process.o
+ .debug_str     0x000037ce      0x71a network/skbuff.o
+ .debug_str     0x000037ce      0x946 network/socket.o
+ .debug_str     0x000037ce      0x9a2 network/ip_input.o
+ .debug_str     0x000037ce      0xa78 network/udp_sock.o
+ .debug_str     0x000037ce      0x89c network/netdev.o
+ .debug_str     0x000037ce      0xb34 network/tcp.o
+ .debug_str     0x000037ce      0x8bd network/sock.o
+ .debug_str     0x000037ce      0xc24 network/tcp_output.o
+ .debug_str     0x000037ce      0x838 network/arp.o
+ .debug_str     0x000037ce      0xcc7 network/tcp_sock.o
+ .debug_str     0x000037ce      0x910 network/ipc.o
+ .debug_str     0x000037ce      0x921 network/icmpv4.o
+ .debug_str     0x000037ce      0x85d network/ip_output.o
+ .debug_str     0x000037ce      0x905 network/inet.o
+ .debug_str     0x000037ce      0x735 network/dst.o
+ .debug_str     0x000037ce      0xb94 network/tcp_input.o
+ .debug_str     0x000037ce      0x6d2 network/task_network.o
+ .debug_str     0x000037ce      0x736 network/route.o
+ .debug_str     0x000037ce      0x954 network/udp.o
+ .debug_str     0x000037ce      0xa50 network/tcp_data.o
+ .debug_str     0x000037ce      0x1b8 network/utils.o
+ .debug_str     0x000037ce      0x931 hd/hd.o
+ .debug_str     0x000037ce      0xb12 fs/fs_main.o
+ .debug_str     0x000037ce      0x62f mm/forkexit.o
+ .debug_str     0x000037ce      0x885 mm/exec.o
+ .debug_str     0x000037ce      0x5b0 mm/main.o
+ .debug_str     0x000037ce      0xad6 mem/mem.o
+ .debug_str     0x000037ce      0x644 lib/exec.o
+ .debug_str     0x000037ce      0x5b6 lib/fork.o
+ .debug_str     0x000037ce      0x5bd lib/exit.o
+ .debug_str     0x000037ce      0x63c lib/unlink.o
+ .debug_str     0x000037ce      0x5bd lib/wait.o
+ .debug_str     0x000037ce      0x6c6 lib/socket_close.o
+ .debug_str     0x000037ce      0x742 lib/socket_read.o
+ .debug_str     0x000037ce       0xce lib/alloca.o
+ .debug_str     0x000037ce      0x649 lib/calloc.o
+ .debug_str     0x000037ce       0xa2 lib/floor.o
+ .debug_str     0x000037ce      0x745 lib/socket_write.o
+ .debug_str     0x000037ce      0x5ba lib/getpid.o
+ .debug_str     0x000037ce       0xad lib/stdlib/atoi.o
+ .debug_str     0x000037ce       0xc6 lib/stdlib/strtol.o
+ .debug_str     0x000037ce       0xb9 lib/string/strtok.o
+ .debug_str     0x000037ce       0xb1 lib/string/strcmp.o
+ .debug_str     0x000037ce       0xba lib/string/strncmp.o
+ .debug_str     0x000037ce       0xc1 lib/string/strpbrk.o
+ .debug_str     0x000037ce      0x617 lib/stdio/read.o
+ .debug_str     0x000037ce       0x99 lib/stdio/perror.o
+ .debug_str     0x000037ce      0x109 lib/stdio/sscanf.o
+ .debug_str     0x000037ce      0x5de lib/stdio/open.o
+ .debug_str     0x000037ce      0x5f3 lib/stdio/write.o
+ .debug_str     0x000037ce      0x5a6 lib/stdio/close.o
+ .debug_str     0x000037ce      0x716 lib/sys/socket.o
+ .debug_str     0x000037ce      0x735 lib/sys/connect.o
+ .debug_str     0x000037ce      0x101 lib/arpa/ntohs.o
+ .debug_str     0x000037ce       0xf4 lib/arpa/htonl.o
+ .debug_str     0x000037ce      0x102 lib/arpa/htons.o
+ .debug_str     0x000037ce      0x14c lib/arpa/inet_pton.o
+ .debug_str     0x000037ce       0xf3 lib/arpa/ntohl.o
+ .debug_str     0x000037ce      0x10f lib/arpa/inet_ntop.o
 
 .debug_loc
  *(.debug_loc)
