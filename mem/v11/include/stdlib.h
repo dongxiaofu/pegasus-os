@@ -5,5 +5,6 @@
 
 void *calloc(size_t nmemb, size_t size);
 int atoi(const char *nptr);
+long int strtol(const char *nptr, char **endptr, int base);
 
 #endif

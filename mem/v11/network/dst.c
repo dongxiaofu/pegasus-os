@@ -27,6 +27,7 @@ try_agin:
 	}
 	else {
 		count += 1;
+		Printf("saddr = %x, daddr = %x\n", saddr, daddr);
 		arp_request(saddr, daddr, netdev);
         /* Inform upper layer that traffic was not sent, retry later */
 		if (count < 3) {

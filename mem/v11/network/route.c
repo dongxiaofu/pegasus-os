@@ -52,7 +52,7 @@ route_init()
 
 	char *loop_addr = "127.0.0.1";
 	route_add(loop->addr, 0, ip_parse(loop_addr), RT_LOOPBACK, 0, loop);  // 127.0.0.1
-	char *netdev_addr = "10.0.0.4";
+	char *netdev_addr = "10.0.0.9";
 	route_add(netdev->addr, 0, ip_parse(netdev_addr), RT_HOST, 0, netdev);	 // 10.0.1.4
 	// TODO 这是我随便设置的IP地址。
 	char *tapaddr = "127.0.0.1";

@@ -37,6 +37,7 @@ netdev_alloc(char *addr, char* hwaddr, uint32_t mtu)
 
 	dev->addr_len = 6;					/* 地址长度 */
 	dev->mtu = mtu;						/* 最大传输单元 */
+
 	return dev;
 }
 
@@ -47,7 +48,7 @@ netdev_init()
 	/* 本地环回地址 */
 	loop = netdev_alloc("127.0.0.1", "00:00:00:00:00:00", 1500);
 	/* 下面的mac地址是捏造的. */
-	netdev = netdev_alloc("10.0.0.4", "00:0c:29:6d:50:25", 1500);
+	netdev = netdev_alloc("10.0.0.9", "00:0c:29:6d:50:25", 1500);
 }
 
 /**\
@@ -83,6 +84,17 @@ netdev_transmit(struct sk_buff *skb, uint8_t *dst_hw, uint16_t ethertype)
 static int 
 netdev_receive(struct sk_buff *skb)
 {
+//	// 从其他进程获取netdev。
+//	Message *msg = (Message *)sys_malloc(sizeof(Message));
+//	Memset(msg, 0, sizeof(Message));
+//	// TODO INTERRUPT 应该修改为解除阻塞的进程。
+//    send_rec(RECEIVE, msg, TASK_NETWORK);
+//	unsigned int phy_buf = msg->BUF;
+//	unsigned int len = msg->BUF_LEN;
+//	unsigned int vaddr_buf = alloc_virtual_memory(phy_buf, len); 
+//	Memcpy(netdev, vaddr_buf, sizeof(struct netdev));
+//	sys_free(msg, sizeof(Message));
+
 	struct eth_hdr *hdr = eth_hdr(skb);  /* 获得以太网头部信息,以太网头部包括
 										 目的mac地址,源mac地址,以及类型信息 */
 	// disp_int(hdr->ethertype);

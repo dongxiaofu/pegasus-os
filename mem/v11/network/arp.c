@@ -91,7 +91,6 @@ void arp_rcv(struct sk_buff *skb)
 
 	arpdata->sip = ntohl(arpdata->sip);		// 发送方ip地址
 	arpdata->dip = ntohl(arpdata->dip);		// 接收方ip地址
-	Printf("sip = %x, dip = %x, addr = %x\n", arpdata->sip, arpdata->dip, 33); 
 	//arpdata_dbg("receive", arpdata);
 
 	merge = update_arp_translation_table(arphdr, arpdata); // 更新arp缓存

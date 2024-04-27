@@ -1,4 +1,5 @@
 #include "string.h"
+#include "stdlib.h"
 
 int sscanf(const char *str, const char *format, ...)
 {
@@ -80,19 +81,49 @@ int sscanf(const char *str, const char *format, ...)
 				{
 					// TODO 时间有限，对sscanf的格式字符串不是特别熟悉，所以只支持%hhu这种。
 					ptr_format++;		// 跳过h。
-					ptr_format++;		// 跳过u。
+					ptr_format++;		// 跳过h。
+					
+					// TODO 有空时，把进制种类改成枚举类型。
+					char number_base = 1;   // 进制种类：1-二进制；2-八进制；3-十六进制。
+
+					if(*ptr_format == 'u'){
+						number_base = 1;
+					}else if(*ptr_format == 'x'){
+						number_base = 3;
+					}else{
+						// do nothing
+					}
 
 					char *start = ptr_str;
-					while('0' <= *ptr_str && *ptr_str <= '9'){
+			//		while('0' <= *ptr_str && *ptr_str <= '9'){
+			//			ptr_str++;
+			//		}
+			//		while('a' <= *ptr_str && *ptr_str <= 'f'){
+			//			ptr_str++;
+			//		}
+			//		while('A' <= *ptr_str && *ptr_str <= 'F'){
+			//			ptr_str++;
+			//		}
+					while(('0' <= *ptr_str && *ptr_str <= '9')	\
+						||('a' <= *ptr_str && *ptr_str <= 'f')	\
+						||('A' <= *ptr_str && *ptr_str <= 'F')){
 						ptr_str++;
 					}
+						
 					unsigned int len = ptr_str - start;
 					char *buf = (char *)sys_malloc(len + 1);
 					Memset(buf, 0, len + 1);
 					Memcpy(buf, start, len);
 					// 成功把十进制数字字符串解析出来了，并且存储到了buf中。
 					// TODO 怎么识别参数的数据类型？在函数内部无法识别。
-					int number = atoi(buf);
+					int number = 0;
+					if(number_base == 1){
+						number = atoi(buf);
+					}else if(number_base == 3){
+						number = (int)strtol(buf, NULL, 16);
+					}else{
+						// TODO do nothing
+					}
 					// *next_arg = number;
 					// *(unsigned int *)(*next_arg) = number;
 					// 上面这行代码是错误的。我花了很多时间才发现这个错误。

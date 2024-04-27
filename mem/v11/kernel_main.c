@@ -67,7 +67,7 @@ void kernel_main()
 
 void init()
 {
-	char *stackaddr = "10.0.0.4";   /* 本协议栈模拟的ip地址 */
+	char *stackaddr = "10.0.0.9";   /* 本协议栈模拟的ip地址 */
 
 	MAIN_THREAD_PAGE_DIRECTORY = 0x400000;
 	k_reenter = 99;
@@ -199,7 +199,7 @@ static void tcp_client()
 	struct sockaddr_in addr;
 	int addrlen = 0;
 
-//	char *host = "10.0.0.4";
+//	char *host = "10.0.0.9";
 //	char port = 80;
 
 	char *dst_host = "82.156.59.186";
