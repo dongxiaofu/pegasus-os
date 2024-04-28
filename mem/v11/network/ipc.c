@@ -392,12 +392,19 @@ ipc_close(int sockfd, struct ipc_msg *msg)
 	return rc;
 }
 
+void ipc_call_from_netdev_rx(const Message *msg)
+{
+
+    Message *result = (Message *)sys_malloc(sizeof(Message));
+    result->RETVAL = 0;
+    send_rec(SEND, result, TASK_NET_DEV_RX);
+}
 
 /**\
  * demux_ipc_socket_call 更多的是实现消息的分发.
 \**/
 int
-demux_ipc_socket_call(int source, int sockfd, char *cmdbuf, int blen)
+demux_ipc_socket_call(int source, int sockfd, char *cmdbuf, int blen, Message *param)
 {
 	struct ipc_msg *msg = (struct ipc_msg *)cmdbuf;
 	// 没有办法。移植别人的代码，只能像这样打补丁。
@@ -430,6 +437,9 @@ demux_ipc_socket_call(int source, int sockfd, char *cmdbuf, int blen)
 		return ipc_sendto(sockfd, msg);
 	case IPC_RECVFROM:
 		return ipc_recvfrom(sockfd, msg);
+	case IPC_API:
+		ipc_call_from_netdev_rx(param);
+		return 1;
 	default:
 		print_err("No such IPC type %d\n", msg->type);
 		break;

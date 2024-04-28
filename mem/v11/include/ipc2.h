@@ -29,6 +29,7 @@
 #define IPC_LISTEN   0x0008
 #define IPC_SENDTO   0x0009
 #define IPC_RECVFROM 0x000a
+#define IPC_API      0x000b
 
 struct ipc_thread {
     struct list_head list;
