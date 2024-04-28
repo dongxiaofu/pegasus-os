@@ -48,7 +48,7 @@ void task_network() {
 		char *buf = (char *)sys_malloc(len);
 		Memcpy((char *)buf, vaddr_buf, len);
 
-        int rc = demux_ipc_socket_call(source, sockfd, buf, len);	/* 分发 */
+        int rc = demux_ipc_socket_call(source, sockfd, buf, len, msg);	/* 分发 */
 
 		if (rc == -1) {
 			Printf("Error on demuxing IPC socket call\n");

@@ -138,6 +138,6 @@ ipc_socket(int sockfd, struct ipc_msg *msg);
 int 
 ipc_close(int sockfd, struct ipc_msg *msg);
 
-static int demux_ipc_socket_call(int sockfd, char *cmdbuf, int blen);
+static int demux_ipc_socket_call(int sockfd, char *cmdbuf, int blen, Message *msg);
 
 #endif
