@@ -394,7 +394,6 @@ ipc_close(int sockfd, struct ipc_msg *msg)
 
 void ipc_call_from_netdev_rx(const Message *msg)
 {
-
     Message *result = (Message *)sys_malloc(sizeof(Message));
     result->RETVAL = 0;
     send_rec(SEND, result, TASK_NET_DEV_RX);

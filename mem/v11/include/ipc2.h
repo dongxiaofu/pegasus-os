@@ -105,8 +105,14 @@ struct ipc_read {
     uint8_t buf[];
 } __attribute__((packed));
 
-struct ipc_close {
-    int sockfd;
+struct ipc_update_arp_table {
+	struct arp_hdr *hdr;
+	struct arp_ipv4 *data;
+} __attribute__((packed));
+
+struct ipc_insert_arp_table {
+	struct arp_hdr *hdr;
+	struct arp_ipv4 *data;
 } __attribute__((packed));
 
 static int
