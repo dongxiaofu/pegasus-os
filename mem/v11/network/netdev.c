@@ -229,7 +229,7 @@ int netdev_get(struct ipc_msg *msg)
 	}
 	
 	Message *result = (Message *)sys_malloc(sizeof(Message));
-	if(dev == NULL){
+	if(dev != NULL){
     	result->BUF = get_physical_address(netdev);
 		result->BUF_LEN = sizeof(struct netdev);
 	}else{

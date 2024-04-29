@@ -4,6 +4,7 @@
 #include "netdev.h"
 #include "list.h"
 #include "ip.h"
+#include "ipc.h"
 
 #include "global.h"
 //static LIST_HEAD(routes);
@@ -56,32 +57,75 @@ route_init()
     route_add(0, ip_parse(tapaddr), 0, RT_GATEWAY, 0, netdev);   // 默认的网关
 }
 
+struct rtentry *call_route_lookup(uint32_t daddr)
+{
+    unsigned int ipc_msg_size = sizeof(struct ipc_msg);
+    struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
+    ipc_msg->type = IPC_ROUTE_LOOKUP;
+
+    unsigned int payload_size = sizeof(struct ipc_route_lookup);
+
+    struct ipc_route_lookup *payload = (struct ipc_route_lookup *)sys_malloc(payload_size);
+    payload->daddr = daddr;
+
+    ipc_msg->data = (char *)get_physical_address(payload);
+    ipc_msg->data_size = payload_size;
+
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+    Memset(msg, 0, sizeof(Message));
+    msg->TYPE = IPC_SOCKET_CALL;
+    msg->SOCKET_FD = 0;
+
+    unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
+    msg->BUF =  phy_ipc_msg;
+    msg->BUF_LEN = ipc_msg_size;
+
+    send_rec(BOTH, msg, TASK_NET_INIT_DEV);
+
+	struct rtentry *route;
+	unsigned int route_phy_addr = msg->BUF;
+	if(route_phy_addr == NULL){
+		route = NULL;
+	}else{
+		unsigned int route_size = sizeof(struct rtentry);
+		unsigned int rtentry_vaddr = alloc_virtual_memory(route_phy_addr, route_size);
+		route = (struct netdev *)sys_malloc(route_size);
+		Memcpy(route, rtentry_vaddr, route_size);
+	}
+
+    sys_free(msg, sizeof(Message));
+
+    return route;
+}
+
 /**\
  * route_lookup 从路由表中查找路由.
 \**/
-struct rtentry  *
-	route_lookup(uint32_t daddr)
+int route_lookup(struct ipc_msg *msg)
 {
+    pid_t pid = msg->pid;
+    struct ipc_route_lookup *param = (struct ipc_route_lookup *)msg->data;
+    uint32_t daddr = param->daddr;
+
 	struct list_head *item;
-	struct rtentry *rt = NULL;
+    struct rtentry *rt = NULL;
 
-	list_for_each(item, routes) {
-		rt = list_entry(item, struct rtentry, list);
-		if ((rt->netmask & daddr) == rt->dst) break;
-		/* 如果不能匹配的话,我们默认使用最后一个项,也就是网关 */
+    list_for_each(item, routes) {
+        rt = list_entry(item, struct rtentry, list);
+        if ((rt->netmask & daddr) == rt->dst) break;
+        /* 如果不能匹配的话,我们默认使用最后一个项,也就是网关 */
+    }
+
+	Message *result = (Message *)sys_malloc(sizeof(Message));
+	if(rt != NULL){
+    	result->BUF = get_physical_address(rt);
+		result->BUF_LEN = sizeof(struct rtentry);
+	}else{
+		result->BUF = NULL;
+		result->BUF_LEN = 0;
 	}
-	return rt;
-}
+    send_rec(SEND, result, pid);
+	sys_free(result);
 
-void 
-free_routes()
-{
-	struct list_head *item, *tmp;
-	struct rtentry *rt;
-
-	list_for_each_safe(item, tmp, routes) {
-		rt = list_entry(item, struct rtentry, list);
-		list_del(item);
-		sys_free(rt);
-	}
+	return 0;
 }

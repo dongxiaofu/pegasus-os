@@ -444,6 +444,8 @@ demux_ipc_socket_call(int source, int sockfd, char *cmdbuf, int blen, Message *p
 		return arp_get_hwaddr(msg);	
 	case IPC_GET_NETDEV:
 		return netdev_get(msg);
+	case IPC_ROUTE_LOOKUP:
+		return route_lookup(msg); 
 	default:
 		print_err("No such IPC type %d\n", msg->type);
 		break;

@@ -19,8 +19,13 @@ struct rtentry {
 	struct netdev *dev;     /* dev主要记录网关的地址信息,包括ip地址和mac地址 */
 };
 
+//struct ipc_route_lookup {
+//    uint32_t daddr;
+//} __attribute__((packed));
+
 void route_init();
-struct rtentry * route_lookup(uint32_t daddr);
+struct rtentry *call_route_lookup(uint32_t daddr);
+//int route_lookup(struct ipc_msg *msg);
 void free_routes();
 
 #endif // !_ROUTE_H_

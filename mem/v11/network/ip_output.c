@@ -12,7 +12,7 @@ ip_output(struct sock *sk, struct sk_buff *skb)
 	struct rtentry *rt;
 	struct iphdr *ihdr = ip_hdr(skb);
 
-	rt = route_lookup(ihdr->daddr);	/* 根据目的ip地址查找路由 */
+	rt = call_route_lookup(ihdr->daddr);	/* 根据目的ip地址查找路由 */
 
 	if (!rt) {
 		/* todo */

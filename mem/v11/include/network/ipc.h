@@ -35,6 +35,7 @@
 #define IPC_UPDATE_ARP_TABLE         0x000c
 #define IPC_GET_HWADDR               0x000d
 #define IPC_GET_NETDEV               0x000e
+#define IPC_ROUTE_LOOKUP             0x000f
 
 struct ipc_thread {
     struct list_head list;
@@ -139,4 +140,9 @@ struct ipc_close {
 //	uint8_t *arp_ipv4;
 //} __attribute__((packed));
 
+struct ipc_route_lookup {
+    uint32_t daddr;
+} __attribute__((packed));
+
+int route_lookup(struct ipc_msg *msg);
 #endif
