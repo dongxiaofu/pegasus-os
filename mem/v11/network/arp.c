@@ -354,8 +354,11 @@ uint8_t *call_arp_get_hwaddr(uint32_t sip)
  * arp_get_hwaddr 根据ip得到mac地址,找不到则返回NULL
 \**/
 uint8_t* 
-arp_get_hwaddr(uint32_t sip)
+//arp_get_hwaddr(uint32_t sip)
+arp_get_hwaddr(struct ipc_msg *msg)
 {
+	uint32_t sip = 32;
+
 	struct list_head *item;
 	struct arp_cache_entry *entry;
 	

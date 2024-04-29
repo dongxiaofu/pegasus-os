@@ -105,7 +105,7 @@ struct ipc_get_hwaddr {
     uint32_t sip;
 } __attribute__((packed));
 
-uint8_t* arp_get_hwaddr(uint32_t sip);
+uint8_t* arp_get_hwaddr(struct ipc_msg *msg);
 void arp_init();
 void free_arp();
 void arp_rcv(struct sk_buff *skb);
