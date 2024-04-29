@@ -105,13 +105,19 @@ int call_insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data
 // int insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
 int insert_arp_translation_table(struct ipc_msg *msg)
 {
+	pid_t pid = msg->pid;
 	struct ipc_insert_arp_table *data = (struct ipc_insert_arp_table *)msg->data;
 	struct arp_hdr *hdr = (struct arp_hdr *)(&(data->arp_hdr));
 	struct arp_ipv4 *arp_ipv4 = (struct arp_ipv4 *)(&(data->arp_ipv4));
 
 	struct arp_cache_entry *entry = arp_entry_alloc(hdr, arp_ipv4);
 	list_add_tail(&entry->list, &arp_cache); /* 添加到arp_cache的尾部 */
-	return 0;
+
+	Message *result = (Message *)sys_malloc(sizeof(Message));
+	result->RETVAL = 0;
+	send_rec(SEND, result, pid);
+
+//	return ipc_write_rc(sockfd, pid, IPC_SENDTO, 1);
 }
 
 /**\
@@ -120,21 +126,29 @@ int insert_arp_translation_table(struct ipc_msg *msg)
 //int update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
 int update_arp_translation_table(struct ipc_msg *msg)
 {
+	pid_t pid = msg->pid;
 	struct ipc_update_arp_table *data = (struct ipc_update_arp_table *)msg->data;
 	struct arp_hdr *hdr = (struct arp_hdr *)(&(data->arp_hdr));
 	struct arp_ipv4 *arp_ipv4 = (struct arp_ipv4 *)(&(data->arp_ipv4));
 
 	struct list_head *item;
 	struct arp_cache_entry *entry;
+	unsigned char rc = 0;
 	
 	list_for_each(item, &arp_cache) {
 		entry = list_entry(item, struct arp_cache_entry, list);
 		if (entry->hwtype == hdr->hwtype && entry->sip == arp_ipv4->sip) {
 			Memcpy(entry->smac, arp_ipv4->smac, 6);
-			return 1;
+			rc =  1;
+			break;
 		}
 	}
-	return 0;
+
+	Message *result = (Message *)sys_malloc(sizeof(Message));
+	result->RETVAL = rc;
+	send_rec(SEND, result, pid);
+
+//	return ipc_write_rc(sockfd, pid, IPC_SENDTO, rc);
 }
 
 void arp_init()
