@@ -6,6 +6,7 @@
 #include "skbuff.h"
 #include "list.h"
 #include "utils.h"
+#include "ipc.h"
 
 #define ARP_ETHERNET	0x0001
 #define ARP_IPV4		0x0800
@@ -96,6 +97,13 @@ void free_arp();
 void arp_rcv(struct sk_buff *skb);
 void arp_reply(struct sk_buff *skb, struct netdev *netdev);
 int arp_request(uint32_t sip, uint32_t dip, struct netdev *netdev);
+//int update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data);
+//int insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data);
+int update_arp_translation_table(struct ipc_msg *msg);
+int insert_arp_translation_table(struct ipc_msg *msg);
+
+static int call_insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data);
+int call_update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data);
 
 
 // arp_hdr用于获取从以太网帧中获取arp头部,以太网头部之后立马就是arp协议的头部

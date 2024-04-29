@@ -30,11 +30,86 @@ arp_entry_alloc(struct arp_hdr *hdr, struct arp_ipv4 *data)
 	return entry;
 }
 
-static int 
-//insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
-update_arp_translation_table(struct ipc_msg *msg)
+int call_update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
 {
-	struct arp_cache_entry *entry = arp_entry_alloc(hdr, data);
+	unsigned int ipc_msg_size = sizeof(struct ipc_msg);
+	struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
+	ipc_msg->type = IPC_UPDATE_ARP_TABLE;
+
+	unsigned int payload_size = sizeof(struct ipc_update_arp_table);
+
+	struct ipc_update_arp_table *payload = (struct ipc_update_arp_table *)sys_malloc(payload_size);
+//	payload->hdr = get_physical_address(hdr);
+//	payload->data = get_physical_address(data);
+	Memcpy(payload->arp_hdr, hdr, sizeof(struct arp_hdr));
+	Memcpy(payload->arp_ipv4, data, sizeof(struct arp_ipv4));
+	
+	ipc_msg->data = (char *)get_physical_address(payload);
+	ipc_msg->data_size = payload_size;
+
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+	Memset(msg, 0, sizeof(Message));
+    msg->TYPE = IPC_SOCKET_CALL;
+	msg->SOCKET_FD = 0;
+
+	unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
+    msg->BUF =  phy_ipc_msg;
+    msg->BUF_LEN = ipc_msg_size;
+
+    send_rec(BOTH, msg, TASK_NETWORK);
+	
+	int result = msg->RETVAL;
+
+    //assert(msg.type == SYSCALL_RET);
+    sys_free(msg, sizeof(Message));
+
+    return result;
+}
+
+int call_insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
+{
+	unsigned int ipc_msg_size = sizeof(struct ipc_msg);
+	struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
+	ipc_msg->type = IPC_INSERT_ARP_TABLE;
+
+	unsigned int payload_size = sizeof(struct ipc_update_arp_table);
+
+	struct ipc_update_arp_table *payload = (struct ipc_update_arp_table *)sys_malloc(payload_size);
+//	payload->hdr = get_physical_address(hdr);
+//	payload->data = get_physical_address(data);
+	Memcpy(payload->arp_hdr, hdr, sizeof(struct arp_hdr));
+	Memcpy(payload->arp_ipv4, data, sizeof(struct arp_ipv4));
+	
+	ipc_msg->data = (char *)get_physical_address(payload);
+	ipc_msg->data_size = payload_size;
+
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+	Memset(msg, 0, sizeof(Message));
+    msg->TYPE = IPC_SOCKET_CALL;
+	msg->SOCKET_FD = 0;
+
+	unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
+    msg->BUF =  phy_ipc_msg;
+    msg->BUF_LEN = ipc_msg_size;
+
+    send_rec(BOTH, msg, TASK_NETWORK);
+	
+	int result = msg->RETVAL;
+
+    //assert(msg.type == SYSCALL_RET);
+    sys_free(msg, sizeof(Message));
+
+    return result;
+}
+
+// int insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
+int insert_arp_translation_table(struct ipc_msg *msg)
+{
+	struct ipc_insert_arp_table *data = (struct ipc_insert_arp_table *)msg->data;
+	struct arp_hdr *hdr = (struct arp_hdr *)(&(data->arp_hdr));
+	struct arp_ipv4 *arp_ipv4 = (struct arp_ipv4 *)(&(data->arp_ipv4));
+
+	struct arp_cache_entry *entry = arp_entry_alloc(hdr, arp_ipv4);
 	list_add_tail(&entry->list, &arp_cache); /* 添加到arp_cache的尾部 */
 	return 0;
 }
@@ -42,17 +117,20 @@ update_arp_translation_table(struct ipc_msg *msg)
 /**\
  * update_arp_translation_table 更新arp转换表 
 \**/
-static int
-// update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
-update_arp_translation_table(struct ipc_msg *msg)
+//int update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
+int update_arp_translation_table(struct ipc_msg *msg)
 {
+	struct ipc_update_arp_table *data = (struct ipc_update_arp_table *)msg->data;
+	struct arp_hdr *hdr = (struct arp_hdr *)(&(data->arp_hdr));
+	struct arp_ipv4 *arp_ipv4 = (struct arp_ipv4 *)(&(data->arp_ipv4));
+
 	struct list_head *item;
 	struct arp_cache_entry *entry;
 	
 	list_for_each(item, &arp_cache) {
 		entry = list_entry(item, struct arp_cache_entry, list);
-		if (entry->hwtype == hdr->hwtype && entry->sip == data->sip) {
-			Memcpy(entry->smac, data->smac, 6);
+		if (entry->hwtype == hdr->hwtype && entry->sip == arp_ipv4->sip) {
+			Memcpy(entry->smac, arp_ipv4->smac, 6);
 			return 1;
 		}
 	}
@@ -95,14 +173,14 @@ void arp_rcv(struct sk_buff *skb)
 	arpdata->dip = ntohl(arpdata->dip);		// 接收方ip地址
 	//arpdata_dbg("receive", arpdata);
 
-	merge = update_arp_translation_table(arphdr, arpdata); // 更新arp缓存
+	merge = call_update_arp_translation_table(arphdr, arpdata); // 更新arp缓存
 	
 	if (!(netdev = netdev_get(arpdata->dip))) {
 		Printf("ARP was not for us\n");
 		goto drop_pkt;
 	}
 
-	if (!merge && insert_arp_translation_table(arphdr, arpdata) != 0) {
+	if (!merge && call_insert_arp_translation_table(arphdr, arpdata) != 0) {
 		print_err("ERR: No free space in ARP translation table\n");
 		goto drop_pkt;
 	}

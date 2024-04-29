@@ -4,6 +4,7 @@
 #include "syshead.h"
 #include "in.h"
 #include "list.h"
+#include "arp.h"
 
 
 #define DEBUG_IPC
@@ -116,14 +117,24 @@ struct ipc_close {
     int sockfd;
 } __attribute__((packed));
 
+//struct ipc_update_arp_table {
+//	struct arp_hdr hdr;
+//	struct arp_ipv4 data;
+//} __attribute__((packed));
+//
+//struct ipc_insert_arp_table {
+//	struct arp_hdr hdr;
+//	struct arp_ipv4 data;
+//} __attribute__((packed));
+
 struct ipc_update_arp_table {
-	struct arp_hdr *hdr;
-	struct arp_ipv4 *data;
+	uint8_t *arp_hdr;
+	uint8_t *arp_ipv4;
 } __attribute__((packed));
 
 struct ipc_insert_arp_table {
-	struct arp_hdr *hdr;
-	struct arp_ipv4 *data;
+	uint8_t *arp_hdr;
+	uint8_t *arp_ipv4;
 } __attribute__((packed));
 
 #endif
