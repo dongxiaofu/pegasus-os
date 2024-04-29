@@ -101,11 +101,16 @@ struct ipc_insert_arp_table {
 	struct arp_ipv4 arp_ipv4;
 } __attribute__((packed));
 
+struct ipc_get_hwaddr {
+    uint32_t sip;
+} __attribute__((packed));
+
 uint8_t* arp_get_hwaddr(uint32_t sip);
 void arp_init();
 void free_arp();
 void arp_rcv(struct sk_buff *skb);
 void arp_reply(struct sk_buff *skb, struct netdev *netdev);
+uint8_t *call_arp_get_hwaddr(uint32_t sip);
 int arp_request(uint32_t sip, uint32_t dip, struct netdev *netdev);
 //int update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data);
 //int insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data);

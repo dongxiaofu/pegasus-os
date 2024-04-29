@@ -316,6 +316,40 @@ arp_reply(struct sk_buff *skb, struct netdev *netdev)
 	free_skb(skb);
 }
 
+uint8_t *call_arp_get_hwaddr(uint32_t sip)
+{
+    return 0;
+    unsigned int ipc_msg_size = sizeof(struct ipc_msg);
+    struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
+    ipc_msg->type = IPC_GET_HWADDR;
+
+    unsigned int payload_size = sizeof(struct ipc_get_hwaddr);
+
+    struct ipc_get_hwaddr *payload = (struct ipc_get_hwaddr *)sys_malloc(payload_size);
+    payload->sip = sip;
+
+    ipc_msg->data = (char *)get_physical_address(payload);
+    ipc_msg->data_size = payload_size;
+
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+    Memset(msg, 0, sizeof(Message));
+    msg->TYPE = IPC_SOCKET_CALL;
+    msg->SOCKET_FD = 0;
+
+    unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
+    msg->BUF =  phy_ipc_msg;
+    msg->BUF_LEN = ipc_msg_size;
+
+    send_rec(BOTH, msg, TASK_NET_INIT_DEV);
+
+    int result = msg->RETVAL;
+
+    //assert(msg.type == SYSCALL_RET);
+    sys_free(msg, sizeof(Message));
+
+    return (uint8_t *)result;
+}
+
 /**\
  * arp_get_hwaddr 根据ip得到mac地址,找不到则返回NULL
 \**/

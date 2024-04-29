@@ -33,6 +33,7 @@
 // 勤快一点，多记一个vim命令，我就不必逐个费劲自己逐个敲入小写字母对应的大写字母了。
 #define IPC_INSERT_ARP_TABLE         0x000b
 #define IPC_UPDATE_ARP_TABLE         0x000c
+#define IPC_GET_HWADDR               0x000d
 
 struct ipc_thread {
     struct list_head list;
