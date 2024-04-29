@@ -21,6 +21,15 @@ void init_dev()
 
 	Message *msg = (Message *)sys_malloc(sizeof(Message));
 
+	   // 向TASK_NET_DEV_RX进程发送netdev数据。
+//    Message *msg_netdev = (Message *)sys_malloc(sizeof(Message));
+//    unsigned int phy_buf = get_physical_address(netdev);
+//    msg_netdev->BUF = phy_buf;
+//    msg_netdev->BUF_LEN = sizeof(struct netdev);
+//    send_rec(SEND, msg_netdev, TASK_NET_DEV_RX);
+
+//    send_rec(SEND, msg_netdev, TASK_NETWORK);
+
 	while(1){
 		Memset(msg, 0, sizeof(Message));
 		send_rec(RECEIVE, msg, ANY);
@@ -55,15 +64,20 @@ void init_dev()
 void task_network() {
 	Printf("------network is running\n");
 
-	netdev_init();
-	route_init();
+//	netdev_init();
+//	route_init();
 
-	// 向TASK_NET_DEV_RX进程发送netdev数据。
+	// 从其他进程获取netdev。
 	Message *msg = (Message *)sys_malloc(sizeof(Message));
-	unsigned int phy_buf = get_physical_address(netdev);
-	msg->BUF = phy_buf; 
-	msg->BUF_LEN = sizeof(struct netdev);
-    send_rec(SEND, msg, TASK_NET_DEV_RX);
+	Memset(msg, 0, sizeof(Message));
+	// TODO INTERRUPT 应该修改为解除阻塞的进程。
+//    send_rec(RECEIVE, msg, TASK_NET_INIT_DEV);
+//	unsigned int phy_buf = msg->BUF;
+//	unsigned int len = msg->BUF_LEN;
+//	unsigned int vaddr_buf = alloc_virtual_memory(phy_buf, len); 
+//	Memcpy(netdev, vaddr_buf, sizeof(struct netdev));
+//	sys_free(msg, sizeof(Message));
+
 
     while (1) {
 		Memset(msg, 0, sizeof(Message));
@@ -100,17 +114,17 @@ void task_netdev_rx()
 	Printf("------netdev_rx_loop is running\n");
 
 	// 从其他进程获取netdev。
-	Message *msg = (Message *)sys_malloc(sizeof(Message));
-	Memset(msg, 0, sizeof(Message));
-	// TODO INTERRUPT 应该修改为解除阻塞的进程。
-    send_rec(RECEIVE, msg, TASK_NETWORK);
-	unsigned int phy_buf = msg->BUF;
-	unsigned int len = msg->BUF_LEN;
-	unsigned int vaddr_buf = alloc_virtual_memory(phy_buf, len); 
-	Memcpy(netdev, vaddr_buf, sizeof(struct netdev));
-	sys_free(msg, sizeof(Message));
-
-	Printf("task:%x-%x-%x\n", netdev->hwaddr[0], netdev->hwaddr[1],netdev->hwaddr[2]); 
+//	Message *msg = (Message *)sys_malloc(sizeof(Message));
+//	Memset(msg, 0, sizeof(Message));
+//	// TODO INTERRUPT 应该修改为解除阻塞的进程。
+//    send_rec(RECEIVE, msg, TASK_NET_INIT_DEV);   // 向TASK_NET_DEV_RX进程发送netdev数据。
+//	unsigned int phy_buf = msg->BUF;
+//	unsigned int len = msg->BUF_LEN;
+//	unsigned int vaddr_buf = alloc_virtual_memory(phy_buf, len); 
+//	Memcpy(netdev, vaddr_buf, sizeof(struct netdev));
+//	sys_free(msg, sizeof(Message));
+//
+//	Printf("task:%x-%x-%x\n", netdev->hwaddr[0], netdev->hwaddr[1],netdev->hwaddr[2]); 
 
 	netdev_rx_loop();
 }

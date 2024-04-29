@@ -41,7 +41,8 @@ try_agin:
 		count += 1;
 		arp_request(saddr, daddr, netdev);
         /* Inform upper layer that traffic was not sent, retry later */
-		if (count < 3) {
+		//if (count < 3) {
+		if (count < 6) {
 			// usleep(10000);
 			goto try_agin;
 		}

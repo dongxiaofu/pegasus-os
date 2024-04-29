@@ -119,6 +119,7 @@ int insert_arp_translation_table(struct ipc_msg *msg);
 
 static int call_insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data);
 int call_update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data);
+int netdev_get(struct ipc_msg *msg);
 
 
 // arp_hdr用于获取从以太网帧中获取arp头部,以太网头部之后立马就是arp协议的头部

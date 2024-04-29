@@ -144,10 +144,10 @@ netdev_rx_loop()
 		// interrupt_status irs = (interrupt_status)status;
 		interrupt_status irs = {0};
 		Memcpy(&irs, &status, sizeof(interrupt_status));
-	Printf("prx = %x, ptx = %x, rxe = %x, rdc = %x\n", irs.prx, irs.ptx, irs.rxe, irs.rdc);
+//	Printf("prx = %x, ptx = %x, rxe = %x, rdc = %x\n", irs.prx, irs.ptx, irs.rxe, irs.rdc);
 	disp_str("\n=====================\n");
 
-//	asm("xchgw %bx, %bx");
+//	/sm("xchgw %bx, %bx");
 
 	int size = 256;
 	if(irs.prx == 1){
@@ -176,16 +176,71 @@ netdev_rx_loop()
 }
 
 struct netdev* 
-netdev_get(uint32_t sip)
+call_netdev_get(uint32_t sip)
 {
-	Printf("sip = %x, addr = %x\n", sip, netdev->addr);
+    unsigned int ipc_msg_size = sizeof(struct ipc_msg);
+    struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
+    ipc_msg->type = IPC_GET_NETDEV;
+
+    unsigned int payload_size = sizeof(struct ipc_get_netdev);
+
+    struct ipc_get_netdev *payload = (struct ipc_get_netdev *)sys_malloc(payload_size);
+    payload->sip = sip;
+
+    ipc_msg->data = (char *)get_physical_address(payload);
+    ipc_msg->data_size = payload_size;
+
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+    Memset(msg, 0, sizeof(Message));
+    msg->TYPE = IPC_SOCKET_CALL;
+    msg->SOCKET_FD = 0;
+
+    unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
+    msg->BUF =  phy_ipc_msg;
+    msg->BUF_LEN = ipc_msg_size;
+
+    send_rec(BOTH, msg, TASK_NET_INIT_DEV);
+
+	struct netdev *dev;
+	unsigned int netdev_phy_addr = msg->BUF;
+	if(netdev_phy_addr == NULL){
+		dev = NULL;
+	}else{
+		unsigned int netdev_size = sizeof(struct netdev);
+		unsigned int netdev_vaddr = alloc_virtual_memory(netdev_phy_addr, netdev_size);
+		struct netdev *dev = (struct netdev *)sys_malloc(netdev_size);
+		Memcpy(dev, netdev_vaddr, netdev_size);
+	}
+
+    sys_free(msg, sizeof(Message));
+
+    return dev;
+}
+
+int netdev_get(struct ipc_msg *msg)
+{
+	struct netdev *dev = NULL;
+    pid_t pid = msg->pid;
+    struct ipc_get_netdev *param = (struct ipc_get_netdev *)msg->data;
+    uint32_t sip = param->sip;
+
 	if (netdev->addr == sip) {
-		return netdev; /* 将static local variable的地址传递出去, netdev包含mac地址信息 */
+		dev = netdev; /* 将static local variable的地址传递出去, netdev包含mac地址信息 */
 	}
-	else
-	{
-		return NULL;
+	
+	Message *result = (Message *)sys_malloc(sizeof(Message));
+	if(dev == NULL){
+    	result->BUF = get_physical_address(netdev);
+		result->BUF_LEN = sizeof(struct netdev);
+	}else{
+		result->BUF = NULL;
+		result->BUF_LEN = 0;
 	}
+    send_rec(SEND, result, pid);
+	sys_free(result);
+
+	// TODO 不知道该返回什么。
+	return 0;
 }
 
 void 
@@ -237,7 +292,7 @@ char *receive_msg_from_nic()
 		Memset(buf, 0, size);
 	//	Printf("k * size = %x\n", (startPage + k) * size);
 		SetPageStart(k * size);
-//		asm("xchgw %bx, %bx");
+//		/sm("xchgw %bx, %bx");
 		unsigned int len = NICtoPC(buf, size, (startPage + k) * size);
 	//	disp_int(buf[16]);
 	//	disp_int(buf[17]);
@@ -284,7 +339,7 @@ void receive_msg_from_nic2()
 	Printf("curr_page = %d", curr_page);
 
 //	return;
-	//	asm ("xchgw %bx, %bx");
+	//	/sm ("xchgw %bx, %bx");
 	//	没有NULL，只能用0。略感惊讶，我的OS中还不能使用NULL。
 	//	我使用过链表，不用NULL用什么解决问题的？
 	NIC_PAGE_BUF_NODE bufLinkList = 0;	
@@ -309,7 +364,7 @@ void receive_msg_from_nic2()
 		Printf("before NICtoPC\n");
 		unsigned int len = NICtoPC(buf, size, 3);
 		Printf("buf = %s\n", buf);
-		//		asm ("xchgw %bx, %bx");
+		//		/sm ("xchgw %bx, %bx");
 		// 把从NIC中读取的数据存储到单链表中。
 //		unsigned int nodeSize = sizeof(struct nic_page_buf_node);
 //		NIC_PAGE_BUF_NODE node = (NIC_PAGE_BUF_NODE)sys_malloc(nodeSize);

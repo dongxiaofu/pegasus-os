@@ -115,7 +115,6 @@ ipc_write_rc(int sockfd, pid_t pid, uint16_t type, int rc)
 	msg->BUF = get_physical_address(response) ;
 	msg->BUF_LEN = resplen;
 	// TODO 需要判断返回值吗？
-	asm("xchgw %bx, %bx");
 	send_rec(SEND, msg, pid);
 
 	return 0;
@@ -292,7 +291,6 @@ ipc_connect(int sockfd, struct ipc_msg *msg)
 	int rc = -1;
 	// rc = _connect(pid, payload->sockfd, &payload->addr);
 	rc = _connect(pid, sockfd, &payload->addr);
-	asm("xchgw %bx, %bx");
 	return ipc_write_rc(sockfd, pid, IPC_CONNECT, rc); /* 所谓的IPC,只是自己定义的一套规则吗? */
 }
 
@@ -444,6 +442,8 @@ demux_ipc_socket_call(int source, int sockfd, char *cmdbuf, int blen, Message *p
 		return insert_arp_translation_table(msg);
 	case IPC_GET_HWADDR:
 		return arp_get_hwaddr(msg);	
+	case IPC_GET_NETDEV:
+		return netdev_get(msg);
 	default:
 		print_err("No such IPC type %d\n", msg->type);
 		break;

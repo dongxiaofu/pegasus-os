@@ -34,6 +34,7 @@
 #define IPC_INSERT_ARP_TABLE         0x000b
 #define IPC_UPDATE_ARP_TABLE         0x000c
 #define IPC_GET_HWADDR               0x000d
+#define IPC_GET_NETDEV               0x000e
 
 struct ipc_thread {
     struct list_head list;

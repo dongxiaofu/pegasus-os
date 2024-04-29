@@ -194,7 +194,7 @@ void arp_rcv(struct sk_buff *skb)
 
 	merge = call_update_arp_translation_table(arphdr, arpdata); // 更新arp缓存
 	
-	if (!(netdev = netdev_get(arpdata->dip))) {
+	if (!(netdev = call_netdev_get(arpdata->dip))) {
 		Printf("ARP was not for us\n");
 		goto drop_pkt;
 	}
@@ -343,6 +343,7 @@ uint8_t *call_arp_get_hwaddr(uint32_t sip)
     send_rec(BOTH, msg, TASK_NET_INIT_DEV);
 
     int result = msg->RETVAL;
+//	Printf("result = %x\n", result);
 
     //assert(msg.type == SYSCALL_RET);
     sys_free(msg, sizeof(Message));

@@ -21,11 +21,16 @@ struct netdev {
 	uint32_t mtu;			/* mtu,最大传输单元,一般默认为1500字节 */
 };
 
+struct ipc_get_netdev {
+    uint32_t sip;
+} __attribute__((packed));
+
 void netdev_init();
 int netdev_transmit(struct sk_buff *skb, uint8_t *dst, uint16_t ethertype);
 void *netdev_rx_loop();
 void free_netdev();
-struct netdev *netdev_get(uint32_t sip);
+struct netdev *call_netdev_get(uint32_t sip);
+//int netdev_get(struct ipc_msg *msg);
 int local_ipaddress(uint32_t addr);
 
 #endif // !NETDEV_H
