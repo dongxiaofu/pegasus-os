@@ -29,7 +29,8 @@ dst_neigh_output(struct sk_buff *skb)
 	}
 
 try_agin:
-	dmac = arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
+	// dmac = arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
+	dmac = call_arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
 
 	if (dmac) {
 		Printf("get\n");
