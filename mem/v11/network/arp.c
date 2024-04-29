@@ -357,10 +357,13 @@ uint8_t*
 //arp_get_hwaddr(uint32_t sip)
 arp_get_hwaddr(struct ipc_msg *msg)
 {
-	uint32_t sip = 32;
-
 	struct list_head *item;
 	struct arp_cache_entry *entry;
+	uint8_t *smac = NULL;
+
+    pid_t pid = msg->pid;
+    struct ipc_get_hwaddr *hwaddr = (struct ipc_get_hwaddr *)msg->data;
+    uint32_t sip = hwaddr->sip;
 	
 	list_for_each(item, &arp_cache) {
 		entry = list_entry(item, struct arp_cache_entry, list);
