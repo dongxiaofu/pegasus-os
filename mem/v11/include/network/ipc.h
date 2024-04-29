@@ -29,6 +29,9 @@
 #define IPC_SENDTO   0x0009
 #define IPC_RECVFROM 0x000a
 #define IPC_API		 0x000b
+// 勤快一点，多记一个vim命令，我就不必逐个费劲自己逐个敲入小写字母对应的大写字母了。
+#define IPC_INSERT_ARP_TABLE         0x000b
+#define IPC_UPDATE_ARP_TABLE         0x000c
 
 struct ipc_thread {
     struct list_head list;
@@ -111,6 +114,16 @@ struct ipc_read {
 
 struct ipc_close {
     int sockfd;
+} __attribute__((packed));
+
+struct ipc_update_arp_table {
+	struct arp_hdr *hdr;
+	struct arp_ipv4 *data;
+} __attribute__((packed));
+
+struct ipc_insert_arp_table {
+	struct arp_hdr *hdr;
+	struct arp_ipv4 *data;
 } __attribute__((packed));
 
 #endif

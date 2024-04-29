@@ -436,9 +436,10 @@ demux_ipc_socket_call(int source, int sockfd, char *cmdbuf, int blen, Message *p
 		return ipc_sendto(sockfd, msg);
 	case IPC_RECVFROM:
 		return ipc_recvfrom(sockfd, msg);
-	case IPC_API:
-		ipc_call_from_netdev_rx(param);
-		return 1;
+	case IPC_UPDATE_ARP_TABLE:
+		return update_arp_translation_table(msg);
+	case IPC_INSERT_ARP_TABLE:
+		return insert_arp_translation_table(msg);
 	default:
 		print_err("No such IPC type %d\n", msg->type);
 		break;

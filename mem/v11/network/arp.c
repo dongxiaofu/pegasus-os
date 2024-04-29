@@ -31,7 +31,8 @@ arp_entry_alloc(struct arp_hdr *hdr, struct arp_ipv4 *data)
 }
 
 static int 
-insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
+//insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
+update_arp_translation_table(struct ipc_msg *msg)
 {
 	struct arp_cache_entry *entry = arp_entry_alloc(hdr, data);
 	list_add_tail(&entry->list, &arp_cache); /* 添加到arp_cache的尾部 */
@@ -42,7 +43,8 @@ insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
  * update_arp_translation_table 更新arp转换表 
 \**/
 static int
-update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
+// update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
+update_arp_translation_table(struct ipc_msg *msg)
 {
 	struct list_head *item;
 	struct arp_cache_entry *entry;
