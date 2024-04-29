@@ -41,8 +41,8 @@ int call_update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data
 	struct ipc_update_arp_table *payload = (struct ipc_update_arp_table *)sys_malloc(payload_size);
 //	payload->hdr = get_physical_address(hdr);
 //	payload->data = get_physical_address(data);
-	Memcpy(payload->arp_hdr, hdr, sizeof(struct arp_hdr));
-	Memcpy(payload->arp_ipv4, data, sizeof(struct arp_ipv4));
+	Memcpy(&(payload->arp_hdr), hdr, sizeof(struct arp_hdr));
+	Memcpy(&(payload->arp_ipv4), data, sizeof(struct arp_ipv4));
 	
 	ipc_msg->data = (char *)get_physical_address(payload);
 	ipc_msg->data_size = payload_size;
@@ -77,8 +77,10 @@ int call_insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data
 	struct ipc_update_arp_table *payload = (struct ipc_update_arp_table *)sys_malloc(payload_size);
 //	payload->hdr = get_physical_address(hdr);
 //	payload->data = get_physical_address(data);
-	Memcpy(payload->arp_hdr, hdr, sizeof(struct arp_hdr));
-	Memcpy(payload->arp_ipv4, data, sizeof(struct arp_ipv4));
+//	Memcpy(payload->arp_hdr, hdr, sizeof(struct arp_hdr));
+//	Memcpy(payload->arp_ipv4, data, sizeof(struct arp_ipv4));
+	Memcpy(&(payload->arp_hdr), hdr, sizeof(struct arp_hdr));
+	Memcpy(&(payload->arp_ipv4), data, sizeof(struct arp_ipv4));
 	
 	ipc_msg->data = (char *)get_physical_address(payload);
 	ipc_msg->data_size = payload_size;

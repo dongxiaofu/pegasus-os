@@ -127,14 +127,14 @@ struct ipc_close {
 //	struct arp_ipv4 data;
 //} __attribute__((packed));
 
-struct ipc_update_arp_table {
-	uint8_t *arp_hdr;
-	uint8_t *arp_ipv4;
-} __attribute__((packed));
-
-struct ipc_insert_arp_table {
-	uint8_t *arp_hdr;
-	uint8_t *arp_ipv4;
-} __attribute__((packed));
+//struct ipc_update_arp_table {
+//	uint8_t *arp_hdr;
+//	uint8_t *arp_ipv4;
+//} __attribute__((packed));
+//
+//struct ipc_insert_arp_table {
+//	uint8_t *arp_hdr;
+//	uint8_t *arp_ipv4;
+//} __attribute__((packed));
 
 #endif

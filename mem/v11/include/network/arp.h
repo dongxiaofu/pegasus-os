@@ -91,6 +91,16 @@ struct arp_cache_entry
 	uint32_t state;
 };
 
+struct ipc_update_arp_table {
+	struct arp_hdr arp_hdr;
+	struct arp_ipv4 arp_ipv4;
+} __attribute__((packed));
+
+struct ipc_insert_arp_table {
+	struct arp_hdr arp_hdr;
+	struct arp_ipv4 arp_ipv4;
+} __attribute__((packed));
+
 uint8_t* arp_get_hwaddr(uint32_t sip);
 void arp_init();
 void free_arp();
