@@ -318,7 +318,7 @@ arp_reply(struct sk_buff *skb, struct netdev *netdev)
 
 uint8_t *call_arp_get_hwaddr(uint32_t sip)
 {
-    return 0;
+    //return 0;
     unsigned int ipc_msg_size = sizeof(struct ipc_msg);
     struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
     ipc_msg->type = IPC_GET_HWADDR;
@@ -371,10 +371,19 @@ arp_get_hwaddr(struct ipc_msg *msg)
 		if (entry->state == ARP_RESOLVED &&
 			entry->sip == sip) {
 			//arpcache_dbg("entry", entry);
-			return entry->smac;
+			// return entry->smac;
+			smac = entry->smac;
+			break;
 		}
 	}
-	return NULL;
+
+	Message *result = (Message *)sys_malloc(sizeof(Message));
+    result->RETVAL = smac;
+    send_rec(SEND, result, pid);
+	sys_free(result);
+
+    // TODO 无用，但又不确定是否无用，所以随便设置一个返回值。
+    return 0;
 }
 
 void 
