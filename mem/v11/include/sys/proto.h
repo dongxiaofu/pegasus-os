@@ -200,6 +200,7 @@ void TaskHD();
 extern void task_fs();
 extern void task_network();
 extern void task_netdev_rx();
+extern void init_dev();
 //void task_network();
 //void task_netdev_rx();
 // 内存管理

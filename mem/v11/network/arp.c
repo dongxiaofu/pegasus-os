@@ -32,6 +32,7 @@ arp_entry_alloc(struct arp_hdr *hdr, struct arp_ipv4 *data)
 
 int call_update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
 {
+//	return 1;
 	unsigned int ipc_msg_size = sizeof(struct ipc_msg);
 	struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
 	ipc_msg->type = IPC_UPDATE_ARP_TABLE;
@@ -53,10 +54,11 @@ int call_update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data
 	msg->SOCKET_FD = 0;
 
 	unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
-    msg->BUF =  phy_ipc_msg;
-    msg->BUF_LEN = ipc_msg_size;
+	msg->BUF =  phy_ipc_msg;
+	msg->BUF_LEN = ipc_msg_size;
 
     send_rec(BOTH, msg, TASK_NETWORK);
+//    send_rec(SEND, msg, TASK_NET_INIT_DEV);
 	
 	int result = msg->RETVAL;
 
@@ -95,6 +97,7 @@ int call_insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data
     msg->BUF_LEN = ipc_msg_size;
 
     send_rec(BOTH, msg, TASK_NETWORK);
+    // send_rec(SEND, msg, TASK_NET_INIT_DEV);
 	
 	int result = msg->RETVAL;
 

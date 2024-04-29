@@ -415,6 +415,8 @@ demux_ipc_socket_call(int source, int sockfd, char *cmdbuf, int blen, Message *p
 	Memcpy(data, alloc_virtual_memory(msg->data, data_size), data_size);
 	msg->data = data;
 
+	Printf("source = %x, type = %x\n", source, msg->type);
+
 	switch (msg->type) {
 	case IPC_SOCKET:
 		return ipc_socket(sockfd, msg);

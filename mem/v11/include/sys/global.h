@@ -125,6 +125,7 @@ EXTERN TSS tss;
 #define TASK_NETWORK            5
 // 从网卡接收数据。
 #define TASK_NET_DEV_RX         6
+#define TASK_NET_INIT_DEV         7
 
 
 #define reassembly(val1, offset1, val2, offset2, val3) \

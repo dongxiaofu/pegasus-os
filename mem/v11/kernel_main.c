@@ -54,6 +54,7 @@ void kernel_main()
 	process_execute(TaskTTY, "task_tty\n", "TaskTTY", 0, init_ticks);
 	process_execute(task_network, "task_network\n", "task_network", 0, init_ticks);
 	process_execute(task_netdev_rx, "task_netdev_rx\n", "task_netdev_rx", 0, init_ticks);
+	process_execute(init_dev, "init_dev\n", "init_dev", 0, init_ticks);
 	process_execute(user_proc_a, "user_proc_a\n", "process_a", 1, init_ticks - 2);
 	process_execute(user_proc_b, "user_proc_b\n", "process_b", 1, init_ticks - 3);
 
@@ -252,6 +253,6 @@ void user_proc_b()
  	// disp_str("\n-------------I am user_proc_b\n");
 	Printf("\n-------------I am user_proc_b\n");
 	while(1){
-		tcp_client();	
+//		tcp_client();	
 	}
 }
