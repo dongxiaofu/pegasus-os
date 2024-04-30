@@ -193,11 +193,13 @@ void arp_rcv(struct sk_buff *skb)
 	//arpdata_dbg("receive", arpdata);
 
 	merge = call_update_arp_translation_table(arphdr, arpdata); // 更新arp缓存
+	Printf("merge = %x\n", merge);
 	
 	if (!(netdev = call_netdev_get(arpdata->dip))) {
 		Printf("ARP was not for us\n");
 		goto drop_pkt;
 	}
+	Printf("netdev = %x\n", netdev);
 
 	if (!merge && call_insert_arp_translation_table(arphdr, arpdata) != 0) {
 		print_err("ERR: No free space in ARP translation table\n");

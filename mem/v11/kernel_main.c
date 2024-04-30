@@ -252,6 +252,7 @@ void user_proc_b()
 {
  	// disp_str("\n-------------I am user_proc_b\n");
 	Printf("\n-------------I am user_proc_b\n");
+	while(1);
 		tcp_client();	
 		tcp_client();	
 		tcp_client();	

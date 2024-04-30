@@ -1421,6 +1421,12 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
         || sender->p_flag == HANGING || sender->p_flag == WAITING, sender->p_flag);
 
     int sender_pid = proc2pid(sender);
+	
+	if(sender_pid == TASK_NET_INIT_DEV && receiver_pid == TASK_NET_DEV_RX){
+		asm("xchgw %bx, %bx");
+	}
+
+
 	unsigned int msg_size = sizeof(Message);
 	unsigned int msg_vaddr = (unsigned int)msg;
 	unsigned int msg_phy_addr = get_physical_address_proc(msg_vaddr, sender_pid); 

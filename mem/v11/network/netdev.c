@@ -208,7 +208,7 @@ call_netdev_get(uint32_t sip)
 	}else{
 		unsigned int netdev_size = sizeof(struct netdev);
 		unsigned int netdev_vaddr = alloc_virtual_memory(netdev_phy_addr, netdev_size);
-		struct netdev *dev = (struct netdev *)sys_malloc(netdev_size);
+		dev = (struct netdev *)sys_malloc(netdev_size);
 		Memcpy(dev, netdev_vaddr, netdev_size);
 	}
 
