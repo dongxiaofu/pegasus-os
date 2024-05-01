@@ -217,6 +217,7 @@ static void tcp_client()
         perror("Curl could not establish connection");
         return 1;
     }
+	return;
 
 	char str[512] = {0};
 //	char *dst_host = "82.156.59.186";
@@ -252,11 +253,11 @@ void user_proc_b()
 {
  	// disp_str("\n-------------I am user_proc_b\n");
 	Printf("\n-------------I am user_proc_b\n");
-	while(1);
+//	while(1);
 		tcp_client();	
-		tcp_client();	
-		tcp_client();	
-		tcp_client();	
+//		tcp_client();	
+//		tcp_client();	
+//		tcp_client();	
 	while(1){
 		//tcp_client();	
 	}

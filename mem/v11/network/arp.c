@@ -57,8 +57,8 @@ int call_update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data
 	msg->BUF =  phy_ipc_msg;
 	msg->BUF_LEN = ipc_msg_size;
 
-    send_rec(BOTH, msg, TASK_NETWORK);
-//    send_rec(SEND, msg, TASK_NET_INIT_DEV);
+//    send_rec(BOTH, msg, TASK_NETWORK);
+    send_rec(BOTH, msg, TASK_NET_INIT_DEV);
 	
 	int result = msg->RETVAL;
 
@@ -96,8 +96,8 @@ int call_insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data
     msg->BUF =  phy_ipc_msg;
     msg->BUF_LEN = ipc_msg_size;
 
-    send_rec(BOTH, msg, TASK_NETWORK);
-    // send_rec(SEND, msg, TASK_NET_INIT_DEV);
+    // send_rec(BOTH, msg, TASK_NETWORK);
+    send_rec(BOTH, msg, TASK_NET_INIT_DEV);
 	
 	int result = msg->RETVAL;
 
@@ -370,7 +370,6 @@ arp_get_hwaddr(struct ipc_msg *msg)
 	
 	list_for_each(item, &arp_cache) {
 		entry = list_entry(item, struct arp_cache_entry, list);
-
 		if (entry->state == ARP_RESOLVED &&
 			entry->sip == sip) {
 			//arpcache_dbg("entry", entry);

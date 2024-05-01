@@ -194,6 +194,7 @@ typedef struct ethhdr{
 //EXTERN LIST_HEAD(routes); 
 struct list_head *routes;
 EXTERN struct netdev *loop;
+//EXTERN struct netdev *netdev = NULL; /* 用于记录本机地址,包括ip和mac地址 */
 EXTERN struct netdev *netdev; /* 用于记录本机地址,包括ip和mac地址 */
 
 #endif

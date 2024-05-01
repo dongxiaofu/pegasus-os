@@ -297,12 +297,14 @@ tcp_v4_connect(struct sock *sk, const struct sockaddr_in *addr)
 	struct tcp_sock *tsk = tcp_sk(sk);
 	uint16_t dport = ((struct sockaddr_in *)addr)->sin_port;
 	uint32_t daddr = ((struct sockaddr_in *)addr)->sin_addr.s_addr;
+	Printf("tcp daddr = %x\n", daddr);
 	int rc = 0;
 
 	sk->dport = ntohs(dport);
 	sk->sport = tcp_generate_port();			  /* 伪随机产生一个端口 */
 	sk->daddr = ntohl(daddr);
 	sk->saddr = ip_parse(stackaddr);			  /* sk中存储的是主机字节序 */
+	Printf("sk->saddr = %x, stackaddr = %s\n", sk->saddr, stackaddr);
 	tcp_connecting_or_listening_socks_enqueue(sk);
 	tcp_begin_connect(sk);					  /* 首先向对方发送ack */
 

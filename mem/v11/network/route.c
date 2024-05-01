@@ -27,7 +27,7 @@ route_alloc(uint32_t dst, uint32_t gateway, uint32_t netmask,
 	rt->netmask = netmask;
 	rt->flags = flags;
 	rt->metric = metric;
-	rt->dev = dev;
+	Memcpy(&rt->dev, dev, sizeof(struct netdev));
 	return rt;
 }
 

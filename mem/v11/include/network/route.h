@@ -2,6 +2,7 @@
 #define _ROUTE_H
 
 #include "list.h"
+#include "netdev.h"
 
 #define RT_LOOPBACK 0x01
 #define RT_GATEWAY  0x02
@@ -16,7 +17,7 @@ struct rtentry {
 	uint32_t netmask;		/* 子网掩码 */
 	uint8_t flags;
 	uint32_t metric;		/* 在本应用中基本没有什么用处 */
-	struct netdev *dev;     /* dev主要记录网关的地址信息,包括ip地址和mac地址 */
+	struct netdev dev;     /* dev主要记录网关的地址信息,包括ip地址和mac地址 */
 };
 
 //struct ipc_route_lookup {

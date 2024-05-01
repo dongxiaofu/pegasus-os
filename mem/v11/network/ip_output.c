@@ -13,13 +13,14 @@ ip_output(struct sock *sk, struct sk_buff *skb)
 	struct iphdr *ihdr = ip_hdr(skb);
 
 	rt = call_route_lookup(ihdr->daddr);	/* 根据目的ip地址查找路由 */
+	Printf("ret->dev = %x, dev->addr = %x\n", &(rt->dev), rt->dev.addr);
 
 	if (!rt) {
 		/* todo */
 		return -1;
 	}
 
-	skb->dev = rt->dev;				/* dev用于指示 */
+	skb->dev = &rt->dev;				/* dev用于指示 */
 	skb->rt = rt;
 	skb_push(skb, IP_HDR_LEN);		/* ip头部 */
 
@@ -42,6 +43,7 @@ ip_output(struct sock *sk, struct sk_buff *skb)
 	ihdr->id = htons(ihdr->id);
 	ihdr->daddr = htonl(ihdr->daddr);
 	ihdr->saddr = htonl(ihdr->saddr);
+	Printf("ihdr->saddr = %x\n", ihdr->saddr);
 	ihdr->csum = htons(ihdr->csum);
 	ihdr->csum = checksum(ihdr, ihdr->ihl * 4, 0);
 

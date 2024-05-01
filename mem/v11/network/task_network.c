@@ -13,6 +13,7 @@
 #include "net.h"
 #include "wait.h"
 #include "netdev.h"
+#include "ip.h"
 
 void init_dev()
 {
@@ -78,6 +79,14 @@ void task_network() {
 //	Memcpy(netdev, vaddr_buf, sizeof(struct netdev));
 //	sys_free(msg, sizeof(Message));
 
+//	if(netdev == NULL){
+		uint8_t *addr = "10.0.1.4";
+		addr = ip_parse(addr);
+		netdev = call_netdev_get(addr);
+//	}
+
+//	Printf("netdev->addr = %x\n", netdev->addr);
+//	print_array(netdev->hwaddr, 6);
 
     while (1) {
 		Memset(msg, 0, sizeof(Message));

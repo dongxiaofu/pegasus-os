@@ -71,10 +71,11 @@ netdev_transmit(struct sk_buff *skb, uint8_t *dst_hw, uint16_t ethertype)
 	
 	//eth_dbg("out", hdr);
 	hdr->ethertype = htons(ethertype);	/* 帧类型 */
+	// hdr->ethertype = 0x0608; 
 	/* 回复,直接写即可 */
 	// ret = tun_write((char *)skb->data, skb->len);
 	//DriverSend((char *)skb->data, skb->len);
-	Printf("send to physical network\n");
+	//Printf("send to physical network\n");
 	DriverSend(skb->data, skb->len);
 	
 	// TODO 暂时返回1。
