@@ -217,12 +217,17 @@ SetPageStart:
 	push ecx
 	mov ebp, esp
 
+    mov al,22h ;back to page 0, start mode
+    mov dx,COMMAND
+    out dx,al
+
 	;BX_NE2K_THIS s.remote_dma = BX_NE2K_THIS s.remote_start;
 	mov dx, CRDMA0
 	xor ax, ax
 	;mov ax, CRDA
 	;使用SetPageStart的参数pageStart。
 	mov ax, [ebp+24]
+	;mov ax, 16384
 	out dx, al
 	mov dx, CRDMA1
 	;and ax, 0b11110000
@@ -594,7 +599,6 @@ NICtoPC:
 	;mov edi,0xc0503000
 READING_Word_NICtoPC: ;because of word-wide transfers
 	xor eax, eax
-	;xchg bx, bx
 	;call debug_ticks
     mov dx,IOPORT
     in ax,dx

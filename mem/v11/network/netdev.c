@@ -271,9 +271,9 @@ char *receive_msg_from_nic()
 {
 	unsigned int pageStart = 16 * 1024;
 	unsigned char curr_page = get_curr_page();
-	disp_str("#");
-	disp_int(curr_page);
-	disp_str("#\n");
+//	disp_str("#");
+//	disp_int(curr_page);
+//	disp_str("#\n");
 //	没有NULL，只能用0。略感惊讶，我的OS中还不能使用NULL。
 //	我使用过链表，不用NULL用什么解决问题的？
 	NIC_PAGE_BUF_NODE bufLinkList = 0;	
@@ -291,10 +291,13 @@ char *receive_msg_from_nic()
 		pageNum++;
 		char *buf = (char *)sys_malloc(size); 
 		Memset(buf, 0, size);
-	//	Printf("k * size = %x\n", (startPage + k) * size);
+//		Printf("k * size = %x\n", k * size);
 		SetPageStart(k * size);
-//		/sm("xchgw %bx, %bx");
-		unsigned int len = NICtoPC(buf, size, (startPage + k) * size);
+	//	SetPageStart(16384);
+		//unsigned int len = NICtoPC(buf, size, (startPage + k) * size);
+		unsigned int len = NICtoPC(buf, size,  k * size);
+		asm("xchgw %bx, %bx");
+		
 	//	disp_int(buf[16]);
 	//	disp_int(buf[17]);
 		// 把从NIC中读取的数据存储到单链表中。
@@ -303,7 +306,8 @@ char *receive_msg_from_nic()
 		Memset(node, 0, nodeSize);
 		if(bufLinkList == 0){
 			bufLinkList = node;
-			node->buf = buf + 4;
+			//node->buf = buf + 4;
+			node->buf = buf;
 		}else{
 			node->buf = buf;
 			preNode->next = node;
@@ -323,13 +327,18 @@ char *receive_msg_from_nic()
 		current_node = current_node->next;
 	}
 
-//	for(int i = 0; i < bufSize; i++){
+//	for(int i = 0; i < 18; i++){
 //		disp_int((unsigned char)(buf[i]));
 //		disp_str(" ");
 //	}
 //	disp_str(buf);
 
-	return buf;
+//		Printf("buf[12] = %x\n", buf[12]);
+//		Printf("buf[13] = %x\n", buf[13]);
+		Printf("buf[16] = %x\n", buf[16]);
+		Printf("buf[17] = %x\n", buf[17]);
+		asm("xchgw %bx, %bx");
+	return buf + 4;
 }
 
 void receive_msg_from_nic2()

@@ -193,13 +193,13 @@ void arp_rcv(struct sk_buff *skb)
 	//arpdata_dbg("receive", arpdata);
 
 	merge = call_update_arp_translation_table(arphdr, arpdata); // 更新arp缓存
-	Printf("merge = %x\n", merge);
+//	Printf("merge = %x\n", merge);
 	
 	if (!(netdev = call_netdev_get(arpdata->dip))) {
 		Printf("ARP was not for us\n");
 		goto drop_pkt;
 	}
-	Printf("netdev = %x\n", netdev);
+//	Printf("netdev = %x\n", netdev);
 
 	if (!merge && call_insert_arp_translation_table(arphdr, arpdata) != 0) {
 		print_err("ERR: No free space in ARP translation table\n");
@@ -329,6 +329,7 @@ uint8_t *call_arp_get_hwaddr(uint32_t sip)
 
     struct ipc_get_hwaddr *payload = (struct ipc_get_hwaddr *)sys_malloc(payload_size);
     payload->sip = sip;
+//	Printf("call_arp_get_hwaddr sip = %x\n", sip);
 
     ipc_msg->data = (char *)get_physical_address(payload);
     ipc_msg->data_size = payload_size;
@@ -344,13 +345,20 @@ uint8_t *call_arp_get_hwaddr(uint32_t sip)
 
     send_rec(BOTH, msg, TASK_NET_INIT_DEV);
 
-    int result = msg->RETVAL;
-//	Printf("result = %x\n", result);
+	uint8_t *mac = NULL;
+    //int result = msg->RETVAL;
+	uint32_t phy_mac_addr = msg->BUF;
+	if(phy_mac_addr != NULL){
+		uint32_t mac_len = msg->BUF_LEN;
+		uint32_t mac_vaddr = alloc_virtual_memory(phy_mac_addr, mac_len);	
+		mac = (uint8_t *)sys_malloc(mac_len);
+		Memcpy(mac, mac_vaddr, mac_len);
+	}
 
     //assert(msg.type == SYSCALL_RET);
     sys_free(msg, sizeof(Message));
 
-    return (uint8_t *)result;
+    return (uint8_t *)mac;
 }
 
 /**\
@@ -379,8 +387,17 @@ arp_get_hwaddr(struct ipc_msg *msg)
 		}
 	}
 
+	//print_array(smac, 6);
+
 	Message *result = (Message *)sys_malloc(sizeof(Message));
-    result->RETVAL = smac;
+    //result->RETVAL = smac;
+    if(smac != NULL){
+    	result->BUF = get_physical_address(smac);
+		result->BUF_LEN = 6;
+	}else{
+    	result->BUF = NULL; 
+		result->BUF_LEN = 0;
+	}
     send_rec(SEND, result, pid);
 	sys_free(result);
 

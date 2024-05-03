@@ -6,6 +6,10 @@
 
 void print_array(uint8_t arr[], int size)
 {
+	if(arr == NULL){
+		Printf("arr is NULL\n");
+		return;
+	}
 	Printf("\n");
 	for(int i = 0; i < size; i++){
 		Printf("%x,", arr[i]);
@@ -27,16 +31,17 @@ dst_neigh_output(struct sk_buff *skb)
 	if (rt->flags & RT_GATEWAY) {
 		daddr = rt->gateway;	  /*  需要发送到网关 */
 	}
-	Printf("daddr = %x\n", daddr);
 
-	do{
-		Printf("saddr = %x, saddr2 = %x\n", saddr, iphdr->saddr);
-		netdev = call_netdev_get(saddr);
-	}while(netdev == NULL);
+//	do{
+//		Printf("saddr = %x, saddr2 = %x\n", saddr, iphdr->saddr);
+//		netdev = call_netdev_get(saddr);
+//	}while(netdev == NULL);
 
 try_agin:
 	// dmac = arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
 	dmac = call_arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
+	Printf("daddr = %x\n", daddr);
+	print_array(dmac, 6);
 
 	if (dmac) {
 		Printf("get\n");
@@ -48,7 +53,8 @@ try_agin:
 		arp_request(saddr, daddr, netdev);
         /* Inform upper layer that traffic was not sent, retry later */
 		//if (count < 3) {
-		if (count < 3) {
+		// if (count < 3) {
+		if (count < 8) {
 			// usleep(10000);
 			unsigned int k = 0;
 			while(1){

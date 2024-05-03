@@ -135,5 +135,8 @@ void task_netdev_rx()
 //
 //	Printf("task:%x-%x-%x\n", netdev->hwaddr[0], netdev->hwaddr[1],netdev->hwaddr[2]); 
 
+	uint8_t *addr = "10.0.1.4";
+	addr = ip_parse(addr);
+	netdev = call_netdev_get(addr);
 	netdev_rx_loop();
 }
