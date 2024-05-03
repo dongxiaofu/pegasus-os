@@ -306,7 +306,7 @@ tcp_v4_connect(struct sock *sk, const struct sockaddr_in *addr)
 	sk->saddr = ip_parse(stackaddr);			  /* sk中存储的是主机字节序 */
 	Printf("sk->saddr = %x, stackaddr = %s\n", sk->saddr, stackaddr);
 	tcp_connecting_or_listening_socks_enqueue(sk);
-	tcp_begin_connect(sk);					  /* 首先向对方发送ack */
+	rc = tcp_begin_connect(sk);					  /* 首先向对方发送ack */
 
 	/* 接下来需要等待连接的成功建立 */
 	wait_sleep(&tsk->wait);
