@@ -217,7 +217,7 @@ static void tcp_client()
         perror("Curl could not establish connection");
         return 1;
     }
-	return;
+//	return;
 
 	char str[512] = {0};
 //	char *dst_host = "82.156.59.186";
@@ -225,7 +225,8 @@ static void tcp_client()
 	sprintf(str, "GET / HTTP/1.1\r\nHost: %s:%s\r\nConnection: close\r\n\r\n", dst_host, dst_port);
     int len = Strlen(str);
 
-	asm("xchgw %bx, %bx");
+//	asm("xchgw %bx, %bx");
+	Printf("start to write\n");
     if (socket_write(sock, str, len) != len) {
         Printf("Write error\n");
         return 1;

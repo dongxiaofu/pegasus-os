@@ -40,12 +40,10 @@ dst_neigh_output(struct sk_buff *skb)
 try_agin:
 	// dmac = arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
 	dmac = call_arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
-	Printf("daddr = %x\n", daddr);
 	print_array(dmac, 6);
 
 	if (dmac) {
 		Printf("get\n");
-		//print_array(dmac, 6);
 		return netdev_transmit(skb, dmac, ETH_P_IP);
 	}
 	else {
