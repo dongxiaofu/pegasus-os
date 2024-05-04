@@ -49,16 +49,17 @@ try_agin:
 	else {
 		count += 1;
 		arp_request(saddr, daddr, netdev);
+		// TODO 必须阻塞此进程，直到对方进程通知本进程，已经更新了ARP缓存。
+		Message *msg = (Message *)sys_malloc(sizeof(Message));
+		send_rec(RECEIVE, msg, TASK_NET_DEV_RX);
+		Printf("after arp_request\n");
         /* Inform upper layer that traffic was not sent, retry later */
 		//if (count < 3) {
 		// if (count < 3) {
-		if (count < 8) {
+		if (count < 12) {
 			// usleep(10000);
-			unsigned int k = 0;
-			while(1){
-				if(k == 50)	break;
-				k++;
-			}
+			// milli_delay(50);
+			asm("xchgw %bx, %bx");
 			goto try_agin;
 		}
 		return -1;

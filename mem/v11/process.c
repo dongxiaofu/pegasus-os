@@ -95,6 +95,8 @@ void schedule_process()
 
 void clock_handler()
 {
+	ticks++;
+
 	Proc *cur = get_running_thread_pcb();
 //	assert(cur->stack_magic == STACK_MAGIC);
 	if(key_pressed){

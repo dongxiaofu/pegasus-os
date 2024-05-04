@@ -288,7 +288,7 @@ DriverSend:
 	push dword [ebp + 24] 
     call PCtoNIC ;transfer packet to NIC buffer RAM
 	;消除因传递参数增加的栈。
-	add esp, 4
+	add esp, 8
     ;jmp Finished
 	;call NICtoPC
 	;有什么作用？

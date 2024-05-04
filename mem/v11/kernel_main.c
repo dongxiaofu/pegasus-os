@@ -217,12 +217,13 @@ static void tcp_client()
         perror("Curl could not establish connection");
         return 1;
     }
-//	return;
 
-	char str[512] = {0};
+//	char str[512] = {0};
 //	char *dst_host = "82.156.59.186";
 //	char *dst_port = "80";
-	sprintf(str, "GET / HTTP/1.1\r\nHost: %s:%s\r\nConnection: close\r\n\r\n", dst_host, dst_port);
+	asm("xchgw %bx, %bx");
+//	sprintf(str, "GET / HTTP/1.1\r\nHost: %s:%s\r\nConnection: close\r\n\r\n", dst_host, dst_port);
+	char *str = "GET / HTTP/1.1\r\nHost: 82.156.59.186:80\r\nConnection: close\r\n\r\n";
     int len = Strlen(str);
 
 //	asm("xchgw %bx, %bx");

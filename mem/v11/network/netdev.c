@@ -105,6 +105,7 @@ netdev_receive(struct sk_buff *skb)
 	0x0806表示ARP */
 	switch (hdr->ethertype) {
 	case ETH_P_ARP:	/* ARP  0x0806 */
+		Printf("arp_rcv\n");
 		arp_rcv(skb);
 		break;
 	case ETH_P_IP:  /* IPv4 0x0800 */
@@ -296,7 +297,6 @@ char *receive_msg_from_nic()
 	//	SetPageStart(16384);
 		//unsigned int len = NICtoPC(buf, size, (startPage + k) * size);
 		unsigned int len = NICtoPC(buf, size,  k * size);
-		asm("xchgw %bx, %bx");
 		
 	//	disp_int(buf[16]);
 	//	disp_int(buf[17]);
@@ -337,7 +337,6 @@ char *receive_msg_from_nic()
 //		Printf("buf[13] = %x\n", buf[13]);
 		Printf("buf[16] = %x\n", buf[16]);
 		Printf("buf[17] = %x\n", buf[17]);
-		asm("xchgw %bx, %bx");
 	return buf + 4;
 }
 

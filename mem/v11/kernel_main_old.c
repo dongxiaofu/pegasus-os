@@ -1055,9 +1055,15 @@ void milli_delay(unsigned int milli_sec)
 {
     int t = get_ticks_ipc();
 
-    while (((get_ticks_ipc() - t) / 100 * 1000) < milli_sec)
-    {
-    }
+	// (get_ticks_ipc() - t) / 100--多少秒。
+	// 再乘以1000----多少毫秒。
+//    while (((get_ticks_ipc() - t) / 100 * 1000) < milli_sec);
+	// 也可以像下面这样写。
+	// 每个时钟中断耗时多少？1000/100。
+	// 共有多少个时钟中断？get_ticks_ipc() - t。
+    while (((get_ticks_ipc() - t) * (1000 / 100)) < milli_sec){
+//		disp_int(t);
+	}
 }
 
 void TaskSys()
@@ -1422,9 +1428,9 @@ int sys_send_msg(Message *msg, int receiver_pid, Proc *sender)
 
     int sender_pid = proc2pid(sender);
 	
-	if(sender_pid == TASK_NET_INIT_DEV && receiver_pid == TASK_NET_DEV_RX){
-		asm("xchgw %bx, %bx");
-	}
+//	if(sender_pid == TASK_NET_INIT_DEV && receiver_pid == TASK_NET_DEV_RX){
+//		asm("xchgw %bx, %bx");
+//	}
 
 
 	unsigned int msg_size = sizeof(Message);
@@ -1770,7 +1776,7 @@ int unblock(Proc *proc)
 
 int get_ticks_ipc()
 {
-    //return ticks;
+    return ticks;
     Message msg;
     Memset(&msg, 0, sizeof(Message));
     //msg.source = 2;

@@ -285,7 +285,7 @@
 #define PG_US_USER	4		// 100b
 
 
-#define TICKS_NUM	15
+#define TICKS_NUM	5
 // #define TICKS_NUM	100
 #define STACK_MAGIC	0x99ABCDE0
 

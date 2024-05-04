@@ -173,6 +173,7 @@ void arp_rcv(struct sk_buff *skb)
 	arphdr = arp_hdr(skb);						// 获得arp头部
 	arphdr->hwtype = ntohs(arphdr->hwtype);		// 硬件类型
 	arphdr->protype = ntohs(arphdr->protype);	// 协议类型
+	Printf("opcode2 = %x\n", arphdr->opcode);
 	arphdr->opcode = ntohs(arphdr->opcode);		// 操作类型
 	//arp_dbg("in", arphdr);
 
@@ -206,6 +207,13 @@ void arp_rcv(struct sk_buff *skb)
 		goto drop_pkt;
 	}
 
+	Printf("opcode = %x\n", arphdr->opcode);
+	if(arphdr->opcode == ARP_REPLY){
+		Message *msg = (Message *)sys_malloc(sizeof(Message));
+		send_rec(SEND, msg, TASK_NETWORK);
+		Printf("unblock TASK_NETWORK\n");
+	}
+
 	switch (arphdr->opcode) {
 	case ARP_REQUEST:		// 0x0001 -- arp请求
 		arp_reply(skb, netdev);
@@ -213,6 +221,8 @@ void arp_rcv(struct sk_buff *skb)
 	case ARP_REPLY:			// 0x0002 -- arp回复,这里实际上在上面已经处理了,更新了arp缓存
 		Printf("ARP_REPLY\n");
 		Printf("arp_reply sip = %x, dip = %x\n", arpdata->sip, arpdata->dip);
+	//	Message *msg = (Message *)sys_malloc(sizeof(Message));
+	//	send_rec(SEND, msg, TASK_NETWORK);
 		return;
 	default:
 		Printf("ARP: Opcode not supported\n");
@@ -256,6 +266,9 @@ arp_request(uint32_t sip, uint32_t dip, struct netdev *netdev)
 
 	//arp_dbg("req", arp);
 	arp->opcode = htons(ARP_REQUEST);
+//	arp->opcode = htons(ARP_REPLY);
+//	arp->opcode = 0x100;
+	// arp->opcode = ARP_REQUEST;
 	arp->hwtype = htons(ARP_ETHERNET);
 	arp->protype = htons(ETH_P_IP);
 	arp->hwsize = netdev->addr_len;
@@ -266,6 +279,7 @@ arp_request(uint32_t sip, uint32_t dip, struct netdev *netdev)
 	payload->sip = htonl(payload->sip);
 	payload->dip = htonl(payload->dip);
 
+	asm("xchgw %bx, %bx");
 	rc = netdev_transmit(skb, broadcast_hw, ETH_P_ARP);
 
 	free_skb(skb);

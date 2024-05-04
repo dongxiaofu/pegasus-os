@@ -260,7 +260,8 @@ ipc_write(int sockfd, struct ipc_msg *msg)
 	int dlen = payload->len - IPC_BUFLEN;
 	char buf[payload->len];
 	Memset(buf, 0, payload->len);
-	Memcpy(buf, payload->buf, payload->len > IPC_BUFLEN ? IPC_BUFLEN : payload->len);
+	uint8_t *buf_vaddr = alloc_virtual_memory(payload->buf, payload->len);
+	Memcpy(buf, buf_vaddr, payload->len > IPC_BUFLEN ? IPC_BUFLEN : payload->len);
 
 	if (payload->len > IPC_BUFLEN) {
 		// TODO 待功能稳定后，删除下面这行代码。
@@ -269,7 +270,9 @@ ipc_write(int sockfd, struct ipc_msg *msg)
 		unsigned int msg_size = sizeof(Message);
 		Message *message = (Message *)sys_malloc(msg_size);
 		int res = send_rec(RECEIVE, message, TASK_NETWORK);
-		Memcpy(buf + IPC_BUFLEN, message->BUF, payload->len - IPC_BUFLEN);
+		uint8_t *buf_phy_addr = message->BUF;
+		uint8_t *buf_vaddr = alloc_virtual_memory(buf_phy_addr, payload->len - IPC_BUFLEN);
+		Memcpy(buf + IPC_BUFLEN, buf_vaddr, payload->len - IPC_BUFLEN);
 
 		if (res == -1) {
 			perror("Read on IPC payload guard");

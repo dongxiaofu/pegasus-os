@@ -307,7 +307,7 @@ tcp_v4_connect(struct sock *sk, const struct sockaddr_in *addr)
 	rc = tcp_begin_connect(sk);					  /* 首先向对方发送ack */
 
 	/* 接下来需要等待连接的成功建立 */
-	//wait_sleep(&tsk->wait);
+	wait_sleep(&tsk->wait);
 	tcp_connecting_or_listening_socks_remove(sk);
 	tcp_established_or_syn_recvd_socks_enqueue(sk);
 out:
