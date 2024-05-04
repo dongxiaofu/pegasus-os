@@ -85,22 +85,9 @@ netdev_transmit(struct sk_buff *skb, uint8_t *dst_hw, uint16_t ethertype)
 static int 
 netdev_receive(struct sk_buff *skb)
 {
-//	// 从其他进程获取netdev。
-//	Message *msg = (Message *)sys_malloc(sizeof(Message));
-//	Memset(msg, 0, sizeof(Message));
-//	// TODO INTERRUPT 应该修改为解除阻塞的进程。
-//    send_rec(RECEIVE, msg, TASK_NETWORK);
-//	unsigned int phy_buf = msg->BUF;
-//	unsigned int len = msg->BUF_LEN;
-//	unsigned int vaddr_buf = alloc_virtual_memory(phy_buf, len); 
-//	Memcpy(netdev, vaddr_buf, sizeof(struct netdev));
-//	sys_free(msg, sizeof(Message));
-
 	struct eth_hdr *hdr = eth_hdr(skb);  /* 获得以太网头部信息,以太网头部包括
 										 目的mac地址,源mac地址,以及类型信息 */
-	// disp_int(hdr->ethertype);
 	Printf("hdr->ethertype = %x\n", hdr->ethertype);
-	//eth_dbg("in", hdr);
 	/* 以太网头部的Type(类型)字段 0x86dd表示IPv6 0x0800表示IPv4
 	0x0806表示ARP */
 	switch (hdr->ethertype) {

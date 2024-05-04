@@ -98,9 +98,9 @@ tcp_generate_port()
 int
 tcp_generate_isn()
 {
-	return 2000;
 	// todo: 更好的方法来产生isn
 	// return (int)time(NULL) *rand();
+	return 4144160038 + sys_get_ticks();
 }
 
 
