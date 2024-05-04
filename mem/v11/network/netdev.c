@@ -76,7 +76,10 @@ netdev_transmit(struct sk_buff *skb, uint8_t *dst_hw, uint16_t ethertype)
 	// ret = tun_write((char *)skb->data, skb->len);
 	//DriverSend((char *)skb->data, skb->len);
 	//Printf("send to physical network\n");
+	int i = 0;
+//	while(i++ < 10){
 	DriverSend(skb->data, skb->len);
+//	}
 	
 	// TODO 暂时返回1。
 	return 1;

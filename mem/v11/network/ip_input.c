@@ -61,6 +61,7 @@ ip_rcv(struct sk_buff *skb)
 	csum = checksum(ih, ih->ihl * 4, 0);
 
 	if (csum != 0) {
+		Printf("invalid data\n");
 		/* 无效的数据报 */
 		goto drop_pkt;
 	}
@@ -75,12 +76,16 @@ ip_rcv(struct sk_buff *skb)
 	ip_init_pkt(ih);
 	//ip_dbg("in", ih);
 
-	if (!ip_pkt_for_us(ih)) goto drop_pkt;
+	if (!ip_pkt_for_us(ih)){
+		Printf("tcp is not for us\n");
+		goto drop_pkt;
+	}
     switch (ih->proto) {
     case ICMPV4:
         icmpv4_incoming(skb);
         return 0;
     case IP_TCP:
+		Printf("IP_TCP\n");
         tcp_in(skb);
         return 0;
 	case IP_UDP:

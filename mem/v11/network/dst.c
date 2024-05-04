@@ -44,7 +44,10 @@ try_agin:
 
 	if (dmac) {
 		Printf("get\n");
-		return netdev_transmit(skb, dmac, ETH_P_IP);
+		int ret = -1;
+			ret = netdev_transmit(skb, dmac, ETH_P_IP);
+			Printf("after netdev_transmit\n");
+		return ret;
 	}
 	else {
 		count += 1;
