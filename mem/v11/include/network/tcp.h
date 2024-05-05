@@ -69,7 +69,6 @@ do {																						  \
 
 #define tcp_set_state(sk, state)					\
     do {											\
-        tcp_sock_dbg("state is now "#state, sk);	\
         _tcp_set_state(sk, state);					\
     } while (0)
 

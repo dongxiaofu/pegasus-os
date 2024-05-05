@@ -40,13 +40,13 @@ dst_neigh_output(struct sk_buff *skb)
 try_agin:
 	// dmac = arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
 	dmac = call_arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
-	print_array(dmac, 6);
+	//print_array(dmac, 6);
 
 	if (dmac) {
-		Printf("get\n");
+		//Printf("get\n");
 		int ret = -1;
 			ret = netdev_transmit(skb, dmac, ETH_P_IP);
-			Printf("after netdev_transmit\n");
+		//	Printf("after netdev_transmit\n");
 		return ret;
 	}
 	else {
@@ -55,14 +55,14 @@ try_agin:
 		// TODO 必须阻塞此进程，直到对方进程通知本进程，已经更新了ARP缓存。
 		Message *msg = (Message *)sys_malloc(sizeof(Message));
 		send_rec(RECEIVE, msg, TASK_NET_DEV_RX);
-		Printf("after arp_request\n");
+		//Printf("after arp_request\n");
         /* Inform upper layer that traffic was not sent, retry later */
 		//if (count < 3) {
 		// if (count < 3) {
 		if (count < 12) {
 			// usleep(10000);
 			// milli_delay(50);
-			asm("xchgw %bx, %bx");
+			//asm("xchgw %bx, %bx");
 			goto try_agin;
 		}
 		return -1;

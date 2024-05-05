@@ -66,7 +66,7 @@ tcp_in(struct sk_buff *skb)
 		return;
 	}
 
-	tcp_in_dbg(th, sk, skb);
+	//tcp_in_dbg(th, sk, skb);
 	tcp_process(sk, th, skb);
 }
 

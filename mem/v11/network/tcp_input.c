@@ -246,7 +246,7 @@ tcp_process(struct sock *sk, struct tcphdr *th, struct sk_buff *skb)
 	struct tcp_sock *tsk = tcp_sk(sk);
 	struct tcb *tcb = &tsk->tcb; /* transmission control block 传输控制块 */
 
-	tcp_sock_dbg("input state", sk);
+	Printf("input state\n");
 
 	switch (sk->state) {
 	case TCP_CLOSE:   /* 处于close状态,接收到了tcp数据报 */
@@ -358,7 +358,7 @@ tcp_process(struct sock *sk, struct tcphdr *th, struct sk_buff *skb)
 	/* 8, 检查fin */
 	 /* 第2个条件是保证,在fin之前的数据全部接收成功了. */
 	if (th->fin && (tcb->rcv_nxt - skb->dlen) == skb->seq) {
-		tcp_sock_dbg("Received in-sequence FIN", sk);
+//		tcp_sock_dbg("Received in-sequence FIN", sk);
         switch (sk->state) {
         case TCP_CLOSE:
         case TCP_LISTEN:
