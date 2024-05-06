@@ -197,4 +197,7 @@ EXTERN struct netdev *loop;
 //EXTERN struct netdev *netdev = NULL; /* 用于记录本机地址,包括ip和mac地址 */
 EXTERN struct netdev *netdev; /* 用于记录本机地址,包括ip和mac地址 */
 
+struct list_head *tcp_connecting_or_listening_socks;
+struct list_head *tcp_establised_or_syn_recvd_socks;
+
 #endif

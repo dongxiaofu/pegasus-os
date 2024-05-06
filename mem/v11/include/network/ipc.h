@@ -36,6 +36,7 @@
 #define IPC_GET_HWADDR               0x000d
 #define IPC_GET_NETDEV               0x000e
 #define IPC_ROUTE_LOOKUP             0x000f
+#define TCP_CONNECTING_OR_LISTENING_SOCKS_ENQUEUE	0x00010 
 
 struct ipc_thread {
     struct list_head list;

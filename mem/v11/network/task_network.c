@@ -20,6 +20,14 @@ void init_dev()
 	netdev_init();
 	route_init();
 
+	// TODO 没有其他办法，只能放在这里。
+	unsigned int size = sizeof(struct list_head);
+	tcp_connecting_or_listening_socks = (struct list_head *)sys_malloc(size);
+	tcp_connecting_or_listening_socks->prev = tcp_connecting_or_listening_socks->next = tcp_connecting_or_listening_socks;
+
+	tcp_establised_or_syn_recvd_socks = (struct list_head *)sys_malloc(size);
+	tcp_establised_or_syn_recvd_socks->prev = tcp_establised_or_syn_recvd_socks->next = tcp_establised_or_syn_recvd_socks;
+
 	Message *msg = (Message *)sys_malloc(sizeof(Message));
 
 	   // 向TASK_NET_DEV_RX进程发送netdev数据。

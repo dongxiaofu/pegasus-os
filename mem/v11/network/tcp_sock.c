@@ -1,19 +1,27 @@
 #include "syshead.h"
 #include "tcp.h"
+#include "global.h"
+#include "ipc.h"
+
+//struct list_head *tcp_connecting_or_listening_socks;
+//struct list_head *tcp_establised_or_syn_recvd_socks;
+//tcp_connecting_or_listening_socks = NULL;
+//tcp_establised_or_syn_recvd_socks = NULL;
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* 为了尽可能简洁,所以实现非常简单. */
 
 
-static LIST_HEAD(tcp_connecting_or_listening_socks);
-static LIST_HEAD(tcp_establised_or_syn_recvd_socks);
-
+//static LIST_HEAD(tcp_connecting_or_listening_socks);
+//static LIST_HEAD(tcp_establised_or_syn_recvd_socks);
+//struct list_head *tcp_connecting_or_listening_socks;
+//struct list_head *tcp_establised_or_syn_recvd_socks;
 
 inline void
 tcp_established_or_syn_recvd_socks_enqueue(struct sock *sk)
 {
 	//pthread_rwlock_wrlock(&es_lock);
-	list_add_tail(&sk->link, &tcp_establised_or_syn_recvd_socks);
+	list_add_tail(&sk->link, tcp_establised_or_syn_recvd_socks);
 	//pthread_rwlock_unlock(&es_lock);
 }
 
@@ -26,11 +34,50 @@ tcp_established_or_syn_recvd_socks_remove(struct sock *sk)
 	//pthread_rwlock_unlock(&es_lock);
 }
 
-inline void
-tcp_connecting_or_listening_socks_enqueue(struct sock *sk)
+void call_tcp_connecting_or_listening_socks_enqueue(struct sock *sk)
+{
+    unsigned int ipc_msg_size = sizeof(struct ipc_msg);
+    struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
+    ipc_msg->type = TCP_CONNECTING_OR_LISTENING_SOCKS_ENQUEUE;
+
+    unsigned int payload_size = sizeof(struct tcp_connecting_or_listening_socks_enqueue);
+
+	struct tcp_connecting_or_listening_socks_enqueue *payload = \
+		(struct tcp_connecting_or_listening_socks_enqueue *)sys_malloc(payload_size);
+    payload->sk = get_physical_address(sk);
+
+    ipc_msg->data = (char *)get_physical_address(payload);
+    ipc_msg->data_size = payload_size;
+
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+    Memset(msg, 0, sizeof(Message));
+    msg->TYPE = IPC_SOCKET_CALL;
+    msg->SOCKET_FD = 0;
+
+    unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
+    msg->BUF =  phy_ipc_msg;
+    msg->BUF_LEN = ipc_msg_size;
+
+    send_rec(SEND, msg, TASK_NET_INIT_DEV);
+    //assert(msg.type == SYSCALL_RET);
+    sys_free(msg, sizeof(Message));
+
+	return;
+}
+
+void tcp_connecting_or_listening_socks_enqueue(struct ipc_msg *msg)
 {
 	//pthread_rwlock_wrlock(&cl_lock);
-	list_add_tail(&sk->link, &tcp_connecting_or_listening_socks);
+    pid_t pid = msg->pid;
+    struct tcp_connecting_or_listening_socks_enqueue *payload = \
+		(struct tcp_connecting_or_listening_socks_enqueue *)msg->data;
+	struct sock *sk_phy_addr = (struct sock *)payload->sk;
+	unsigned int sock_size = sizeof(struct sock);
+	unsigned int sk_vaddr = alloc_virtual_memory(sk_phy_addr, sock_size); 
+	struct sock *sk = (struct sock *)sys_malloc(sock_size);
+	Memcpy(sk, sk_vaddr, sock_size);
+	asm("xchgw %bx, %bx");
+	list_add_tail(&sk->link, tcp_connecting_or_listening_socks);
 	//pthread_rwlock_unlock(&cl_lock);
 }
 
@@ -125,6 +172,10 @@ tcp_free_sock(struct sock *sk)
 int
 tcp_init()
 {
+//	Printf("tcp_init\n");
+//	unsigned int size = sizeof(struct list_head);
+//	tcp_connecting_or_listening_socks = (struct list_head *)sys_malloc(size);
+//	tcp_establised_or_syn_recvd_socks = (struct list_head *)sys_malloc(size);
 	return 0;
 }
 
@@ -147,7 +198,7 @@ tcp_port_used(uint16_t pt)
 	struct list_head* item;
 	struct sock* it;
 	/* 遍历监听队列,查看是否port已经被使用 */
-	list_for_each(item, &tcp_connecting_or_listening_socks) {
+	list_for_each(item, tcp_connecting_or_listening_socks) {
 		it = list_entry(item, struct sock, link);
 		if (it->sport == pt) return 1;
 	}
@@ -303,7 +354,8 @@ tcp_v4_connect(struct sock *sk, const struct sockaddr_in *addr)
 	sk->sport = tcp_generate_port();			  /* 伪随机产生一个端口 */
 	sk->daddr = ntohl(daddr);
 	sk->saddr = ip_parse(stackaddr);			  /* sk中存储的是主机字节序 */
-	tcp_connecting_or_listening_socks_enqueue(sk);
+	// tcp_connecting_or_listening_socks_enqueue(sk);
+	call_tcp_connecting_or_listening_socks_enqueue(sk);
 	rc = tcp_begin_connect(sk);					  /* 首先向对方发送ack */
 
 	/* 接下来需要等待连接的成功建立 */
@@ -345,7 +397,7 @@ tcp_lookup_establised_or_syn_recvd_sock(uint32_t src, uint16_t sport, uint32_t d
 	struct sock *sk;
 	struct list_head* item;
 	//pthread_rwlock_rdlock(&es_lock);
-	list_for_each(item, &tcp_establised_or_syn_recvd_socks) {
+	list_for_each(item, tcp_establised_or_syn_recvd_socks) {
 		sk = list_entry(item, struct sock, link);
 		if ((sk->saddr == src) && (sk->sport == sport) &&
 			(sk->daddr == dst) && (sk->dport == dport)) {
@@ -367,7 +419,7 @@ static struct sock *
 	struct sock *sk;
 	struct list_head *item;
 	//pthread_rwlock_rdlock(&cl_lock);
-	list_for_each(item, &tcp_connecting_or_listening_socks) {
+	list_for_each(item, tcp_connecting_or_listening_socks) {
 		sk = list_entry(item, struct sock, link);
 		if ((sk->saddr == src) && (sk->sport == sport)) {
 			//pthread_rwlock_unlock(&cl_lock);
@@ -386,7 +438,7 @@ tcp_connection_exist(uint32_t dst, uint16_t dport)
 {
 	struct sock *sk;
 	struct list_head *item;
-	list_for_each(item, &tcp_establised_or_syn_recvd_socks) {
+	list_for_each(item, tcp_establised_or_syn_recvd_socks) {
 		sk = list_entry(item, struct sock, link);
 		if ((sk->daddr == dst) && (sk->dport == dport))
 			return 1;

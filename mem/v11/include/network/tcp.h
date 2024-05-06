@@ -6,6 +6,7 @@
 #include "timer.h"
 #include "utils.h"
 #include "sock.h"
+#include "ipc.h"
 
 #define TCP_HDR_LEN	sizeof(struct tcphdr)
 #define TCP_DOFFSET sizeof(struct tcphdr) / 4
@@ -175,6 +176,10 @@ struct tcp_sock {
 								   没有按照顺序到达的tcp数据报 */
 };
 
+struct tcp_connecting_or_listening_socks_enqueue{
+	struct sock *sk;
+}; 
+
 static inline struct tcphdr *
 tcp_hdr(const struct sk_buff *skb)
 {
@@ -215,7 +220,8 @@ int tcp_free_sock(struct sock *sk);
 int tcp_done(struct sock *sk);
 
 void tcp_established_or_syn_recvd_socks_enqueue(struct sock *sk);
-void tcp_connecting_or_listening_socks_enqueue(struct sock *sk);
+void call_tcp_connecting_or_listening_socks_enqueue(struct sock *sk);
+void tcp_connecting_or_listening_socks_enqueue(struct ipc_msg *msg);
 void tcp_established_or_syn_recvd_socks_remove(struct sock *sk);
 void tcp_connecting_or_listening_socks_remove(struct sock *sk);
 
