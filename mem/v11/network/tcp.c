@@ -57,7 +57,7 @@ tcp_in(struct sk_buff *skb)
 	tcp_init_segment(th, iph, skb);
 
 	/* 这里寻找的sk本来就是一个tcp_sock对象 */
-	sk = tcp_lookup_sock(iph->saddr, th->sport, iph->daddr, th->dport);
+	sk = call_tcp_lookup_sock(iph->saddr, th->sport, iph->daddr, th->dport);
 
 	if (sk == NULL) {
 		print_err("No TCP socket for sport %d dport %d\n",

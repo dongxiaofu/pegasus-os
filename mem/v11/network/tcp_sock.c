@@ -38,7 +38,7 @@ void call_tcp_connecting_or_listening_socks_enqueue(struct sock *sk)
 {
     unsigned int ipc_msg_size = sizeof(struct ipc_msg);
     struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
-    ipc_msg->type = TCP_CONNECTING_OR_LISTENING_SOCKS_ENQUEUE;
+    ipc_msg->type = IPC_TCP_CONNECTING_OR_LISTENING_SOCKS_ENQUEUE;
 
     unsigned int payload_size = sizeof(struct tcp_connecting_or_listening_socks_enqueue);
 
@@ -446,12 +446,54 @@ tcp_connection_exist(uint32_t dst, uint16_t dport)
 	return 0;
 }
 
+struct sock *call_tcp_lookup_sock(uint32_t src, uint16_t sport, uint32_t dst, uint16_t dport)
+{
+    unsigned int ipc_msg_size = sizeof(struct ipc_msg);
+    struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
+    ipc_msg->type = IPC_TCP_LOOKUP_SOCK; 
+
+    unsigned int payload_size = sizeof(struct tcp_lookup_sock); 
+	struct tcp_lookup_sock *payload = sys_malloc(payload_size);
+    payload->src = src; 
+	payload->sport = sport;
+	payload->dst = dst;
+	payload->dport = dport;
+
+    ipc_msg->data = (char *)get_physical_address(payload);
+    ipc_msg->data_size = payload_size;
+
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+    Memset(msg, 0, sizeof(Message));
+    msg->TYPE = IPC_SOCKET_CALL;
+    msg->SOCKET_FD = 0;
+
+    unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
+    msg->BUF =  phy_ipc_msg;
+    msg->BUF_LEN = ipc_msg_size;
+
+    send_rec(BOTH, msg, TASK_NET_INIT_DEV);
+    sys_free(msg, sizeof(Message));
+
+	uint32_t sock_phy_addr = msg->BUF;
+	uint32_t sock_size = msg->BUF_LEN;
+	uint32_t sock_vaddr = alloc_virtual_memory(sock_phy_addr, sock_size);
+	uint32_t sock = (uint32_t)sys_malloc(sock_size);
+	Memcpy(sock, sock_vaddr, sock_size);
+
+	return (struct sock *)sock;
+}
+
 /**\
  * tcp_lookup_sock根据给出的四元组寻找对应的sock.
 \**/
-struct sock *
-	tcp_lookup_sock(uint32_t src, uint16_t sport, uint32_t dst, uint16_t dport)
+struct sock* tcp_lookup_sock(struct ipc_msg *msg)
 {
+	struct tcp_lookup_sock *payload = (struct tcp_lookup_sock *)msg->data;
+	uint32_t dst = payload->dst;
+	uint32_t dport = payload->dport;
+	uint32_t src = payload->src;
+	uint32_t sport = payload->sport;
+
 	struct sock *sk;
 	sk = tcp_lookup_establised_or_syn_recvd_sock(dst, dport, src, sport);
 	if (!sk) sk = tcp_lookup_connecting_or_listening_sock(dst, dport);
