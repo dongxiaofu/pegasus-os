@@ -7,6 +7,7 @@
 #include "timer.h"
 #include "wait.h"
 #include "tcp.h"
+#include "ipc.h"
 
 #ifdef DEBUG_TCP
 const char *tcp_dbg_states[] = {
@@ -40,12 +41,10 @@ tcp_init_segment(struct tcphdr *th, struct iphdr *ih, struct sk_buff *skb)
 	skb->payload = th->data;
 }
 
-
 /**\
  * tcp_in 处理接收到的tcp数据报
 \**/
-void
-tcp_in(struct sk_buff *skb)
+void tcp_in(struct sk_buff *skb)
 {
 	struct sock *sk;
 	struct iphdr *iph;
@@ -57,7 +56,7 @@ tcp_in(struct sk_buff *skb)
 	tcp_init_segment(th, iph, skb);
 
 	/* 这里寻找的sk本来就是一个tcp_sock对象 */
-	sk = call_tcp_lookup_sock(iph->saddr, th->sport, iph->daddr, th->dport);
+	sk = tcp_lookup_sock2(iph->saddr, th->sport, iph->daddr, th->dport);
 
 	if (sk == NULL) {
 		print_err("No TCP socket for sport %d dport %d\n",

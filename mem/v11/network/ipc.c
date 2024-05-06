@@ -453,6 +453,8 @@ demux_ipc_socket_call(int source, int sockfd, char *cmdbuf, int blen, Message *p
 		return tcp_connecting_or_listening_socks_enqueue(msg);
 	case IPC_TCP_LOOKUP_SOCK:
 		return tcp_lookup_sock(msg);
+	case IPC_IP_RCV:
+		return ip_rcv(msg);
 	default:
 		print_err("No such IPC type %d\n", msg->type);
 		break;

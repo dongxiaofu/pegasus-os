@@ -234,6 +234,7 @@ void tcp_connecting_or_listening_socks_remove(struct sock *sk);
 
 struct sock *call_tcp_lookup_sock(uint32_t src, uint16_t sport, uint32_t dst, uint16_t dport);
 struct sock* tcp_lookup_sock(struct ipc_msg *msg);
+struct sock *tcp_lookup_sock2(uint32_t src, uint16_t sport, uint32_t dst, uint16_t dport);
 
 /* tcp.c */
 void tcp_clear_timers(struct sock *sk);

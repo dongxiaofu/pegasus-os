@@ -6,6 +6,7 @@
 #include "ethernet.h"
 #include "ip.h"
 #include "tuntap.h"
+#include "ipc.h"
 #include "arp.h"
 #include "if_ether.h"
 
@@ -99,7 +100,7 @@ netdev_receive(struct sk_buff *skb)
 		arp_rcv(skb);
 		break;
 	case ETH_P_IP:  /* IPv4 0x0800 */
-		ip_rcv(skb);
+		call_ip_rcv(skb);
 		break;
 	case ETH_P_IPV6: /* IPv6 0x86dd -- not supported! */
 	default:

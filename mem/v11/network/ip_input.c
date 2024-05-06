@@ -1,3 +1,4 @@
+#include "ipc.h"
 #include "ip.h"
 #include "syshead.h"
 #include "arp.h"
@@ -30,13 +31,64 @@ ip_pkt_for_us(struct iphdr *ih)
 	return ih->daddr == ip_parse(stackaddr) ? 1 : 0;
 }
 
+
+int call_ip_rcv(struct sk_buff *skb)
+{
+	unsigned int ipc_msg_size = sizeof(struct ipc_msg);
+	struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
+	ipc_msg->type = IPC_IP_RCV; 
+
+	skb->data = get_physical_address(skb->data);
+
+	unsigned int payload_size = sizeof(struct ipc_ip_rcv);
+	struct ipc_ip_rcv *payload = (struct ipc_ip_rcv *)sys_malloc(payload_size); 
+	payload->skb = get_physical_address(skb);
+
+	
+	ipc_msg->data = (char *)get_physical_address(payload);
+	ipc_msg->data_size = payload_size;
+
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+	Memset(msg, 0, sizeof(Message));
+    msg->TYPE = IPC_SOCKET_CALL;
+	msg->SOCKET_FD = 0;
+
+	unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
+	msg->BUF =  phy_ipc_msg;
+	msg->BUF_LEN = ipc_msg_size;
+
+    // send_rec(BOTH, msg, TASK_NET_INIT_DEV);
+    send_rec(SEND, msg, TASK_NET_INIT_DEV);
+	
+//	int result = msg->RETVAL;
+
+    sys_free(msg, sizeof(Message));
+
+    // return result;
+    // TODO 返回结果无关紧要，似乎可以不要。
+    return 0;
+}
+
 /**\
  * ip_rcv 处理接收到的ip数据报
 \**/
 int
-ip_rcv(struct sk_buff *skb)
+ip_rcv(struct ipc_msg *msg)
 {
-	Printf("ip_rcv\n");
+	struct ipc_ip_rcv *payload = (struct ipc_ip_rcv *)msg->data;	
+	uint32_t ip_rcv_size = sizeof(struct ipc_ip_rcv);
+	uint32_t skb_phy_addr = (uint32_t)payload->skb;
+	uint32_t skb_vaddr = alloc_virtual_memory(skb_phy_addr, ip_rcv_size);
+	uint32_t skb_size = sizeof(struct sk_buff);
+	struct sk_buff *skb = (struct sk_buff *)sys_malloc(skb_size);
+	Memcpy(skb, skb_vaddr, skb_size);
+	uint32_t skb_data_phy_addr = ((struct sk_buff *)skb_vaddr)->data;
+	uint32_t skb_data_vaddr = alloc_virtual_memory(skb_data_phy_addr, BUFLEN);
+	uint32_t skb_data = sys_malloc(BUFLEN);
+	Memcpy(skb_data, skb_data_vaddr, BUFLEN);
+	skb->data = skb_data;
+	skb->head = skb->data;
+	skb->end = skb->data + BUFLEN; 
 
 	struct iphdr *ih = ip_hdr(skb);
 	uint16_t csum = -1;

@@ -9,6 +9,7 @@
 #include "sock.h"
 #include "inet.h"
 #include "stdio.h"
+#include "ipc.h"
 
 #define IPV4	 0x04
 #define IP_TCP	 0x06
@@ -60,6 +61,11 @@ struct iphdr {
 	uint8_t data[];
 } __attribute__((packed));
 
+struct ipc_ip_rcv{
+	struct sk_buff *skb;
+//	uint32_t skb;
+};
+
 static inline struct iphdr *
 ip_hdr(const struct sk_buff *skb)
 {
@@ -83,7 +89,8 @@ ip_parse(char *addr)
 	return ntohl(dst);
 }
 
-int ip_rcv(struct sk_buff *skb);
+int call_ip_rcv(struct sk_buff *skb);
+int ip_rcv(struct ipc_msg *msg);
 int ip_output(struct sock *sk, struct sk_buff *skb);
 int dst_neigh_output(struct sk_buff *skb);
 

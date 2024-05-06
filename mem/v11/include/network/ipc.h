@@ -4,7 +4,7 @@
 #include "syshead.h"
 #include "in.h"
 #include "list.h"
-#include "arp.h"
+//#include "arp.h"
 
 
 #define DEBUG_IPC
@@ -38,6 +38,7 @@
 #define IPC_ROUTE_LOOKUP             0x000f
 #define IPC_TCP_CONNECTING_OR_LISTENING_SOCKS_ENQUEUE	0x00010 
 #define IPC_TCP_LOOKUP_SOCK			0x00011
+#define IPC_IP_RCV					0x00012
 
 struct ipc_thread {
     struct list_head list;

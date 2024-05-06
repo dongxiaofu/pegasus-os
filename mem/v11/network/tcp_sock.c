@@ -71,8 +71,14 @@ void tcp_connecting_or_listening_socks_enqueue(struct ipc_msg *msg)
     pid_t pid = msg->pid;
     struct tcp_connecting_or_listening_socks_enqueue *payload = \
 		(struct tcp_connecting_or_listening_socks_enqueue *)msg->data;
-	struct sock *sk_phy_addr = (struct sock *)payload->sk;
-	unsigned int sock_size = sizeof(struct sock);
+//	struct sock *sk_phy_addr = (struct sock *)payload->sk;
+//	unsigned int sock_size = sizeof(struct sock);
+//	unsigned int sk_vaddr = alloc_virtual_memory(sk_phy_addr, sock_size); 
+//	struct sock *sk = (struct sock *)sys_malloc(sock_size);
+//	Memcpy(sk, sk_vaddr, sock_size);
+
+	struct sock *sk_phy_addr = (struct tcp_sock *)payload->sk;
+	unsigned int sock_size = sizeof(struct tcp_sock);
 	unsigned int sk_vaddr = alloc_virtual_memory(sk_phy_addr, sock_size); 
 	struct sock *sk = (struct sock *)sys_malloc(sock_size);
 	Memcpy(sk, sk_vaddr, sock_size);
@@ -355,8 +361,9 @@ tcp_v4_connect(struct sock *sk, const struct sockaddr_in *addr)
 	sk->daddr = ntohl(daddr);
 	sk->saddr = ip_parse(stackaddr);			  /* sk中存储的是主机字节序 */
 	// tcp_connecting_or_listening_socks_enqueue(sk);
-	call_tcp_connecting_or_listening_socks_enqueue(sk);
+	//call_tcp_connecting_or_listening_socks_enqueue(sk);
 	rc = tcp_begin_connect(sk);					  /* 首先向对方发送ack */
+	call_tcp_connecting_or_listening_socks_enqueue(sk);
 
 	/* 接下来需要等待连接的成功建立 */
 	wait_sleep(&tsk->wait);
@@ -494,6 +501,14 @@ struct sock* tcp_lookup_sock(struct ipc_msg *msg)
 	uint32_t src = payload->src;
 	uint32_t sport = payload->sport;
 
+	struct sock *sk;
+	sk = tcp_lookup_establised_or_syn_recvd_sock(dst, dport, src, sport);
+	if (!sk) sk = tcp_lookup_connecting_or_listening_sock(dst, dport);
+	return sk;
+}
+
+struct sock *tcp_lookup_sock2(uint32_t src, uint16_t sport, uint32_t dst, uint16_t dport)
+{
 	struct sock *sk;
 	sk = tcp_lookup_establised_or_syn_recvd_sock(dst, dport, src, sport);
 	if (!sk) sk = tcp_lookup_connecting_or_listening_sock(dst, dport);

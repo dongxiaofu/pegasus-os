@@ -152,19 +152,24 @@ tcp_synsent(struct tcp_sock *tsk, struct sk_buff *skb, struct tcphdr *th)
 	struct tcb *tcb = &tsk->tcb;
 	struct sock *sk = &tsk->sk;
 
-	tcp_sock_dbg("state is synsent", sk);
+//	tcp_sock_dbg("state is synsent", sk);
+//	Printf("state is synsent\n");
+	Printf("ack_seq = %x, isn = %x, snd_nxt = %x, snd_una = %x\n", \
+		th->ack_seq, tcb->isn, tcb->snd_nxt,tcb->snd_una);
 
 	if (th->ack) {
 		/* th->ack_seq < tcb->isn 以及 th->ack_seq > tcb->snd_nxt
 		   根据tcp协议栈的话,都是不可能的. */
 		if (th->ack_seq < tcb->isn || th->ack_seq > tcb->snd_nxt) {
-			tcp_sock_dbg("ACK is unacceptable", sk);
+			// tcp_sock_dbg("ACK is unacceptable", sk);
+			Printf("ACK is unacceptable");
 			if (th->rst) goto discard;
 			goto reset_and_discard;
 		}
 		
 		if (th->ack_seq < tcb->snd_una || th->ack_seq > tcb->snd_nxt) {
-			tcp_sock_dbg("ACK is unacceptable", sk);
+			//tcp_sock_dbg("ACK is unacceptable", sk);
+			Printf("2ACK is unacceptable\n");
 			goto reset_and_discard;
 		}
 	}
@@ -246,7 +251,7 @@ tcp_process(struct sock *sk, struct tcphdr *th, struct sk_buff *skb)
 	struct tcp_sock *tsk = tcp_sk(sk);
 	struct tcb *tcb = &tsk->tcb; /* transmission control block 传输控制块 */
 
-	Printf("input state\n");
+	Printf("input state = %x\n", sk->state);
 
 	switch (sk->state) {
 	case TCP_CLOSE:   /* 处于close状态,接收到了tcp数据报 */
