@@ -20,6 +20,7 @@ void print_array(uint8_t arr[], int size)
 int
 dst_neigh_output(struct sk_buff *skb)
 {
+//	Printf("5skb->data = %x, skb->head = %x\n", skb->data, skb->head);
 	struct iphdr *iphdr = ip_hdr(skb);
 	struct netdev *netdev = skb->dev;
 	struct rtentry *rt = skb->rt;
@@ -33,18 +34,20 @@ dst_neigh_output(struct sk_buff *skb)
 	}
 
 //	do{
-//		Printf("saddr = %x, saddr2 = %x\n", saddr, iphdr->saddr);
+//Printf("saddr = %x, saddr2 = %x, daddr = %x, daddr = %x\n", saddr, iphdr->saddr, daddr, iphdr->daddr);
 //		netdev = call_netdev_get(saddr);
 //	}while(netdev == NULL);
 
 try_agin:
 	// dmac = arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
 	dmac = call_arp_get_hwaddr(daddr); /* 根据ip地址获得mac地址 */
-	//print_array(dmac, 6);
+	print_array(dmac, 6);
 
 	if (dmac) {
-		//Printf("get\n");
+//		Printf("get\n");
 		int ret = -1;
+//	Printf("6skb->data = %x, skb->head = %x\n", skb->data, skb->head);
+//	asm("xchgw %bx, %bx");
 			ret = netdev_transmit(skb, dmac, ETH_P_IP);
 		//	Printf("after netdev_transmit\n");
 		return ret;
@@ -55,6 +58,8 @@ try_agin:
 		// TODO 必须阻塞此进程，直到对方进程通知本进程，已经更新了ARP缓存。
 		Message *msg = (Message *)sys_malloc(sizeof(Message));
 		send_rec(RECEIVE, msg, TASK_NET_DEV_RX);
+//Printf("33saddr = %x, saddr2 = %x, daddr = %x, daddr = %x\n", saddr, iphdr->saddr, daddr, iphdr->daddr);
+//asm("xchgw %bx, %bx");
 		//Printf("after arp_request\n");
         /* Inform upper layer that traffic was not sent, retry later */
 		//if (count < 3) {

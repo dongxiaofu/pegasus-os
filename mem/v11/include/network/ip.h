@@ -16,6 +16,7 @@
 #define IP_UDP	 0x11
 #define ICMPV4	 0x01
 
+// 20
 #define IP_HDR_LEN sizeof(struct iphdr)
 // ip_len表示ip数据报的大小,不包含首部
 #define ip_len(ip) (ip->len - (ip->ihl * 4))

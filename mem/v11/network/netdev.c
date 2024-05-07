@@ -61,10 +61,15 @@ netdev_transmit(struct sk_buff *skb, uint8_t *dst_hw, uint16_t ethertype)
 	struct netdev *dev;
 	struct eth_hdr *hdr;
 	int ret = 0;
+//	struct iphdr *iphdr2 = (struct iphdr *)(skb->head);
+//	Printf("2iphdr saddr = %x, daddr = %x\n", iphdr2->saddr, iphdr2->daddr);
 
+//	Printf("7skb->data = %x, skb->head = %x\n", skb->data, skb->head);
 	dev = skb->dev;
 	skb_push(skb, ETH_HDR_LEN);
 	hdr = (struct eth_hdr *)skb->data;
+//	Printf("8skb->data = %x, skb->head = %x\n", skb->data, skb->head);
+//	asm("xchgw %bx, %bx");
 
 	/* 拷贝硬件地址 */
 	Memcpy(hdr->dmac, dst_hw, dev->addr_len); /* 对端的mac地址 */
@@ -79,6 +84,10 @@ netdev_transmit(struct sk_buff *skb, uint8_t *dst_hw, uint16_t ethertype)
 	//Printf("send to physical network\n");
 	int i = 0;
 //	while(i++ < 10){
+	// int reserved = ETH_HDR_LEN + IP_HDR_LEN + TCP_HDR_LEN + optlen + sizeo
+	struct iphdr *iphdr = (struct iphdr *)(skb->data + ETH_HDR_LEN);
+//	Printf("iphdr saddr = %x, daddr = %x\n", iphdr->saddr, iphdr->daddr);
+//	asm("xchgw %bx, %bx");
 	DriverSend(skb->data, skb->len);
 //	}
 	
@@ -91,7 +100,7 @@ netdev_receive(struct sk_buff *skb)
 {
 	struct eth_hdr *hdr = eth_hdr(skb);  /* 获得以太网头部信息,以太网头部包括
 										 目的mac地址,源mac地址,以及类型信息 */
-	Printf("hdr->ethertype = %x\n", hdr->ethertype);
+//	Printf("hdr->ethertype = %x\n", hdr->ethertype);
 	/* 以太网头部的Type(类型)字段 0x86dd表示IPv6 0x0800表示IPv4
 	0x0806表示ARP */
 	switch (hdr->ethertype) {
@@ -273,7 +282,7 @@ char *receive_msg_from_nic()
 	unsigned int size = 256;
 	unsigned char startPage = nic_current_page;
 	unsigned char endPage = curr_page;
-	Printf("nic_current_page = %x, endPage = %x\n", nic_current_page, endPage);
+//	Printf("nic_current_page = %x, endPage = %x\n", nic_current_page, endPage);
 	nic_current_page = curr_page;
 	unsigned int pageNum = 0;
 	//unsigned int endPage = 1516 / 256;
@@ -326,8 +335,8 @@ char *receive_msg_from_nic()
 
 //		Printf("buf[12] = %x\n", buf[12]);
 //		Printf("buf[13] = %x\n", buf[13]);
-		Printf("buf[16] = %x\n", buf[16]);
-		Printf("buf[17] = %x\n", buf[17]);
+//		Printf("buf[16] = %x\n", buf[16]);
+//		Printf("buf[17] = %x\n", buf[17]);
 	return buf + 4;
 }
 

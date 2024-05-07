@@ -82,7 +82,6 @@ void tcp_connecting_or_listening_socks_enqueue(struct ipc_msg *msg)
 	unsigned int sk_vaddr = alloc_virtual_memory(sk_phy_addr, sock_size); 
 	struct sock *sk = (struct sock *)sys_malloc(sock_size);
 	Memcpy(sk, sk_vaddr, sock_size);
-	asm("xchgw %bx, %bx");
 	list_add_tail(&sk->link, tcp_connecting_or_listening_socks);
 	//pthread_rwlock_unlock(&cl_lock);
 }
@@ -432,12 +431,15 @@ tcp_v4_connect(struct sock *sk, const struct sockaddr_in *addr)
 
 	tcp_options_len = tcp_syn_options(sk, &opts);	/* tcp选项的长度 */
 	skb = tcp_alloc_skb(tcp_options_len, 0); /* 需要发送tcp选项 */
-	asm("xchgw %bx, %bx");
 	// TODO 把这行代码改造为IPC机制。
 	// opts和tcp_options_len这两个参数真是草灰蛇线，实在不是个好方法，可我暂时想不到好方法。
+//	Printf("skb->data = %x, skb->head = %x\n", skb->data, skb->head);
+	call_tcp_connecting_or_listening_socks_enqueue(sk);
 	rc = call_tcp_begin_connect(sk, skb, opts, tcp_options_len);					  /* 首先向对方发送ack */
 
 	// TODO 把在tcp_begin_connect中生成的skb提到外面。
+	//Printf("sk->daddr = %x, daddr = %x\n", sk->daddr, daddr);
+//	Printf("2skb->data = %x, skb->head = %x\n", skb->data, skb->head);
 	ip_output(sk, skb);
 	// call_tcp_connecting_or_listening_socks_enqueue(sk);
 
@@ -585,6 +587,7 @@ struct sock* tcp_lookup_sock(struct ipc_msg *msg)
 
 struct sock *tcp_lookup_sock2(uint32_t src, uint16_t sport, uint32_t dst, uint16_t dport)
 {
+	Printf("src = %x, dst = %x\n", src, dst);
 	struct sock *sk;
 	sk = tcp_lookup_establised_or_syn_recvd_sock(dst, dport, src, sport);
 	if (!sk) sk = tcp_lookup_connecting_or_listening_sock(dst, dport);

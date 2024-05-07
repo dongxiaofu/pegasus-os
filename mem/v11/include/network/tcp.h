@@ -8,6 +8,7 @@
 #include "sock.h"
 #include "ipc.h"
 
+// 20
 #define TCP_HDR_LEN	sizeof(struct tcphdr)
 #define TCP_DOFFSET sizeof(struct tcphdr) / 4
 
@@ -190,6 +191,7 @@ struct tcp_lookup_sock{
 struct ipc_tcp_write{
 	struct sock *sk;
 	struct sk_buff *skb;
+	uint32_t skb_head;
 	uint32_t skb_data;
 	// skb的data的长度。
 	uint32_t data_len;
@@ -198,9 +200,11 @@ struct ipc_tcp_write{
 struct ipc_tcp_begin_connect{
 	struct sock *sk;
 	struct sk_buff *skb;
+	uint32_t skb_head;
 	uint32_t skb_data;
 	// skb的data的长度。
 	uint32_t data_len;
+	int data_differ_from_head;
 	struct tcp_options opts;
 	uint32_t optlen;
 };
@@ -245,6 +249,7 @@ tcp_alloc_skb(int optlen, int size)
 	skb_reserve(skb, reserved); /* skb->data部分留出reserved个字节 */
 	skb->protocol = IP_TCP;
 	skb->dlen = size;	/* dlen表示数据的大小 */
+	skb->all_data_len = reserved;
 
 	return skb;
 }

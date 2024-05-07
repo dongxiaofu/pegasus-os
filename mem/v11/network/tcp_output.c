@@ -361,12 +361,17 @@ int call_tcp_begin_connect(struct sock *sk, struct sk_buff *skb, struct tcp_opti
 	struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
 	ipc_msg->type = IPC_TCP_BEGIN_CONNECT; 
 
+	uint32_t skb_head = skb->head;
+
 	unsigned int payload_size = sizeof(struct ipc_tcp_begin_connect);
 	struct ipc_tcp_begin_connect *payload = (struct ipc_tcp_begin_connect *)sys_malloc(payload_size);
 	payload->sk = get_physical_address(sk);
 	payload->skb = get_physical_address(skb);
+	payload->skb_head = get_physical_address(skb->head);
 	payload->skb_data = get_physical_address(skb->data);
 	payload->data_len = skb->all_data_len;
+	Printf("all_data_len = %x\n", skb->all_data_len);
+	payload->data_differ_from_head = skb->data - skb->head;
 
 	Memcpy(&payload->opts, &opts, sizeof(struct tcp_options));
 	payload->optlen = optlen;
@@ -384,12 +389,49 @@ int call_tcp_begin_connect(struct sock *sk, struct sk_buff *skb, struct tcp_opti
     msg->BUF_LEN = ipc_msg_size;
 
     send_rec(BOTH, msg, TASK_NET_INIT_DEV);
+
+	unsigned int phy_addr_buf = msg->BUF;
+	unsigned int len = msg->BUF_LEN;
+	unsigned int vaddr_buf = alloc_virtual_memory(phy_addr_buf, len); 
+	Memcpy(ipc_msg, vaddr_buf, len);
+
+	unsigned int data_size = ipc_msg->data_size;
+	Memcpy(payload, alloc_virtual_memory(ipc_msg->data, data_size), data_size);
+
+	uint32_t return_sk_phy_addr = payload->sk;
+	uint32_t return_skb_phy_addr = payload->skb;
+	uint32_t return_skb_head_phy_addr = payload->skb_head;
+	uint32_t return_skb_data_phy_addr = payload->skb_data;
+	uint32_t return_skb_data_len = payload->data_len;
+	int data_differ_from_head = payload->data_differ_from_head;
+
+	uint32_t sock_size = sizeof(struct tcp_sock);
+	struct sock *return_sk_vaddr = alloc_virtual_memory(return_sk_phy_addr, sock_size);
+
+	uint32_t skb_size = sizeof(struct sk_buff);
+	struct sk_buff *return_skb_vaddr = alloc_virtual_memory(return_skb_phy_addr, skb_size);
+	Memcpy(skb, return_skb_vaddr, skb_size);
+	uint32_t return_skb_head_vaddr = alloc_virtual_memory(return_skb_head_phy_addr, \
+		return_skb_data_len);
+	// Memcpy(skb->data, return_skb_data_vaddr, return_skb_data_len);
+	// Memcpy(skb->head, return_skb_data_vaddr, return_skb_data_len);
+	Printf("return_skb_data_len = %x\n", return_skb_data_len);
+	Memcpy(skb_head, return_skb_head_vaddr, return_skb_data_len);
 	
-	int result = msg->RETVAL;
+	// skb的head怎么处理？
+	// 我认为，head和end不会改变，只有data会变化。
+	//skb->data = skb_head + (return_skb_vaddr->data - return_skb_vaddr->head);
+	skb->head = skb_head;
+	skb->data = skb->head + data_differ_from_head;
+	// skb->data = skb_head + skb->all_data_len - skb->len;
+	// skb->data = skb_head + (return_skb_data_phy_addr - return_skb_head_phy_addr);
+//	Printf("skb->head = %x, skb_data_len = %x, skb->data = %x\n", \
+		skb->head, return_skb_data_len, skb->data);
 
     sys_free(msg, sizeof(Message));
 
-	return result;
+	// TODO 随便设置的值。
+	return 0;
 }
 
 int tcp_begin_connect(struct ipc_msg *msg)
@@ -409,19 +451,27 @@ int tcp_begin_connect(struct ipc_msg *msg)
 	struct sk_buff *skb = (struct sk_buff *)sys_malloc(skb_size);
 	Memcpy(skb, skb_vaddr, skb_size);
 
+	int data_differ_from_head = payload->data_differ_from_head;
+	assert(data_differ_from_head >= 0);
 	uint32_t skb_data_size = payload->data_len;
+	uint32_t skb_head_phy_addr = payload->skb_head;
 	uint32_t skb_data_phy_addr = payload->skb_data;
-	uint32_t skb_data_vaddr = alloc_virtual_memory(skb_data_phy_addr, skb_data_size);
-	uint8_t *data = (uint8_t *)sys_malloc(skb_data_size);
-	Memcpy(data, skb_data_vaddr, skb_data_size);
-	skb->data = data;
-	skb->head = skb->data;
+	uint32_t skb_head_vaddr = alloc_virtual_memory(skb_head_phy_addr, skb_data_size);
+	uint8_t *head = (uint8_t *)sys_malloc(skb_data_size);
+	Memcpy(head, skb_head_vaddr, skb_data_size);
+	skb->head = head;
+//	Printf("skb_data_phy_addr = %x, skb_head_phy_addr = %x\n", skb_data_phy_addr, skb_head_phy_addr);
+	// skb->data = head + (skb_data_phy_addr - skb_head_phy_addr); 
+	skb->data = head + data_differ_from_head;
 	skb->end = skb->head + skb->all_data_len;
 
 	uint32_t tcp_options_size = sizeof(struct tcp_options);
 	struct tcp_options *opts = (struct tcp_options *)sys_malloc(tcp_options_size);
 	Memcpy(opts, &payload->opts, tcp_options_size);
 	uint32_t optlen = payload->optlen;
+
+//  TODO 需修改此函数才能在这里调用它。
+//	tcp_connecting_or_listening_socks_enqueue(sk);
 
 	struct tcp_sock *tsk = tcp_sk(sk);
 	struct tcb *tcb = &tsk->tcb;
@@ -442,11 +492,27 @@ int tcp_begin_connect(struct ipc_msg *msg)
 	// tcp_send_syn可能由于暂时找不到以太网地址的原因发送失败
 	// 但是存在定时器,隔一段时间再次尝试发送.
 	rc = tcp_send_syn(sk, skb, *opts, optlen);  
+//	Printf("8head = %x, data = %x\n", skb->head, skb->data);
 	// 消耗一个序列号.
 	tcb->snd_nxt++;  
 
+	// 返回数据。
+	// IPC机制真是太麻烦了！
+	payload->sk = get_physical_address(sk);
+	payload->skb = get_physical_address(skb);
+	payload->skb_head = get_physical_address(skb->head);
+	payload->skb_data = get_physical_address(skb->data);
+	payload->data_len = skb_data_size;
+	payload->data_differ_from_head = skb->data - skb->head;
+
+	uint32_t payload_size = sizeof(struct ipc_tcp_begin_connect);
+	msg->data = (char *)get_physical_address(payload);
+	msg->data_size = payload_size;
+
 	Message *result = (Message *)sys_malloc(sizeof(Message));
-	result->RETVAL = 0;
+	unsigned int phy_ipc_msg = get_physical_address(msg);
+    result->BUF =  phy_ipc_msg;
+    result->BUF_LEN = sizeof(struct ipc_msg);
 	send_rec(SEND, result, pid);
 
 	// TODO 随便设置一个返回值。
@@ -459,10 +525,13 @@ int call_tcp_write(struct sock *sk, struct sk_buff *skb, uint32_t data_len)
 	struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
 	ipc_msg->type = IPC_TCP_WRITE; 
 
+	uint32_t skb_head = skb->head;
+
 	unsigned int payload_size = sizeof(struct ipc_tcp_write);
 	struct ipc_tcp_write *payload = (struct ipc_tcp_write *)sys_malloc(payload_size);
 	payload->sk = get_physical_address(sk);
 	payload->skb = get_physical_address(skb);
+	payload->skb_head = get_physical_address(skb->head);
 	payload->skb_data = get_physical_address(skb->data);
 	payload->data_len = data_len;
 	
@@ -479,12 +548,41 @@ int call_tcp_write(struct sock *sk, struct sk_buff *skb, uint32_t data_len)
     msg->BUF_LEN = ipc_msg_size;
 
     send_rec(BOTH, msg, TASK_NET_INIT_DEV);
+
+	unsigned int phy_addr_buf = msg->BUF;
+	unsigned int len = msg->BUF_LEN;
+	unsigned int vaddr_buf = alloc_virtual_memory(phy_addr_buf, len); 
+	Memcpy(ipc_msg, vaddr_buf, len);
+
+	unsigned int data_size = ipc_msg->data_size;
+	Memcpy(payload, alloc_virtual_memory(ipc_msg->data, data_size), data_size);
+
+	uint32_t return_sk_phy_addr = payload->sk;
+	uint32_t return_skb_phy_addr = payload->skb;
+	uint32_t return_skb_head_phy_addr = payload->skb_head;
+	uint32_t return_skb_data_phy_addr = payload->skb_data;
+	uint32_t return_skb_data_len = payload->data_len;
+
+	uint32_t sock_size = sizeof(struct tcp_sock);
+	struct sock *return_sk_vaddr = alloc_virtual_memory(return_sk_phy_addr, sock_size);
+
+	uint32_t skb_size = sizeof(struct sk_buff);
+	struct sk_buff *return_skb_vaddr = alloc_virtual_memory(return_skb_phy_addr, skb_size);
+	Memcpy(skb, return_skb_vaddr, skb_size);
+	uint32_t return_skb_head_vaddr = alloc_virtual_memory(return_skb_head_phy_addr, \
+		return_skb_data_len);
+	// Memcpy(skb->data, return_skb_data_vaddr, return_skb_data_len);
+	Memcpy(skb_head, return_skb_head_vaddr, return_skb_data_len);
 	
-	int result = msg->RETVAL;
+	// skb的head怎么处理？
+	// 我认为，head和end不会改变，只有data会变化。
+	// skb->data = skb_head + (return_skb_vaddr->data - return_skb_vaddr->head);
+	skb->data = skb_head + (return_skb_data_phy_addr - return_skb_head_phy_addr);
 
     sys_free(msg, sizeof(Message));
 
-	return result;
+	// TODO 随便设置的值。
+	return 0;
 }
 
 /* tcp_send 发送tcp数据 */
@@ -507,13 +605,13 @@ int ipc_tcp_write(struct ipc_msg *msg)
 	Memcpy(skb, skb_vaddr, skb_size);
 
 	uint32_t skb_data_size = payload->data_len;
+	uint32_t skb_head_phy_addr = payload->skb_head;
 	uint32_t skb_data_phy_addr = payload->skb_data;
-	uint32_t skb_data_vaddr = alloc_virtual_memory(skb_data_phy_addr, skb_data_size);
-	uint8_t *data = (uint8_t *)sys_malloc(skb_data_size);
-	Memcpy(data, skb_data_vaddr, skb_data_size);
-	
-	skb->data = data;
-	skb->head = skb->data;
+	uint32_t skb_head_vaddr = alloc_virtual_memory(skb_head_phy_addr, skb_data_size);
+	uint8_t *head = (uint8_t *)sys_malloc(skb_data_size);
+	Memcpy(head, skb_head_vaddr, skb_data_size);
+	skb->head = head;
+	skb->data = head + (skb_data_phy_addr - skb_head_phy_addr); 
 	skb->end = skb->head + skb->all_data_len;
 
 	struct tcp_sock *tsk = tcp_sk(sk);
@@ -521,8 +619,20 @@ int ipc_tcp_write(struct ipc_msg *msg)
 
 	tcp_queue_transmit_skb(&tsk->sk, skb);
 
+	payload->sk = get_physical_address(sk);
+	payload->skb = get_physical_address(skb);
+	payload->skb_head = get_physical_address(skb->head);
+	payload->skb_data = get_physical_address(skb->data);
+	payload->data_len = skb_data_size;
+
+	uint32_t payload_size = sizeof(struct ipc_tcp_write);
+	msg->data = (char *)get_physical_address(payload);
+	msg->data_size = payload_size;
+
 	Message *result = (Message *)sys_malloc(sizeof(Message));
-	result->RETVAL = 0;
+	unsigned int phy_ipc_msg = get_physical_address(msg);
+    result->BUF =  phy_ipc_msg;
+    result->BUF_LEN = sizeof(struct ipc_msg);
 	send_rec(SEND, result, pid);
 
 	return 0;

@@ -22,7 +22,9 @@ ip_output(struct sock *sk, struct sk_buff *skb)
 
 	skb->dev = &rt->dev;				/* dev用于指示 */
 	skb->rt = rt;
+//	Printf("3skb->data = %x, skb->head = %x\n", skb->data, skb->head);
 	skb_push(skb, IP_HDR_LEN);		/* ip头部 */
+//	Printf("4skb->data = %x, skb->head = %x\n", skb->data, skb->head);
 
 	ihdr->version = IPV4;			/* ip的版本是IPv4 */
 	ihdr->ihl = 0x05;				/* ip头部20字节,也就是说不附带任何选项 */

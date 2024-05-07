@@ -271,8 +271,8 @@ arp_request(uint32_t sip, uint32_t dip, struct netdev *netdev)
 	/* 然后转换为网络字节序 */
 	payload->sip = htonl(payload->sip);
 	payload->dip = htonl(payload->dip);
+	Printf("payload->sip = %x, dip = %x\n", payload->sip, payload->dip);
 
-	asm("xchgw %bx, %bx");
 	rc = netdev_transmit(skb, broadcast_hw, ETH_P_ARP);
 
 	free_skb(skb);
@@ -385,6 +385,7 @@ arp_get_hwaddr(struct ipc_msg *msg)
 	
 	list_for_each(item, &arp_cache) {
 		entry = list_entry(item, struct arp_cache_entry, list);
+//		Printf("entry->sip = %x\n", entry->sip);
 		if (entry->state == ARP_RESOLVED &&
 			entry->sip == sip) {
 			//arpcache_dbg("entry", entry);
@@ -394,7 +395,8 @@ arp_get_hwaddr(struct ipc_msg *msg)
 		}
 	}
 
-	//print_array(smac, 6);
+//	Printf("arp_get_hwaddr sip = %x\n", sip);
+//	print_array(smac, 6);
 
 	Message *result = (Message *)sys_malloc(sizeof(Message));
     //result->RETVAL = smac;

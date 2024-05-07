@@ -28,6 +28,8 @@ static int
 ip_pkt_for_us(struct iphdr *ih)
 {
 	extern char * stackaddr;
+//	Printf("ih->daddr = %x, stackaddr = %x, stackaddr2 = %x\n", \
+		ih->daddr, stackaddr, ip_parse(stackaddr));
 	return ih->daddr == ip_parse(stackaddr) ? 1 : 0;
 }
 
@@ -137,7 +139,7 @@ ip_rcv(struct ipc_msg *msg)
         icmpv4_incoming(skb);
         return 0;
     case IP_TCP:
-		Printf("IP_TCP\n");
+//		Printf("IP_TCP\n");
         tcp_in(skb);
         return 0;
 	case IP_UDP:
