@@ -187,6 +187,24 @@ struct tcp_lookup_sock{
 	uint16_t dport;
 };
 
+struct ipc_tcp_write{
+	struct sock *sk;
+	struct sk_buff *skb;
+	uint32_t skb_data;
+	// skb的data的长度。
+	uint32_t data_len;
+};
+
+struct ipc_tcp_begin_connect{
+	struct sock *sk;
+	struct sk_buff *skb;
+	uint32_t skb_data;
+	// skb的data的长度。
+	uint32_t data_len;
+	struct tcp_options opts;
+	uint32_t optlen;
+};
+
 static inline struct tcphdr *
 tcp_hdr(const struct sk_buff *skb)
 {
@@ -214,12 +232,44 @@ tcp_accept_enqueue(struct tcp_sock *tsk)
 	list_add(&tsk->list, &tsk->parent->accept_queue);
 }
 
+static struct sk_buff *
+tcp_alloc_skb(int optlen, int size)
+{
+	/*
+	 optlen表示tcp首部选项的大小
+	 这里要特别注意一下,因为忘记了TCP_HDR_LEN导致出错
+	 */
+	int reserved = ETH_HDR_LEN + IP_HDR_LEN + TCP_HDR_LEN + optlen + size; /* ==> 这里的一个错误弄得我好苦! */
+	struct sk_buff *skb = alloc_skb(reserved);
+
+	skb_reserve(skb, reserved); /* skb->data部分留出reserved个字节 */
+	skb->protocol = IP_TCP;
+	skb->dlen = size;	/* dlen表示数据的大小 */
+
+	return skb;
+}
+
+//static int
+//tcp_write_options(struct tcphdr *th, struct tcp_options *opts, int optlen)
+//{
+//	struct tcp_opt_mss *opt_mss = (struct tcp_opt_mss *)th->data;
+//
+//	opt_mss->kind = TCP_OPT_MSS;
+//	opt_mss->len = TCP_OPTLEN_MSS;
+//	opt_mss->mss = htons(opts->mss);
+//
+//	th->hl = TCP_DOFFSET + (optlen / 4);
+//	return 0;
+//}
+
 /* tcp_sock.c */
 int tcp_generate_isn();
 int tcp_sock_init(struct sock *sk);
 int tcp_init();
 int tcp_v4_connect(struct sock *sk, const struct sockaddr_in *addr);
 int tcp_write(struct sock *sk, const void *buf, const uint32_t len);
+int call_tcp_write(struct sock *sk, struct sk_buff *skb, uint32_t data_len);
+int ipc_tcp_write(struct ipc_msg *msg);
 int tcp_read(struct sock *sk, void *buf, const uint32_t len);
 int tcp_recv_notify(struct sock *sk);
 int tcp_close(struct sock *sk);
@@ -264,7 +314,8 @@ int tcp_send_ack(struct sock *sk);
 int tcp_send_fin(struct sock *sk);
 int tcp_send(struct tcp_sock *tsk, const void *buf, int len);
 int tcp_send_synack(struct sock *sk);
-int tcp_begin_connect(struct sock *sk);
+int call_tcp_begin_connect(struct sock *sk, struct sk_buff *skb, struct tcp_options opts, int optlen);
+int tcp_begin_connect(struct ipc_msg *msg);
 void tcp_handle_fin_state(struct sock *sk);
 int tcp_queue_fin(struct sock *sk);
 int tcp_send_reset(struct tcp_sock *tsk);

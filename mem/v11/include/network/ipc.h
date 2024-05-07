@@ -39,6 +39,8 @@
 #define IPC_TCP_CONNECTING_OR_LISTENING_SOCKS_ENQUEUE	0x00010 
 #define IPC_TCP_LOOKUP_SOCK			0x00011
 #define IPC_IP_RCV					0x00012
+#define IPC_TCP_WRITE				0x00013
+#define IPC_TCP_BEGIN_CONNECT		0x00014
 
 struct ipc_thread {
     struct list_head list;

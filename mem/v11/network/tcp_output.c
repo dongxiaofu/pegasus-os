@@ -1,5 +1,6 @@
 #include "syshead.h"
 #include "utils.h"
+#include "ipc.h"
 #include "tcp.h"
 #include "ip.h"
 #include "skbuff.h"
@@ -8,46 +9,46 @@
 static void tcp_retransmission_timeout(uint32_t ts, void *arg);
 
 
-static struct sk_buff *
-tcp_alloc_skb(int optlen, int size)
-{
-	/*
-	 optlen表示tcp首部选项的大小
-	 这里要特别注意一下,因为忘记了TCP_HDR_LEN导致出错
-	 */
-	int reserved = ETH_HDR_LEN + IP_HDR_LEN + TCP_HDR_LEN + optlen + size; /* ==> 这里的一个错误弄得我好苦! */
-	struct sk_buff *skb = alloc_skb(reserved);
+//static struct sk_buff *
+//tcp_alloc_skb(int optlen, int size)
+//{
+//	/*
+//	 optlen表示tcp首部选项的大小
+//	 这里要特别注意一下,因为忘记了TCP_HDR_LEN导致出错
+//	 */
+//	int reserved = ETH_HDR_LEN + IP_HDR_LEN + TCP_HDR_LEN + optlen + size; /* ==> 这里的一个错误弄得我好苦! */
+//	struct sk_buff *skb = alloc_skb(reserved);
+//
+//	skb_reserve(skb, reserved); /* skb->data部分留出reserved个字节 */
+//	skb->protocol = IP_TCP;
+//	skb->dlen = size;	/* dlen表示数据的大小 */
+//
+//	return skb;
+//}
 
-	skb_reserve(skb, reserved); /* skb->data部分留出reserved个字节 */
-	skb->protocol = IP_TCP;
-	skb->dlen = size;	/* dlen表示数据的大小 */
+//static int
+//tcp_write_options(struct tcphdr *th, struct tcp_options *opts, int optlen)
+//{
+//	struct tcp_opt_mss *opt_mss = (struct tcp_opt_mss *)th->data;
+//
+//	opt_mss->kind = TCP_OPT_MSS;
+//	opt_mss->len = TCP_OPTLEN_MSS;
+//	opt_mss->mss = htons(opts->mss);
+//
+//	th->hl = TCP_DOFFSET + (optlen / 4);
+//	return 0;
+//}
 
-	return skb;
-}
-
-static int
-tcp_write_options(struct tcphdr *th, struct tcp_options *opts, int optlen)
-{
-	struct tcp_opt_mss *opt_mss = (struct tcp_opt_mss *)th->data;
-
-	opt_mss->kind = TCP_OPT_MSS;
-	opt_mss->len = TCP_OPTLEN_MSS;
-	opt_mss->mss = htons(opts->mss);
-
-	th->hl = TCP_DOFFSET + (optlen / 4);
-	return 0;
-}
-
-static int 
-tcp_syn_options(struct sock *sk, struct tcp_options *opts)
-{
-	struct tcp_sock *tsk = tcp_sk(sk);
-	int optlen = 0;
-
-	opts->mss = tsk->rmss;
-	optlen += TCP_OPTLEN_MSS;
-	return optlen;
-}
+//static int 
+//tcp_syn_options(struct sock *sk, struct tcp_options *opts)
+//{
+//	struct tcp_sock *tsk = tcp_sk(sk);
+//	int optlen = 0;
+//
+//	opts->mss = tsk->rmss;
+//	optlen += TCP_OPTLEN_MSS;
+//	return optlen;
+//}
 
 static int 
 tcp_transmit_skb(struct sock *sk, struct sk_buff *skb, uint32_t seq)
@@ -95,7 +96,7 @@ tcp_transmit_skb(struct sock *sk, struct sk_buff *skb, uint32_t seq)
 	 */
 	thdr->csum = tcp_checksum(skb, htonl(sk->saddr), htonl(sk->daddr));
 
-	return ip_output(sk, skb);
+	return 0;
 }
 
 /**\
@@ -119,7 +120,8 @@ tcp_queue_transmit_skb(struct sock *sk, struct sk_buff *skb)
 	rc = tcp_transmit_skb(sk, skb, tcb->snd_nxt); /* 首先将数据发送一遍 */
 	tcb->snd_nxt += skb->dlen;
 	//pthread_mutex_unlock(&sk->write_queue.lock);
-	return rc;
+//	return ip_output(sk, skb);
+	return 0;
 }
 
 int
@@ -184,20 +186,34 @@ tcp_send_ack(struct sock *sk)
 }
 
 static int
-tcp_send_syn(struct sock *sk)
+tcp_write_options(struct tcphdr *th, struct tcp_options *opts, int optlen)
+{
+	struct tcp_opt_mss *opt_mss = (struct tcp_opt_mss *)th->data;
+
+	opt_mss->kind = TCP_OPT_MSS;
+	opt_mss->len = TCP_OPTLEN_MSS;
+	opt_mss->mss = htons(opts->mss);
+
+	th->hl = TCP_DOFFSET + (optlen / 4);
+	return 0;
+}
+
+static int
+tcp_send_syn(struct sock *sk, struct sk_buff *skb, struct tcp_options opts, int tcp_options_len)
 {
 	if (sk->state != TCP_SYN_SENT && sk->state != TCP_CLOSE && sk->state != TCP_LISTEN) {
 		print_err("Socket was not in correct state (closed or listen)\n");
 		return 1;
 	}
 
-	struct sk_buff *skb;
-	struct tcphdr *th;
-	struct tcp_options opts = { 0 };
-	int tcp_options_len = 0;
+//	struct sk_buff *skb;
+//	struct tcphdr *th;
+//	struct tcp_options opts = { 0 };
+//	int tcp_options_len = 0;
 
-	tcp_options_len = tcp_syn_options(sk, &opts);	/* tcp选项的长度 */
-	skb = tcp_alloc_skb(tcp_options_len, 0); /* 需要发送tcp选项 */
+//	tcp_options_len = tcp_syn_options(sk, &opts);	/* tcp选项的长度 */
+//	skb = tcp_alloc_skb(tcp_options_len, 0); /* 需要发送tcp选项 */
+	struct tcphdr *th;
 	th = tcp_hdr(skb);		/* 指向tcp头部 */
 
 	tcp_write_options(th, &opts, tcp_options_len);
@@ -339,9 +355,69 @@ tcp_reset_retransmission_timer(struct tcp_sock *tsk)
 	}
 }
 
-int 
-tcp_begin_connect(struct sock *sk)
+int call_tcp_begin_connect(struct sock *sk, struct sk_buff *skb, struct tcp_options opts, int optlen)
 {
+	unsigned int ipc_msg_size = sizeof(struct ipc_msg);
+	struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
+	ipc_msg->type = IPC_TCP_BEGIN_CONNECT; 
+
+	unsigned int payload_size = sizeof(struct ipc_tcp_begin_connect);
+	struct ipc_tcp_begin_connect *payload = (struct ipc_tcp_begin_connect *)sys_malloc(payload_size);
+	payload->sk = get_physical_address(sk);
+	payload->skb = get_physical_address(skb);
+	Memcpy(&payload->opts, &opts, sizeof(struct tcp_options));
+	payload->optlen = optlen;
+	
+	ipc_msg->data = (char *)get_physical_address(payload);
+	ipc_msg->data_size = payload_size;
+
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+	Memset(msg, 0, sizeof(Message));
+    msg->TYPE = IPC_SOCKET_CALL;
+	msg->SOCKET_FD = 0;
+
+	unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
+    msg->BUF =  phy_ipc_msg;
+    msg->BUF_LEN = ipc_msg_size;
+
+    send_rec(BOTH, msg, TASK_NET_INIT_DEV);
+	
+	int result = msg->RETVAL;
+
+    sys_free(msg, sizeof(Message));
+
+	return result;
+}
+
+int tcp_begin_connect(struct ipc_msg *msg)
+{
+	pid_t pid = msg->pid;
+	struct ipc_tcp_begin_connect *payload = (struct ipc_tcp_begin_connect *)msg->data;
+	uint32_t sk_phy_addr = payload->sk;
+	uint32_t skb_phy_addr = payload->skb;
+
+	uint32_t sock_size = sizeof(struct tcp_sock);
+	struct sock *sk_vaddr = (struct sock *)alloc_virtual_memory(sk_phy_addr, sock_size);
+	struct sock *sk = (struct sock *)sys_malloc(sock_size);
+	Memcpy(sk, sk_vaddr, sock_size);
+
+	uint32_t skb_size = sizeof(struct sk_buff);
+	struct sk_buff *skb_vaddr = (struct sk_buff *)alloc_virtual_memory(skb_phy_addr, skb_size);
+	struct sk_buff *skb = (struct sk_buff *)sys_malloc(skb_size);
+	Memcpy(skb, skb_vaddr, skb_size);
+
+	uint32_t skb_data_size = payload->data_len;
+	uint32_t skb_data_phy_addr = payload->skb_data;
+	uint32_t skb_data_vaddr = alloc_virtual_memory(skb_data_phy_addr, skb_data_size);
+	uint8_t *data = (uint8_t *)sys_malloc(skb_data_size);
+	Memcpy(data, skb_data_vaddr, skb_data_size);
+	skb->data = data;
+
+	uint32_t tcp_options_size = sizeof(struct tcp_options);
+	struct tcp_options *opts = (struct tcp_options *)sys_malloc(tcp_options_size);
+	Memcpy(opts, &payload->opts, tcp_options_size);
+	uint32_t optlen = payload->optlen;
+
 	struct tcp_sock *tsk = tcp_sk(sk);
 	struct tcb *tcb = &tsk->tcb;
 	int rc = 0;
@@ -358,44 +434,91 @@ tcp_begin_connect(struct sock *sk)
 
 	tcp_select_initial_window(&tsk->tcb.rcv_wnd); /* 接收窗口的大小 */
 
-	rc = tcp_send_syn(sk);  /* tcp_send_syn可能由于暂时找不到以太网地址的原因发送失败
-							但是存在定时器,隔一段时间再次尝试发送. */
-	tcb->snd_nxt++;  /* 消耗一个序列号 */
-	return rc;
+	// tcp_send_syn可能由于暂时找不到以太网地址的原因发送失败
+	// 但是存在定时器,隔一段时间再次尝试发送.
+	rc = tcp_send_syn(sk, skb, *opts, optlen);  
+	// 消耗一个序列号.
+	tcb->snd_nxt++;  
+
+	Message *result = (Message *)sys_malloc(sizeof(Message));
+	result->RETVAL = 0;
+	send_rec(SEND, result, pid);
+
+	// TODO 随便设置一个返回值。
+	return 0;
+}
+
+int call_tcp_write(struct sock *sk, struct sk_buff *skb, uint32_t data_len)
+{
+	unsigned int ipc_msg_size = sizeof(struct ipc_msg);
+	struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
+	ipc_msg->type = IPC_TCP_WRITE; 
+
+	unsigned int payload_size = sizeof(struct ipc_tcp_write);
+	struct ipc_tcp_write *payload = (struct ipc_tcp_write *)sys_malloc(payload_size);
+	payload->sk = get_physical_address(sk);
+	payload->skb = get_physical_address(skb);
+	payload->skb_data = get_physical_address(skb->data);
+	payload->data_len = data_len;
+	
+	ipc_msg->data = (char *)get_physical_address(payload);
+	ipc_msg->data_size = payload_size;
+
+    Message *msg = (Message *)sys_malloc(sizeof(Message));
+	Memset(msg, 0, sizeof(Message));
+    msg->TYPE = IPC_SOCKET_CALL;
+	msg->SOCKET_FD = 0;
+
+	unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
+    msg->BUF =  phy_ipc_msg;
+    msg->BUF_LEN = ipc_msg_size;
+
+    send_rec(BOTH, msg, TASK_NET_INIT_DEV);
+	
+	int result = msg->RETVAL;
+
+    sys_free(msg, sizeof(Message));
+
+	return result;
 }
 
 /* tcp_send 发送tcp数据 */
-int 
-tcp_send(struct tcp_sock *tsk, const void *buf, int len)
+//int ipc_tcp_write(struct sock *sk, struct sk_buff *skb)
+int ipc_tcp_write(struct ipc_msg *msg)
 {
-	struct sk_buff *skb;
-	struct tcphdr *th;
-	int slen = len;
-	int mss = tsk->smss;
-	int dlen = 0;
+	pid_t pid = msg->pid;
+	struct ipc_tcp_write *payload = (struct ipc_tcp_write *)msg->data;
+	uint32_t sk_phy_addr = payload->sk;
+	uint32_t skb_phy_addr = payload->skb;
 
-	while (slen > 0) {
-		dlen = slen > mss ? mss : slen; /* 一个tcp报文最多只能发送mss个字节tcp数据 */
-		slen -= dlen;
+	uint32_t sock_size = sizeof(struct tcp_sock);
+	struct sock *sk_vaddr = (struct sock *)alloc_virtual_memory(sk_phy_addr, sock_size);
+	struct sock *sk = (struct sock *)sys_malloc(sock_size);
+	Memcpy(sk, sk_vaddr, sock_size);
 
-		skb = tcp_alloc_skb(0, dlen); /* tcp头部选项0字节,数据大小dlen字节 */
-		skb_push(skb, dlen);
-		Memcpy(skb->data, buf, dlen);
+	uint32_t skb_size = sizeof(struct sk_buff);
+	struct sk_buff *skb_vaddr = (struct sk_buff *)alloc_virtual_memory(skb_phy_addr, skb_size);
+	struct sk_buff *skb = (struct sk_buff *)sys_malloc(skb_size);
+	Memcpy(skb, skb_vaddr, skb_size);
 
-		buf += dlen;
-		th = tcp_hdr(skb);
-		th->ack = 1;
+	uint32_t skb_data_size = payload->data_len;
+	uint32_t skb_data_phy_addr = payload->skb_data;
+	uint32_t skb_data_vaddr = alloc_virtual_memory(skb_data_phy_addr, skb_data_size);
+	uint8_t *data = (uint8_t *)sys_malloc(skb_data_size);
+	Memcpy(data, skb_data_vaddr, skb_data_size);
+	
+	skb->data = data;
 
-		if (slen == 0) {
-			th->psh = 1;	/*将推送标志bit置为1,表示接收方一旦接收到这个报文,
-							就应该尽快将数据推送给应用程序 */
-		}
+	struct tcp_sock *tsk = tcp_sk(sk);
+	int ret = -1;
 
-		if (tcp_queue_transmit_skb(&tsk->sk, skb) == -1) {
-			perror("Error on TCP skb queueing");
-		}
-	}
-	return len;
+	tcp_queue_transmit_skb(&tsk->sk, skb);
+
+	Message *result = (Message *)sys_malloc(sizeof(Message));
+	result->RETVAL = 0;
+	send_rec(SEND, result, pid);
+
+	return 0;
 }
 
 /* tcp_send_reset 向对端发送rst */

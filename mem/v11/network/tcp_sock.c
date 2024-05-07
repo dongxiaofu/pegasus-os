@@ -229,9 +229,50 @@ out:
 	return err;
 }
 
+int tcp_write(struct sock *sk, const void *buf, const uint32_t len)
+{
+	// 先想办法执行ipc_tcp_write。
+	// 再执行 ip_output(sk, skb);
+	struct sk_buff *skb;
+	struct tcphdr *th;
+	int slen = len;
+	struct tcp_sock *tsk = tcp_sk(sk);
+	int mss = tsk->smss;
+	int dlen = 0;
+
+	while (slen > 0) {
+		dlen = slen > mss ? mss : slen; /* 一个tcp报文最多只能发送mss个字节tcp数据 */
+		slen -= dlen;
+		skb = tcp_alloc_skb(0, dlen); /* tcp头部选项0字节,数据大小dlen字节 */
+		skb_push(skb, dlen);
+		Memcpy(skb->data, buf, dlen);
+
+		buf += dlen;
+		th = tcp_hdr(skb);
+		th->ack = 1;
+
+		if (slen == 0){
+			th->psh = 1;	/*将推送标志bit置为1,表示接收方一旦接收到这个报文, */
+		}
+		uint8_t state = sk->state;
+
+		// TODO 调用其他进程。
+		call_tcp_write(sk, skb, dlen);
+		//ipc_tcp_write(sk, skb);
+
+		if(state != TCP_ESTABLISHED && state != TCP_CLOSE_WAIT){
+			ip_output(sk, skb);
+		}
+	}
+
+	// TODO 随便设置的。
+	return 0;
+}
+
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+// TODO 要删除
 int
-tcp_write(struct sock *sk, const void *buf, const uint32_t len)
+ipc_tcp_write2(struct sock *sk, const void *buf, const uint32_t len)
 {
 	struct tcp_sock *tsk = tcp_sk(sk);
 	int ret = -1;
@@ -245,7 +286,7 @@ tcp_write(struct sock *sk, const void *buf, const uint32_t len)
 	default:
 		goto out;
 	}
-	return tcp_send(tsk, buf, len);
+//	return tcp_send(tsk, buf, len);
 out:
 	return ret;
 }
@@ -345,6 +386,29 @@ tcp_recv_notify(struct sock *sk)
 	return -1;
 }
 
+//static int
+//tcp_write_options(struct tcphdr *th, struct tcp_options *opts, int optlen)
+//{
+//	struct tcp_opt_mss *opt_mss = (struct tcp_opt_mss *)th->data;
+//
+//	opt_mss->kind = TCP_OPT_MSS;
+//	opt_mss->len = TCP_OPTLEN_MSS;
+//	opt_mss->mss = htons(opts->mss);
+//
+//	th->hl = TCP_DOFFSET + (optlen / 4);
+//	return 0;
+//}
+
+static int 
+tcp_syn_options(struct sock *sk, struct tcp_options *opts)
+{
+	struct tcp_sock *tsk = tcp_sk(sk);
+	int optlen = 0;
+
+	opts->mss = tsk->rmss;
+	optlen += TCP_OPTLEN_MSS;
+	return optlen;
+}
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 int
@@ -362,8 +426,19 @@ tcp_v4_connect(struct sock *sk, const struct sockaddr_in *addr)
 	sk->saddr = ip_parse(stackaddr);			  /* sk中存储的是主机字节序 */
 	// tcp_connecting_or_listening_socks_enqueue(sk);
 	//call_tcp_connecting_or_listening_socks_enqueue(sk);
-	rc = tcp_begin_connect(sk);					  /* 首先向对方发送ack */
-	call_tcp_connecting_or_listening_socks_enqueue(sk);
+	struct sk_buff *skb;
+	struct tcp_options opts = { 0 };
+	int tcp_options_len = 0;
+
+	tcp_options_len = tcp_syn_options(sk, &opts);	/* tcp选项的长度 */
+	skb = tcp_alloc_skb(tcp_options_len, 0); /* 需要发送tcp选项 */
+	// TODO 把这行代码改造为IPC机制。
+	// opts和tcp_options_len这两个参数真是草灰蛇线，实在不是个好方法，可我暂时想不到好方法。
+	rc = call_tcp_begin_connect(sk, skb, opts, tcp_options_len);					  /* 首先向对方发送ack */
+
+	// TODO 把在tcp_begin_connect中生成的skb提到外面。
+	ip_output(sk, skb);
+	// call_tcp_connecting_or_listening_socks_enqueue(sk);
 
 	/* 接下来需要等待连接的成功建立 */
 	wait_sleep(&tsk->wait);
