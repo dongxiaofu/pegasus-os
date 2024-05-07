@@ -10,6 +10,8 @@ alloc_skb(uint32_t size)
 	skb->data = sys_malloc(size);    /* 记录下数据 */
 	Memset(skb->data, 0, size);
 
+	skb->all_data_len = size;
+
 	skb->refcnt = 0;
 	skb->head = skb->data;       /* 数据开始的地方 */
 	skb->end = skb->data + size; /* 数据结束的地方 */

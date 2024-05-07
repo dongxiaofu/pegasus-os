@@ -15,6 +15,7 @@ struct sk_buff {
 	uint16_t protocol;
 	uint32_t len;			/* len主要记录已经填入的数据的大小,仅供输出使用 */
 	uint32_t dlen;			/* 数据的大小,不包含头部(以太网,ip,tcp头部) */
+	uint32_t all_data_len;	// 数据的大小，包含头部。
 	uint32_t seq;
 	uint32_t end_seq;
 	uint8_t *end;

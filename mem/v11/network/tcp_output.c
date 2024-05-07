@@ -365,6 +365,9 @@ int call_tcp_begin_connect(struct sock *sk, struct sk_buff *skb, struct tcp_opti
 	struct ipc_tcp_begin_connect *payload = (struct ipc_tcp_begin_connect *)sys_malloc(payload_size);
 	payload->sk = get_physical_address(sk);
 	payload->skb = get_physical_address(skb);
+	payload->skb_data = get_physical_address(skb->data);
+	payload->data_len = skb->all_data_len;
+
 	Memcpy(&payload->opts, &opts, sizeof(struct tcp_options));
 	payload->optlen = optlen;
 	
@@ -412,6 +415,8 @@ int tcp_begin_connect(struct ipc_msg *msg)
 	uint8_t *data = (uint8_t *)sys_malloc(skb_data_size);
 	Memcpy(data, skb_data_vaddr, skb_data_size);
 	skb->data = data;
+	skb->head = skb->data;
+	skb->end = skb->head + skb->all_data_len;
 
 	uint32_t tcp_options_size = sizeof(struct tcp_options);
 	struct tcp_options *opts = (struct tcp_options *)sys_malloc(tcp_options_size);
@@ -508,6 +513,8 @@ int ipc_tcp_write(struct ipc_msg *msg)
 	Memcpy(data, skb_data_vaddr, skb_data_size);
 	
 	skb->data = data;
+	skb->head = skb->data;
+	skb->end = skb->head + skb->all_data_len;
 
 	struct tcp_sock *tsk = tcp_sk(sk);
 	int ret = -1;

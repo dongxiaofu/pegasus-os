@@ -432,6 +432,7 @@ tcp_v4_connect(struct sock *sk, const struct sockaddr_in *addr)
 
 	tcp_options_len = tcp_syn_options(sk, &opts);	/* tcp选项的长度 */
 	skb = tcp_alloc_skb(tcp_options_len, 0); /* 需要发送tcp选项 */
+	asm("xchgw %bx, %bx");
 	// TODO 把这行代码改造为IPC机制。
 	// opts和tcp_options_len这两个参数真是草灰蛇线，实在不是个好方法，可我暂时想不到好方法。
 	rc = call_tcp_begin_connect(sk, skb, opts, tcp_options_len);					  /* 首先向对方发送ack */
