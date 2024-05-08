@@ -86,7 +86,7 @@ void init()
 //	static struct netdev *loop;
 //	static struct netdev *netdev; /* 用于记录本机地址,包括ip和mac地址 */
 	// 初始化NIC。
-	DriverInitialize();
+//	DriverInitialize();
 	//在这里调用这两个函数必然出错。它们使用了sys_malloc。
 	//内存都没有初始化，怎么能分配内存？
 	//可以先初始化内存，再试试这两个函数。
@@ -255,7 +255,7 @@ void user_proc_b()
 {
  	// disp_str("\n-------------I am user_proc_b\n");
 	Printf("\n-------------I am user_proc_b\n");
-//	while(1);
+	while(1);
 		tcp_client();	
 //		tcp_client();	
 //		tcp_client();	

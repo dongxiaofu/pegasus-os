@@ -17,6 +17,7 @@
 
 void init_dev()
 {
+	while(1);
 	netdev_init();
 	route_init();
 
@@ -71,6 +72,7 @@ void init_dev()
 
 // 网络协议。
 void task_network() {
+	while(1);
 	Printf("------network is running\n");
 
 //	netdev_init();
@@ -128,6 +130,7 @@ void task_network() {
 
 void task_netdev_rx()
 {
+	while(1);
 	Printf("------netdev_rx_loop is running\n");
 
 	// 从其他进程获取netdev。
