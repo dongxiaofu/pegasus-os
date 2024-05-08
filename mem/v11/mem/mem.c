@@ -141,7 +141,7 @@ unsigned int get_a_page(MEMORY_POOL_TYPE pool_type)
 unsigned int get_virtual_address_start_with_addr(unsigned int vaddr, unsigned int cnt, int pid)
 {
 	VirtualMemoryAddress pool;
-	Proc *current_thread = (Proc *)get_running_thread_pcb();
+	Proc *current_thread = (Proc *)get_running_process_pcb();
 	Proc *thread = pid2proc(pid);
 
 	Memcpy(&pool, thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
@@ -164,7 +164,7 @@ unsigned int get_virtual_address_start_with_addr(unsigned int vaddr, unsigned in
 unsigned int get_virtual_address(unsigned int cnt, MEMORY_POOL_TYPE pool_type)
 {
 	VirtualMemoryAddress pool;
-	Proc *current_thread = (Proc *)get_running_thread_pcb();
+	Proc *current_thread = (Proc *)get_running_process_pcb();
 
 	if(pool_type == KERNEL){
 		pool = KernelVirtualMemory;
@@ -271,7 +271,7 @@ unsigned int alloc_virtual_memory(unsigned int phy_addr, unsigned int size)
 	new_size = new_size + size;
 	int page_cnt = ROUND_UP(new_size, PAGE_SIZE);
 	MEMORY_POOL_TYPE pool_type;	
-	Proc *proc = (Proc *)get_running_thread_pcb();
+	Proc *proc = (Proc *)get_running_process_pcb();
 	if(proc->page_directory == MAIN_THREAD_PAGE_DIRECTORY){
 		pool_type = KERNEL;
 	}else{
@@ -298,7 +298,7 @@ unsigned int alloc_virtual_memory(unsigned int phy_addr, unsigned int size)
 unsigned int get_physical_address_proc(unsigned int vaddr, int pid)
 {
 	disable_int();
-	Proc *current_thread = get_running_thread_pcb();
+	Proc *current_thread = get_running_process_pcb();
 	Proc *target_thread = pid2proc(pid);
 	update_cr3(target_thread->page_directory);
 	unsigned int *pte = ptr_pte(vaddr);
@@ -328,7 +328,7 @@ unsigned int alloc_physical_memory_of_proc(unsigned int vaddr, unsigned int pid)
 	MEMORY_POOL_TYPE pool_type = USER;
 
 	Proc *thread = pid2proc(pid); 
-	Proc *current_thread = get_running_thread_pcb();
+	Proc *current_thread = get_running_process_pcb();
 
 	// TODO 某个用户进程的虚拟地址池
 	Memcpy(&pool, thread->user_virtual_memory_address, sizeof(VirtualMemoryAddress));
@@ -357,7 +357,7 @@ unsigned int alloc_physical_memory(unsigned int vaddr, MEMORY_POOL_TYPE pool_typ
 	unsigned int page_vaddr = vaddr & 0xFFFFF000;
 	VirtualMemoryAddress pool;
 
-	Proc *current_thread = (Proc *)get_running_thread_pcb();
+	Proc *current_thread = (Proc *)get_running_process_pcb();
 
 	if(pool_type == KERNEL){
 		pool = KernelVirtualMemory;
@@ -423,7 +423,7 @@ unsigned int sys_malloc2(unsigned int size, int unknown, Proc *caller)
 	int j = 2;
 
 	// TODO 这是调试代码。以后要删除。
-	Proc *current_thread2 = (Proc *)get_running_thread_pcb();
+	Proc *current_thread2 = (Proc *)get_running_process_pcb();
 	if(current_thread2 == 0xc0881000){
 		j = 4;
 	}
@@ -551,7 +551,7 @@ void sys_free2(unsigned int addr, unsigned int size)
 	MEMORY_POOL_TYPE pool_type;
 	mem_block_desc *desc_array;
 
-	Proc *current_thread = (Proc *)get_running_thread_pcb();
+	Proc *current_thread = (Proc *)get_running_process_pcb();
 
 	enum intr_status old_status = intr_disable();
 

@@ -38,11 +38,6 @@ Proc *thread_init()
 
 void thread_create(Proc *proc)
 {
-//	Proc *proc = (Proc *)alloc_memory(1, KERNEL);
-//	Memset(proc, 0, sizeof(*proc));
-//	proc->stack = (unsigned int *)((unsigned int)proc + PAGE_SIZE);
-//	proc->page_directory = 0x0;
-
 	unsigned int proc_stack_size = sizeof(Regs);	
 	unsigned int thread_stack_size = sizeof(ThreadStack);	
 	proc->stack = (unsigned int *)((unsigned int)(proc->stack) - proc_stack_size);
@@ -54,6 +49,9 @@ void thread_start(thread_function func, char *thread_arg, char *thread_name)
 	Proc *thread = thread_init();
  	thread_create(thread);
 	Strcpy(thread->name, thread_name);
+	Proc *current_process = (Proc *)get_running_process_pcb();
+	thread->process_or_thread = THREAD;
+	thread->pid = current_process->pid;
 
 	ThreadStack *thread_stack = (ThreadStack *)thread->stack;
 	thread_stack->eip2 = kernel_thread;

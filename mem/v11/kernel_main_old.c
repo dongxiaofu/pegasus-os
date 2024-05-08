@@ -1885,3 +1885,17 @@ int deprecate_strcmp(const char *s1, const char *s2)
 
     return (*p1 - *p2);
 }
+
+// 获取当前进程的PCB。
+// 分为两种情况处理：当前PCB是进程的和线程的。
+unsigned int get_running_process_pcb()
+{
+	Proc *pcb = get_running_thread_pcb();
+	assert(pcb->process_or_thread == PROCESS || pcb->process_or_thread == THREAD);
+	if(pcb->process_or_thread == PROCESS){
+		return pcb;
+	}else{
+		Proc *proc = pid2proc(pcb->pid);
+		return proc;
+	}
+}

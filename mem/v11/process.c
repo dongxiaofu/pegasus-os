@@ -80,15 +80,29 @@ void schedule_process()
 	next->p_flag = RUNNING;
 //	disp_str(next->name);
 //	disp_str("#");
+	Proc *next_process = NULL;
+	unsigned int next_page_directory = 0;
+	unsigned int next_tss = 0;
+	assert(next->process_or_thread == PROCESS || next->process_or_thread == THREAD);
+	if(next->process_or_thread == PROCESS){
+		next_process = next;
+		next_page_directory = next->page_directory;
+		next_tss = (unsigned int)next + PAGE_SIZE;
+	}else{
+		Proc *proc = pid2proc(next->pid);
+		next_process = proc;
+		next_page_directory = proc->page_directory;
+		next_tss = (unsigned int)proc + PAGE_SIZE;
+	} 
 
 	if(next->page_directory != page_directory){
-		update_tss((unsigned int)next + PAGE_SIZE);
-		update_cr3((unsigned int)next->page_directory);
+		update_tss(next_tss);
+		update_cr3(next_page_directory);
 	}else{
 		update_cr3(page_directory);
 	}
 
-	proc_ready_table = next;	
+	proc_ready_table = next_process;	
 
 	switch_to(cur, next);
 }

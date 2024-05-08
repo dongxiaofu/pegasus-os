@@ -37,7 +37,7 @@ void kernel_main()
 //	disable_int();
 	int init_ticks = TICKS_NUM;
 	
-	main_thread = get_running_thread_pcb();
+	main_thread = get_running_process_pcb();
 	main_thread->ticks = main_thread->init_ticks = init_ticks + 2;
 	main_thread->page_directory = MAIN_THREAD_PAGE_DIRECTORY;
 	Strcpy(main_thread->name, "main_thread");
@@ -57,6 +57,8 @@ void kernel_main()
 	process_execute(init_dev, "init_dev\n", "init_dev", 0, init_ticks);
 	process_execute(user_proc_a, "user_proc_a\n", "process_a", 1, init_ticks - 2);
 	process_execute(user_proc_b, "user_proc_b\n", "process_b", 1, init_ticks - 3);
+
+//	thread_start(kernel_thread_a, "thread a\n", "threadA");
 
 	disp_str("main end\n");
 

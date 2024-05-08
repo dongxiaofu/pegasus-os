@@ -60,7 +60,7 @@ void user_process(Func func, void *arg, unsigned int privilege, unsigned int ini
 //  	InitDescriptor(&gdt[gdt_index], 0, limit, cs_attribute);
 //	gdt_index++;
 
-	Proc *process = (Proc *)get_running_thread_pcb();
+	Proc *process = (Proc *)get_running_process_pcb();
 	process->init_ticks = process->ticks = init_ticks;
 	process->stack = (unsigned int *)((unsigned int)process + PAGE_SIZE);
 	// 费了很大劲才找出的错误。
@@ -263,6 +263,7 @@ void process_execute(Func func, char *thread_arg, char *process_name, unsigned i
 	Proc *process = thread_init();
 	thread_create(process);
 	Strcpy(process->name, process_name);
+	process->process_or_thread = PROCESS;
 
 	// 建立进程的页表
 	unsigned int page_dir_vaddr = alloc_memory(1, KERNEL);

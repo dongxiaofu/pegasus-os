@@ -64,6 +64,11 @@ typedef struct _thread_stack
 
 #define FILP_TABLE_SIZE 64
 #define FILE_TABLE_SIZE 64
+// 进程或线程
+// 想不到更好的名称。
+typedef enum{
+	PROCESS, THREAD
+}SCHEDULE_UNIT_TYPE;
 
 // 进程表
 typedef struct proc{
@@ -117,6 +122,10 @@ typedef struct proc{
 	//	char all_tag[10];
 		ListElement tag;
 		ListElement all_tag;
+		// 线程。
+		int thread_id;	// 线程ID
+		// 线程还是进程。
+		SCHEDULE_UNIT_TYPE process_or_thread;	
         
 		// 为了兼容，先保留这个成员。
 		Regs s_reg;
