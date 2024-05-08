@@ -89,8 +89,8 @@ clean:
 	rm -rvf fs/*.o
 	rm -rvf network/*.o
 	rm -rvf lib/*.o
-	rm -rvf command/*.o
-	rm -rvf command/*.a
 	rm -rvf 80m.img
 	rm -rvf 80m.img.lock
 	rm -rvf k-log
+	cd command && make clean
+	cd ..
