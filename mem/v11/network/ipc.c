@@ -449,8 +449,6 @@ demux_ipc_socket_call(int source, int sockfd, char *cmdbuf, int blen, Message *p
 		return netdev_get(msg);
 	case IPC_ROUTE_LOOKUP:
 		return route_lookup(msg); 
-	case IPC_TCP_CONNECTING_OR_LISTENING_SOCKS_ENQUEUE:
-		return tcp_connecting_or_listening_socks_enqueue(msg);
 	case IPC_TCP_LOOKUP_SOCK:
 		return tcp_lookup_sock(msg);
 	case IPC_IP_RCV:

@@ -282,8 +282,7 @@ int tcp_free_sock(struct sock *sk);
 int tcp_done(struct sock *sk);
 
 void tcp_established_or_syn_recvd_socks_enqueue(struct sock *sk);
-void call_tcp_connecting_or_listening_socks_enqueue(struct sock *sk);
-void tcp_connecting_or_listening_socks_enqueue(struct ipc_msg *msg);
+void tcp_connecting_or_listening_socks_enqueue(struct sock *sk);
 void tcp_established_or_syn_recvd_socks_remove(struct sock *sk);
 void tcp_connecting_or_listening_socks_remove(struct sock *sk);
 

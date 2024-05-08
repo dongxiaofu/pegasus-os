@@ -34,54 +34,9 @@ tcp_established_or_syn_recvd_socks_remove(struct sock *sk)
 	//pthread_rwlock_unlock(&es_lock);
 }
 
-void call_tcp_connecting_or_listening_socks_enqueue(struct sock *sk)
-{
-    unsigned int ipc_msg_size = sizeof(struct ipc_msg);
-    struct ipc_msg *ipc_msg = (struct ipc_msg *)sys_malloc(ipc_msg_size);
-    ipc_msg->type = IPC_TCP_CONNECTING_OR_LISTENING_SOCKS_ENQUEUE;
-
-    unsigned int payload_size = sizeof(struct tcp_connecting_or_listening_socks_enqueue);
-
-	struct tcp_connecting_or_listening_socks_enqueue *payload = \
-		(struct tcp_connecting_or_listening_socks_enqueue *)sys_malloc(payload_size);
-    payload->sk = get_physical_address(sk);
-
-    ipc_msg->data = (char *)get_physical_address(payload);
-    ipc_msg->data_size = payload_size;
-
-    Message *msg = (Message *)sys_malloc(sizeof(Message));
-    Memset(msg, 0, sizeof(Message));
-    msg->TYPE = IPC_SOCKET_CALL;
-    msg->SOCKET_FD = 0;
-
-    unsigned int phy_ipc_msg = get_physical_address(ipc_msg);
-    msg->BUF =  phy_ipc_msg;
-    msg->BUF_LEN = ipc_msg_size;
-
-    send_rec(SEND, msg, TASK_NET_INIT_DEV);
-    //assert(msg.type == SYSCALL_RET);
-    sys_free(msg, sizeof(Message));
-
-	return;
-}
-
-void tcp_connecting_or_listening_socks_enqueue(struct ipc_msg *msg)
+void tcp_connecting_or_listening_socks_enqueue(struct sock *sk)
 {
 	//pthread_rwlock_wrlock(&cl_lock);
-    pid_t pid = msg->pid;
-    struct tcp_connecting_or_listening_socks_enqueue *payload = \
-		(struct tcp_connecting_or_listening_socks_enqueue *)msg->data;
-//	struct sock *sk_phy_addr = (struct sock *)payload->sk;
-//	unsigned int sock_size = sizeof(struct sock);
-//	unsigned int sk_vaddr = alloc_virtual_memory(sk_phy_addr, sock_size); 
-//	struct sock *sk = (struct sock *)sys_malloc(sock_size);
-//	Memcpy(sk, sk_vaddr, sock_size);
-
-	struct sock *sk_phy_addr = (struct tcp_sock *)payload->sk;
-	unsigned int sock_size = sizeof(struct tcp_sock);
-	unsigned int sk_vaddr = alloc_virtual_memory(sk_phy_addr, sock_size); 
-	struct sock *sk = (struct sock *)sys_malloc(sock_size);
-	Memcpy(sk, sk_vaddr, sock_size);
 	list_add_tail(&sk->link, tcp_connecting_or_listening_socks);
 	//pthread_rwlock_unlock(&cl_lock);
 }
@@ -434,7 +389,6 @@ tcp_v4_connect(struct sock *sk, const struct sockaddr_in *addr)
 	// TODO 把这行代码改造为IPC机制。
 	// opts和tcp_options_len这两个参数真是草灰蛇线，实在不是个好方法，可我暂时想不到好方法。
 //	Printf("skb->data = %x, skb->head = %x\n", skb->data, skb->head);
-	call_tcp_connecting_or_listening_socks_enqueue(sk);
 	rc = call_tcp_begin_connect(sk, skb, opts, tcp_options_len);					  /* 首先向对方发送ack */
 
 	// TODO 把在tcp_begin_connect中生成的skb提到外面。

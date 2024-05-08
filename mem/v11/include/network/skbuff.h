@@ -71,6 +71,8 @@ static inline struct sk_buff *
 skb_dequeue(struct sk_buff_head *list)
 {
 	struct sk_buff *skb = list_first_entry(&list->head, struct sk_buff, list);
+	Printf("skb = %x, &skb->list = %x\n", skb, &skb->list);
+	asm("xchgw %bx, %bx");
 	list_del(&skb->list);
 	list->qlen -= 1;
 	return skb;

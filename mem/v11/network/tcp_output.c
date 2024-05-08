@@ -180,6 +180,8 @@ tcp_send_ack(struct sock *sk)
 	th->ack = 1;
 
 	rc = tcp_transmit_skb(sk, skb, tcb->snd_nxt);
+	ip_output(sk, skb);
+
 	free_skb(skb);
 
 	return rc;
@@ -470,8 +472,7 @@ int tcp_begin_connect(struct ipc_msg *msg)
 	Memcpy(opts, &payload->opts, tcp_options_size);
 	uint32_t optlen = payload->optlen;
 
-//  TODO 需修改此函数才能在这里调用它。
-//	tcp_connecting_or_listening_socks_enqueue(sk);
+	tcp_connecting_or_listening_socks_enqueue(sk);
 
 	struct tcp_sock *tsk = tcp_sk(sk);
 	struct tcb *tcb = &tsk->tcb;
@@ -488,6 +489,9 @@ int tcp_begin_connect(struct ipc_msg *msg)
 	tcb->rcv_nxt = 0;
 
 	tcp_select_initial_window(&tsk->tcb.rcv_wnd); /* 接收窗口的大小 */
+
+	// TODO 怪异的IPC机制，让我不得不在这里初始化发送队列。
+	skb_queue_init(&sk->write_queue);
 
 	// tcp_send_syn可能由于暂时找不到以太网地址的原因发送失败
 	// 但是存在定时器,隔一段时间再次尝试发送.

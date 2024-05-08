@@ -36,7 +36,6 @@
 #define IPC_GET_HWADDR               0x000d
 #define IPC_GET_NETDEV               0x000e
 #define IPC_ROUTE_LOOKUP             0x000f
-#define IPC_TCP_CONNECTING_OR_LISTENING_SOCKS_ENQUEUE	0x00010 
 #define IPC_TCP_LOOKUP_SOCK			0x00011
 #define IPC_IP_RCV					0x00012
 #define IPC_TCP_WRITE				0x00013
