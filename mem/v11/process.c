@@ -102,7 +102,8 @@ void schedule_process()
 		update_cr3(page_directory);
 	}
 
-	proc_ready_table = next_process;	
+	// proc_ready_table = next_process;	
+	proc_ready_table = next;	
 
 	switch_to(cur, next);
 }
@@ -117,6 +118,11 @@ void clock_handler()
 		inform_int(TASK_TTY, KEYBOARD_INT);
 	}
 
+	// 线程切换时被k_reenter阻止调度。
+	// 我不清楚这样做会怎样。
+	// 一时半会儿想不明白，先这样吧。
+	if(cur->process_or_thread == THREAD)	goto start;
+
 	// 第一次时钟中断时，处理k_reenter
 	if(k_reenter == 100){
 		k_reenter = 1;
@@ -125,6 +131,7 @@ void clock_handler()
 		if(k_reenter != 1)	return;
 	}
 
+start:
     // 调度进程
 	if(cur->ticks > 0){
 		proc_ready_table->ticks--;

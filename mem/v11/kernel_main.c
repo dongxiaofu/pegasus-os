@@ -58,7 +58,11 @@ void kernel_main()
 	process_execute(user_proc_a, "user_proc_a\n", "process_a", 1, init_ticks - 2);
 	process_execute(user_proc_b, "user_proc_b\n", "process_b", 1, init_ticks - 3);
 
+//	thread_start(kernel_thread_b, "thread b\n", "threadB");
 //	thread_start(kernel_thread_a, "thread a\n", "threadA");
+////	thread_start(kernel_thread_b, "thread b\n", "threadA");
+//	thread_start(kernel_thread_c, "thread c\n", "threadC");
+//	thread_start(kernel_thread_d, "thread d\n", "threadD");
 
 	disp_str("main end\n");
 
@@ -74,8 +78,12 @@ void init()
 
 	MAIN_THREAD_PAGE_DIRECTORY = 0x400000;
 	k_reenter = 99;
+	// 设置disp_int和disp_str打印数据的位置。
 	dis_pos = 0;
+	// 进程的pid。
 	pid = 0;
+	// 线程的id。
+	thread_id = 0;
 	fork_pid = 100;
 	gdt_index = 9;
 	proc_ready_table = 0xc07fe000;
@@ -105,21 +113,26 @@ void init()
 
 void kernel_thread_a(void *msg)
 {
-	disp_str(msg);
+	Printf(msg);
 	int b = dis_pos;
 	int a = 0;
 	while(1){
-		dis_pos = b;
-		disp_str("still a:");
-		disp_str("\n");
+		if(++a <= 3){
+			Printf("still a:");
+		}
 	}
 }
 
 void kernel_thread_b(void *msg)
 {
-	disp_str(msg);
+	Printf(msg);
 	int b = dis_pos;
 	int a = 0;
+	while(1){
+		if(++a <= 4){
+			Printf("still b:");
+		}
+	}
 	while(1){
 		dis_pos = b;
 		disp_str("still b:");
@@ -129,19 +142,24 @@ void kernel_thread_b(void *msg)
 
 void kernel_thread_c(void *msg)
 {
-	disp_str(msg);
+	Printf(msg);
 	while(1);
 }
 
 void kernel_thread_d(void *msg)
 {
-	disp_str(msg);
+	Printf(msg);
 	while(1);
 }
 
 void user_proc_a()
 {
 	Printf("hello,A\n");
+	thread_start(kernel_thread_b, "thread b\n", "threadB");
+//	thread_start(kernel_thread_a, "thread a\n", "threadA");
+////	thread_start(kernel_thread_b, "thread b\n", "threadA");
+//	thread_start(kernel_thread_c, "thread c\n", "threadC");
+//	thread_start(kernel_thread_d, "thread d\n", "threadD");
 	while(1);
 	disp_str("-------------I am user_proc_a\n");
 	net_data = 0;

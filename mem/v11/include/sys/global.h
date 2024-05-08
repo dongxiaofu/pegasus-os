@@ -56,6 +56,7 @@ EXTERN unsigned int k_reenter;
 EXTERN unsigned int counter;
 EXTERN unsigned int key_pressed;
 EXTERN unsigned int pid;
+EXTERN unsigned int thread_id;
 EXTERN unsigned int fork_pid;
 EXTERN unsigned char is_init;
 EXTERN unsigned int gdt_index;

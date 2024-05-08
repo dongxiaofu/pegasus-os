@@ -28,6 +28,7 @@ Proc *thread_init()
 	// proc->stack = (unsigned int *)((unsigned int)proc + PAGE_SIZE * 2);
 	proc->page_directory = 0x0;
 	proc->parent_pid = -1;
+	proc->thread_id = -1;
 	proc->q_sending = proc->q_next = 0x0;
 	proc->pid = ++pid;
 	proc->ticks = TICKS_NUM;
@@ -48,6 +49,7 @@ void thread_start(thread_function func, char *thread_arg, char *thread_name)
 {
 	Proc *thread = thread_init();
  	thread_create(thread);
+	thread->thread_id = ++thread_id;
 	Strcpy(thread->name, thread_name);
 	Proc *current_process = (Proc *)get_running_process_pcb();
 	thread->process_or_thread = THREAD;

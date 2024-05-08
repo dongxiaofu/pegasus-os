@@ -423,12 +423,19 @@ unsigned int sys_malloc2(unsigned int size, int unknown, Proc *caller)
 	int j = 2;
 
 	// TODO 这是调试代码。以后要删除。
+	// 当初花了非常非常多时间才修复的错误，我又没有写详细的注释！
+	// 恶习！
+	// 不知道咋回事，process_read_table出现了莫名其妙的错误。
 	Proc *current_thread2 = (Proc *)get_running_process_pcb();
 	if(current_thread2 == 0xc0881000){
 		j = 4;
 	}
 
 	Proc *current_thread = caller;
+	// 如果是线程,就获取它所属的进程。
+	if(caller->process_or_thread == THREAD){
+		current_thread = pid2proc(caller->pid);
+	}
 	if(current_thread->page_directory == MAIN_THREAD_PAGE_DIRECTORY){
 		pool_type = KERNEL;
 		desc_array = kernel_mem_block_decs_array;
